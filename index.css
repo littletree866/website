@@ -20,3 +20,9 @@ a {
     font-family: 'Courier New', Courier, monospace;
     text-decoration: none !important;
 }
+
+button {
+    position: fixed;
+    left: 500px;
+    top: 500px;
+}
