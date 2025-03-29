@@ -1,9 +1,22 @@
 h1 {
     font-family: 'Courier New', Courier, monospace;
     font-size: 25px;
+    position: fixed;
+    left: 500px;
+    top: 0px;
+    font-weight: lighter;
+    
 }
 
 h4 {
     font-family: 'Courier New', Courier, monospace;
     font-size: 15px;
+    font-weight: lighter;
+
+}
+
+a {
+    color: #ff0101;
+    font-family: 'Courier New', Courier, monospace;
+    text-decoration: none !important;
 }
