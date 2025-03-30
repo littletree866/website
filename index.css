@@ -23,8 +23,8 @@ a {
 
 button {
     position: fixed;
-    left: 500px;
-    top: 500px;
+    left: 950px;
+    top: 450px;
 }
 
 .footer {
@@ -36,3 +36,10 @@ button {
     color: white;
     text-align: center;
   }
+
+  p {
+    font-family: 'Courier New', Courier, monospace;
+    color: #ff0101;
+  }
+
+  
