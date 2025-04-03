@@ -1,4 +1,5 @@
 let points = 0;
+let b = 3000;
 let isDefused = false; // Use a separate variable for defuse state
 
 function sleep(ms) {
@@ -7,6 +8,7 @@ function sleep(ms) {
 
 function defuse() {
     isDefused = true;
+    b -= 50;
     alert("Defused Bomb!")
 }
 
@@ -28,7 +30,7 @@ async function clicked() { // Make this async to use await
         const button = document.getElementById('myButton');
         button.removeEventListener('click', clicked); // Remove original listener
         button.addEventListener('click', defuse);
-        await sleep(3000)
+        await sleep(b)
         
         // Create bomb element
         const bomb = document.createElement('div');
@@ -50,6 +52,7 @@ async function clicked() { // Make this async to use await
         if (isDefused) {
             bomb.remove();
             isDefused = false;
+            document.getElementById("myButton").value = "Click Me";
             button.addEventListener('click', clicked); // Restore original listener
         } else {
             // Explode!
