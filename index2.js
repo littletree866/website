@@ -7,6 +7,7 @@ function sleep(ms) {
 
 function defuse() {
     isDefused = true;
+    alert("Defused Bomb!")
 }
 
 async function clicked() { // Make this async to use await
@@ -23,11 +24,11 @@ async function clicked() { // Make this async to use await
     }
     else {
         alert("BOMB INCOMING!");
-        sleep(3000)
         // Add defuse listener temporarily
         const button = document.getElementById('myButton');
         button.removeEventListener('click', clicked); // Remove original listener
         button.addEventListener('click', defuse);
+        await sleep(3000)
         
         // Create bomb element
         const bomb = document.createElement('div');
@@ -42,9 +43,6 @@ async function clicked() { // Make this async to use await
 
         // Play explosion countdown sound
         const explosionSound = document.getElementById('explosionSound');
-        
-        // Wait for 1 second to allow defusing
-        await sleep(1000);
         
         // Remove defuse listener
         button.removeEventListener('click', defuse);
