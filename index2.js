@@ -1,18 +1,33 @@
 let points = 0;
+let isDefused = false; // Use a separate variable for defuse state
 
-function clicked() {
-    if (points < 5) {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function defuse() {
+    isDefused = true;
+}
+
+async function clicked() { // Make this async to use await
+    const a = Math.floor(Math.random() * 10) + 1; // Fixed random number generation
+    
+    if (points < a) {
         // Play ticking sound
         const tickSound = document.getElementById('tickSound');
-        tickSound.currentTime = 0; // Rewind to start
+        tickSound.currentTime = 0;
         tickSound.play();
         
         points += 1;
-        document.getElementById("demo").textContent = `Points: ${points}`;
+        document.getElementById("points").textContent = `Points: ${points}`;
     }
     else {
-        points = 0;
-        document.getElementById("demo").textContent = `Points: ${points}`;
+        alert("BOMB INCOMING!");
+        sleep(3000)
+        // Add defuse listener temporarily
+        const button = document.getElementById('myButton');
+        button.removeEventListener('click', clicked); // Remove original listener
+        button.addEventListener('click', defuse);
         
         // Create bomb element
         const bomb = document.createElement('div');
@@ -21,15 +36,25 @@ function clicked() {
         bomb.style.top = '50%';
         bomb.style.left = '50%';
         bomb.style.transform = 'translate(-50%, -50%)';
-        bomb.style.fontSize = '1000px';
+        bomb.style.fontSize = '5000px'; // Reduced size for better visibility
         bomb.style.zIndex = '1000';
         document.body.appendChild(bomb);
 
         // Play explosion countdown sound
         const explosionSound = document.getElementById('explosionSound');
         
-        // Explode after 1 second
-        setTimeout(() => {
+        // Wait for 1 second to allow defusing
+        await sleep(1000);
+        
+        // Remove defuse listener
+        button.removeEventListener('click', defuse);
+        
+        if (isDefused) {
+            bomb.remove();
+            isDefused = false;
+            button.addEventListener('click', clicked); // Restore original listener
+        } else {
+            // Explode!
             bomb.innerHTML = '💥';
             bomb.style.fontSize = '5000px';
             explosionSound.currentTime = 0;
@@ -41,11 +66,14 @@ function clicked() {
             // Remove explosion after 2 seconds
             setTimeout(() => {
                 bomb.remove();
+                points = 0;
                 document.body.style.animation = '';
+                document.getElementById("points").textContent = `Points: ${points}`;
+                button.addEventListener('click', clicked); // Restore original listener
             }, 2000);
-        }, 1000);
+        }
     }
 }
 
 document.getElementById('myButton').addEventListener('click', clicked);
-document.getElementById("demo").textContent = `Points: ${points}`;
+document.getElementById("points").textContent = `Points: ${points}`;
