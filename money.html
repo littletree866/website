@@ -1,18 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>The money game</title>
-        <link rel="stylesheet" href="./all.css">
-        <link rel="icon" href="palm-tree.jpg">
-    </head>
-
-    <body>
-        <h1>Welcome to the money game!</h1>
-        <p><a href="index.html">Back</a></p>
-        <p id="money"></p>
-        <script src="money.js"></script>
-
-    </body>
-
+<html>
+<head>
+    <title>The money game</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; }
+        .panel { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        button { margin: 5px; padding: 5px 10px; }
+        #game-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        #stats { grid-column: span 2; }
+    </style>
+</head>
+<body>
+    <p><a href="index.html">Back</a></p>
+    <h1>The money game</h1>
+    <div id="game-container">
+        <div id="stats" class="panel">
+            <h2>Stats</h2>
+            <p id="day">Day: 1</p>
+            <p id="money">Money: $1000</p>
+            <p id="loan">Loan: $0</p>
+            <p id="reputation">Reputation: 50/100</p>
+            <p id="customers">Customers waiting: 0</p>
+            <button onclick="borrowMoney()">Borrow Money ($250 loan)</button>
+            <button onclick="serveCustomer()">Serve Customer</button>
+            <button onclick="nextDay()">Next Day</button>
+        </div>
+        
+        <div id="inventory" class="panel"></div>
+        <div id="shop" class="panel"></div>
+        <div id="art" class="panel"></div>
+    </div>
+    
+    <script src="money.js"></script>
+</body>
 </html>
