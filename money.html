@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>The money game</title>
+    <link rel="icon" href="palm-tree.jpg">
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; }
         .panel { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
@@ -21,9 +22,9 @@
             <p id="loan">Loan: $0</p>
             <p id="reputation">Reputation: 50/100</p>
             <p id="customers">Customers waiting: 0</p>
+            <div id="day-timer">Next day in: 30s</div>
             <button onclick="borrowMoney()">Borrow Money ($250 loan)</button>
             <button onclick="serveCustomer()">Serve Customer</button>
-            <button onclick="nextDay()">Next Day</button>
         </div>
         
         <div id="inventory" class="panel"></div>

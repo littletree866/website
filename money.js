@@ -5,13 +5,16 @@ let inventory = [];
 let reputation = 50; // 0-100 scale
 let customersWaiting = 0;
 let artUnlocked = false;
+let timeLeft = 30;
+let dayInterval;
 
-// Shop items
+
+// Shop items with image paths
 const shopItems = [
-    { id: 1, name: "Coffee", cost: 5, sellPrice: 10 },
-    { id: 2, name: "Sandwich", cost: 8, sellPrice: 15 },
-    { id: 3, name: "Book", cost: 12, sellPrice: 25 },
-    { id: 4, name: "Painting Supplies", cost: 50, sellPrice: 0, unlocksArt: true }
+    { id: 1, name: "Coffee", cost: 5, sellPrice: 10, img: "img/coffee.png" },
+    { id: 2, name: "Sandwich", cost: 8, sellPrice: 15, img: "img/sandwich.png" },
+    { id: 3, name: "Book", cost: 12, sellPrice: 25, img: "img/book.png" },
+    { id: 4, name: "Painting Supplies", cost: 50, sellPrice: 0, unlocksArt: true, img: "img/paint-supplies.png" }
 ];
 
 // Customer messages
@@ -24,12 +27,46 @@ const customerMessages = [
     "I've been waiting too long..."
 ];
 
-// Initialize game
+// Customer images
+const customerImages = [
+    "img/customer1.png",
+    "img/customer2.png",
+    "img/customer3.png",
+    "img/customer4.png"
+];
+
 function initGame() {
+    // Existing background setup
+    document.body.style.backgroundImage = "url('img/shop-bg.png')";
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+    
+    // Start day interval
+    setInterval(() => {
+        nextDay();
+    }, 30000); // 30 seconds
+
+    startDayCycle();
     updateUI();
     renderShop();
     renderArtGallery();
 }
+
+function startDayCycle() {
+    // Update timer every second
+    const timerElement = document.getElementById("day-timer");
+    dayInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = `Next day in: ${timeLeft}s`;
+        
+        if (timeLeft <= 0) {
+            nextDay();
+            timeLeft = 30; // Reset timer
+        }
+    }, 1000);
+}
+
 
 // Borrow money function
 function borrowMoney() {
@@ -73,7 +110,10 @@ function sellItem(itemIndex) {
     if (itemIndex >= 0 && itemIndex < inventory.length) {
         const item = inventory[itemIndex];
         money += item.sellPrice;
-        reputation += 2;
+        if (reputation < 100){
+            reputation += 1;
+        }
+        
         customersWaiting = Math.max(0, customersWaiting - 1);
         inventory.splice(itemIndex, 1);
         
@@ -90,7 +130,8 @@ function createArt() {
     inventory.push({
         name: "Painting",
         cost: 0,
-        sellPrice: artValue
+        sellPrice: artValue,
+        img: `img/painting-${Math.floor(Math.random() * 3) + 1}.png`
     });
     alert(`Created a painting worth $${artValue}!`);
     updateUI();
@@ -100,17 +141,70 @@ function createArt() {
 function serveCustomer() {
     if (customersWaiting > 0) {
         customersWaiting--;
-        reputation += 1;
-        alert(customerMessages[Math.floor(Math.random() * customerMessages.length)]);
+        if (reputation < 100){
+            reputation += 1;
+        }
+        
+        
+        // Show customer image with message
+        const customerImg = customerImages[Math.floor(Math.random() * customerImages.length)];
+        const message = customerMessages[Math.floor(Math.random() * customerMessages.length)];
+        
+        alertWithImage(message, customerImg);
         updateUI();
     } else {
         alert("No customers waiting right now.");
     }
 }
 
+// Custom alert with image
+function alertWithImage(message, imageUrl) {
+    const alertBox = document.createElement('div');
+    alertBox.style.position = 'fixed';
+    alertBox.style.top = '50%';
+    alertBox.style.left = '50%';
+    alertBox.style.transform = 'translate(-50%, -50%)';
+    alertBox.style.backgroundColor = 'white';
+    alertBox.style.padding = '20px';
+    alertBox.style.border = '2px solid #333';
+    alertBox.style.borderRadius = '10px';
+    alertBox.style.zIndex = '1000';
+    alertBox.style.textAlign = 'center';
+    
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.style.width = '100px';
+    img.style.height = '100px';
+    img.style.objectFit = 'cover';
+    img.style.marginBottom = '10px';
+    
+    const text = document.createElement('p');
+    text.textContent = message;
+    text.style.marginBottom = '15px';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'OK';
+    closeBtn.style.padding = '5px 15px';
+    closeBtn.style.backgroundColor = '#4CAF50';
+    closeBtn.style.color = 'white';
+    closeBtn.style.border = 'none';
+    closeBtn.style.borderRadius = '5px';
+    closeBtn.style.cursor = 'pointer';
+    
+    closeBtn.onclick = function() {
+        document.body.removeChild(alertBox);
+    };
+    
+    alertBox.appendChild(img);
+    alertBox.appendChild(text);
+    alertBox.appendChild(closeBtn);
+    document.body.appendChild(alertBox);
+}
+
 // Advance day
 function nextDay() {
-    day++;
+    clearInterval(dayInterval);
+    day += 1;
     customersWaiting += Math.floor(Math.random() * 3) + 1;
     
     // Loan due after 30 days
@@ -124,7 +218,8 @@ function nextDay() {
             alert("You failed to pay your loan! Your reputation has suffered.");
         }
     }
-    
+
+    startDayCycle();
     updateUI();
 }
 
@@ -136,24 +231,30 @@ function updateUI() {
     document.getElementById("reputation").textContent = `Reputation: ${reputation}/100`;
     document.getElementById("customers").textContent = `Customers waiting: ${customersWaiting}`;
     
-    // Update inventory display
+    // Update inventory display with images
     const inventoryElement = document.getElementById("inventory");
     inventoryElement.innerHTML = "<h3>Inventory</h3>";
     inventory.forEach((item, index) => {
         inventoryElement.innerHTML += 
-            `<div>${item.name} (Sell for $${item.sellPrice}) 
-             <button onclick="sellItem(${index})">Sell</button></div>`;
+            `<div class="inventory-item">
+                <img src="${item.img || 'img/default-item.png'}" alt="${item.name}" class="item-img">
+                <span>${item.name} (Sell for $${item.sellPrice})</span>
+                <button onclick="sellItem(${index})">Sell</button>
+             </div>`;
     });
 }
 
-// Render shop
+// Render shop with images
 function renderShop() {
     const shopElement = document.getElementById("shop");
     shopElement.innerHTML = "<h3>Shop</h3>";
     shopItems.forEach(item => {
         shopElement.innerHTML += 
-            `<div>${item.name} (Buy for $${item.cost}) 
-             <button onclick="buyItem(${item.id})">Buy</button></div>`;
+            `<div class="shop-item">
+                <img src="${item.img}" alt="${item.name}" class="item-img">
+                <span>${item.name} (Buy for $${item.cost})</span>
+                <button onclick="buyItem(${item.id})">Buy</button>
+             </div>`;
     });
 }
 
@@ -164,11 +265,13 @@ function renderArtGallery() {
     
     if (artUnlocked) {
         artElement.innerHTML += 
-            `<button onclick="createArt()">Create Art</button>
+            `<img src="img/art-studio.png" alt="Art Studio" style="width: 100px; margin-bottom: 10px;">
+             <button onclick="createArt()">Create Art</button>
              <p>Create valuable paintings to sell!</p>`;
     } else {
         artElement.innerHTML += 
-            `<p>Unlock painting by buying painting supplies in the shop.</p>`;
+            `<img src="img/locked-art.png" alt="Locked Art Studio" style="width: 100px; margin-bottom: 10px;">
+             <p>Unlock painting by buying painting supplies in the shop.</p>`;
     }
 }
 
