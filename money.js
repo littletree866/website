@@ -8,7 +8,6 @@ let artUnlocked = false;
 let timeLeft = 30;
 let dayInterval;
 
-
 // Shop items with image paths
 const shopItems = [
     { id: 1, name: "Coffee", cost: 5, sellPrice: 10, img: "img/coffee.png" },
@@ -36,17 +35,11 @@ const customerImages = [
 ];
 
 function initGame() {
-    // Existing background setup
     document.body.style.backgroundImage = "url('img/shop-bg.png')";
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
     
-    // Start day interval
-    setInterval(() => {
-        nextDay();
-    }, 30000); // 30 seconds
-
     startDayCycle();
     updateUI();
     renderShop();
@@ -54,7 +47,6 @@ function initGame() {
 }
 
 function startDayCycle() {
-    // Update timer every second
     const timerElement = document.getElementById("day-timer");
     dayInterval = setInterval(() => {
         timeLeft--;
@@ -62,13 +54,11 @@ function startDayCycle() {
         
         if (timeLeft <= 0) {
             nextDay();
-            timeLeft = 30; // Reset timer
+            timeLeft = 30;
         }
     }, 1000);
 }
 
-
-// Borrow money function
 function borrowMoney() {
     if (loan > 0) {
         alert("You already have an outstanding loan!");
@@ -82,7 +72,6 @@ function borrowMoney() {
     updateUI();
 }
 
-// Buy items from shop
 function buyItem(itemId) {
     const item = shopItems.find(i => i.id === itemId);
     if (!item) return;
@@ -105,24 +94,27 @@ function buyItem(itemId) {
     }
 }
 
-// Sell items to customers
 function sellItem(itemIndex) {
+    if (customersWaiting <= 0) {
+        alert("No customers to serve right now!");
+        return;
+    }
+    
     if (itemIndex >= 0 && itemIndex < inventory.length) {
         const item = inventory[itemIndex];
         money += item.sellPrice;
-        if (reputation < 100){
-            reputation += 1;
-        }
-        
-        customersWaiting = Math.max(0, customersWaiting - 1);
+        reputation += 2;
+        customersWaiting--;
         inventory.splice(itemIndex, 1);
         
-        alert(`Sold ${item.name} for $${item.sellPrice}!`);
+        const customerImg = customerImages[Math.floor(Math.random() * customerImages.length)];
+        const message = customerMessages[Math.floor(Math.random() * customerMessages.length)];
+        alertWithImage(`${message}\nSold ${item.name} for $${item.sellPrice}!`, customerImg);
+        
         updateUI();
     }
 }
 
-// Create art (if unlocked)
 function createArt() {
     if (!artUnlocked) return;
     
@@ -137,27 +129,6 @@ function createArt() {
     updateUI();
 }
 
-// Serve customers
-function serveCustomer() {
-    if (customersWaiting > 0) {
-        customersWaiting--;
-        if (reputation < 100){
-            reputation += 1;
-        }
-        
-        
-        // Show customer image with message
-        const customerImg = customerImages[Math.floor(Math.random() * customerImages.length)];
-        const message = customerMessages[Math.floor(Math.random() * customerMessages.length)];
-        
-        alertWithImage(message, customerImg);
-        updateUI();
-    } else {
-        alert("No customers waiting right now.");
-    }
-}
-
-// Custom alert with image
 function alertWithImage(message, imageUrl) {
     const alertBox = document.createElement('div');
     alertBox.style.position = 'fixed';
@@ -201,13 +172,12 @@ function alertWithImage(message, imageUrl) {
     document.body.appendChild(alertBox);
 }
 
-// Advance day
 function nextDay() {
     clearInterval(dayInterval);
-    day += 1;
+    alert("A new day has begun!");
+    day++;
     customersWaiting += Math.floor(Math.random() * 3) + 1;
     
-    // Loan due after 30 days
     if (loan > 0 && day % 30 === 0) {
         if (money >= loan) {
             money -= loan;
@@ -218,33 +188,35 @@ function nextDay() {
             alert("You failed to pay your loan! Your reputation has suffered.");
         }
     }
-
-    startDayCycle();
+    
     updateUI();
+    startDayCycle();
 }
 
-// Update UI
 function updateUI() {
     document.getElementById("day").textContent = `Day: ${day}`;
     document.getElementById("money").textContent = `Money: $${money}`;
     document.getElementById("loan").textContent = `Loan: $${loan}`;
     document.getElementById("reputation").textContent = `Reputation: ${reputation}/100`;
     document.getElementById("customers").textContent = `Customers waiting: ${customersWaiting}`;
+    document.getElementById("day-timer").textContent = `Next day in: ${timeLeft}s`;
     
-    // Update inventory display with images
     const inventoryElement = document.getElementById("inventory");
     inventoryElement.innerHTML = "<h3>Inventory</h3>";
     inventory.forEach((item, index) => {
+        const sellButton = customersWaiting > 0 
+            ? `<button onclick="sellItem(${index})">Sell</button>`
+            : '<button disabled>No customers</button>';
+        
         inventoryElement.innerHTML += 
             `<div class="inventory-item">
                 <img src="${item.img || 'img/default-item.png'}" alt="${item.name}" class="item-img">
                 <span>${item.name} (Sell for $${item.sellPrice})</span>
-                <button onclick="sellItem(${index})">Sell</button>
+                ${sellButton}
              </div>`;
     });
 }
 
-// Render shop with images
 function renderShop() {
     const shopElement = document.getElementById("shop");
     shopElement.innerHTML = "<h3>Shop</h3>";
@@ -258,7 +230,6 @@ function renderShop() {
     });
 }
 
-// Render art gallery
 function renderArtGallery() {
     const artElement = document.getElementById("art");
     artElement.innerHTML = "<h3>Art Studio</h3>";
@@ -275,5 +246,4 @@ function renderArtGallery() {
     }
 }
 
-// Initialize game when loaded
 window.onload = initGame;
