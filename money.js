@@ -1,11 +1,11 @@
-let money = 1000;
+let money = 250;
 let loan = 0;
 let day = 1;
 let inventory = [];
 let reputation = 50; // 0-100 scale
 let customersWaiting = 0;
 let artUnlocked = false;
-let timeLeft = 30;
+let timeLeft = 20;
 let dayInterval;
 
 // Shop items with image paths
