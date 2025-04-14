@@ -2,11 +2,12 @@ let money = 250;
 let loan = 0;
 let day = 1;
 let inventory = [];
-let reputation = 50; // 0-100 scale
+let reputation = 25; // 0-100 scale
 let customersWaiting = 0;
 let artUnlocked = false;
-let timeLeft = 20;
+let timeLeft = 15;
 let dayInterval;
+let activeCustomers = [];
 
 // Shop items with image paths
 const shopItems = [
@@ -40,10 +41,83 @@ function initGame() {
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
     
+    // Create seating area
+    const seatingArea = document.createElement('div');
+    seatingArea.id = 'seating-area';
+    seatingArea.style.position = 'fixed';
+    seatingArea.style.left = '10px';
+    seatingArea.style.top = '50%';
+    seatingArea.style.transform = 'translateY(-50%)';
+    seatingArea.style.width = '150px';
+    seatingArea.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+    seatingArea.style.padding = '10px';
+    seatingArea.style.borderRadius = '10px';
+    seatingArea.style.display = 'grid';
+    seatingArea.style.gridTemplateRows = 'repeat(4, 1fr)';
+    seatingArea.style.gap = '10px';
+    seatingArea.style.zIndex = '100';
+    seatingArea.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
+    document.body.appendChild(seatingArea);
+    
     startDayCycle();
     updateUI();
     renderShop();
     renderArtGallery();
+}
+
+function addCustomer() {
+    if (activeCustomers.length >= 4) return; // Max 4 customers
+    
+    const customer = {
+        id: Date.now(),
+        img: customerImages[Math.floor(Math.random() * customerImages.length)],
+        timeout: setTimeout(() => {
+            removeCustomer(customer.id);
+            customersWaiting = Math.max(0, customersWaiting - 1);
+            reputation -= 1;
+            updateUI();
+        }, 7000) // Leave after 7 seconds
+    };
+    
+    activeCustomers.push(customer);
+    renderCustomers();
+}
+
+function removeCustomer(id) {
+    activeCustomers = activeCustomers.filter(c => {
+        if (c.id === id) {
+            clearTimeout(c.timeout);
+            return false;
+        }
+        return true;
+    });
+    renderCustomers();
+}
+
+function renderCustomers() {
+    const seatingArea = document.getElementById('seating-area');
+    seatingArea.innerHTML = '<h3 style="margin:0;text-align:center;">Customers</h3>';
+    
+    activeCustomers.forEach(customer => {
+        const customerElement = document.createElement('div');
+        customerElement.className = 'customer';
+        customerElement.style.display = 'flex';
+        customerElement.style.justifyContent = 'center';
+        customerElement.style.alignItems = 'center';
+        customerElement.style.backgroundColor = 'rgba(255,255,255,0.8)';
+        customerElement.style.borderRadius = '5px';
+        customerElement.style.padding = '5px';
+        
+        const img = document.createElement('img');
+        img.src = customer.img;
+        img.alt = "Customer";
+        img.style.width = '50px';
+        img.style.height = '50px';
+        img.style.objectFit = 'cover';
+        
+        customerElement.appendChild(img);
+        seatingArea.appendChild(customerElement);
+    });
 }
 
 function startDayCycle() {
@@ -54,7 +128,7 @@ function startDayCycle() {
         
         if (timeLeft <= 0) {
             nextDay();
-            timeLeft = 30;
+            timeLeft = 15;
         }
     }, 1000);
 }
@@ -105,6 +179,12 @@ function sellItem(itemIndex) {
         money += item.sellPrice;
         reputation += 2;
         customersWaiting--;
+        
+        // Remove one customer
+        if (activeCustomers.length > 0) {
+            removeCustomer(activeCustomers[0].id);
+        }
+        
         inventory.splice(itemIndex, 1);
         
         const customerImg = customerImages[Math.floor(Math.random() * customerImages.length)];
@@ -176,7 +256,15 @@ function nextDay() {
     clearInterval(dayInterval);
     alert("A new day has begun!");
     day++;
-    customersWaiting += Math.floor(Math.random() * 3) + 1;
+    
+    // Add new customers
+    const newCustomers = Math.floor(Math.random() * 3) + 1;
+    customersWaiting += newCustomers;
+    
+    // Add visual customers
+    for (let i = 0; i < newCustomers; i++) {
+        addCustomer();
+    }
     
     if (loan > 0 && day % 30 === 0) {
         if (money >= loan) {

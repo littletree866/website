@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>The money game</title>
+    <title>Supply & Demand</title>
     <link rel="icon" href="palm-tree.jpg">
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; }
-        .panel { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        .panel { border: 1px solid #000000; padding: 10px; margin: 10px 0; }
         button { margin: 5px; padding: 5px 10px; }
         #game-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         #stats { grid-column: span 2; }
@@ -18,9 +18,9 @@
         <div id="stats" class="panel">
             <h2>Stats</h2>
             <p id="day">Day: 1</p>
-            <p id="money">Money: $1000</p>
+            <p id="money">Money: $250</p>
             <p id="loan">Loan: $0</p>
-            <p id="reputation">Reputation: 50/100</p>
+            <p id="reputation">Reputation: 25/100</p>
             <p id="customers">Customers waiting: 0</p>
             <div id="day-timer">Next day in: 30s</div>
             <button onclick="borrowMoney()">Borrow Money ($250 loan)</button>

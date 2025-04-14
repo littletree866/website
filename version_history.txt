@@ -1,7 +1,11 @@
 Update 0.0 -> 0.10
 April 7, 2025 
-The money game now has graphics
+Supply & Demand now has graphics
 
 Update 0.10 -> 0.11
 April 10, 2025
 Minor bug fixes and updates
+
+Update 0.11 -> 0.12
+April 14, 2025
+Supply & Demand now has a seating area and slightly more complex gameplay
