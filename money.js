@@ -32,7 +32,6 @@ const customerImages = [
     "img/customer1.png",
     "img/customer2.png",
     "img/customer3.png",
-    "img/customer4.png"
 ];
 
 function initGame() {
@@ -195,6 +194,7 @@ function sellItem(itemIndex) {
     }
 }
 
+
 function createArt() {
     if (!artUnlocked) return;
     
@@ -257,12 +257,16 @@ function nextDay() {
     alert("A new day has begun!");
     day++;
     
+    // Clear any existing customers first
+    activeCustomers.forEach(c => clearTimeout(c.timeout));
+    activeCustomers = [];
+    
     // Add new customers
     const newCustomers = Math.floor(Math.random() * 3) + 1;
-    customersWaiting += newCustomers;
+    customersWaiting = newCustomers; // Set directly instead of adding
     
     // Add visual customers
-    for (let i = 0; i < newCustomers; i++) {
+    for (let i = 0; i < customersWaiting; i++) {
         addCustomer();
     }
     
@@ -288,6 +292,13 @@ function updateUI() {
     document.getElementById("reputation").textContent = `Reputation: ${reputation}/100`;
     document.getElementById("customers").textContent = `Customers waiting: ${customersWaiting}`;
     document.getElementById("day-timer").textContent = `Next day in: ${timeLeft}s`;
+
+    while (activeCustomers.length > customersWaiting) {
+        removeCustomer(activeCustomers[0].id);
+    }
+    while (activeCustomers.length < customersWaiting && activeCustomers.length < 4) {
+        addCustomer();
+    }
     
     const inventoryElement = document.getElementById("inventory");
     inventoryElement.innerHTML = "<h3>Inventory</h3>";
