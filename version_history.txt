@@ -1,11 +1,15 @@
-Update 0.0 -> 0.10
+Update 0.0.0 -> 0.1.0
 April 7, 2025 
 Supply & Demand now has graphics
 
-Update 0.10 -> 0.11
+Update 0.1.0 -> 0.1.1
 April 10, 2025
 Minor bug fixes and updates
 
-Update 0.11 -> 0.12
+Update 0.1.1 -> 0.1.2
 April 14, 2025
 Supply & Demand now has a seating area and slightly more complex gameplay
+
+Update 0.1.2 -> 0.2.2
+April 24, 2025
+Supply & Demand has bug tweaks and updates

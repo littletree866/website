@@ -1,8 +1,8 @@
-let money = 250;
+let money = 100;
 let loan = 0;
 let day = 1;
 let inventory = [];
-let reputation = 25; // 0-100 scale
+let reputation = 20; // 0-100 scale
 let customersWaiting = 0;
 let artUnlocked = false;
 let timeLeft = 15;
@@ -19,11 +19,9 @@ const shopItems = [
 
 // Customer messages
 const customerMessages = [
-    "I'll take a coffee please!",
-    "Do you have any fresh sandwiches?",
-    "What books do you recommend?",
-    "I heard you sell art now?",
-    "The service here is great!",
+    ":|",
+    "This place is great!",
+    "The service here is great! :)",
     "I've been waiting too long..."
 ];
 
@@ -32,6 +30,7 @@ const customerImages = [
     "img/customer1.png",
     "img/customer2.png",
     "img/customer3.png",
+    "img/customer4.png",
 ];
 
 function initGame() {
@@ -65,11 +64,16 @@ function initGame() {
 }
 
 function addCustomer() {
-    if (activeCustomers.length >= 4) return; // Max 4 customers
+    if (activeCustomers.length >= 5) return; // Max 5 customers
+    
+    const randomIndex = Math.floor(Math.random() * customerImages.length);
+    const customerImg = customerImages[randomIndex];
+    const customerMessage = customerMessages[randomIndex % customerMessages.length];
     
     const customer = {
         id: Date.now(),
-        img: customerImages[Math.floor(Math.random() * customerImages.length)],
+        img: customerImg,
+        message: customerMessage,
         timeout: setTimeout(() => {
             removeCustomer(customer.id);
             customersWaiting = Math.max(0, customersWaiting - 1);
@@ -155,17 +159,37 @@ function buyItem(itemId) {
         if (item.unlocksArt) {
             artUnlocked = true;
             alert("You've unlocked painting! Now you can create and sell art.");
+            // Update the button immediately
+            document.querySelector(`button[onclick="buyItem(${item.id})"]`).disabled = true;
+            document.querySelector(`button[onclick="buyItem(${item.id})"]`).textContent = "Already Bought";
         } else {
             inventory.push({...item});
         }
         
         updateUI();
-        renderShop();
+        renderShop(); // This will ensure the button stays disabled
         renderArtGallery();
     } else {
         alert("Not enough money!");
     }
 }
+
+function renderShop() {
+    const shopElement = document.getElementById("shop");
+    shopElement.innerHTML = "<h3>Shop</h3>";
+    shopItems.forEach(item => {
+        const buttonText = (item.unlocksArt && artUnlocked) ? "Already Bought" : "Buy";
+        const buttonDisabled = (item.unlocksArt && artUnlocked) ? "disabled" : "";
+        
+        shopElement.innerHTML += 
+            `<div class="shop-item">
+                <img src="${item.img}" alt="${item.name}" class="item-img">
+                <span>${item.name} (Buy for $${item.cost})</span>
+                <button onclick="buyItem(${item.id})" ${buttonDisabled}>${buttonText}</button>
+             </div>`;
+    });
+}
+
 
 function sellItem(itemIndex) {
     if (customersWaiting <= 0) {
@@ -179,17 +203,19 @@ function sellItem(itemIndex) {
         reputation += 2;
         customersWaiting--;
         
-        // Remove one customer
+        // Remove one customer and get their details
         if (activeCustomers.length > 0) {
-            removeCustomer(activeCustomers[0].id);
+            const servedCustomer = activeCustomers[0];
+            removeCustomer(servedCustomer.id);
+            
+            // Use the same customer's image and message
+            alertWithImage(
+                `${servedCustomer.message}\nSold ${item.name} for $${item.sellPrice}!`, 
+                servedCustomer.img
+            );
         }
         
         inventory.splice(itemIndex, 1);
-        
-        const customerImg = customerImages[Math.floor(Math.random() * customerImages.length)];
-        const message = customerMessages[Math.floor(Math.random() * customerMessages.length)];
-        alertWithImage(`${message}\nSold ${item.name} for $${item.sellPrice}!`, customerImg);
-        
         updateUI();
     }
 }
@@ -312,19 +338,6 @@ function updateUI() {
                 <img src="${item.img || 'img/default-item.png'}" alt="${item.name}" class="item-img">
                 <span>${item.name} (Sell for $${item.sellPrice})</span>
                 ${sellButton}
-             </div>`;
-    });
-}
-
-function renderShop() {
-    const shopElement = document.getElementById("shop");
-    shopElement.innerHTML = "<h3>Shop</h3>";
-    shopItems.forEach(item => {
-        shopElement.innerHTML += 
-            `<div class="shop-item">
-                <img src="${item.img}" alt="${item.name}" class="item-img">
-                <span>${item.name} (Buy for $${item.cost})</span>
-                <button onclick="buyItem(${item.id})">Buy</button>
              </div>`;
     });
 }
