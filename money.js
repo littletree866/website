@@ -2,12 +2,46 @@ let money = 100;
 let loan = 0;
 let day = 1;
 let inventory = [];
-let reputation = 20; // 0-100 scale
+let reputation = 20;
 let customersWaiting = 0;
 let artUnlocked = false;
 let timeLeft = 15;
 let dayInterval;
 let activeCustomers = [];
+
+// Quest system variables
+let currentQuest = null;
+let questCompleted = false;
+const quests = [
+    {
+        description: "Sell 3 coffees",
+        targetItem: "Coffee",
+        targetCount: 3,
+        reward: 30,
+        progress: 0
+    },
+    {
+        description: "Sell 2 sandwiches",
+        targetItem: "Sandwich",
+        targetCount: 2,
+        reward: 40,
+        progress: 0
+    },
+    {
+        description: "Sell 1 book",
+        targetItem: "Book",
+        targetCount: 1,
+        reward: 50,
+        progress: 0
+    },
+    {
+        description: "Create 2 paintings",
+        targetItem: "Painting",
+        targetCount: 2,
+        reward: 100,
+        progress: 0
+    }
+];
 
 // Shop items with image paths
 const shopItems = [
@@ -57,14 +91,75 @@ function initGame() {
     seatingArea.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
     document.body.appendChild(seatingArea);
     
+    // Create quest giver
+    const questGiver = document.createElement('div');
+    questGiver.id = 'quest-giver';
+    questGiver.style.position = 'fixed';
+    questGiver.style.right = '20px';
+    questGiver.style.bottom = '20px';
+    questGiver.style.zIndex = '100';
+    
+    const questGiverImg = document.createElement('img');
+    questGiverImg.src = 'img/questgiver.png';
+    questGiverImg.alt = 'Quest Giver';
+    questGiverImg.style.width = '80px';
+    questGiverImg.style.height = '80px';
+    questGiverImg.style.cursor = 'pointer';
+    questGiverImg.onclick = interactWithQuestGiver;
+    
+    questGiver.appendChild(questGiverImg);
+    document.body.appendChild(questGiver);
+    
     startDayCycle();
     updateUI();
     renderShop();
     renderArtGallery();
 }
 
+function interactWithQuestGiver() {
+    if (!currentQuest) {
+        // Assign a new random quest
+        const availableQuests = quests.filter(q => 
+            (q.targetItem !== "Painting" || artUnlocked)
+        );
+        if (availableQuests.length > 0) {
+            currentQuest = {...availableQuests[Math.floor(Math.random() * availableQuests.length)]};
+            alert(`New Quest: ${currentQuest.description}\nProgress: ${currentQuest.progress}/${currentQuest.targetCount}`);
+        } else {
+            alert("No quests available right now. Come back later!");
+        }
+    } else if (questCompleted) {
+        // Claim reward
+        money += currentQuest.reward;
+        alert(`Quest completed! You received $${currentQuest.reward}`);
+        currentQuest = null;
+        questCompleted = false;
+        
+        // Update UI to remove quest info
+        updateUI();
+    } else {
+        // Show current quest progress
+        alert(`Current Quest: ${currentQuest.description}\nProgress: ${currentQuest.progress}/${currentQuest.targetCount}`);
+    }
+}
+
+function updateQuestProgress(itemName) {
+    if (!currentQuest || questCompleted) return;
+    
+    if (itemName === currentQuest.targetItem) {
+        currentQuest.progress++;
+        
+        if (currentQuest.progress >= currentQuest.targetCount) {
+            questCompleted = true;
+            alert("Quest completed! Return to the quest giver for your reward.");
+        }
+        
+        updateUI();
+    }
+}
+
 function addCustomer() {
-    if (activeCustomers.length >= 5) return; // Max 5 customers
+    if (activeCustomers.length >= 5) return;
     
     const randomIndex = Math.floor(Math.random() * customerImages.length);
     const customerImg = customerImages[randomIndex];
@@ -79,7 +174,7 @@ function addCustomer() {
             customersWaiting = Math.max(0, customersWaiting - 1);
             reputation -= 1;
             updateUI();
-        }, 7000) // Leave after 7 seconds
+        }, 7000)
     };
     
     activeCustomers.push(customer);
@@ -159,7 +254,6 @@ function buyItem(itemId) {
         if (item.unlocksArt) {
             artUnlocked = true;
             alert("You've unlocked painting! Now you can create and sell art.");
-            // Update the button immediately
             document.querySelector(`button[onclick="buyItem(${item.id})"]`).disabled = true;
             document.querySelector(`button[onclick="buyItem(${item.id})"]`).textContent = "Already Bought";
         } else {
@@ -167,7 +261,7 @@ function buyItem(itemId) {
         }
         
         updateUI();
-        renderShop(); // This will ensure the button stays disabled
+        renderShop();
         renderArtGallery();
     } else {
         alert("Not enough money!");
@@ -190,7 +284,6 @@ function renderShop() {
     });
 }
 
-
 function sellItem(itemIndex) {
     if (customersWaiting <= 0) {
         alert("No customers to serve right now!");
@@ -203,12 +296,14 @@ function sellItem(itemIndex) {
         reputation += 2;
         customersWaiting--;
         
-        // Remove one customer and get their details
+        // Update quest progress
+        updateQuestProgress(item.name);
+        
+        // Remove one customer
         if (activeCustomers.length > 0) {
             const servedCustomer = activeCustomers[0];
             removeCustomer(servedCustomer.id);
             
-            // Use the same customer's image and message
             alertWithImage(
                 `${servedCustomer.message}\nSold ${item.name} for $${item.sellPrice}!`, 
                 servedCustomer.img
@@ -219,7 +314,6 @@ function sellItem(itemIndex) {
         updateUI();
     }
 }
-
 
 function createArt() {
     if (!artUnlocked) return;
@@ -232,6 +326,10 @@ function createArt() {
         img: `img/painting-${Math.floor(Math.random() * 3) + 1}.png`
     });
     alert(`Created a painting worth $${artValue}!`);
+    
+    // Update quest progress for painting
+    updateQuestProgress("Painting");
+    
     updateUI();
 }
 
@@ -283,15 +381,14 @@ function nextDay() {
     alert("A new day has begun!");
     day++;
     
-    // Clear any existing customers first
+    // Clear existing customers
     activeCustomers.forEach(c => clearTimeout(c.timeout));
     activeCustomers = [];
     
     // Add new customers
     const newCustomers = Math.floor(Math.random() * 3) + 1;
-    customersWaiting = newCustomers; // Set directly instead of adding
+    customersWaiting = newCustomers;
     
-    // Add visual customers
     for (let i = 0; i < customersWaiting; i++) {
         addCustomer();
     }
@@ -318,6 +415,23 @@ function updateUI() {
     document.getElementById("reputation").textContent = `Reputation: ${reputation}/100`;
     document.getElementById("customers").textContent = `Customers waiting: ${customersWaiting}`;
     document.getElementById("day-timer").textContent = `Next day in: ${timeLeft}s`;
+    
+    // Update quest display
+    const questInfo = document.getElementById("quest-info");
+    if (!questInfo) {
+        const statsElement = document.getElementById("stats");
+        const questDiv = document.createElement('div');
+        questDiv.id = "quest-info";
+        statsElement.appendChild(questDiv);
+    }
+    
+    if (currentQuest) {
+        document.getElementById("quest-info").innerHTML = 
+            `<p>Quest: ${currentQuest.description}</p>
+             <p>Progress: ${currentQuest.progress}/${currentQuest.targetCount}</p>`;
+    } else {
+        document.getElementById("quest-info").innerHTML = "<p>No active quest</p>";
+    }
 
     while (activeCustomers.length > customersWaiting) {
         removeCustomer(activeCustomers[0].id);
