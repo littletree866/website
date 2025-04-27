@@ -14,6 +14,12 @@ Update 0.1.2 -> 0.1.3
 April 24, 2025
 Supply & Demand has bug tweaks and updates
 
-Update 0.2.3
+Update 0.1.3 -> 0.2.3
 April 25, 2025
 Supply & Demand now has a questgiver and bugfixes
+
+Update 0.2.3 -> 1.2.4
+April 26 -> April 27
+Platformer game has been added. 
+Added a beta save/load for S&D
+New Quest: Earn $25!

@@ -12,33 +12,41 @@ let activeCustomers = [];
 // Quest system variables
 let currentQuest = null;
 let questCompleted = false;
+let moneyEarnedSinceQuestStart = 0;
 const quests = [
     {
         description: "Sell 3 coffees",
         targetItem: "Coffee",
         targetCount: 3,
-        reward: 30,
+        reward: 10,
         progress: 0
     },
     {
         description: "Sell 2 sandwiches",
         targetItem: "Sandwich",
         targetCount: 2,
-        reward: 40,
+        reward: 10,
         progress: 0
     },
     {
         description: "Sell 1 book",
         targetItem: "Book",
         targetCount: 1,
-        reward: 50,
+        reward: 10,
         progress: 0
     },
     {
         description: "Create 2 paintings",
         targetItem: "Painting",
         targetCount: 2,
-        reward: 100,
+        reward: 10,
+        progress: 0
+    },
+    {
+        description: "Earn $25",
+        targetItem: "Money",
+        targetCount: 25,
+        reward: 10,
         progress: 0
     }
 ];
@@ -72,6 +80,38 @@ function initGame() {
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
+
+    const saveLoadDiv = document.createElement('div');
+    saveLoadDiv.style.position = 'fixed';
+    saveLoadDiv.style.bottom = '20px';
+    saveLoadDiv.style.left = '20px';
+    saveLoadDiv.style.zIndex = '100';
+    saveLoadDiv.style.display = 'flex';
+    saveLoadDiv.style.gap = '10px';
+    
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save Game';
+    saveButton.onclick = saveGame;
+    saveButton.style.padding = '5px 15px';
+    saveButton.style.backgroundColor = '#2196F3';
+    saveButton.style.color = 'white';
+    saveButton.style.border = 'none';
+    saveButton.style.borderRadius = '5px';
+    saveButton.style.cursor = 'pointer';
+    
+    const loadButton = document.createElement('button');
+    loadButton.textContent = 'Load Game';
+    loadButton.onclick = loadGame;
+    loadButton.style.padding = '5px 15px';
+    loadButton.style.backgroundColor = '#FF9800';
+    loadButton.style.color = 'white';
+    loadButton.style.border = 'none';
+    loadButton.style.borderRadius = '5px';
+    loadButton.style.cursor = 'pointer';
+    
+    saveLoadDiv.appendChild(saveButton);
+    saveLoadDiv.appendChild(loadButton);
+    document.body.appendChild(saveLoadDiv);
     
     // Create seating area
     const seatingArea = document.createElement('div');
@@ -124,6 +164,8 @@ function interactWithQuestGiver() {
         );
         if (availableQuests.length > 0) {
             currentQuest = {...availableQuests[Math.floor(Math.random() * availableQuests.length)]};
+            moneyEarnedSinceQuestStart = 0;
+            currentQuest.progress = 0;
             alert(`New Quest: ${currentQuest.description}\nProgress: ${currentQuest.progress}/${currentQuest.targetCount}`);
         } else {
             alert("No quests available right now. Come back later!");
@@ -134,8 +176,7 @@ function interactWithQuestGiver() {
         alert(`Quest completed! You received $${currentQuest.reward}`);
         currentQuest = null;
         questCompleted = false;
-        
-        // Update UI to remove quest info
+        moneyEarnedSinceQuestStart = 0;
         updateUI();
     } else {
         // Show current quest progress
@@ -143,19 +184,22 @@ function interactWithQuestGiver() {
     }
 }
 
-function updateQuestProgress(itemName) {
+function updateQuestProgress(itemName, amountEarned = 0) {
     if (!currentQuest || questCompleted) return;
     
-    if (itemName === currentQuest.targetItem) {
+    if (currentQuest.targetItem === "Money") {
+        moneyEarnedSinceQuestStart += amountEarned;
+        currentQuest.progress = moneyEarnedSinceQuestStart;
+    } else if (itemName === currentQuest.targetItem) {
         currentQuest.progress++;
-        
-        if (currentQuest.progress >= currentQuest.targetCount) {
-            questCompleted = true;
-            alert("Quest completed! Return to the quest giver for your reward.");
-        }
-        
-        updateUI();
     }
+    
+    if (currentQuest.progress >= currentQuest.targetCount) {
+        questCompleted = true;
+        alert("Quest completed! Return to the quest giver for your reward.");
+    }
+    
+    updateUI();
 }
 
 function addCustomer() {
@@ -292,12 +336,13 @@ function sellItem(itemIndex) {
     
     if (itemIndex >= 0 && itemIndex < inventory.length) {
         const item = inventory[itemIndex];
-        money += item.sellPrice;
+        const amountEarned = item.sellPrice;
+        money += amountEarned;
         reputation += 2;
         customersWaiting--;
         
         // Update quest progress
-        updateQuestProgress(item.name);
+        updateQuestProgress(item.name, amountEarned);
         
         // Remove one customer
         if (activeCustomers.length > 0) {
@@ -305,7 +350,7 @@ function sellItem(itemIndex) {
             removeCustomer(servedCustomer.id);
             
             alertWithImage(
-                `${servedCustomer.message}\nSold ${item.name} for $${item.sellPrice}!`, 
+                `${servedCustomer.message}\nSold ${item.name} for $${amountEarned}!`, 
                 servedCustomer.img
             );
         }
@@ -471,5 +516,113 @@ function renderArtGallery() {
              <p>Unlock painting by buying painting supplies in the shop.</p>`;
     }
 }
+
+function saveGame() {
+    const gameState = {
+        money,
+        loan,
+        day,
+        inventory,
+        reputation,
+        customersWaiting,
+        artUnlocked,
+        currentQuest,
+        questCompleted,
+        moneyEarnedSinceQuestStart
+    };
+    
+    // Convert to base64 string for easy copy/paste
+    const saveString = btoa(JSON.stringify(gameState));
+    const saveCode = saveString.match(/.{1,4}/g).join('-'); // Add dashes for readability
+    
+    // Show save code in a dialog
+    const saveDialog = document.createElement('div');
+    saveDialog.style.position = 'fixed';
+    saveDialog.style.top = '50%';
+    saveDialog.style.left = '50%';
+    saveDialog.style.transform = 'translate(-50%, -50%)';
+    saveDialog.style.backgroundColor = 'white';
+    saveDialog.style.padding = '20px';
+    saveDialog.style.border = '2px solid #333';
+    saveDialog.style.borderRadius = '10px';
+    saveDialog.style.zIndex = '1000';
+    saveDialog.style.textAlign = 'center';
+    
+    saveDialog.innerHTML = `
+        <h3 style="margin-top:0;">Your Save Code</h3>
+        <p>Copy this code to save your progress:</p>
+        <textarea id="save-code" style="width:100%; height:60px; margin:10px 0; padding:5px;" readonly>${saveCode}</textarea>
+        <button onclick="copySaveCode()" style="padding:5px 15px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Copy Code</button>
+        <button onclick="document.body.removeChild(this.parentElement)" style="padding:5px 15px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer; margin-left:10px;">Close</button>
+    `;
+    
+    document.body.appendChild(saveDialog);
+}
+
+function copySaveCode() {
+    const saveCode = document.getElementById('save-code');
+    saveCode.select();
+    document.execCommand('copy');
+    alert('Save code copied to clipboard!');
+}
+
+function loadGame() {
+    const loadDialog = document.createElement('div');
+    loadDialog.style.position = 'fixed';
+    loadDialog.style.top = '50%';
+    loadDialog.style.left = '50%';
+    loadDialog.style.transform = 'translate(-50%, -50%)';
+    loadDialog.style.backgroundColor = 'white';
+    loadDialog.style.padding = '20px';
+    loadDialog.style.border = '2px solid #333';
+    loadDialog.style.borderRadius = '10px';
+    loadDialog.style.zIndex = '1000';
+    loadDialog.style.textAlign = 'center';
+    
+    loadDialog.innerHTML = `
+        <h3 style="margin-top:0;">Load Game</h3>
+        <p>Paste your save code:</p>
+        <textarea id="load-code" style="width:100%; height:60px; margin:10px 0; padding:5px;"></textarea>
+        <button onclick="processLoadCode()" style="padding:5px 15px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Load Game</button>
+        <button onclick="document.body.removeChild(this.parentElement)" style="padding:5px 15px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer; margin-left:10px;">Cancel</button>
+    `;
+    
+    document.body.appendChild(loadDialog);
+}
+
+function processLoadCode() {
+    try {
+        const loadCode = document.getElementById('load-code').value.replace(/-/g, '');
+        const gameState = JSON.parse(atob(loadCode));
+        
+        // Validate the loaded data
+        if (!gameState || typeof gameState !== 'object') throw new Error('Invalid save data');
+        
+        // Restore game state
+        money = gameState.money || 100;
+        loan = gameState.loan || 0;
+        day = gameState.day || 1;
+        inventory = gameState.inventory || [];
+        reputation = gameState.reputation || 20;
+        customersWaiting = gameState.customersWaiting || 0;
+        artUnlocked = gameState.artUnlocked || false;
+        currentQuest = gameState.currentQuest || null;
+        questCompleted = gameState.questCompleted || false;
+        moneyEarnedSinceQuestStart = gameState.moneyEarnedSinceQuestStart || 0;
+        
+        // Update UI
+        updateUI();
+        renderShop();
+        renderArtGallery();
+        
+        // Close dialog
+        document.body.removeChild(document.querySelector('div:last-child'));
+        alert('Game loaded successfully!');
+    } catch (error) {
+        alert('Invalid save code. Please check your code and try again.');
+        console.error('Load error:', error);
+    }
+}
+
 
 window.onload = initGame;
