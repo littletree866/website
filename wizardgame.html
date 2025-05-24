@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizard Battle Game</title>
+    <link rel="stylesheet" href="wizardgame.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Wizard Battle</h1>
+        <div class="game-info">
+            <div class="player-stats">
+                <h2>Wizard</h2>
+                <div class="health-bar">
+                    <div class="health-fill" id="player-health"></div>
+                </div>
+                <p>Health: <span id="player-health-text">100</span>/100</p>
+                <p>Mana: <span id="player-mana-text">100</span>/100</p>
+                <p>Level: <span id="player-level">1</span></p>
+                <p>XP: <span id="player-xp">0</span>/<span id="player-xp-needed">100</span></p>
+            </div>
+            <div class="enemy-stats">
+                <h2 id="enemy-name">Minion</h2>
+                <div class="health-bar">
+                    <div class="health-fill" id="enemy-health"></div>
+                </div>
+                <p>Health: <span id="enemy-health-text">50</span>/<span id="enemy-max-health">50</span></p>
+            </div>
+        </div>
+        <div class="game-area">
+            <div class="battle-area">
+                <div class="player" id="player">🧙‍♂️</div>
+                <div class="enemy" id="enemy">👹</div>
+            </div>
+            <div class="spell-buttons">
+                <button class="spell-btn" id="fireball">Fireball (10 mana)</button>
+                <button class="spell-btn" id="frostbolt">Frostbolt (8 mana)</button>
+                <button class="spell-btn" id="lightning">Lightning (15 mana)</button>
+                <button class="spell-btn" id="heal">Heal (20 mana)</button>
+            </div>
+            <button class="action-btn" id="next-enemy">Next Enemy</button>
+            <button class="action-btn" id="rest">Rest</button>
+        </div>
+        <div class="game-log" id="game-log">
+            <p>A wild Minion appears!</p>
+        </div>
+    </div>
+    <script src="wizardgame.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1a1a2e;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.game-container {
+    background-color: #16213e;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 800px;
+    max-width: 100%;
+}
+
+h1 {
+    text-align: center;
+    color: #f8bb22;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background-color: #0f3460;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.player-stats, .enemy-stats {
+    width: 48%;
+}
+
+.health-bar {
+    background-color: #333;
+    height: 20px;
+    border-radius: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.health-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 100%;
+    transition: width 0.3s;
+}
+
+.enemy-stats .health-fill {
+    background-color: #f44336;
+}
+
+.game-area {
+    background-color: #0f3460;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.battle-area {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 150px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.player, .enemy {
+    font-size: 60px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.player {
+    color: #4cc9f0;
+}
+
+.enemy {
+    color: #f72585;
+}
+
+.spell-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.spell-btn, .action-btn {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.spell-btn {
+    background-color: #4cc9f0;
+    color: #1a1a2e;
+}
+
+.spell-btn:hover {
+    background-color: #3aa8d8;
+}
+
+.action-btn {
+    background-color: #f8bb22;
+    color: #1a1a2e;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.action-btn:hover {
+    background-color: #e6a919;
+}
+
+#next-enemy {
+    background-color: #f72585;
+    color: white;
+}
+
+#next-enemy:hover {
+    background-color: #e5177b;
+}
+
+.game-log {
+    background-color: #0f3460;
+    padding: 15px;
+    border-radius: 8px;
+    height: 150px;
+    overflow-y: auto;
+}
+
+.game-log p {
+    margin: 5px 0;
+    line-height: 1.4;
+}
+
+@keyframes playerAttack {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(100px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes enemyAttack {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(-100px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes spellEffect {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(0.5); }
+}
+
+.spell-effect {
+    position: absolute;
+    font-size: 40px;
+    animation: spellEffect 0.5s forwards;
+}
+
+/* Powerful spell buttons */
+.powerful-spell {
+    background-color: #f72585;
+    color: white;
+    grid-column: span 2;
+}
+
+.powerful-spell:hover {
+    background-color: #e5177b;
+}
+
+/* Spell level indicators */
+.spell-btn::after {
+    content: attr(data-level);
+    font-size: 0.8em;
+    vertical-align: super;
+    margin-left: 3px;
+}

@@ -23,3 +23,7 @@ April 26 -> April 27
 Platformer game has been added. 
 Added a beta save/load for S&D
 New Quest: Earn $25!
+
+Update 1.2.4 -> 1.3.4
+May 24, 2025 
+New Game: Wizard Game!
