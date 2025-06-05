@@ -31,3 +31,8 @@ New Game: Wizard Game!
 Update 1.3.4 -> 1.4.4
 May 27, 2025
 Minor updates and fixes
+
+Update 1.4.4 -> 1.5.4
+June 5, 2025
+Added map on battle game
+more complex gameplay

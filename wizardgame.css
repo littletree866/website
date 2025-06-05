@@ -188,3 +188,90 @@ h1 {
     vertical-align: super;
     margin-left: 3px;
 }
+
+/* Map styles */
+.map-container {
+    background-color: #16213e;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 800px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.map {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 2px;
+    background-color: #0f3460;
+    padding: 10px;
+    border-radius: 8px;
+    height: 500px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.map-tile {
+    background-color: #1a1a2e;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.map-tile:hover {
+    background-color: #2a2a4a;
+}
+
+.map-tile.enemy {
+    background-color: #4a1a2e;
+}
+
+.map-tile.enemy::after {
+    content: "👹";
+}
+
+.map-tile.player {
+    background-color: #1a2a4e;
+}
+
+.map-tile.player::after {
+    content: "🧙‍♂️";
+}
+
+.map-log {
+    background-color: #0f3460;
+    padding: 15px;
+    border-radius: 8px;
+    height: 100px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.map-log p {
+    margin: 5px 0;
+    line-height: 1.4;
+}
+
+/* Transition effects */
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}

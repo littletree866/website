@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WBG</title>
+    <title>Wizard Battle Game</title>
     <link rel="stylesheet" href="wizardgame.css">
-    <link rel="icon" href="palm-tree.jpg">
 </head>
 <body>
-    <div class="game-container">
+    <div class="map-container" id="map-container">
+        <h1>World Map</h1>
+        <div class="map" id="map">
+            <!-- Map will be generated here -->
+        </div>
+        <div class="map-log" id="map-log">
+            <p>Explore the world to find enemies!</p>
+        </div>
+        <button class="action-btn" id="return-to-battle" style="display: none;">Return to Battle</button>
+    </div>
+
+    <div class="game-container" id="game-container" style="display: none;">
         <h1>Wizard Battle</h1>
         <div class="game-info">
             <div class="player-stats">
@@ -35,16 +45,17 @@
                 <div class="enemy" id="enemy">👹</div>
             </div>
             <div class="spell-buttons">
-                <button class="spell-btn" id="fireball">Fireball (10 mana)</button>
-                <button class="spell-btn" id="frostbolt">Frostbolt (8 mana)</button>
+                <button class="spell-btn" id="fireball">Fireball (15 mana)</button>
+                <button class="spell-btn" id="frostbolt">Frostbolt (7 mana)</button>
                 <button class="spell-btn" id="lightning">Lightning (15 mana)</button>
                 <button class="spell-btn" id="heal">Heal (20 mana)</button>
+                <!-- Powerful spells will be added here by JavaScript -->
             </div>
             <button class="action-btn" id="next-enemy">Next Enemy</button>
             <button class="action-btn" id="rest">Rest</button>
         </div>
         <div class="game-log" id="game-log">
-            <p>A wild Minion appears!</p>
+            <p>Battle Log</p>
         </div>
     </div>
     <script src="wizardgame.js"></script>

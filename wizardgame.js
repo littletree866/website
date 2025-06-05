@@ -9,26 +9,32 @@ const gameState = {
         xp: 0,
         xpNeeded: 100,
         spells: {
-            fireball: { damage: 25, manaCost: 10, level: 1, maxLevel: 3 },
-            frostbolt: { damage: 18, manaCost: 8, slow: true, level: 1, maxLevel: 3 },
-            lightning: { damage: 35, manaCost: 15, level: 1, maxLevel: 3 },
+            fireball: { damage: 20, manaCost: 15, level: 1, maxLevel: 3 },
+            frostbolt: { damage: 15, manaCost: 7, slow: true, level: 1, maxLevel: 3 },
+            lightning: { damage: 25, manaCost: 15, level: 1, maxLevel: 3 },
             heal: { amount: 30, manaCost: 20, level: 1, maxLevel: 3 },
-            // Powerful spells unlocked at level 5
-            meteor: { damage: 60, manaCost: 40, level: 0, maxLevel: 2, unlocked: false },
-            blizzard: { damage: 45, manaCost: 35, slow: true, level: 0, maxLevel: 2, unlocked: false }
+            meteor: { damage: 50, manaCost: 30, level: 0, maxLevel: 2, unlocked: false },
+            blizzard: { damage: 45, manaCost: 30, slow: true, level: 0, maxLevel: 2, unlocked: false }
         }
     },
     enemy: null,
     enemiesDefeated: 0,
-    gameLog: []
+    gameLog: [],
+    map: {
+        size: 10,
+        playerPosition: { x: 5, y: 5 },
+        enemyPositions: []
+    },
+    inBattle: false,
+    loot: 0
 };
 
 // Enemy types
 const enemyTypes = [
-    { name: "Minion", health: 50, damage: 8, xp: 20, emoji: "👹" },
+    { name: "Zombie", health: 50, damage: 8, xp: 20, emoji: "🧟" },
     { name: "Goblin", health: 70, damage: 12, xp: 30, emoji: "👺" },
     { name: "Orc", health: 100, damage: 15, xp: 50, emoji: "👹" },
-    { name: "Troll", health: 150, damage: 20, xp: 80, emoji: "👹" },
+    { name: "Troll", health: 150, damage: 20, xp: 80, emoji: "🧌" },
     { name: "Dragon", health: 250, damage: 30, xp: 150, emoji: "🐲" }
 ];
 
@@ -47,14 +53,18 @@ const enemyMaxHealthEl = document.getElementById('enemy-max-health');
 const enemyEmojiEl = document.getElementById('enemy');
 
 const gameLogEl = document.getElementById('game-log');
+const mapContainerEl = document.getElementById('map-container');
+const mapEl = document.getElementById('map');
+const mapLogEl = document.getElementById('map-log');
+const returnToBattleBtn = document.getElementById('return-to-battle');
 
 const spellButtons = {
     fireball: document.getElementById('fireball'),
     frostbolt: document.getElementById('frostbolt'),
     lightning: document.getElementById('lightning'),
     heal: document.getElementById('heal'),
-    meteor: null, // Will be initialized later
-    blizzard: null // Will be initialized later
+    meteor: null,
+    blizzard: null
 };
 
 const nextEnemyBtn = document.getElementById('next-enemy');
@@ -62,13 +72,15 @@ const restBtn = document.getElementById('rest');
 
 // Initialize game
 function initGame() {
-    // Create buttons for powerful spells (hidden by default)
     createPowerfulSpellButtons();
-    
-    spawnEnemy();
-    updateUI();
     setupEventListeners();
-    addToLog("Welcome to Wizard Battle! Defeat enemies to gain XP and level up.");
+    
+    // Start with the map visible and battle container hidden
+    mapContainerEl.style.display = 'block';
+    document.getElementById('game-container').style.display = 'none';
+    
+    generateMap();
+    addToMapLog("Welcome to Wizard Battle! Move around the map to find enemies.");
 }
 
 // Create buttons for powerful spells
@@ -79,7 +91,7 @@ function createPowerfulSpellButtons() {
     const meteorBtn = document.createElement('button');
     meteorBtn.className = 'spell-btn powerful-spell';
     meteorBtn.id = 'meteor';
-    meteorBtn.textContent = 'Meteor (40 mana)';
+    meteorBtn.textContent = 'Meteor (30 mana)';
     meteorBtn.style.display = 'none';
     meteorBtn.addEventListener('click', () => castSpell('meteor'));
     spellButtonsContainer.appendChild(meteorBtn);
@@ -89,11 +101,153 @@ function createPowerfulSpellButtons() {
     const blizzardBtn = document.createElement('button');
     blizzardBtn.className = 'spell-btn powerful-spell';
     blizzardBtn.id = 'blizzard';
-    blizzardBtn.textContent = 'Blizzard (35 mana)';
+    blizzardBtn.textContent = 'Blizzard (30 mana)';
     blizzardBtn.style.display = 'none';
     blizzardBtn.addEventListener('click', () => castSpell('blizzard'));
     spellButtonsContainer.appendChild(blizzardBtn);
     spellButtons.blizzard = blizzardBtn;
+}
+
+// Generate the map with enemies
+function generateMap() {
+    mapEl.innerHTML = '';
+    gameState.map.enemyPositions = [];
+    
+    // Generate 3-6 enemies at random positions
+    const enemyCount = 3 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < enemyCount; i++) {
+        let x, y;
+        do {
+            x = Math.floor(Math.random() * gameState.map.size);
+            y = Math.floor(Math.random() * gameState.map.size);
+        } while (
+            (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) ||
+            gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)
+        );
+        
+        gameState.map.enemyPositions.push({ x, y });
+    }
+    
+    // Create map tiles
+    for (let y = 0; y < gameState.map.size; y++) {
+        for (let x = 0; x < gameState.map.size; x++) {
+            const tile = document.createElement('div');
+            tile.className = 'map-tile';
+            tile.dataset.x = x;
+            tile.dataset.y = y;
+            
+            // Mark player position
+            if (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) {
+                tile.classList.add('player');
+            }
+            // Mark enemy positions
+            else if (gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)) {
+                tile.classList.add('enemy');
+            }
+            
+            tile.addEventListener('click', () => movePlayer(x, y));
+            mapEl.appendChild(tile);
+        }
+    }
+    
+    addToMapLog("Explore the map to find enemies!");
+}
+
+function movePlayer(x, y) {
+    // Check if move is valid (same as before)
+    const dx = Math.abs(x - gameState.map.playerPosition.x);
+    const dy = Math.abs(y - gameState.map.playerPosition.y);
+    
+    if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
+        gameState.map.playerPosition = { x, y };
+        
+        // Check for enemy encounter
+        const enemyIndex = gameState.map.enemyPositions.findIndex(
+            pos => pos.x === x && pos.y === y
+        );
+        
+        if (enemyIndex !== -1) {
+            // Start battle (remove enemy from map)
+            gameState.map.enemyPositions.splice(enemyIndex, 1);
+            startBattle();
+        } else {
+            // Only update the map visuals - DON'T regenerate enemies
+            updateMapVisuals();  // Add this new function
+            addToMapLog(`Moved to (${x}, ${y})`);
+        }
+    } else {
+        addToMapLog("Can only move to adjacent tiles!");
+    }
+}
+
+// Add this new function to update visuals without regenerating enemies
+function updateMapVisuals() {
+    mapEl.innerHTML = ''; // Clear current map
+    
+    // Redraw tiles with existing enemy positions
+    for (let y = 0; y < gameState.map.size; y++) {
+        for (let x = 0; x < gameState.map.size; x++) {
+            const tile = document.createElement('div');
+            tile.className = 'map-tile';
+            
+            if (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) {
+                tile.classList.add('player');
+            } else if (gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)) {
+                tile.classList.add('enemy');
+            }
+            
+            tile.addEventListener('click', () => movePlayer(x, y));
+            mapEl.appendChild(tile);
+        }
+    }
+}
+
+// Start a battle
+function startBattle() {
+    gameState.inBattle = true;
+    spawnEnemy();
+    
+    // Transition to battle screen
+    mapContainerEl.classList.add('fade-out');
+    setTimeout(() => {
+        mapContainerEl.style.display = 'none';
+        document.querySelector('.game-container').style.display = 'block';
+        document.querySelector('.game-container').classList.add('fade-in');
+    }, 500);
+}
+
+// End battle and return to map
+function endBattle() {
+    gameState.inBattle = false;
+    
+    // Add loot
+    const lootGained = 10 + Math.floor(Math.random() * 20);
+    gameState.loot += lootGained;
+    
+    // Transition to map screen
+    document.querySelector('.game-container').classList.add('fade-out');
+    setTimeout(() => {
+        document.querySelector('.game-container').style.display = 'none';
+        mapContainerEl.style.display = 'block';
+        mapContainerEl.classList.add('fade-in');
+        
+        generateMap();
+        addToMapLog(`You gained ${lootGained} gold from the battle! Total loot: ${gameState.loot}`);
+    }, 500);
+}
+
+// Add message to map log
+function addToMapLog(message) {
+    const p = document.createElement('p');
+    p.textContent = message;
+    mapLogEl.appendChild(p);
+    
+    // Keep log to 10 messages
+    if (mapLogEl.children.length > 10) {
+        mapLogEl.removeChild(mapLogEl.children[0]);
+    }
+    
+    mapLogEl.scrollTop = mapLogEl.scrollHeight;
 }
 
 // Spawn a new enemy
@@ -116,6 +270,7 @@ function spawnEnemy() {
     updateCharacterEmojis();
     updateUI();
 }
+
 
 // Update character emojis based on health
 function updateCharacterEmojis() {
@@ -323,6 +478,9 @@ function enemyDefeated() {
     if (gameState.player.xp >= gameState.player.xpNeeded) {
         levelUp();
     }
+    
+    // Return to map after a short delay
+    setTimeout(endBattle, 1500);
 }
 
 // Player levels up
@@ -424,13 +582,16 @@ function rest() {
 
 // Set up event listeners
 function setupEventListeners() {
+    // Spell buttons
     spellButtons.fireball.addEventListener('click', () => castSpell('fireball'));
     spellButtons.frostbolt.addEventListener('click', () => castSpell('frostbolt'));
     spellButtons.lightning.addEventListener('click', () => castSpell('lightning'));
     spellButtons.heal.addEventListener('click', () => castSpell('heal'));
     
+    // Action buttons
     nextEnemyBtn.addEventListener('click', spawnEnemy);
     restBtn.addEventListener('click', rest);
+    returnToBattleBtn.addEventListener('click', startBattle);
 }
 
 // Start the game
