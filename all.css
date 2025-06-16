@@ -15,8 +15,22 @@ h4 {
 
 }
 
+h5 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+    font-weight: lighter;
+}
+
+h6 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+    font-weight: lighter;
+}
+
+
+
 a {
-    color: #ff0101;
+    color: #924bcc;
     font-family: 'Courier New', Courier, monospace;
     text-decoration: none !important;
 }

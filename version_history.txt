@@ -14,4 +14,8 @@ more complex gameplay
 Update 1.5.4 -> 1.6.5
 June 15, 2025
 NEW GAME: PLATFORMER!
+MAJOR UPDATE!
+Random levels, loot, collectibles, etc
+Added News!
+
 
