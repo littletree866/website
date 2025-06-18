@@ -18,7 +18,7 @@ function resizeCanvas() {
 // Game variables
 let gravity = 0.5;
 let score = 0;
-let health = 100;
+let health = 150;
 let gameOver = false;
 let lastTime = 0;
 let currentLevel = 1;
@@ -92,7 +92,6 @@ document.addEventListener("keyup", (e) => {
     if (e.key === "ArrowUp") keys.up = false;
 });
 
-// Generate random levels
 function generateLevel(levelNum, canvas) {
     const level = {
         platforms: [],
@@ -104,109 +103,152 @@ function generateLevel(levelNum, canvas) {
         startPos: { x: 50, y: 100 }
     };
 
-    // Base platform
+    // 1. Always create a safe starting area
     level.platforms.push({
-        x: 0, 
-        y: canvas.height - 50, 
-        width: 200, 
-        height: 20, 
-        color: "#2ECC71", 
+        x: 0, y: canvas.height - 50, 
+        width: 200, height: 20, 
+        color: "#2ECC71", type: "normal"
+    });
+
+    // 2. Create a guaranteed path to the portal
+    const pathSegments = 4 + levelNum;
+    const segmentWidth = canvas.width / pathSegments;
+    let lastX = 100;
+    let lastY = canvas.height - 100;
+    const minGap = 30;  // Minimum vertical gap between platforms
+    const maxGap = 120; // Maximum vertical gap between platforms
+
+    for (let i = 1; i < pathSegments; i++) {
+        // Ensure reasonable gap between platforms
+        let gap;
+        if (lastY < 200) {
+            // Near top - only allow downward jumps
+            gap = minGap + Math.random() * (maxGap - minGap);
+        } else if (lastY > canvas.height - 200) {
+            // Near bottom - only allow upward jumps
+            gap = -(minGap + Math.random() * (maxGap - minGap));
+        } else {
+            // Middle area - allow both directions
+            gap = (Math.random() > 0.5 ? 1 : -1) * 
+                  (minGap + Math.random() * (maxGap - minGap));
+        }
+
+        const newX = lastX + segmentWidth * (0.7 + Math.random() * 0.3);
+        const newY = Math.max(
+            100, // Minimum height
+            Math.min(
+                canvas.height - 150, // Maximum height
+                lastY + gap
+            )
+        );
+
+
+    // 3. Add the final platform leading to portal
+    level.platforms.push({
+        x: lastX,
+        y: lastY,
+        width: 150,
+        height: 15,
+        color: "#9B59B6",
         type: "normal"
     });
 
-    // Random platforms
-    const platformCount = 4 + levelNum * 2;
-    for (let i = 0; i < platformCount; i++) {
+    // 4. Add decorative platforms (non-essential)
+    const extraPlatforms = 7 + levelNum;
+    for (let i = 0; i < extraPlatforms; i++) {
         level.platforms.push({
-            x: Math.random() * (canvas.width - 200),
-            y: canvas.height - 100 - (Math.random() * 400),
-            width: 100 + Math.random() * 100,
+            x: Math.random() * (canvas.width - 100),
+            y: 100 + Math.random() * (canvas.height - 250),
+            width: 80 + Math.random() * 70,
             height: 15,
             color: ["#2ECC71", "#3498DB", "#9B59B6"][Math.floor(Math.random() * 3)],
             type: ["normal", "moving", "bouncy"][Math.floor(Math.random() * 3)],
             dir: Math.random() > 0.5 ? 1 : -1,
-            speed: 1 + Math.random() * 2,
+            speed: 1 + Math.random(),
             xStart: 0,
             xEnd: canvas.width - 150
         });
     }
 
-    // Hazards
-    if (levelNum > 1) {
-        level.hazards.push({
-            x: 0,
-            y: canvas.height - 30,
-            width: canvas.width,
-            height: 30,
-            color: "#E74C3C",
-            type: "lava"
-        });
-    }
-
-    // Collectibles (coins and health packs)
-    for (let i = 0; i < 3 + levelNum; i++) {
-        const isHealth = Math.random() > 0.8;
-        level.collectibles.push({
-            x: Math.random() * (canvas.width - 30),
-            y: canvas.height - 150 - (Math.random() * 350),
-            width: 15,
-            height: 15,
-            color: isHealth ? "#E67E22" : "#F1C40F",
-            type: isHealth ? "health" : "coin",
-            collected: false
-        });
-    }
-
-    // Enemies
-    if (levelNum > 1) {
-        level.enemies.push({
-            x: 300,
-            y: canvas.height - 100,
-            width: 40,
+    // 5. Place checkpoints only on solid ground
+    const safePlatforms = level.platforms.filter(p => p.type === "normal");
+    if (safePlatforms.length > 0) {
+        const checkpointPlatform = safePlatforms[Math.floor(safePlatforms.length/2)];
+        level.checkpoints.push({
+            x: checkpointPlatform.x + checkpointPlatform.width/2 - 10,
+            y: checkpointPlatform.y - 40,
+            width: 20,
             height: 40,
-            color: "#8E44AD",
-            type: "patrol",
-            speed: 1 + levelNum * 0.5,
-            xStart: 200,
-            xEnd: 500,
-            dir: 1
+            color: "#27AE60",
+            activated: false
         });
     }
 
-    // Portal
-    if (levelNum < 3) {
-        level.portals.push({
-            x: canvas.width - 100,
-            y: canvas.height - 200,
-            width: 40,
-            height: 60,
-            color: "#F39C12",
-            targetLevel: levelNum + 1
-        });
-    } else {
-        level.portals.push({
-            x: canvas.width - 100,
-            y: canvas.height - 200,
-            width: 40,
-            height: 60,
-            color: "#F39C12",
-            isFinal: true
-        });
-    }
-
-    // Checkpoint
-    level.checkpoints.push({
-        x: canvas.width / 2 - 10,
-        y: canvas.height - 150,
-        width: 20,
-        height: 40,
-        color: "#27AE60",
-        activated: false
+    
+    // 6. Place collectibles only on reachable platforms - INCREASED CHANCE
+    safePlatforms.forEach(platform => {
+        if (Math.random() > 0.4) { // 60% chance per platform 
+            level.collectibles.push({
+                // Place collectibles near center of platforms
+                x: platform.x + platform.width/2 - 7.5,
+                y: platform.y - 25, 
+                width: 15,
+                height: 15,
+                color: Math.random() > 0.7 ? "#E67E22" : "#F1C40F",
+                type: Math.random() > 0.7 ? "health" : "coin",
+                collected: false
+            });
+        }
     });
 
-    return level;
-}
+    // 7. Place portal at the end of the guaranteed path
+    level.portals.push({
+        x: lastX + 130,
+        y: lastY - 60,
+        width: 40,
+        height: 60,
+        color: "#F39C12",
+        targetLevel: levelNum < 3 ? levelNum + 1 : 1,
+        isFinal: levelNum >= 3
+    });
 
+      // 8. Add enemies with increased spawn chance
+      const enemyChance = 0.25 + (levelNum * 0.05); // 25% base + 5% per level
+      safePlatforms.forEach(platform => {
+          if (!platform.isStarting && !platform.isFinal && Math.random() < enemyChance) {
+              const enemyType = Math.random() > 0.7 ? "shooter" : 
+                               Math.random() > 0.5 ? "jumper" : "patrol";
+              
+              const enemy = {
+                  x: platform.x + platform.width/2 - 15,
+                  y: platform.y - 40,
+                  width: 30,
+                  height: 40,
+                  color: "#8B0000",
+                  type: enemyType
+              };
+              
+              if (enemyType === "patrol") {
+                  enemy.speed = 1 + Math.random() * 2;
+                  enemy.dir = Math.random() > 0.5 ? 1 : -1;
+                  enemy.xStart = platform.x;
+                  enemy.xEnd = platform.x + platform.width - enemy.width;
+              } else if (enemyType === "shooter") {
+                  enemy.fireRate = 2000 - (levelNum * 200); // Faster shooting at higher levels
+                  enemy.lastShot = 0;
+              } else if (enemyType === "jumper") {
+                  enemy.jumpForce = -12 - (Math.random() * 3);
+                  enemy.jumpDelay = 1500 + Math.random() * 1500;
+                  enemy.velY = 0;
+              }
+              
+              level.enemies.push(enemy);
+          }
+      });
+
+    return level;
+    }
+}
 // Load level function
 function loadLevel(levelNum) {
     currentLevel = levelNum;
@@ -275,6 +317,7 @@ function gameLoop(timestamp) {
 
 // Update player position and handle collisions
 function updatePlayer(deltaTime) {
+    
     if (player.invincible) {
         player.invincibleTimer -= deltaTime;
         if (player.invincibleTimer <= 0) {
@@ -292,6 +335,21 @@ function updatePlayer(deltaTime) {
             checkpoint.activated = true;
             checkpoint.respawnX = checkpoint.x + checkpoint.width/2 - player.width/2;
             checkpoint.respawnY = checkpoint.y - player.height;
+        }
+    });
+
+    collectibles.forEach(collectible => {
+        if (!collectible.collected &&
+            player.x < collectible.x + collectible.width &&
+            player.x + player.width > collectible.x &&
+            player.y < collectible.y + collectible.height &&
+            player.y + player.height > collectible.y) {
+            collectible.collected = true;
+            if (collectible.type === "coin") {
+                score += 100;
+            } else if (collectible.type === "health") {
+                health = Math.min(150, health + 50); // Increased from 25 to 50
+            }
         }
     });
 
@@ -326,6 +384,34 @@ function updatePlayer(deltaTime) {
             }
         }
     });
+
+    
+function checkPlatformCollisions() {
+    let onGround = false;
+    player.jumping = true;
+
+    platforms.forEach(platform => {
+        // More precise collision check
+        if (player.x + player.width > platform.x &&
+            player.x < platform.x + platform.width &&
+            player.y + player.height >= platform.y &&
+            player.y < platform.y + platform.height &&
+            player.velY > 0) {
+            
+            // Snap player to platform surface
+            player.y = platform.y - player.height;
+            player.velY = 0;
+            player.jumping = false;
+            onGround = true;
+
+            // Bouncy platform effect
+            if (platform.type === "bouncy") {
+                player.velY = -20;
+                player.jumping = true;
+            }
+        }
+    });
+}
 
     // Hazard collisions
     hazards.forEach(hazard => {
@@ -383,7 +469,7 @@ function updatePlayer(deltaTime) {
             player.y < enemy.y + enemy.height &&
             player.y + player.height > enemy.y &&
             !player.invincible) {
-            takeDamage(15);
+            takeDamage(5);
             player.velY = -10;
             player.x += (player.x < enemy.x + enemy.width/2) ? -30 : 30;
         }
@@ -396,7 +482,7 @@ function updatePlayer(deltaTime) {
             player.y < proj.y + proj.height &&
             player.y + player.height > proj.y &&
             !player.invincible) {
-            takeDamage(10);
+            takeDamage(5);
             projectiles.splice(index, 1);
             player.velY = -8;
             player.x += (proj.dir > 0) ? -20 : 20;
@@ -405,7 +491,7 @@ function updatePlayer(deltaTime) {
 
     // Boundary checks
     if (player.y > canvas.height) {
-        takeDamage(25);
+        takeDamage(10);
         resetToCheckpoint();
     }
     
@@ -527,7 +613,7 @@ function resetToCheckpoint() {
 
 // Reset entire game
 function resetGame() {
-    health = 100;
+    health = 150;
     score = 0;
     currentLevel = 1;
     gameOver = false;
