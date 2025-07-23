@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Defense</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #6ab150;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #sunCounter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: yellow;
+            text-shadow: 2px 2px 4px #000;
+        }
+        #waveCounter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+        }
+        #plantSelection {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .plantOption {
+            width: 60px;
+            height: 60px;
+            background-color: #8bc34a;
+            border: 2px solid #5a8f29;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+            color: white;
+        }
+        .plantOption:hover {
+            background-color: #9ccc65;
+        }
+        .plantOption.selected {
+            border-color: gold;
+            box-shadow: 0 0 10px gold;
+        }
+        .cost {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="sunCounter">Suns: 50</div>
+    <div id="waveCounter">Wave: 1</div>
+    <div id="plantSelection">
+        <div class="plantOption" data-plant="peashooter" data-cost="100">
+            Peashooter<div class="cost">100</div>
+        </div>
+        <div class="plantOption" data-plant="sunflower" data-cost="50">
+            Sunflower<div class="cost">50</div>
+        </div>
+        <div class="plantOption" data-plant="wallnut" data-cost="50">
+            Wall-nut<div class="cost">50</div>
+        </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // Game setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const sunCounter = document.getElementById('sunCounter');
+        const waveCounter = document.getElementById('waveCounter');
+        const plantOptions = document.querySelectorAll('.plantOption');
+        
+        // Set canvas size (make it wider for longer level)
+        canvas.width = window.innerWidth * 1.5;
+        canvas.height = window.innerHeight;
+        
+        // Game state
+        let suns = 50;
+        let selectedPlant = null;
+        let plants = [];
+        let zombies = [];
+        let sunsOnScreen = [];
+        let lastZombieTime = 0;
+        let lastSunTime = 0;
+        let gameOver = false;
+        let wave = 1;
+        let zombiesInWave = 0;
+        let zombiesSpawnedInWave = 0;
+        let waveActive = false;
+        let waveCooldown = 15000; // 15 seconds between waves
+        
+        // Lawn grid (5 rows, 15 columns - longer level)
+        const grid = {
+            rows: 5,
+            cols: 15,
+            cellWidth: 80,
+            cellHeight: 100,
+            offsetX: 100,
+            offsetY: 100
+        };
+        
+        // Plant types
+        const plantTypes = {
+            peashooter: {
+                cost: 100,
+                health: 100,
+                recharge: 5,
+                color: '#2E7D32', // Darker green
+                attackRate: 2000, // ms
+                lastAttack: 0,
+                projectile: {
+                    damage: 20,
+                    speed: 5,
+                    color: 'green'
+                }
+            },
+            sunflower: {
+                cost: 50,
+                health: 80,
+                recharge: 10,
+                color: '#FFC107',
+                sunProductionRate: 5000, // ms
+                lastProduction: 0
+            },
+            wallnut: {
+                cost: 50,
+                health: 400,
+                recharge: 20,
+                color: '#8D6E63'
+            }
+        };
+        
+        // Zombie types
+        const zombieTypes = {
+            basic: {
+                health: 100,
+                speed: 0.5,
+                damage: 1,
+                color: '#7B1FA2'
+            },
+            conehead: {
+                health: 200,
+                speed: 0.4,
+                damage: 1,
+                color: '#FF9800' // Orange color
+            }
+        };
+        
+        // Event listeners
+        canvas.addEventListener('click', handleCanvasClick);
+        plantOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                plantOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedPlant = option.dataset.plant;
+            });
+        });
+        
+        // Main game loop
+        function gameLoop() {
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'red';
+                ctx.font = '48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2);
+                ctx.font = '24px Arial';
+                ctx.fillText('Refresh to play again', canvas.width/2, canvas.height/2 + 50);
+                return;
+            }
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            drawGrid();
+            
+            // Update and draw plants
+            updatePlants();
+            
+            // Update and draw zombies
+            updateZombies();
+            
+            // Update and draw suns
+            updateSuns();
+            
+            // Manage waves
+            manageWaves();
+            
+            // Spawn random suns
+            spawnRandomSuns();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 1;
+            
+            for (let row = 0; row < grid.rows; row++) {
+                for (let col = 0; col < grid.cols; col++) {
+                    const x = grid.offsetX + col * grid.cellWidth;
+                    const y = grid.offsetY + row * grid.cellHeight;
+                    ctx.strokeRect(x, y, grid.cellWidth, grid.cellHeight);
+                }
+            }
+        }
+        
+        function updatePlants() {
+            const now = Date.now();
+            
+            plants.forEach((plant, index) => {
+                const x = grid.offsetX + plant.col * grid.cellWidth + grid.cellWidth / 2;
+                const y = grid.offsetY + plant.row * grid.cellHeight + grid.cellHeight / 2;
+                
+                // Draw plant
+                ctx.fillStyle = plantTypes[plant.type].color;
+                ctx.beginPath();
+                ctx.arc(x, y, 30, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw health bar
+                const maxHealth = plantTypes[plant.type].health;
+                const healthPercent = plant.health / maxHealth;
+                ctx.fillStyle = healthPercent > 0.5 ? 'green' : healthPercent > 0.2 ? 'orange' : 'red';
+                ctx.fillRect(x - 30, y - 45, 60 * healthPercent, 5);
+                
+                // Plant-specific behavior
+                if (plant.type === 'peashooter' && now - plant.lastAttack > plantTypes.peashooter.attackRate) {
+                    // Check if there are zombies in this row
+                    const zombiesInRow = zombies.filter(z => z.row === plant.row && z.x > x);
+                    if (zombiesInRow.length > 0) {
+                        plant.projectiles.push({
+                            x: x + 30,
+                            y,
+                            damage: plantTypes.peashooter.projectile.damage
+                        });
+                        plant.lastAttack = now;
+                    }
+                }
+                
+                if (plant.type === 'sunflower' && now - plant.lastProduction > plantTypes.sunflower.sunProductionRate) {
+                    createSun(x, y);
+                    plant.lastProduction = now;
+                }
+                
+                // Update projectiles (for peashooter)
+                if (plant.projectiles) {
+                    plant.projectiles.forEach((proj, projIndex) => {
+                        proj.x += plantTypes.peashooter.projectile.speed;
+                        
+                        // Draw projectile
+                        ctx.fillStyle = plantTypes.peashooter.projectile.color;
+                        ctx.beginPath();
+                        ctx.arc(proj.x, proj.y, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Check for zombie hits
+                        const hitZombieIndex = zombies.findIndex(z => 
+                            z.row === plant.row && 
+                            Math.abs(z.x - proj.x) < 20
+                        );
+                        
+                        if (hitZombieIndex !== -1) {
+                            zombies[hitZombieIndex].health -= proj.damage;
+                            plant.projectiles.splice(projIndex, 1);
+                        } else if (proj.x > canvas.width) {
+                            plant.projectiles.splice(projIndex, 1);
+                        }
+                    });
+                }
+                
+                // Check if plant is dead
+                if (plant.health <= 0) {
+                    plants.splice(index, 1);
+                }
+            });
+        }
+        
+        function updateZombies() {
+            const now = Date.now();
+            
+            zombies.forEach((zombie, index) => {
+                // Move zombie
+                zombie.x -= zombie.speed;
+                
+                // Draw zombie (as a square)
+                ctx.fillStyle = zombie.color;
+                ctx.fillRect(zombie.x - 25, zombie.y - 25, 50, 50);
+                
+                // Draw eyes to make it look like a zombie
+                ctx.fillStyle = 'white';
+                ctx.fillRect(zombie.x - 15, zombie.y - 15, 10, 10);
+                ctx.fillRect(zombie.x + 5, zombie.y - 15, 10, 10);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(zombie.x - 12, zombie.y - 12, 4, 4);
+                ctx.fillRect(zombie.x + 8, zombie.y - 12, 4, 4);
+                
+                // Draw health bar
+                const maxHealth = zombieTypes[zombie.type].health;
+                const healthPercent = zombie.health / maxHealth;
+                ctx.fillStyle = healthPercent > 0.5 ? 'green' : healthPercent > 0.2 ? 'orange' : 'red';
+                ctx.fillRect(zombie.x - 25, zombie.y - 40, 50 * healthPercent, 5);
+                
+                // Check for plant collisions
+                plants.forEach(plant => {
+                    const plantX = grid.offsetX + plant.col * grid.cellWidth + grid.cellWidth / 2;
+                    const plantY = grid.offsetY + plant.row * grid.cellHeight + grid.cellHeight / 2;
+                    
+                    if (zombie.row === plant.row && 
+                        Math.abs(zombie.x - plantX) < 40 &&
+                        now - zombie.lastAttack > 1000) {
+                        plant.health -= zombie.damage;
+                        zombie.lastAttack = now;
+                    }
+                });
+                
+                // Check if zombie reached the left side
+                if (zombie.x < 0) {
+                    gameOver = true;
+                }
+                
+                // Check if zombie is dead
+                if (zombie.health <= 0) {
+                    zombies.splice(index, 1);
+                }
+            });
+        }
+        
+        function updateSuns() {
+            sunsOnScreen.forEach((sun, index) => {
+                // Draw sun
+                ctx.fillStyle = 'yellow';
+                ctx.beginPath();
+                ctx.arc(sun.x, sun.y, 20, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw sun rays
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI / 4) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(sun.x, sun.y);
+                    ctx.lineTo(
+                        sun.x + Math.cos(angle) * 30,
+                        sun.y + Math.sin(angle) * 30
+                    );
+                    ctx.strokeStyle = 'yellow';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+                
+                // Move falling suns
+                if (sun.falling) {
+                    sun.y += 2;
+                    if (sun.y >= sun.targetY) {
+                        sun.falling = false;
+                        sun.lifetime = Date.now() + 10000; // 10 seconds
+                    }
+                }
+                
+                // Remove expired suns
+                if (!sun.falling && Date.now() > sun.lifetime) {
+                    sunsOnScreen.splice(index, 1);
+                }
+            });
+        }
+        
+        function manageWaves() {
+            const now = Date.now();
+            
+            if (!waveActive) {
+                // Between waves
+                if (now - lastZombieTime > waveCooldown) {
+                    startNewWave();
+                }
+            } else {
+                // During wave
+                if (now - lastZombieTime > 1000 && zombiesSpawnedInWave < zombiesInWave) {
+                    spawnZombie();
+                    lastZombieTime = now;
+                    zombiesSpawnedInWave++;
+                }
+                
+                // Check if wave is complete
+                if (zombiesSpawnedInWave >= zombiesInWave && zombies.length === 0) {
+                    waveActive = false;
+                    lastZombieTime = now;
+                    wave++;
+                    waveCounter.textContent = `Wave: ${wave}`;
+                    
+                    // Increase difficulty
+                    waveCooldown = Math.max(5000, 15000 - wave * 1000); // Shorter cooldown as waves progress
+                }
+            }
+        }
+        
+        function startNewWave() {
+            waveActive = true;
+            zombiesInWave = 5 + wave * 2; // More zombies each wave
+            zombiesSpawnedInWave = 0;
+            lastZombieTime = Date.now();
+        }
+        
+        function spawnZombie() {
+            const row = Math.floor(Math.random() * grid.rows);
+            const type = Math.random() > (0.7 + wave * 0.02) ? 'conehead' : 'basic'; // More coneheads as waves progress
+            
+            zombies.push({
+                x: canvas.width,
+                y: grid.offsetY + row * grid.cellHeight + grid.cellHeight / 2,
+                row,
+                type,
+                health: zombieTypes[type].health * (1 + wave * 0.1), // Zombies get stronger each wave
+                speed: zombieTypes[type].speed,
+                damage: zombieTypes[type].damage,
+                color: zombieTypes[type].color,
+                lastAttack: 0
+            });
+        }
+        
+        function spawnRandomSuns() {
+            const now = Date.now();
+            if (now - lastSunTime > 8000) { // Every 8 seconds
+                createSun(
+                    Math.random() * (canvas.width - 200) + 100,
+                    0,
+                    Math.random() * 300 + 200
+                );
+                lastSunTime = now;
+            }
+        }
+        
+        function createSun(x, y, targetY = null) {
+            const falling = targetY !== null;
+            sunsOnScreen.push({
+                x,
+                y: falling ? 0 : y,
+                targetY: falling ? targetY : y,
+                falling,
+                lifetime: Date.now() + (falling ? 15000 : 10000) // Longer lifetime for falling suns
+            });
+        }
+        
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if clicked on a sun
+            const clickedSunIndex = sunsOnScreen.findIndex(sun => {
+                return Math.sqrt((sun.x - x) ** 2 + (sun.y - y) ** 2) < 30;
+            });
+            
+            if (clickedSunIndex !== -1) {
+                suns += 50; // Each sun gives 50 now
+                sunCounter.textContent = `Suns: ${suns}`;
+                sunsOnScreen.splice(clickedSunIndex, 1);
+                return;
+            }
+            
+            // Check if placing a plant
+            if (selectedPlant) {
+                const plantCost = plantTypes[selectedPlant].cost;
+                if (suns >= plantCost) {
+                    // Find which grid cell was clicked
+                    for (let row = 0; row < grid.rows; row++) {
+                        for (let col = 0; col < grid.cols; col++) {
+                            const cellX = grid.offsetX + col * grid.cellWidth;
+                            const cellY = grid.offsetY + row * grid.cellHeight;
+                            
+                            if (x >= cellX && x <= cellX + grid.cellWidth &&
+                                y >= cellY && y <= cellY + grid.cellHeight) {
+                                
+                                // Check if there's already a plant here
+                                const existingPlant = plants.find(p => p.row === row && p.col === col);
+                                if (!existingPlant) {
+                                    plants.push({
+                                        row,
+                                        col,
+                                        type: selectedPlant,
+                                        health: plantTypes[selectedPlant].health,
+                                        lastAttack: 0,
+                                        lastProduction: 0,
+                                        projectiles: selectedPlant === 'peashooter' ? [] : undefined
+                                    });
+                                    suns -= plantCost;
+                                    sunCounter.textContent = `Suns: ${suns}`;
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Start the game
+        gameLoop();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth * 1.5;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

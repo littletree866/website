@@ -19,5 +19,5 @@ June 18, 2025
 Minor bug fixes, code edits, etc
 
 Update 1.7.6 -> 1.7.7
-July 18, 2025
+July 23, 2025
 
