@@ -1,36 +1,250 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Supply & Demand v1.5.2</title>
+    <title>Supply & Demand</title>
     <link rel="icon" href="infinity.png">
-    <link rel="stylesheet" href="./S&D.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; }
-        .panel { border: 1px solid #000000; padding: 10px; margin: 10px 0; }
-        button { margin: 5px; padding: 5px 10px; }
-        #game-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        #stats { grid-column: span 2; }
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --text: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .panel h2, .panel h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--secondary);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        #stats {
+            grid-column: span 2;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: rgba(110, 142, 251, 0.1);
+            border-radius: 5px;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+        }
+        
+        #day-timer {
+            background-color: var(--dark);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .shop-item, .inventory-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: rgba(255,255,255,0.8);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .item-img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        
+        .item-info {
+            flex-grow: 1;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: var(--secondary);
+            font-size: 0.9em;
+        }
+        
+        .art-studio {
+            text-align: center;
+        }
+        
+        .art-studio img {
+            max-width: 150px;
+            margin-bottom: 15px;
+        }
+        
+        #seating-area {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        #quest-giver {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 100;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        #quest-giver:hover {
+            transform: translateY(-5px);
+        }
+        
+        #quest-giver img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--secondary);
+        }
+        
+        @media (max-width: 768px) {
+            #game-container {
+                grid-template-columns: 1fr;
+            }
+            
+            #stats {
+                grid-column: span 1;
+            }
+            
+            #seating-area, #quest-giver {
+                position: static;
+                transform: none;
+                margin: 20px 0;
+            }
+            
+        }
     </style>
 </head>
 <body>
-    <p><a href="index.html">Back</a></p>
     <h1>Supply & Demand</h1>
     <div id="game-container">
         <div id="stats" class="panel">
             <h2>Stats</h2>
-            <p id="day">Day: 1</p>
-            <p id="money">Money: $250</p>
-            <p id="loan">Loan: $0</p>
-            <p id="reputation">Reputation: 25/100</p>
-            <p id="customers">Customers waiting: 0</p>
-            <div id="day-timer">Next day in: 30s</div>
-            <button onclick="borrowMoney()">Borrow Money ($250 loan)</button>
+            <div class="stat-item">
+                <span>Day:</span>
+                <span class="stat-value" id="day">1</span>
+            </div>
+            <div class="stat-item">
+                <span>Money:</span>
+                <span class="stat-value" id="money">$100</span>
+            </div>
+            <div class="stat-item">
+                <span>Loan:</span>
+                <span class="stat-value" id="loan">$0</span>
+            </div>
+            <div class="stat-item">
+                <span>Reputation:</span>
+                <span class="stat-value" id="reputation">20/100</span>
+            </div>
+            <div class="stat-item">
+                <span>Customers:</span>
+                <span class="stat-value" id="customers">0</span>
+            </div>
+            <div id="day-timer">Next day in: 15s</div>
+            <button onclick="borrowMoney()"><i class="fas fa-coins"></i> Borrow Money ($250 loan)</button>
+            <div id="quest-info"></div>
         </div>
         
-        <div id="inventory" class="panel"></div>
-        <div id="shop" class="panel"></div>
-        <div id="art" class="panel"></div>
+        <div id="inventory" class="panel">
+            <h3>Inventory</h3>
+            <!-- Items will be added here by JavaScript -->
+        </div>
+        
+        <div id="shop" class="panel">
+            <h3>Shop</h3>
+            <!-- Shop items will be added here by JavaScript -->
+        </div>
+        
+        <div id="art" class="panel art-studio">
+            <h3>Art Studio</h3>
+            <!-- Art content will be added here by JavaScript -->
+        </div>
     </div>
+
     <script src="money.js"></script>
 </body>
 </html>

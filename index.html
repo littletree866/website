@@ -1,31 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Littletree - Home</title>
-        <link rel="stylesheet" href="./all.css">
-        <link rel="icon" href="infinity.png">
-    </head>
-
-    <body>
-        <script>
-        document.getElementById('copyright-year').textContent = new Date().getFullYear();
-        </script>
-        <h1>Littletree.codeberg.page is currently shut down until July 28, 2025</h1>
-
-        <!--
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./all.css">
+    <link rel="icon" href="infinity.png">
+    <style>
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --text: #333333;
+        }
         
-        <p><a href="https://codeberg.org/littletree/pages">Codeberg</a></p>
-        <h4>Games:</h4>
-        <script src="footer.js"></script>
-        <p><a href="s&d/money.html">Supply & Demand</a></p>
-        <p><a href="wizardgame/wizardgame.html">Battle Game</a></p>
-        <p><a href="platformergame/platformergame.html">Platfomer!</a></p>
-        <p><a href="https://codeberg.org/littletree/platformer-game/releases/tag/v1.0.0">Download platformer-game!</a> <a href="platformer-game/LICENSE.md">(License)</a></p>
-        <p><a href="news.html">News</a></p>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        -->
-    </body>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: "center";
+        }
+        
+        .main-content {
+            padding: 40px 0;
+            flex: 1;
+        }
+        
+        .links-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .content-link {
+            display: block;
+            background: white;
+            padding: 18px 25px;
+            border-radius: 8px;
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .content-link:hover {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.3rem;
+        }
+        
+        .copyright {
+            margin-top: 15px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>Welcome to Littletree.codeberg.page! v1.8.8</h1>
+            <p>Feel free to explore!</p>
+            <p>Welcome to the new interface!</p>
+        </div>
+    </header>
     
+    <main class="main-content">
+        <div class="container">
+            <div class="links-section">
+                <!-- Add links here -->
+                <a href="s&d/money.html" class="content-link">Supply & Demand</a>
+                <a href="wizardgame/wizardgame.html" class="content-link">Wizard Battle</a>
+                <a href="platformergame/platformergame.html" class="content-link">Platformer!</a>
+                <a href="news.html" class="content-link">News</a>
+                <a href="https://codeberg.org/littletree/pages" class="content-link">Codeberg</a>
+                <!-- Add more links as needed -->
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            </div>
+            <p class="copyright">© <span id="copyright-year"></span> Littletree.codeberg.page </p>
+        </div>
+    </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set copyright year
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
 </html>
