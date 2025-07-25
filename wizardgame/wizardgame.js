@@ -1,6 +1,7 @@
-// Game state
+// Enhanced game state with new features
 const gameState = {
     player: {
+        name: "Arcane Mage",
         health: 100,
         maxHealth: 100,
         mana: 100,
@@ -8,6 +9,7 @@ const gameState = {
         level: 1,
         xp: 0,
         xpNeeded: 100,
+        gold: 0,
         spells: {
             fireball: { damage: 20, manaCost: 15, level: 1, maxLevel: 3 },
             frostbolt: { damage: 15, manaCost: 7, slow: true, level: 1, maxLevel: 3 },
@@ -15,6 +17,11 @@ const gameState = {
             heal: { amount: 30, manaCost: 20, level: 1, maxLevel: 3 },
             meteor: { damage: 50, manaCost: 30, level: 0, maxLevel: 2, unlocked: false },
             blizzard: { damage: 45, manaCost: 30, slow: true, level: 0, maxLevel: 2, unlocked: false }
+        },
+        inventory: {
+            healthPotions: 0,
+            manaPotions: 0,
+            scrolls: []
         }
     },
     enemy: null,
@@ -23,33 +30,46 @@ const gameState = {
     map: {
         size: 10,
         playerPosition: { x: 5, y: 5 },
-        enemyPositions: []
+        enemyPositions: [],
+        treasurePositions: []
     },
     inBattle: false,
-    loot: 0
+    shopItems: [
+        { name: "Health Potion", cost: 20, effect: "Restores 50 health", type: "potion" },
+        { name: "Mana Potion", cost: 25, effect: "Restores 40 mana", type: "potion" },
+        { name: "Fire Scroll", cost: 50, effect: "Deals 40 fire damage", type: "scroll", spell: "fireball" },
+        { name: "Lightning Scroll", cost: 60, effect: "Deals 50 lightning damage", type: "scroll", spell: "lightning" }
+    ]
 };
 
-// Enemy types
+// Enhanced enemy types with more variety
 const enemyTypes = [
-    { name: "Zombie", health: 50, damage: 8, xp: 20, emoji: "🧟" },
-    { name: "Goblin", health: 70, damage: 12, xp: 30, emoji: "👺" },
-    { name: "Orc", health: 100, damage: 15, xp: 50, emoji: "👹" },
-    { name: "Troll", health: 150, damage: 20, xp: 80, emoji: "🧌" },
-    { name: "Dragon", health: 250, damage: 30, xp: 150, emoji: "🐲" }
+    { name: "Arcane Zombie", health: 50, damage: 8, xp: 20, gold: 10, emoji: "🧟", color: "#4cc9f0" },
+    { name: "Mystic Goblin", health: 70, damage: 12, xp: 30, gold: 15, emoji: "👺", color: "#a777e3" },
+    { name: "Spellbound Orc", health: 100, damage: 15, xp: 50, gold: 25, emoji: "👹", color: "#f72585" },
+    { name: "Enchanted Troll", health: 150, damage: 20, xp: 80, gold: 40, emoji: "🧌", color: "#6e8efb" },
+    { name: "Elder Dragon", health: 250, damage: 30, xp: 150, gold: 75, emoji: "🐲", color: "#ff9e00" },
+    { name: "Shadow Wraith", health: 120, damage: 25, xp: 100, gold: 50, emoji: "👻", color: "#333333" }
 ];
 
 // DOM elements
 const playerHealthEl = document.getElementById('player-health');
 const playerHealthTextEl = document.getElementById('player-health-text');
+const playerMaxHealthEl = document.getElementById('player-max-health');
+const playerManaEl = document.getElementById('player-mana');
 const playerManaTextEl = document.getElementById('player-mana-text');
+const playerMaxManaEl = document.getElementById('player-max-mana');
 const playerLevelEl = document.getElementById('player-level');
 const playerXpEl = document.getElementById('player-xp');
 const playerXpNeededEl = document.getElementById('player-xp-needed');
+const playerGoldEl = document.getElementById('player-gold');
+const xpFillEl = document.getElementById('xp-fill');
 
 const enemyNameEl = document.getElementById('enemy-name');
 const enemyHealthEl = document.getElementById('enemy-health');
 const enemyHealthTextEl = document.getElementById('enemy-health-text');
 const enemyMaxHealthEl = document.getElementById('enemy-max-health');
+const enemyStatusEl = document.getElementById('enemy-status');
 const enemyEmojiEl = document.getElementById('enemy');
 
 const gameLogEl = document.getElementById('game-log');
@@ -57,6 +77,9 @@ const mapContainerEl = document.getElementById('map-container');
 const mapEl = document.getElementById('map');
 const mapLogEl = document.getElementById('map-log');
 const returnToBattleBtn = document.getElementById('return-to-battle');
+const inventoryEl = document.getElementById('inventory');
+const shopEl = document.getElementById('shop');
+const usePotionBtn = document.getElementById('use-potion');
 
 const spellButtons = {
     fireball: document.getElementById('fireball'),
@@ -74,13 +97,15 @@ const restBtn = document.getElementById('rest');
 function initGame() {
     createPowerfulSpellButtons();
     setupEventListeners();
+    updateInventoryDisplay();
+    updateShopDisplay();
     
     // Start with the map visible and battle container hidden
     mapContainerEl.style.display = 'block';
     document.getElementById('game-container').style.display = 'none';
     
     generateMap();
-    addToMapLog("Welcome to Wizard Battle! Move around the map to find enemies.");
+    addToMapLog("Welcome to Arcane Duel! Move around the map to find enemies and treasures.", "special");
 }
 
 // Create buttons for powerful spells
@@ -93,6 +118,7 @@ function createPowerfulSpellButtons() {
     meteorBtn.id = 'meteor';
     meteorBtn.textContent = 'Meteor (30 mana)';
     meteorBtn.style.display = 'none';
+    meteorBtn.setAttribute('data-level', '0');
     meteorBtn.addEventListener('click', () => castSpell('meteor'));
     spellButtonsContainer.appendChild(meteorBtn);
     spellButtons.meteor = meteorBtn;
@@ -103,15 +129,17 @@ function createPowerfulSpellButtons() {
     blizzardBtn.id = 'blizzard';
     blizzardBtn.textContent = 'Blizzard (30 mana)';
     blizzardBtn.style.display = 'none';
+    blizzardBtn.setAttribute('data-level', '0');
     blizzardBtn.addEventListener('click', () => castSpell('blizzard'));
     spellButtonsContainer.appendChild(blizzardBtn);
     spellButtons.blizzard = blizzardBtn;
 }
 
-// Generate the map with enemies
+// Generate the map with enemies and treasures
 function generateMap() {
     mapEl.innerHTML = '';
     gameState.map.enemyPositions = [];
+    gameState.map.treasurePositions = [];
     
     // Generate 3-6 enemies at random positions
     const enemyCount = 3 + Math.floor(Math.random() * 4);
@@ -126,6 +154,22 @@ function generateMap() {
         );
         
         gameState.map.enemyPositions.push({ x, y });
+    }
+    
+    // Generate 1-3 treasures
+    const treasureCount = 1 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < treasureCount; i++) {
+        let x, y;
+        do {
+            x = Math.floor(Math.random() * gameState.map.size);
+            y = Math.floor(Math.random() * gameState.map.size);
+        } while (
+            (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) ||
+            gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y) ||
+            gameState.map.treasurePositions.some(pos => pos.x === x && pos.y === y)
+        );
+        
+        gameState.map.treasurePositions.push({ x, y });
     }
     
     // Create map tiles
@@ -144,17 +188,21 @@ function generateMap() {
             else if (gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)) {
                 tile.classList.add('enemy');
             }
+            // Mark treasure positions
+            else if (gameState.map.treasurePositions.some(pos => pos.x === x && pos.y === y)) {
+                tile.classList.add('treasure');
+                tile.innerHTML = '💎';
+            }
             
             tile.addEventListener('click', () => movePlayer(x, y));
             mapEl.appendChild(tile);
         }
     }
     
-    addToMapLog("Explore the map to find enemies!");
+    addToMapLog("Explore the mystical world to find enemies and treasures!", "special");
 }
 
 function movePlayer(x, y) {
-    // Check if move is valid (same as before)
     const dx = Math.abs(x - gameState.map.playerPosition.x);
     const dy = Math.abs(y - gameState.map.playerPosition.y);
     
@@ -166,13 +214,25 @@ function movePlayer(x, y) {
             pos => pos.x === x && pos.y === y
         );
         
+        // Check for treasure encounter
+        const treasureIndex = gameState.map.treasurePositions.findIndex(
+            pos => pos.x === x && pos.y === y
+        );
+        
         if (enemyIndex !== -1) {
             // Start battle (remove enemy from map)
             gameState.map.enemyPositions.splice(enemyIndex, 1);
             startBattle();
+        } else if (treasureIndex !== -1) {
+            // Found treasure
+            gameState.map.treasurePositions.splice(treasureIndex, 1);
+            const goldFound = 10 + Math.floor(Math.random() * 40);
+            gameState.player.gold += goldFound;
+            addToMapLog(`You found a treasure chest containing ${goldFound} gold!`, "special");
+            updateMapVisuals();
+            updateUI();
         } else {
-            // Only update the map visuals - DON'T regenerate enemies
-            updateMapVisuals();  // Add this new function
+            updateMapVisuals();
             addToMapLog(`Moved to (${x}, ${y})`);
         }
     } else {
@@ -180,20 +240,23 @@ function movePlayer(x, y) {
     }
 }
 
-// Add this new function to update visuals without regenerating enemies
 function updateMapVisuals() {
-    mapEl.innerHTML = ''; // Clear current map
+    mapEl.innerHTML = '';
     
-    // Redraw tiles with existing enemy positions
     for (let y = 0; y < gameState.map.size; y++) {
         for (let x = 0; x < gameState.map.size; x++) {
             const tile = document.createElement('div');
             tile.className = 'map-tile';
+            tile.dataset.x = x;
+            tile.dataset.y = y;
             
             if (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) {
                 tile.classList.add('player');
             } else if (gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)) {
                 tile.classList.add('enemy');
+            } else if (gameState.map.treasurePositions.some(pos => pos.x === x && pos.y === y)) {
+                tile.classList.add('treasure');
+                tile.innerHTML = '💎';
             }
             
             tile.addEventListener('click', () => movePlayer(x, y));
@@ -202,12 +265,10 @@ function updateMapVisuals() {
     }
 }
 
-// Start a battle
 function startBattle() {
     gameState.inBattle = true;
     spawnEnemy();
     
-    // Transition to battle screen
     mapContainerEl.classList.add('fade-out');
     setTimeout(() => {
         mapContainerEl.style.display = 'none';
@@ -216,15 +277,13 @@ function startBattle() {
     }, 500);
 }
 
-// End battle and return to map
 function endBattle() {
     gameState.inBattle = false;
     
     // Add loot
-    const lootGained = 10 + Math.floor(Math.random() * 20);
-    gameState.loot += lootGained;
+    const goldGained = gameState.enemy.gold;
+    gameState.player.gold += goldGained;
     
-    // Transition to map screen
     document.querySelector('.game-container').classList.add('fade-out');
     setTimeout(() => {
         document.querySelector('.game-container').style.display = 'none';
@@ -232,17 +291,17 @@ function endBattle() {
         mapContainerEl.classList.add('fade-in');
         
         generateMap();
-        addToMapLog(`You gained ${lootGained} gold from the battle! Total loot: ${gameState.loot}`);
+        addToMapLog(`You gained ${goldGained} gold from defeating the ${gameState.enemy.name}!`, "special");
+        updateUI();
     }, 500);
 }
 
-// Add message to map log
-function addToMapLog(message) {
+function addToMapLog(message, type = "") {
     const p = document.createElement('p');
     p.textContent = message;
+    if (type) p.classList.add(type);
     mapLogEl.appendChild(p);
     
-    // Keep log to 10 messages
     if (mapLogEl.children.length > 10) {
         mapLogEl.removeChild(mapLogEl.children[0]);
     }
@@ -250,7 +309,6 @@ function addToMapLog(message) {
     mapLogEl.scrollTop = mapLogEl.scrollHeight;
 }
 
-// Spawn a new enemy
 function spawnEnemy() {
     const enemyLevel = Math.min(Math.floor(gameState.player.level / 2), enemyTypes.length - 1);
     const baseEnemy = enemyTypes[enemyLevel];
@@ -263,16 +321,15 @@ function spawnEnemy() {
         health: baseEnemy.health + Math.floor(Math.random() * healthVariation),
         maxHealth: baseEnemy.health + Math.floor(Math.random() * healthVariation),
         damage: baseEnemy.damage + Math.floor(Math.random() * damageVariation),
-        isSlowed: false
+        isSlowed: false,
+        isFrozen: false
     };
     
-    addToLog(`A wild ${gameState.enemy.name} appears!`);
+    addToLog(`A wild ${gameState.enemy.name} appears!`, "enemy-turn");
     updateCharacterEmojis();
     updateUI();
 }
 
-
-// Update character emojis based on health
 function updateCharacterEmojis() {
     const playerElement = document.getElementById('player');
     const enemyElement = document.getElementById('enemy');
@@ -281,18 +338,23 @@ function updateCharacterEmojis() {
     
     if (gameState.enemy) {
         enemyElement.textContent = gameState.enemy.health <= 0 ? '💀' : gameState.enemy.emoji;
+        enemyElement.style.color = gameState.enemy.color;
     }
 }
 
-// Update UI elements
 function updateUI() {
     // Player stats
     playerHealthEl.style.width = `${(gameState.player.health / gameState.player.maxHealth) * 100}%`;
     playerHealthTextEl.textContent = gameState.player.health;
+    playerMaxHealthEl.textContent = gameState.player.maxHealth;
+    playerManaEl.style.width = `${(gameState.player.mana / gameState.player.maxMana) * 100}%`;
     playerManaTextEl.textContent = gameState.player.mana;
+    playerMaxManaEl.textContent = gameState.player.maxMana;
     playerLevelEl.textContent = gameState.player.level;
     playerXpEl.textContent = gameState.player.xp;
     playerXpNeededEl.textContent = gameState.player.xpNeeded;
+    playerGoldEl.textContent = gameState.player.gold;
+    xpFillEl.style.width = `${(gameState.player.xp / gameState.player.xpNeeded) * 100}%`;
     
     // Enemy stats
     if (gameState.enemy) {
@@ -300,23 +362,28 @@ function updateUI() {
         enemyHealthEl.style.width = `${(gameState.enemy.health / gameState.enemy.maxHealth) * 100}%`;
         enemyHealthTextEl.textContent = gameState.enemy.health;
         enemyMaxHealthEl.textContent = gameState.enemy.maxHealth;
+        
+        let status = "Normal";
+        if (gameState.enemy.isFrozen) status = "Frozen ❄️";
+        else if (gameState.enemy.isSlowed) status = "Slowed 🐌";
+        
+        enemyStatusEl.textContent = `Status: ${status}`;
     }
     
-    // Update spell buttons based on mana and level
+    // Update spell buttons
     for (const [spell, button] of Object.entries(spellButtons)) {
         if (!button) continue;
         
         const spellInfo = gameState.player.spells[spell];
         if (!spellInfo) continue;
         
-        // Show/hide powerful spells based on unlock status
         if (spell === 'meteor' || spell === 'blizzard') {
             button.style.display = spellInfo.unlocked ? 'block' : 'none';
         }
         
-        // Update button text with level indicator
         if (spellInfo.level > 0) {
-            button.textContent = `${spell.charAt(0).toUpperCase() + spell.slice(1)} Lv${spellInfo.level} (${spellInfo.manaCost} mana)`;
+            button.textContent = `${spell.charAt(0).toUpperCase() + spell.slice(1)} (${spellInfo.manaCost} mana)`;
+            button.setAttribute('data-level', spellInfo.level);
         }
         
         button.disabled = gameState.player.mana < spellInfo.manaCost || gameState.player.health <= 0;
@@ -324,27 +391,29 @@ function updateUI() {
     
     nextEnemyBtn.disabled = !gameState.enemy || (gameState.enemy.health > 0);
     restBtn.disabled = gameState.player.health <= 0;
+    usePotionBtn.disabled = gameState.player.inventory.healthPotions <= 0 || gameState.player.health <= 0;
     
     updateCharacterEmojis();
 }
 
-// Add message to game log
-function addToLog(message) {
-    gameState.gameLog.push(message);
-    if (gameState.gameLog.length > 10) {
-        gameState.gameLog.shift();
+function addToLog(message, type = "") {
+    const p = document.createElement('p');
+    p.textContent = message;
+    if (type) p.classList.add(type);
+    gameLogEl.appendChild(p);
+    
+    if (gameLogEl.children.length > 10) {
+        gameLogEl.removeChild(gameLogEl.children[0]);
     }
     
-    gameLogEl.innerHTML = gameState.gameLog.map(msg => `<p>${msg}</p>`).join('');
     gameLogEl.scrollTop = gameLogEl.scrollHeight;
 }
 
-// Player casts a spell
 function castSpell(spell) {
     const spellInfo = gameState.player.spells[spell];
     
     if (gameState.player.mana < spellInfo.manaCost) {
-        addToLog("Not enough mana!");
+        addToLog("Not enough mana!", "enemy-turn");
         return;
     }
     
@@ -366,7 +435,7 @@ function castSpell(spell) {
             const healAmount = Math.min(spellInfo.amount, gameState.player.maxHealth - gameState.player.health);
             gameState.player.health += healAmount;
             createSpellEffect(getHealEmoji(spellInfo.level), document.getElementById('player'));
-            addToLog(`You heal for ${healAmount} health.`);
+            addToLog(`You heal for ${healAmount} health.`, "special");
             break;
         case 'meteor':
             dealDamage(spellInfo.damage, 'meteor', getMeteorEmoji(spellInfo.level));
@@ -374,7 +443,8 @@ function castSpell(spell) {
         case 'blizzard':
             dealDamage(spellInfo.damage, 'blizzard', getBlizzardEmoji(spellInfo.level));
             gameState.enemy.isSlowed = true;
-            addToLog(`The ${gameState.enemy.name} is frozen solid!`);
+            gameState.enemy.isFrozen = true;
+            addToLog(`The ${gameState.enemy.name} is frozen solid!`, "special");
             break;
     }
     
@@ -385,32 +455,6 @@ function castSpell(spell) {
     updateUI();
 }
 
-// Get emoji based on spell level
-function getFireballEmoji(level) {
-    return ['🔥', '🔥🔥', '🔥🔥🔥'][level - 1] || '🔥';
-}
-
-function getFrostboltEmoji(level) {
-    return ['❄️', '❄️❄️', '❄️❄️❄️'][level - 1] || '❄️';
-}
-
-function getLightningEmoji(level) {
-    return ['⚡', '⚡⚡', '⚡⚡⚡'][level - 1] || '⚡';
-}
-
-function getHealEmoji(level) {
-    return ['✨', '✨✨', '✨✨✨'][level - 1] || '✨';
-}
-
-function getMeteorEmoji(level) {
-    return ['☄️', '☄️☄️'][level - 1] || '☄️';
-}
-
-function getBlizzardEmoji(level) {
-    return ['🌨️', '🌨️🌨️'][level - 1] || '🌨️';
-}
-
-// Deal damage to enemy
 function dealDamage(damage, spellName, emoji) {
     const playerElement = document.getElementById('player');
     const enemyElement = document.getElementById('enemy');
@@ -434,7 +478,6 @@ function dealDamage(damage, spellName, emoji) {
     }, 300);
 }
 
-// Enemy attacks player
 function enemyAttack() {
     if (!gameState.enemy || gameState.enemy.health <= 0 || gameState.player.health <= 0) return;
     
@@ -452,38 +495,42 @@ function enemyAttack() {
             gameState.enemy.isSlowed = false;
         }
         
+        if (gameState.enemy.isFrozen) {
+            damage = Math.floor(damage * 0.5);
+            gameState.enemy.isFrozen = false;
+            addToLog(`The ${gameState.enemy.name} breaks free from the ice!`);
+        }
+        
         gameState.player.health = Math.max(0, gameState.player.health - damage);
-        addToLog(`The ${gameState.enemy.name} attacks you for ${damage} damage!`);
+        addToLog(`The ${gameState.enemy.name} attacks you for ${damage} damage!`, "enemy-turn");
         
         if (gameState.player.health <= 0) {
-            addToLog("You have been defeated! Game over.");
+            addToLog("You have been defeated! Game over.", "enemy-turn");
             for (const button of Object.values(spellButtons)) {
                 if (button) button.disabled = true;
             }
             nextEnemyBtn.disabled = true;
             restBtn.disabled = true;
+            usePotionBtn.disabled = true;
         }
         
         updateUI();
     }, 300);
 }
 
-// Enemy defeated
 function enemyDefeated() {
     gameState.enemiesDefeated++;
     const xpGained = gameState.enemy.xp;
     gameState.player.xp += xpGained;
-    addToLog(`You defeated the ${gameState.enemy.name} and gained ${xpGained} XP!`);
+    addToLog(`You defeated the ${gameState.enemy.name} and gained ${xpGained} XP!`, "special");
     
     if (gameState.player.xp >= gameState.player.xpNeeded) {
         levelUp();
     }
     
-    // Return to map after a short delay
     setTimeout(endBattle, 1500);
 }
 
-// Player levels up
 function levelUp() {
     gameState.player.level++;
     gameState.player.xp -= gameState.player.xpNeeded;
@@ -499,16 +546,13 @@ function levelUp() {
     if (gameState.player.level === 5) {
         gameState.player.spells.meteor.unlocked = true;
         gameState.player.spells.blizzard.unlocked = true;
-        addToLog("You unlocked powerful spells: Meteor and Blizzard!");
+        addToLog("You unlocked powerful spells: Meteor and Blizzard!", "special");
     }
     
-    // Show upgrade options
     showUpgradeOptions();
-    
-    addToLog(`Level up! You are now level ${gameState.player.level}!`);
+    addToLog(`Level up! You are now level ${gameState.player.level}!`, "special");
 }
 
-// Show spell upgrade options
 function showUpgradeOptions() {
     const availableSpells = Object.entries(gameState.player.spells)
         .filter(([_, spell]) => spell.level > 0 && spell.level < spell.maxLevel);
@@ -518,10 +562,8 @@ function showUpgradeOptions() {
     const spellToUpgrade = availableSpells[Math.floor(Math.random() * availableSpells.length)];
     const [spellName, spell] = spellToUpgrade;
     
-    // Upgrade the spell
     spell.level++;
     
-    // Improve spell stats based on type
     switch (spellName) {
         case 'fireball':
             spell.damage += 10;
@@ -543,27 +585,25 @@ function showUpgradeOptions() {
             break;
     }
     
-    addToLog(`Your ${spellName} spell upgraded to level ${spell.level}!`);
+    addToLog(`Your ${spellName} spell upgraded to level ${spell.level}!`, "special");
 }
 
-// Create spell effect animation
 function createSpellEffect(emoji, targetElement) {
     const effect = document.createElement('div');
     effect.className = 'spell-effect';
     effect.textContent = emoji;
     
     const rect = targetElement.getBoundingClientRect();
-    effect.style.left = `${rect.left + rect.width / 2 - 20}px`;
-    effect.style.top = `${rect.top + rect.height / 2 - 20}px`;
+    effect.style.left = `${rect.left + rect.width / 2 - 30}px`;
+    effect.style.top = `${rect.top + rect.height / 2 - 30}px`;
     
     document.body.appendChild(effect);
     
     setTimeout(() => {
         effect.remove();
-    }, 500);
+    }, 700);
 }
 
-// Player rests to recover health and mana
 function rest() {
     const healthRecovered = Math.min(30, gameState.player.maxHealth - gameState.player.health);
     const manaRecovered = Math.min(40, gameState.player.maxMana - gameState.player.mana);
@@ -571,7 +611,7 @@ function rest() {
     gameState.player.health += healthRecovered;
     gameState.player.mana += manaRecovered;
     
-    addToLog(`You rest and recover ${healthRecovered} health and ${manaRecovered} mana.`);
+    addToLog(`You meditate and recover ${healthRecovered} health and ${manaRecovered} mana.`, "special");
     
     if (gameState.enemy && gameState.enemy.health > 0 && Math.random() > 0.5) {
         setTimeout(enemyAttack, 1000);
@@ -580,19 +620,116 @@ function rest() {
     updateUI();
 }
 
-// Set up event listeners
+function usePotion() {
+    if (gameState.player.inventory.healthPotions <= 0) return;
+    
+    gameState.player.inventory.healthPotions--;
+    const healAmount = Math.min(50, gameState.player.maxHealth - gameState.player.health);
+    gameState.player.health += healAmount;
+    
+    createSpellEffect("❤️", document.getElementById('player'));
+    addToLog(`You used a health potion and recovered ${healAmount} health!`, "special");
+    
+    updateInventoryDisplay();
+    updateUI();
+}
+
+function buyItem(itemName) {
+    const item = gameState.shopItems.find(i => i.name === itemName);
+    if (!item) return;
+    
+    if (gameState.player.gold >= item.cost) {
+        gameState.player.gold -= item.cost;
+        
+        if (item.type === 'potion') {
+            if (item.name === "Health Potion") {
+                gameState.player.inventory.healthPotions++;
+            } else if (item.name === "Mana Potion") {
+                gameState.player.inventory.manaPotions++;
+            }
+        } else if (item.type === 'scroll') {
+            gameState.player.inventory.scrolls.push(item);
+        }
+        
+        addToMapLog(`You bought a ${item.name} for ${item.cost} gold.`, "special");
+        updateInventoryDisplay();
+        updateShopDisplay();
+        updateUI();
+    } else {
+        addToMapLog("Not enough gold!", "enemy-turn");
+    }
+}
+
+function updateInventoryDisplay() {
+    inventoryEl.innerHTML = '<h3>Inventory</h3>';
+    
+    // Health Potions
+    const healthPotionItem = document.createElement('div');
+    healthPotionItem.className = 'item';
+    healthPotionItem.innerHTML = `
+        <span>Health Potion (${gameState.player.inventory.healthPotions})</span>
+        <button onclick="usePotion()">Use</button>
+    `;
+    inventoryEl.appendChild(healthPotionItem);
+    
+    // Mana Potions
+    const manaPotionItem = document.createElement('div');
+    manaPotionItem.className = 'item';
+    manaPotionItem.innerHTML = `
+        <span>Mana Potion (${gameState.player.inventory.manaPotions})</span>
+    `;
+    inventoryEl.appendChild(manaPotionItem);
+    
+    // Scrolls
+    if (gameState.player.inventory.scrolls.length > 0) {
+        const scrollsHeader = document.createElement('h4');
+        scrollsHeader.textContent = 'Scrolls:';
+        inventoryEl.appendChild(scrollsHeader);
+        
+        gameState.player.inventory.scrolls.forEach((scroll, index) => {
+            const scrollItem = document.createElement('div');
+            scrollItem.className = 'item';
+            scrollItem.innerHTML = `
+                <span>${scroll.name}</span>
+                <button onclick="castScroll(${index})">Use</button>
+            `;
+            inventoryEl.appendChild(scrollItem);
+        });
+    }
+}
+
+function updateShopDisplay() {
+    shopEl.innerHTML = '<h3>Magic Shop</h3>';
+    
+    gameState.shopItems.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'item';
+        itemElement.innerHTML = `
+            <div>
+                <strong>${item.name}</strong><br>
+                <small>${item.effect}</small>
+            </div>
+            <button onclick="buyItem('${item.name}')">${item.cost} Gold</button>
+        `;
+        shopEl.appendChild(itemElement);
+    });
+}
+
 function setupEventListeners() {
-    // Spell buttons
     spellButtons.fireball.addEventListener('click', () => castSpell('fireball'));
     spellButtons.frostbolt.addEventListener('click', () => castSpell('frostbolt'));
     spellButtons.lightning.addEventListener('click', () => castSpell('lightning'));
     spellButtons.heal.addEventListener('click', () => castSpell('heal'));
     
-    // Action buttons
     nextEnemyBtn.addEventListener('click', spawnEnemy);
     restBtn.addEventListener('click', rest);
     returnToBattleBtn.addEventListener('click', startBattle);
+    usePotionBtn.addEventListener('click', usePotion);
 }
 
 // Start the game
 initGame();
+
+// Make functions available globally for HTML buttons
+window.buyItem = buyItem;
+window.usePotion = usePotion;

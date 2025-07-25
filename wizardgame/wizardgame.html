@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wizard Battle Game v1.2.2</title>
+    <title>Wizard Battle</title>
     <link rel="stylesheet" href="wizardgame.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="map-container" id="map-container">
@@ -13,30 +14,48 @@
             <!-- Map will be generated here -->
         </div>
         <div class="map-log" id="map-log">
-            <p>Explore the world to find enemies!</p>
+            <p>Explore the mystical world to find enemies and treasures!</p>
+        </div>
+        <div class="inventory-shop">
+            <div class="inventory" id="inventory">
+                <h3>Inventory</h3>
+                <!-- Inventory items will be added here -->
+            </div>
+            <div class="shop" id="shop">
+                <h3>Magic Shop</h3>
+                <!-- Shop items will be added here -->
+            </div>
         </div>
         <button class="action-btn" id="return-to-battle" style="display: none;">Return to Battle</button>
     </div>
 
     <div class="game-container" id="game-container" style="display: none;">
-        <h1>Wizard Battle</h1>
+        <h1>Arcane Duel</h1>
         <div class="game-info">
             <div class="player-stats">
-                <h2>Wizard</h2>
+                <h2>Arcane Mage</h2>
+                <p>Level: <span id="player-level">1</span></p>
+                <p>Health: <span id="player-health-text">100</span>/<span id="player-max-health">100</span></p>
                 <div class="health-bar">
                     <div class="health-fill" id="player-health"></div>
                 </div>
-                <p>Health: <span id="player-health-text">100</span>/100</p>
-                <p>Mana: <span id="player-mana-text">100</span>/100</p>
-                <p>Level: <span id="player-level">1</span></p>
+                <p>Mana: <span id="player-mana-text">100</span>/<span id="player-max-mana">100</span></p>
+                <div class="mana-bar">
+                    <div class="mana-fill" id="player-mana"></div>
+                </div>
                 <p>XP: <span id="player-xp">0</span>/<span id="player-xp-needed">100</span></p>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xp-fill"></div>
+                </div>
+                <p>Gold: <span id="player-gold">0</span></p>
             </div>
             <div class="enemy-stats">
                 <h2 id="enemy-name">Minion</h2>
+                <p>Health: <span id="enemy-health-text">50</span>/<span id="enemy-max-health">50</span></p>
                 <div class="health-bar">
                     <div class="health-fill" id="enemy-health"></div>
                 </div>
-                <p>Health: <span id="enemy-health-text">50</span>/<span id="enemy-max-health">50</span></p>
+                <p id="enemy-status">Status: Normal</p>
             </div>
         </div>
         <div class="game-area">
@@ -52,10 +71,11 @@
                 <!-- Powerful spells will be added here by JavaScript -->
             </div>
             <button class="action-btn" id="next-enemy">Next Enemy</button>
-            <button class="action-btn" id="rest">Rest</button>
+            <button class="action-btn" id="rest">Meditate</button>
+            <button class="action-btn" id="use-potion">Use Health Potion</button>
         </div>
         <div class="game-log" id="game-log">
-            <p>Battle Log</p>
+            <p class="special">Welcome to Arcane Duel! Defeat enemies to gain XP and unlock powerful spells.</p>
         </div>
     </div>
     <script src="wizardgame.js"></script>
