@@ -553,6 +553,30 @@ function levelUp() {
     addToLog(`Level up! You are now level ${gameState.player.level}!`, "special");
 }
 
+function getFireballEmoji(level) {
+    return level >= 3 ? '🔥🔥🔥' : level >= 2 ? '🔥🔥' : '🔥';
+}
+
+function getFrostboltEmoji(level) {
+    return level >= 3 ? '❄️❄️❄️' : level >= 2 ? '❄️❄️' : '❄️';
+}
+
+function getLightningEmoji(level) {
+    return level >= 3 ? '⚡⚡⚡' : level >= 2 ? '⚡⚡' : '⚡';
+}
+
+function getHealEmoji(level) {
+    return level >= 3 ? '💖' : level >= 2 ? '💕' : '💓';
+}
+
+function getMeteorEmoji(level) {
+    return level >= 2 ? '☄️☄️' : '☄️';
+}
+
+function getBlizzardEmoji(level) {
+    return level >= 2 ? '🌨️🌨️' : '🌨️';
+}
+
 function showUpgradeOptions() {
     const availableSpells = Object.entries(gameState.player.spells)
         .filter(([_, spell]) => spell.level > 0 && spell.level < spell.maxLevel);
@@ -726,6 +750,29 @@ function setupEventListeners() {
     returnToBattleBtn.addEventListener('click', startBattle);
     usePotionBtn.addEventListener('click', usePotion);
 }
+
+window.castSpell = castSpell;
+window.buyItem = buyItem;
+window.usePotion = usePotion;
+window.castScroll = function(index) {
+    // Implement scroll casting functionality here
+    const scroll = gameState.player.inventory.scrolls[index];
+    if (!scroll) return;
+    
+    if (scroll.spell === 'fireball') {
+        dealDamage(40, 'fire scroll', '🔥');
+    } else if (scroll.spell === 'lightning') {
+        dealDamage(50, 'lightning scroll', '⚡');
+    }
+    
+    gameState.player.inventory.scrolls.splice(index, 1);
+    updateInventoryDisplay();
+    updateUI();
+    
+    if (gameState.enemy && gameState.enemy.health > 0) {
+        setTimeout(enemyAttack, 1000);
+    }
+};
 
 // Start the game
 initGame();

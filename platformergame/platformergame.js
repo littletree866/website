@@ -47,6 +47,10 @@ let keys = {
     up: false
 };
 
+const GRAVITY = 0.5;
+const MAX_FALL_SPEED = 15;
+const JUMP_FORCE = -12;
+
 // Event Listeners
 document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") keys.left = true;
@@ -251,49 +255,56 @@ function updatePlayer(deltaTime) {
     if (keys.left) player.x -= player.speed;
     if (keys.right) player.x += player.speed;
 
+    // Apply gravity with terminal velocity
+    player.velY = Math.min(player.velY + GRAVITY, MAX_FALL_SPEED);
+    player.y += player.velY;
+
     // Jumping
     if (keys.up && !player.jumping) {
-        player.velY = -15;
+        player.velY = JUMP_FORCE;
         player.jumping = true;
     }
 
-    // Apply gravity
-    player.velY += gravity;
-    player.y += player.velY;
-
-    // Platform collisions
+        // Platform collisions
     player.jumping = true;
     platforms.forEach(platform => {
-        if (player.x < platform.x + platform.width &&
-            player.x + player.width > platform.x &&
-            player.y + player.height > platform.y &&
-            player.y + player.height < platform.y + platform.height &&
-            player.velY > 0) {
-            player.y = platform.y - player.height;
-            player.velY = 0;
-            player.jumping = false;
-            
-            if (platform.type === "bouncy") {
-                player.velY = -20;
-            }
+    // Check if player is above platform and falling
+    if (player.velY > 0 && 
+        player.y + player.height > platform.y && 
+        player.y < platform.y &&
+        player.x + player.width > platform.x && 
+        player.x < platform.x + platform.width) {
+        
+        // Snap player to platform top
+        player.y = platform.y - player.height;
+        player.velY = 0;
+        player.jumping = false;
+        
+        if (platform.type === "bouncy") {
+            player.velY = -20;
+        }
         }
     });
+            }
 
-    // Collectible collisions
-    collectibles.forEach(collectible => {
-        if (!collectible.collected &&
-            player.x < collectible.x + collectible.width &&
-            player.x + player.width > collectible.x &&
-            player.y < collectible.y + collectible.height &&
-            player.y + player.height > collectible.y) {
-            collectible.collected = true;
-            if (collectible.type === "coin") {
+  
+    for (let i = collectibles.length - 1; i >= 0; i--) {
+        const c = collectibles[i];
+        if (!c.collected &&
+            player.x + player.width > c.x &&
+            player.x < c.x + c.width &&
+            player.y + player.height > c.y &&
+            player.y < c.y + c.height) {
+            
+            c.collected = true;
+            if (c.type === "coin") {
                 score += 100;
-            } else if (collectible.type === "health") {
+            } else if (c.type === "health") {
                 health = Math.min(150, health + 50);
             }
+            collectibles.splice(i, 1); // Remove collected item
         }
-    });
+    }
 
     // Enemy collisions
     enemies.forEach(enemy => {
@@ -323,17 +334,21 @@ function updatePlayer(deltaTime) {
         }
     });
 
-    // Boundary checks
+  
     if (player.y > canvas.height) {
         takeDamage(10);
-        player.x = 50;
-        player.y = 100;
-        player.velY = 0;
+        if (health > 0) {  // Only respawn if still alive
+            const spawnPoint = checkpoints.find(c => c.activated) || 
+                            { x: 50, y: 100 };
+            player.x = spawnPoint.x;
+            player.y = spawnPoint.y;
+            player.velY = 0;
+        }
     }
     
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-}
+
 
 // Update Platforms
 function updatePlatforms(deltaTime) {
@@ -656,6 +671,16 @@ function drawProjectiles() {
     });
 }
 
+function resetGame() {
+    gameOver = false;
+    isGameComplete = false;
+    score = 0;
+    health = 150;
+    gameOverScreen.style.display = "none";
+    victoryScreen.style.display = "none";
+    loadLevel(1);
+}
+
 function drawPortals() {
     portals.forEach(portal => {
         // Outer glow
@@ -745,78 +770,69 @@ function drawGameOver() {
 }
 
 function initGame() {
-    // Ensure canvas is properly sized
+    // Canvas setup
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
+    // Initialize particles
+    initParticles();
     
     // Load first level
     loadLevel(1);
     
     // Start game loop
-    lastTime = performance.now();
     requestAnimationFrame(gameLoop);
-    
-    // CORRECTED particle configuration
-    particlesJS("particles-js", {
-        "particles": {
-            "number": {
-                "value": 30,  // Reduced number
-                "density": {
-                    "enable": true,
-                    "value_area": 800
-                }
-            },
-            "color": {
-                "value": "#66a3ff"  // Changed to light blue
-            },
-            "shape": {
-                "type": "circle"
-            },
-            "opacity": {
-                "value": 0.3,       // More transparent
-                "random": true
-            },
-            "size": {
-                "value": 3,         // Smaller size
-                "random": true
-            },
-            "line_linked": {
-                "enable": false     // No connecting lines
-            },
-            "move": {
-                "enable": true,
-                "speed": 1,         // Slower movement
-                "direction": "none",
-                "random": true,
-                "straight": false,
-                "out_mode": "out",
-                "bounce": false
-            }
-        },
-        "interactivity": {
-            "detect_on": "canvas",
-            "events": {
-                "onhover": {
-                    "enable": false  // Disable interactivity
-                },
-                "onclick": {
-                    "enable": false
-                },
-                "resize": true
-            }
-        },
-        "retina_detect": true
-    });
 }
 
-// Handle window resize
-window.addEventListener('resize', () => {
+function initParticles() {
+    if (typeof particlesJS === 'undefined') {
+        console.error("ParticlesJS not loaded!");
+        return;
+    }
+
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 30, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
+            line_linked: { enable: false },
+            move: {
+                enable: true,
+                speed: 1,
+                direction: "none",
+                random: true,
+                straight: false,
+                out_mode: "out"
+            }
+        },
+        interactivity: {
+            detect_on: "canvas",
+            events: {
+                onhover: { enable: false },
+                onclick: { enable: false },
+                resize: true
+            }
+        },
+        retina_detect: true
+    });
+
+    console.log("Particles initialized");
+}
+
+console.log("Script loaded");
+initGame();
+
+function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-});
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+}
 
-// Initialization
-document.addEventListener('DOMContentLoaded', initGame);
+window.addEventListener('resize', resizeCanvas);
+
 // Damage effect
 function showDamageEffect() {
     const effect = document.getElementById('damage-effect');
