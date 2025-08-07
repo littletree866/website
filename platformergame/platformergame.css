@@ -9,47 +9,60 @@
     --warning: #f39c12;
 }
 
-#particles-js {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.5;
-}
-
 body { 
     margin: 0; 
     padding: 0; 
     overflow: hidden; 
     background: #2c3e50;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+}
+
+.parallax-bg {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.bg-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+.layer-1 {
+    background: linear-gradient(to bottom, #1a2a3a, #2c3e50);
+}
+
+.layer-2 {
+    background-image: url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
+    opacity: 0.2;
+}
+
+.layer-3 {
+    background-image: url('https://www.transparenttextures.com/patterns/starfield.png');
+    opacity: 0.1;
+    animation: starfield 60s linear infinite;
+}
+
+@keyframes starfield {
+    from { background-position: 0 0; }
+    to { background-position: 1000px 1000px; }
 }
 
 canvas { 
     display: block; 
-    background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+    background: transparent;
     width: 100vw;
     height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
-}
-
-#ui {
-    position: fixed;
-    top: 15px;
-    left: 20px;
-    color: white;
-    font-size: 1.1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    z-index: 10;
-    background: rgba(0,0,0,0.5);
-    padding: 10px 15px;
-    border-radius: 20px;
-    display: flex;
-    gap: 20px;
+    z-index: 2;
 }
 
 #ui {
@@ -145,6 +158,7 @@ canvas {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    pointer-events: auto;
 }
 
 .game-button:hover {
@@ -184,17 +198,6 @@ canvas {
     gap: 5px;
 }
 
-#particles-js {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 0;
-    background: transparent;
-    pointer-events: none;
-}
-
 #damage-effect {
     position: absolute;
     top: 0;
@@ -205,4 +208,15 @@ canvas {
     pointer-events: none;
     z-index: 5;
     transition: background-color 0.3s;
+}
+
+/* Jump effect */
+@keyframes jumpEffect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.jump-effect {
+    animation: jumpEffect 0.3s ease-out;
 }

@@ -8,6 +8,13 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const finalScoreDisplay = document.getElementById("finalScore");
 const victoryScreen = document.getElementById("victoryScreen");
 
+// Audio elements
+const jumpSound = document.getElementById("jumpSound");
+const coinSound = document.getElementById("coinSound");
+const hurtSound = document.getElementById("hurtSound");
+const levelSound = document.getElementById("levelSound");
+const bgMusic = document.getElementById("bgMusic");
+
 // Game Variables
 let gravity = 0.5;
 let score = 0;
@@ -16,6 +23,7 @@ let gameOver = false;
 let lastTime = 0;
 let currentLevel = 1;
 let isGameComplete = false;
+let cameraOffset = { x: 0, y: 0 };
 
 // Player Object
 const player = {
@@ -26,9 +34,11 @@ const player = {
     speed: 5,
     velY: 0,
     jumping: false,
-    color: "#FF0000",
+    color: "#FF5555",
     invincible: false,
-    invincibleTimer: 0
+    invincibleTimer: 0,
+    facing: 1, // 1 for right, -1 for left
+    jumpEffect: false
 };
 
 // Game Objects
@@ -39,6 +49,7 @@ let enemies = [];
 let portals = [];
 let checkpoints = [];
 let projectiles = [];
+let particles = [];
 
 // Controls
 let keys = {
@@ -57,6 +68,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") keys.right = true;
     if (e.key === "ArrowUp") keys.up = true;
     if (e.key === "r" && (gameOver || isGameComplete)) resetGame();
+    if (e.key === "m") toggleMusic();
 });
 
 document.addEventListener("keyup", (e) => {
@@ -65,7 +77,54 @@ document.addEventListener("keyup", (e) => {
     if (e.key === "ArrowUp") keys.up = false;
 });
 
-// Level Generation
+function toggleMusic() {
+    if (bgMusic.paused) {
+        bgMusic.play();
+    } else {
+        bgMusic.pause();
+    }
+}
+
+// Particle system
+function createParticles(x, y, color, count) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            size: Math.random() * 5 + 2,
+            color: color,
+            speedX: Math.random() * 6 - 3,
+            speedY: Math.random() * 6 - 3,
+            life: 30 + Math.random() * 20
+        });
+    }
+}
+
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.life--;
+        
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+}
+
+function drawParticles() {
+    particles.forEach(p => {
+        ctx.globalAlpha = p.life / 50;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x - cameraOffset.x, p.y - cameraOffset.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+}
+
+// Level Generation 
 function generateLevel(levelNum) {
     const level = {
         platforms: [],
@@ -77,6 +136,7 @@ function generateLevel(levelNum) {
         startPos: { x: 50, y: 100 }
     };
 
+    // Add checkpoints
     level.checkpoints.push({
         x: canvas.width - 100,
         y: canvas.height - 150,
@@ -85,15 +145,17 @@ function generateLevel(levelNum) {
         activated: false
     });
 
-    // Base platform
+    // Base platform (wider for level 1)
     level.platforms.push({
         x: 0, y: canvas.height - 50, 
-        width: 200, height: 20, 
-        color: "#2ECC71", type: "normal"
+        width: levelNum === 1 ? 300 : 200, 
+        height: 20, 
+        color: "#2ECC71", 
+        type: "normal"
     });
 
-    // Generate platforms
-    const platformCount = 5 + levelNum;
+    // Generate platforms with increasing difficulty
+    const platformCount = 5 + levelNum * 2;
     let lastX = 100;
     let lastY = canvas.height - 100;
     
@@ -108,15 +170,26 @@ function generateLevel(levelNum) {
             )
         );
         
+        // More moving platforms in higher levels
+        let type;
+        const rand = Math.random();
+        if (levelNum === 1) {
+            type = rand > 0.8 ? "moving" : (rand > 0.6 ? "bouncy" : "normal");
+        } else if (levelNum === 2) {
+            type = rand > 0.7 ? "moving" : (rand > 0.4 ? "bouncy" : "normal");
+        } else {
+            type = rand > 0.6 ? "moving" : (rand > 0.3 ? "bouncy" : "normal");
+        }
+        
         level.platforms.push({
             x: platformX,
             y: platformY,
             width: platformWidth,
             height: 15,
             color: ["#2ECC71", "#3498DB", "#9B59B6"][Math.floor(Math.random() * 3)],
-            type: ["normal", "moving", "bouncy"][Math.floor(Math.random() * 3)],
+            type: type,
             dir: Math.random() > 0.5 ? 1 : -1,
-            speed: 1 + Math.random(),
+            speed: 1 + Math.random() * levelNum * 0.5,
             xStart: platformX - 50,
             xEnd: platformX + 50
         });
@@ -136,9 +209,9 @@ function generateLevel(levelNum) {
         isFinal: levelNum >= 3
     });
 
-    // Add collectibles
+    // Add collectibles (more in higher levels)
     level.platforms.forEach(platform => {
-        if (Math.random() > 0.5) {
+        if (Math.random() > (0.6 - levelNum * 0.1)) {
             level.collectibles.push({
                 x: platform.x + platform.width/2 - 10,
                 y: platform.y - 25,
@@ -146,15 +219,26 @@ function generateLevel(levelNum) {
                 height: 20,
                 color: Math.random() > 0.7 ? "#E67E22" : "#F1C40F",
                 type: Math.random() > 0.7 ? "health" : "coin",
-                collected: false
+                collected: false,
+                rotation: 0
             });
         }
     });
 
-    // Add enemies
+    // Add enemies (more and varied in higher levels)
     level.platforms.slice(1).forEach(platform => {
-        if (Math.random() > 0.6) {
-            const enemyType = ["patrol", "jumper", "shooter"][Math.floor(Math.random() * 3)];
+        if (Math.random() > (0.7 - levelNum * 0.1)) {
+            const enemyTypes = ["patrol", "jumper", "shooter"];
+            const weights = levelNum === 1 ? [0.6, 0.3, 0.1] : 
+                          levelNum === 2 ? [0.4, 0.4, 0.2] : 
+                          [0.3, 0.3, 0.4];
+            
+            let rand = Math.random();
+            let enemyType;
+            if (rand < weights[0]) enemyType = enemyTypes[0];
+            else if (rand < weights[0] + weights[1]) enemyType = enemyTypes[1];
+            else enemyType = enemyTypes[2];
+            
             const enemy = {
                 x: platform.x + platform.width/2 - 15,
                 y: platform.y - 40,
@@ -170,11 +254,10 @@ function generateLevel(levelNum) {
                 enemy.xStart = platform.x;
                 enemy.xEnd = platform.x + platform.width - enemy.width;
             } else if (enemyType === "shooter") {
-                enemy.fireRate = 2000;
+                enemy.fireRate = 2000 - (levelNum * 300);
                 enemy.lastShot = 0;
-                   
             } else if (enemyType === "jumper") {
-                enemy.jumpForce = -12;
+                enemy.jumpForce = -12 - (levelNum * 2);
                 enemy.jumpDelay = 1500 + Math.random() * 1500;
                 enemy.velY = 0;
                 enemy.lastJump = Date.now(); 
@@ -187,10 +270,27 @@ function generateLevel(levelNum) {
     return level;
 }
 
+// Camera system
+function updateCamera() {
+    // Center camera on player with some lead space
+    const targetX = player.x - canvas.width/3;
+    const targetY = player.y - canvas.height/2;
+    
+    // Smooth camera movement
+    cameraOffset.x += (targetX - cameraOffset.x) * 0.1;
+    cameraOffset.y += (targetY - cameraOffset.y) * 0.1;
+    
+    // Keep camera within bounds
+    cameraOffset.x = Math.max(0, cameraOffset.x);
+    cameraOffset.y = Math.max(0, cameraOffset.y);
+}
+
 // Load Level
 function loadLevel(levelNum) {
     currentLevel = levelNum;
     levelDisplay.textContent = levelNum;
+    levelSound.currentTime = 0;
+    levelSound.play();
     
     const level = generateLevel(levelNum);
     platforms = JSON.parse(JSON.stringify(level.platforms));
@@ -200,6 +300,7 @@ function loadLevel(levelNum) {
     portals = JSON.parse(JSON.stringify(level.portals));
     checkpoints = JSON.parse(JSON.stringify(level.checkpoints));
     projectiles = [];
+    particles = [];
     
     // Set player position
     player.x = level.startPos.x;
@@ -208,6 +309,9 @@ function loadLevel(levelNum) {
     player.jumping = false;
     player.invincible = false;
     player.invincibleTimer = 0;
+    
+    // Reset camera
+    cameraOffset = { x: 0, y: 0 };
 }
 
 // Game Loop
@@ -218,10 +322,12 @@ function gameLoop(timestamp) {
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        updateCamera();
         updatePlayer(deltaTime);
         updatePlatforms(deltaTime);
         updateEnemies(deltaTime);
         updateProjectiles(deltaTime);
+        updateParticles();
         
         drawPlatforms();
         drawCollectibles();
@@ -230,6 +336,7 @@ function gameLoop(timestamp) {
         drawPortals();
         drawCheckpoints();
         drawPlayer();
+        drawParticles();
         
         healthDisplay.textContent = health;
         scoreDisplay.textContent = score;
@@ -252,8 +359,14 @@ function updatePlayer(deltaTime) {
     }
 
     // Horizontal movement
-    if (keys.left) player.x -= player.speed;
-    if (keys.right) player.x += player.speed;
+    if (keys.left) {
+        player.x -= player.speed;
+        player.facing = -1;
+    }
+    if (keys.right) {
+        player.x += player.speed;
+        player.facing = 1;
+    }
 
     // Apply gravity with terminal velocity
     player.velY = Math.min(player.velY + GRAVITY, MAX_FALL_SPEED);
@@ -263,31 +376,36 @@ function updatePlayer(deltaTime) {
     if (keys.up && !player.jumping) {
         player.velY = JUMP_FORCE;
         player.jumping = true;
+        player.jumpEffect = true;
+        setTimeout(() => player.jumpEffect = false, 300);
+        jumpSound.currentTime = 0;
+        jumpSound.play();
+        createParticles(player.x + player.width/2, player.y + player.height, "#6e8efb", 10);
     }
 
-        // Platform collisions
+    // Platform collisions
     player.jumping = true;
     platforms.forEach(platform => {
-    // Check if player is above platform and falling
-    if (player.velY > 0 && 
-        player.y + player.height > platform.y && 
-        player.y < platform.y &&
-        player.x + player.width > platform.x && 
-        player.x < platform.x + platform.width) {
-        
-        // Snap player to platform top
-        player.y = platform.y - player.height;
-        player.velY = 0;
-        player.jumping = false;
-        
-        if (platform.type === "bouncy") {
-            player.velY = -20;
-        }
+        // Check if player is above platform and falling
+        if (player.velY > 0 && 
+            player.y + player.height > platform.y && 
+            player.y < platform.y &&
+            player.x + player.width > platform.x && 
+            player.x < platform.x + platform.width) {
+            
+            // Snap player to platform top
+            player.y = platform.y - player.height;
+            player.velY = 0;
+            player.jumping = false;
+            
+            if (platform.type === "bouncy") {
+                player.velY = -20;
+                createParticles(player.x + player.width/2, player.y + player.height, "#a777e3", 15);
+            }
         }
     });
-            }
 
-  
+    // Collectible collisions
     for (let i = collectibles.length - 1; i >= 0; i--) {
         const c = collectibles[i];
         if (!c.collected &&
@@ -299,10 +417,16 @@ function updatePlayer(deltaTime) {
             c.collected = true;
             if (c.type === "coin") {
                 score += 100;
+                coinSound.currentTime = 0;
+                coinSound.play();
+                createParticles(c.x + c.width/2, c.y + c.height/2, "#F1C40F", 15);
             } else if (c.type === "health") {
                 health = Math.min(150, health + 50);
+                coinSound.currentTime = 0;
+                coinSound.play();
+                createParticles(c.x + c.width/2, c.y + c.height/2, "#2ECC71", 15);
             }
-            collectibles.splice(i, 1); // Remove collected item
+            collectibles.splice(i, 1);
         }
     }
 
@@ -316,28 +440,50 @@ function updatePlayer(deltaTime) {
             takeDamage(10);
             player.velY = -10;
             player.x += (player.x < enemy.x + enemy.width/2) ? -30 : 30;
+            createParticles(player.x + player.width/2, player.y + player.height/2, "#E74C3C", 20);
         }
     });
 
-    // Portal collisions
+        
     portals.forEach(portal => {
-        if (player.x < portal.x + portal.width &&
-            player.x + player.width > portal.x &&
-            player.y < portal.y + portal.height &&
-            player.y + player.height > portal.y) {
+        
+        const portalX = portal.x - cameraOffset.x;
+        const portalY = portal.y - cameraOffset.y;
+        
+        if (player.x < portalX + portal.width &&
+            player.x + player.width > portalX &&
+            player.y < portalY + portal.height &&
+            player.y + player.height > portalY) {
             if (portal.isFinal) {
                 isGameComplete = true;
                 document.getElementById("finalScoreVictory").textContent = score;
+                bgMusic.pause();
             } else {
                 loadLevel(portal.targetLevel);
             }
         }
     });
 
+    checkpoints.forEach(checkpoint => {
+        // Apply camera offset to checkpoint position
+        const checkpointX = checkpoint.x - cameraOffset.x;
+        const checkpointY = checkpoint.y - cameraOffset.y;
+        
+        if (!checkpoint.activated &&
+            player.x < checkpointX + checkpoint.width &&
+            player.x + player.width > checkpointX &&
+            player.y < checkpointY + checkpoint.height &&
+            player.y + player.height > checkpointY) {
+            checkpoint.activated = true;
+            createParticles(checkpoint.x + checkpoint.width/2, checkpoint.y, "#27AE60", 30);
+        }
+    });
+
+    // Projectile collisions (handled in updateProjectiles)
   
     if (player.y > canvas.height) {
         takeDamage(10);
-        if (health > 0) {  // Only respawn if still alive
+        if (health > 0) {
             const spawnPoint = checkpoints.find(c => c.activated) || 
                             { x: 50, y: 100 };
             player.x = spawnPoint.x;
@@ -348,16 +494,14 @@ function updatePlayer(deltaTime) {
     
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-
+}
 
 // Update Platforms
 function updatePlatforms(deltaTime) {
     platforms.forEach(platform => {
         if (platform.type === "moving") {
-            // Update moving platforms
             platform.x += platform.dir * platform.speed;
             
-            // Reverse direction if reached bounds
             if (platform.x <= platform.xStart || platform.x >= platform.xEnd) {
                 platform.dir *= -1;
             }
@@ -370,21 +514,17 @@ function updateEnemies(deltaTime) {
     enemies.forEach(enemy => {
         switch(enemy.type) {
             case "patrol":
-                // Move patrol enemy back and forth
                 enemy.x += enemy.dir * enemy.speed;
                 
-                // Reverse direction at bounds
                 if (enemy.x <= enemy.xStart || enemy.x >= enemy.xEnd) {
                     enemy.dir *= -1;
                 }
                 break;
                 
             case "jumper":
-                // Handle jumping enemy
                 enemy.velY += gravity;
                 enemy.y += enemy.velY;
                 
-                // Check if on ground and ready to jump
                 platforms.forEach(platform => {
                     if (enemy.x < platform.x + platform.width &&
                         enemy.x + enemy.width > platform.x &&
@@ -394,19 +534,17 @@ function updateEnemies(deltaTime) {
                         enemy.y = platform.y - enemy.height;
                         enemy.velY = 0;
                         
-                        // Jump after delay
                         if (Date.now() - enemy.lastJump > enemy.jumpDelay) {
                             enemy.velY = enemy.jumpForce;
                             enemy.lastJump = Date.now();
+                            createParticles(enemy.x + enemy.width/2, enemy.y + enemy.height, "#8B0000", 10);
                         }
                     }
                 });
                 break;
                 
             case "shooter":
-                // Handle shooting enemy
                 if (Date.now() - enemy.lastShot > enemy.fireRate) {
-                    // Create new projectile
                     projectiles.push({
                         x: enemy.x + enemy.width/2,
                         y: enemy.y + enemy.height/2,
@@ -417,6 +555,7 @@ function updateEnemies(deltaTime) {
                         color: "#E74C3C"
                     });
                     enemy.lastShot = Date.now();
+                    createParticles(enemy.x + enemy.width/2, enemy.y + enemy.height/2, "#E74C3C", 5);
                 }
                 break;
         }
@@ -429,13 +568,11 @@ function updateProjectiles(deltaTime) {
         const proj = projectiles[i];
         proj.x += proj.dir * proj.speed;
         
-        // Remove projectiles that go off screen
         if (proj.x < 0 || proj.x > canvas.width) {
             projectiles.splice(i, 1);
             continue;
         }
         
-        // Check for player collision
         if (!player.invincible &&
             player.x < proj.x + proj.width &&
             player.x + player.width > proj.x &&
@@ -443,6 +580,7 @@ function updateProjectiles(deltaTime) {
             player.y + player.height > proj.y) {
             takeDamage(5);
             projectiles.splice(i, 1);
+            createParticles(proj.x, proj.y, "#E74C3C", 10);
         }
     }
 }
@@ -451,52 +589,81 @@ function updateProjectiles(deltaTime) {
 function takeDamage(amount) {
     health -= amount;
     showDamageEffect();
+    hurtSound.currentTime = 0;
+    hurtSound.play();
     if (health <= 0) {
         health = 0;
         gameOver = true;
         gameOverScreen.style.display = "flex";
         finalScoreDisplay.textContent = score;
+        bgMusic.pause();
     }
     player.invincible = true;
-    player.invincibleTimer = 1000; // 1 second invincibility
+    player.invincibleTimer = 1000;
 }
 
 // DRAWING FUNCTIONS ==============================================
 
 function drawPlayer() {
+    ctx.save();
+    ctx.translate(player.x - cameraOffset.x, player.y - cameraOffset.y);
+    
+    // Apply jump effect if jumping
+    if (player.jumpEffect) {
+        ctx.scale(1, 0.9);
+    }
+
     // Draw player with invincibility flash effect
     if (player.invincible && Math.floor(Date.now() / 100) % 2 === 0) {
-        ctx.fillStyle = "#FF9999"; // Flash color when invincible
+        ctx.fillStyle = "#FF9999";
     } else {
         ctx.fillStyle = player.color;
     }
     
-    // Draw player body
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    // Draw player body with rounded corners
+    ctx.beginPath();
+    ctx.roundRect(0, 0, player.width, player.height, [10, 10, 0, 0]);
+    ctx.fill();
     
     // Draw player face (direction changes based on movement)
     ctx.fillStyle = "#FFFFFF";
-    const eyeOffset = keys.left ? -5 : (keys.right ? 5 : 0);
-    if (eyeOffset !== 0) {
-        // Eyes
-        ctx.beginPath();
-        ctx.arc(player.x + player.width/2 + eyeOffset, player.y + player.height/3, 5, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Mouth (smile when moving)
-        ctx.beginPath();
-        ctx.arc(player.x + player.width/2 + eyeOffset, player.y + player.height*2/3, 7, 0, Math.PI);
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+    const eyeX = player.facing > 0 ? player.width/3 : player.width*2/3;
+    
+    // Eyes
+    ctx.beginPath();
+    ctx.arc(eyeX, player.height/3, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Mouth (smile when moving)
+    ctx.beginPath();
+    if (keys.left || keys.right) {
+        ctx.arc(eyeX, player.height*2/3, 7, 0, Math.PI);
+    } else {
+        ctx.arc(eyeX, player.height*2/3, 7, 0, Math.PI, true);
     }
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Shadow
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.beginPath();
+    ctx.ellipse(player.width/2, player.height + 5, player.width/2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
 }
 
 function drawPlatforms() {
     platforms.forEach(platform => {
+        ctx.save();
+        ctx.translate(platform.x - cameraOffset.x, platform.y - cameraOffset.y);
+        
         // Platform base
         ctx.fillStyle = platform.color;
-        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        ctx.beginPath();
+        ctx.roundRect(0, 0, platform.width, platform.height, 5);
+        ctx.fill();
         
         // Platform decorations based on type
         switch(platform.type) {
@@ -505,7 +672,7 @@ function drawPlatforms() {
                 ctx.fillStyle = "#FFFFFF";
                 for (let i = 0; i < platform.width; i += 20) {
                     ctx.beginPath();
-                    ctx.arc(platform.x + i + 10, platform.y + 5, 5, 0, Math.PI * 2);
+                    ctx.arc(i + 10, 5, 5, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 break;
@@ -515,11 +682,11 @@ function drawPlatforms() {
                 ctx.fillStyle = "#FFFFFF";
                 const arrowCount = Math.floor(platform.width / 30);
                 for (let i = 0; i < arrowCount; i++) {
-                    const x = platform.x + (i * 30) + 15;
+                    const x = i * 30 + 15;
                     ctx.beginPath();
-                    ctx.moveTo(x, platform.y + 5);
-                    ctx.lineTo(x + (platform.dir * 10), platform.y + 15);
-                    ctx.lineTo(x - (platform.dir * 10), platform.y + 15);
+                    ctx.moveTo(x, 5);
+                    ctx.lineTo(x + (platform.dir * 10), 15);
+                    ctx.lineTo(x - (platform.dir * 10), 15);
                     ctx.fill();
                 }
                 break;
@@ -530,38 +697,47 @@ function drawPlatforms() {
                 ctx.lineWidth = 1;
                 for (let i = 0; i < platform.width; i += 15) {
                     ctx.beginPath();
-                    ctx.moveTo(platform.x + i, platform.y);
-                    ctx.lineTo(platform.x + i, platform.y + platform.height);
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, platform.height);
                     ctx.stroke();
                 }
         }
+        
+        // Platform shadow
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.beginPath();
+        ctx.ellipse(platform.width/2, platform.height + 5, platform.width/2, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
     });
 }
 
 function drawCollectibles() {
     collectibles.forEach(collectible => {
         if (!collectible.collected) {
-            ctx.fillStyle = collectible.color;
+            collectible.rotation += 0.05;
+            ctx.save();
+            ctx.translate(
+                collectible.x + collectible.width/2 - cameraOffset.x,
+                collectible.y + collectible.height/2 - cameraOffset.y
+            );
+            ctx.rotate(collectible.rotation);
             
             if (collectible.type === "coin") {
                 // Gold coin with shine effect
+                ctx.fillStyle = collectible.color;
                 ctx.beginPath();
-                ctx.arc(
-                    collectible.x + collectible.width/2, 
-                    collectible.y + collectible.height/2, 
-                    collectible.width/2, 
-                    0, 
-                    Math.PI * 2
-                );
+                ctx.arc(0, 0, collectible.width/2, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Shine effect
                 ctx.fillStyle = "rgba(255,255,255,0.7)";
                 ctx.beginPath();
                 ctx.arc(
-                    collectible.x + collectible.width/3, 
-                    collectible.y + collectible.height/3, 
-                    collectible.width/4, 
+                    -collectible.width/4, 
+                    -collectible.height/4, 
+                    collectible.width/6, 
                     0, 
                     Math.PI * 2
                 );
@@ -570,152 +746,189 @@ function drawCollectibles() {
                 // Coin outline
                 ctx.strokeStyle = "#D4AF37";
                 ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, collectible.width/2, 0, Math.PI * 2);
                 ctx.stroke();
+                
+                // Glow effect
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, collectible.width/2 + 5);
+                gradient.addColorStop(0, "rgba(255,215,0,0.5)");
+                gradient.addColorStop(1, "rgba(255,215,0,0)");
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, collectible.width/2 + 5, 0, Math.PI * 2);
+                ctx.fill();
                 
             } else if (collectible.type === "health") {
                 // Health pack with cross
-                ctx.fillRect(collectible.x, collectible.y, collectible.width, collectible.height);
+                ctx.fillStyle = collectible.color;
+                ctx.beginPath();
+                ctx.roundRect(-collectible.width/2, -collectible.height/2, collectible.width, collectible.height, 5);
+                ctx.fill();
                 
                 // White cross
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(
-                    collectible.x + collectible.width/2 - 2, 
-                    collectible.y + 2, 
+                    -2, 
+                    -collectible.height/2 + 2, 
                     4, 
                     collectible.height - 4
                 );
                 ctx.fillRect(
-                    collectible.x + 2, 
-                    collectible.y + collectible.height/2 - 2, 
+                    -collectible.width/2 + 2, 
+                    -2, 
                     collectible.width - 4, 
                     4
                 );
+                
+                // Plus sign effect
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
+                ctx.fillRect(
+                    -collectible.width/4, 
+                    -2, 
+                    collectible.width/2, 
+                    4
+                );
+                ctx.fillRect(
+                    -2, 
+                    -collectible.height/4, 
+                    4, 
+                    collectible.height/2
+                );
+                
+                // Glow effect
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, collectible.width/2 + 5);
+                gradient.addColorStop(0, "rgba(46,204,113,0.3)");
+                gradient.addColorStop(1, "rgba(46,204,113,0)");
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, collectible.width/2 + 5, 0, Math.PI * 2);
+                ctx.fill();
             }
+            
+            ctx.restore();
         }
     });
 }
 
 function drawEnemies() {
     enemies.forEach(enemy => {
-        // Enemy body
+        ctx.save();
+        ctx.translate(enemy.x - cameraOffset.x, enemy.y - cameraOffset.y);
+        
+        // Enemy body with rounded top
         ctx.fillStyle = enemy.color;
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        ctx.beginPath();
+        ctx.roundRect(0, 0, enemy.width, enemy.height, [10, 10, 0, 0]);
+        ctx.fill();
         
         // Enemy face based on type
         ctx.fillStyle = "#FFFFFF";
         switch(enemy.type) {
             case "patrol":
                 // Simple eyes looking in movement direction
-                const eyeX = enemy.x + enemy.width/2 + (enemy.dir * 5);
+                const eyeX = enemy.width/2 + (enemy.dir * 5);
                 ctx.beginPath();
-                ctx.arc(eyeX, enemy.y + enemy.height/3, 4, 0, Math.PI * 2);
-                ctx.fill();
-                break;
-                
-            case "jumper":
-                // Two eyes and mouth
-                ctx.beginPath();
-                ctx.arc(enemy.x + enemy.width/3, enemy.y + enemy.height/3, 3, 0, Math.PI * 2);
-                ctx.arc(enemy.x + enemy.width*2/3, enemy.y + enemy.height/3, 3, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Angry mouth
-                ctx.strokeStyle = "#FFFFFF";
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(enemy.x + enemy.width/3, enemy.y + enemy.height*2/3);
-                ctx.lineTo(enemy.x + enemy.width*2/3, enemy.y + enemy.height*2/3);
-                ctx.stroke();
-                break;
-                
-            case "shooter":
-                // Single cyclops eye
-                ctx.beginPath();
-                ctx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height/3, 6, 0, Math.PI * 2);
+                ctx.arc(eyeX, enemy.height/3, 4, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Angry eyebrows
                 ctx.strokeStyle = "#FFFFFF";
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(enemy.x + enemy.width/3, enemy.y + enemy.height/4);
-                ctx.lineTo(enemy.x + enemy.width*2/3, enemy.y + enemy.height/4);
+                ctx.moveTo(eyeX - 8, enemy.height/4);
+                ctx.lineTo(eyeX + 8, enemy.height/4);
+                ctx.stroke();
+                break;
+                
+            case "jumper":
+                // Two eyes and mouth
+                ctx.beginPath();
+                ctx.arc(enemy.width/3, enemy.height/3, 3, 0, Math.PI * 2);
+                ctx.arc(enemy.width*2/3, enemy.height/3, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Angry mouth
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(enemy.width/3, enemy.height*2/3);
+                ctx.lineTo(enemy.width*2/3, enemy.height*2/3);
+                ctx.stroke();
+                break;
+                
+            case "shooter":
+                // Single cyclops eye
+                ctx.beginPath();
+                ctx.arc(enemy.width/2, enemy.height/3, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Angry eyebrows
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(enemy.width/3, enemy.height/4);
+                ctx.lineTo(enemy.width*2/3, enemy.height/4);
                 ctx.stroke();
                 break;
         }
+        
+        // Enemy shadow
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.beginPath();
+        ctx.ellipse(enemy.width/2, enemy.height + 5, enemy.width/2, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
     });
 }
 
 function drawProjectiles() {
     projectiles.forEach(proj => {
+        ctx.save();
+        ctx.translate(proj.x - cameraOffset.x, proj.y - cameraOffset.y);
+        
         // Glowing projectile with trail effect
-        const gradient = ctx.createRadialGradient(
-            proj.x, proj.y, 0,
-            proj.x, proj.y, proj.width/2
-        );
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, proj.width/2);
         gradient.addColorStop(0, proj.color);
         gradient.addColorStop(1, "rgba(231, 76, 60, 0)");
         
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(proj.x, proj.y, proj.width/2, 0, Math.PI * 2);
+        ctx.arc(0, 0, proj.width/2, 0, Math.PI * 2);
         ctx.fill();
         
         // Trail effect
         ctx.strokeStyle = `rgba(231, 76, 60, 0.5)`;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(proj.x - (proj.dir * 10), proj.y);
-        ctx.lineTo(proj.x, proj.y);
+        ctx.moveTo(- (proj.dir * 10), 0);
+        ctx.lineTo(0, 0);
         ctx.stroke();
+        
+        ctx.restore();
     });
-}
-
-function resetGame() {
-    gameOver = false;
-    isGameComplete = false;
-    score = 0;
-    health = 150;
-    gameOverScreen.style.display = "none";
-    victoryScreen.style.display = "none";
-    loadLevel(1);
 }
 
 function drawPortals() {
     portals.forEach(portal => {
+        ctx.save();
+        ctx.translate(portal.x + portal.width/2 - cameraOffset.x, portal.y + portal.height/2 - cameraOffset.y);
+        
         // Outer glow
-        const outerGradient = ctx.createRadialGradient(
-            portal.x + portal.width/2, 
-            portal.y + portal.height/2, 
-            0,
-            portal.x + portal.width/2, 
-            portal.y + portal.height/2, 
-            portal.width/2
-        );
+        const outerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, portal.width/2);
         outerGradient.addColorStop(0, portal.color);
         outerGradient.addColorStop(1, "rgba(243, 156, 18, 0)");
         
         ctx.fillStyle = outerGradient;
         ctx.beginPath();
-        ctx.arc(
-            portal.x + portal.width/2, 
-            portal.y + portal.height/2, 
-            portal.width/2, 
-            0, 
-            Math.PI * 2
-        );
+        ctx.arc(0, 0, portal.width/2, 0, Math.PI * 2);
         ctx.fill();
         
         // Inner portal
         ctx.fillStyle = "#FFFFFF";
         ctx.beginPath();
-        ctx.arc(
-            portal.x + portal.width/2, 
-            portal.y + portal.height/2, 
-            portal.width/4, 
-            0, 
-            Math.PI * 2
-        );
+        ctx.arc(0, 0, portal.width/4, 0, Math.PI * 2);
         ctx.fill();
         
         // Swirling effect
@@ -723,25 +936,36 @@ function drawPortals() {
         ctx.lineWidth = 2;
         for (let i = 0; i < 3; i++) {
             ctx.beginPath();
-            ctx.arc(
-                portal.x + portal.width/2, 
-                portal.y + portal.height/2, 
-                portal.width/3, 
-                (Date.now()/500 + i) % (Math.PI * 2), 
-                (Date.now()/500 + i + 1) % (Math.PI * 2)
+            ctx.arc(0, 0, portal.width/3, 
+                    (Date.now()/500 + i) % (Math.PI * 2), 
+                    (Date.now()/500 + i + 1) % (Math.PI * 2)
             );
             ctx.stroke();
         }
+        
+        // Final portal effect
+        if (portal.isFinal) {
+            ctx.strokeStyle = "rgba(46, 204, 113, 0.7)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, 0, portal.width/2 + 5, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        ctx.restore();
     });
 }
 
 function drawCheckpoints() {
     checkpoints.forEach(checkpoint => {
+        ctx.save();
+        ctx.translate(checkpoint.x - cameraOffset.x, checkpoint.y - cameraOffset.y);
+        
         // Checkpoint pole
         ctx.fillStyle = "#7F8C8D";
         ctx.fillRect(
-            checkpoint.x + checkpoint.width/2 - 2, 
-            checkpoint.y, 
+            checkpoint.width/2 - 2, 
+            0, 
             4, 
             checkpoint.height
         );
@@ -749,9 +973,9 @@ function drawCheckpoints() {
         // Checkpoint flag
         ctx.fillStyle = checkpoint.activated ? "#27AE60" : "#95A5A6";
         ctx.beginPath();
-        ctx.moveTo(checkpoint.x + checkpoint.width/2, checkpoint.y);
-        ctx.lineTo(checkpoint.x + checkpoint.width/2, checkpoint.y + checkpoint.height/3);
-        ctx.lineTo(checkpoint.x + checkpoint.width, checkpoint.y + checkpoint.height/4);
+        ctx.moveTo(checkpoint.width/2, 0);
+        ctx.lineTo(checkpoint.width/2, checkpoint.height/3);
+        ctx.lineTo(checkpoint.width, checkpoint.height/4);
         ctx.closePath();
         ctx.fill();
         
@@ -759,8 +983,26 @@ function drawCheckpoints() {
         if (checkpoint.activated) {
             ctx.fillStyle = "#FFFFFF";
             ctx.font = "bold 12px Arial";
-            ctx.fillText("✓", checkpoint.x + checkpoint.width/2 + 10, checkpoint.y + checkpoint.height/4 + 5);
+            ctx.fillText("✓", checkpoint.width/2 + 10, checkpoint.height/4 + 5);
+            
+            // Activation glow
+            const gradient = ctx.createRadialGradient(
+                checkpoint.width/2, 
+                checkpoint.height/3, 
+                0,
+                checkpoint.width/2, 
+                checkpoint.height/3, 
+                20
+            );
+            gradient.addColorStop(0, "rgba(39, 174, 96, 0.5)");
+            gradient.addColorStop(1, "rgba(39, 174, 96, 0)");
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(checkpoint.width/2, checkpoint.height/3, 20, 0, Math.PI * 2);
+            ctx.fill();
         }
+        
+        ctx.restore();
     });
 }
 
@@ -774,8 +1016,23 @@ function initGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    // Initialize particles
-    initParticles();
+    // Add rounded rect support
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.arcTo(x + w, y, x + w, y + h, r);
+        this.arcTo(x + w, y + h, x, y + h, r);
+        this.arcTo(x, y + h, x, y, r);
+        this.arcTo(x, y, x + w, y, r);
+        this.closePath();
+        return this;
+    };
+    
+    // Start background music
+    bgMusic.volume = 0.5;
+    bgMusic.play();
     
     // Load first level
     loadLevel(1);
@@ -784,54 +1041,19 @@ function initGame() {
     requestAnimationFrame(gameLoop);
 }
 
-function initParticles() {
-    if (typeof particlesJS === 'undefined') {
-        console.error("ParticlesJS not loaded!");
-        return;
-    }
-
-    particlesJS('particles-js', {
-        particles: {
-            number: { value: 30, density: { enable: true, value_area: 800 } },
-            color: { value: "#ffffff" },
-            shape: { type: "circle" },
-            opacity: { value: 0.5, random: true },
-            size: { value: 3, random: true },
-            line_linked: { enable: false },
-            move: {
-                enable: true,
-                speed: 1,
-                direction: "none",
-                random: true,
-                straight: false,
-                out_mode: "out"
-            }
-        },
-        interactivity: {
-            detect_on: "canvas",
-            events: {
-                onhover: { enable: false },
-                onclick: { enable: false },
-                resize: true
-            }
-        },
-        retina_detect: true
-    });
-
-    console.log("Particles initialized");
-}
-
-console.log("Script loaded");
-initGame();
-
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
 }
 
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('load', () => {
+    // Initialize canvas size
+    resizeCanvas();
+    
+    // Initialize game
+    initGame();
+});
 
 // Damage effect
 function showDamageEffect() {
@@ -841,3 +1063,7 @@ function showDamageEffect() {
         effect.style.backgroundColor = 'rgba(231, 76, 60, 0)';
     }, 300);
 }
+
+// Start the game
+initGame();
+                

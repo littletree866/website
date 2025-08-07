@@ -13,7 +13,12 @@
     
 </head>
 <body>
-    <div id="particles-js"></div>
+    <div class="parallax-bg">
+        <div class="bg-layer layer-1"></div>
+        <div class="bg-layer layer-2"></div>
+        <div class="bg-layer layer-3"></div>
+    </div>
+    
     <div id="damage-effect"></div>
     
     <div id="ui">
@@ -26,7 +31,7 @@
     <div id="gameOverScreen">
         <h1 class="screen-title" style="color: var(--danger)">GAME OVER</h1>
         <p>Final Score: <span id="finalScore">0</span></p>
-        <p>Press <span class="control-key">R</span> to restart</p>
+        <button class="game-button" onclick="resetGame()"><i class="fas fa-redo"></i> Restart</button>
     </div>
     
     <div id="victoryScreen">
@@ -40,7 +45,14 @@
         <div class="control-key"><i class="fas fa-arrow-up"></i> Jump</div>
         <div class="control-key">R Restart</div>
     </div>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script> 
+
+    <!-- Audio elements -->
+    <audio id="jumpSound" src="https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3" preload="auto"></audio>
+    <audio id="coinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-271.mp3" preload="auto"></audio>
+    <audio id="hurtSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-explosion-2759.mp3" preload="auto"></audio>
+    <audio id="levelSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3" preload="auto"></audio>
+    <audio id="bgMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3" preload="auto"></audio>
+
     <script src="platformergame.js"></script>
 </body>
 </html>
