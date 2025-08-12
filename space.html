@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Shooter (BETA)</title>
+    <link rel="icon" href="infinity.png">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        canvas {
+            border: 2px solid #333;
+            box-shadow: 0 0 20px #0af;
+        }
+        #gameOver {
+            position: absolute;
+            color: white;
+            font-size: 48px;
+            text-align: center;
+            display: none;
+            text-shadow: 0 0 10px #0af;
+        }
+        #scoreDisplay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 0 5px #0af;
+        }
+        #startScreen {
+            position: absolute;
+            color: white;
+            text-align: center;
+            width: 600px;
+        }
+        #instructions {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+            border: 1px solid #0af;
+            padding: 10px;
+            text-align: left;
+        }
+        #instructionText {
+            position: absolute;
+            width: 100%;
+            color: #0af;
+        }
+        button {
+            background: linear-gradient(to bottom, #0af, #08c);
+            border: none;
+            padding: 12px 30px;
+            font-size: 20px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 0 10px #0af;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #0af;
+        }
+        .multiplier {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            animation: fadeUp 1s forwards;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+        .point-label {
+            position: absolute;
+            font-size: 12px;
+            color: white;
+            text-shadow: 0 0 3px black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreDisplay">Score: 0</div>
+    <div id="gameOver">GAME OVER<br><span style="font-size: 24px">Score: 0</span><br><button id="restartButton">Play Again</button></div>
+    <div id="startScreen">
+        <h1 style="font-size: 48px; text-shadow: 0 0 10px #0af;">GALACTIC SHOOTER</h1>
+        <div id="instructions">
+            <div id="instructionText">
+                <h2>INSTRUCTIONS:</h2>
+                <p>- Use ARROW KEYS to move your ship</p>
+                <p>- Press SPACEBAR to shoot</p>
+                <p>- Destroy enemy ships to earn points</p>
+                <p>- Small ships: 10 points</p>
+                <p>- Medium ships: 25 points</p>
+                <p>- Large ships: 50 points</p>
+                <p>- Watch for bonus ships with score multipliers!</p>
+                <p>- Explosions damage nearby ships (including you!)</p>
+                <p>- You have 3 lives</p>
+                <p>- Bonus ships appear randomly</p>
+                <p>- Multipliers last for 10 seconds</p>
+                <p>- Good luck, pilot!</p>
+            </div>
+        </div>
+        <button id="startButton">START MISSION</button>
+    </div>
+
+    <script>
+        // Game setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const gameOverDisplay = document.getElementById('gameOver');
+        const startScreen = document.getElementById('startScreen');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const instructionText = document.getElementById('instructionText');
+        const instructions = document.getElementById('instructions');
+
+        // Set canvas size
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Game state
+        let gameRunning = false;
+        let score = 0;
+        let lives = 3;
+        let scoreMultiplier = 1;
+        let multiplierActive = false;
+        let multiplierEndTime = 0;
+        let multiplierAnimations = [];
+        let explosions = [];
+
+        // Player ship
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 50,
+            width: 40,
+            height: 40,
+            speed: 5,
+            color: '#0af',
+            bullets: [],
+            lastShot: 0,
+            shootDelay: 300,
+            draw: function() {
+                // Draw ship body
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y - this.height/2);
+                ctx.lineTo(this.x + this.width/2, this.y + this.height/2);
+                ctx.lineTo(this.x - this.width/2, this.y + this.height/2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw cockpit
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y - 5, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw engine glow
+                if (keys.ArrowUp || keys.ArrowDown) {
+                    ctx.fillStyle = '#ff0';
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - this.width/3, this.y + this.height/2);
+                    ctx.lineTo(this.x + this.width/3, this.y + this.height/2);
+                    ctx.lineTo(this.x, this.y + this.height/2 + 15);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            },
+            update: function() {
+                // Keep player within bounds
+                if (this.x < this.width/2) this.x = this.width/2;
+                if (this.x > canvas.width - this.width/2) this.x = canvas.width - this.width/2;
+                if (this.y < this.height/2) this.y = this.height/2;
+                if (this.y > canvas.height - this.height/2) this.y = canvas.height - this.height/2;
+            },
+            shoot: function() {
+                const now = Date.now();
+                if (now - this.lastShot > this.shootDelay) {
+                    this.bullets.push({
+                        x: this.x,
+                        y: this.y - this.height/2,
+                        width: 4,
+                        height: 15,
+                        speed: 10,
+                        color: '#ff0'
+                    });
+                    this.lastShot = now;
+                }
+            }
+        };
+
+        // Enemies
+        const enemies = [];
+        const enemyColors = ['#f00', '#f80', '#8f0', '#0f8'];
+
+        // Bonus ships
+        const bonusShips = [];
+        const bonusColors = ['#ff0', '#f0f', '#0ff'];
+
+        // Planets
+        const planets = [];
+        const planetColors = ['#a55', '#5a5', '#55a', '#aa5', '#a5a', '#5aa'];
+
+        // Stars
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 1,
+                speed: Math.random() * 3 + 1,
+                color: `rgba(255, 255, 255, ${Math.random()})`
+            });
+        }
+
+        // Key states
+        const keys = {
+            ArrowLeft: false,
+            ArrowRight: false,
+            ArrowUp: false,
+            ArrowDown: false,
+            ' ': false
+        };
+
+        // Event listeners
+        window.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = true;
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = false;
+                e.preventDefault();
+            }
+        });
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+
+        // Animate instructions
+        function animateInstructions() {
+            const height = instructions.clientHeight;
+            const textHeight = instructionText.clientHeight;
+            let pos = height;
+            
+            function frame() {
+                if (pos < -textHeight) {
+                    pos = height;
+                } else {
+                    pos -= 0.5;
+                }
+                instructionText.style.top = pos + 'px';
+                requestAnimationFrame(frame);
+            }
+            
+            frame();
+        }
+        
+        animateInstructions();
+
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            lives = 3;
+            scoreMultiplier = 1;
+            multiplierActive = false;
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 50;
+            player.bullets = [];
+            enemies.length = 0;
+            bonusShips.length = 0;
+            planets.length = 0;
+            explosions.length = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            gameOverDisplay.style.display = 'none';
+            startScreen.style.display = 'none';
+            
+            // Initial planet
+            spawnPlanet();
+            
+            // Start enemy spawning
+            spawnEnemy();
+            
+            // Start bonus ship spawning
+            spawnBonusShip();
+            
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        function createExplosion(x, y, radius, damage) {
+            explosions.push({
+                x: x,
+                y: y,
+                radius: radius,
+                maxRadius: radius,
+                damage: damage,
+                particles: [],
+                startTime: Date.now(),
+                duration: 500 // ms
+            });
+
+            // Create particles
+            for (let i = 0; i < 50; i++) {
+                explosions[explosions.length - 1].particles.push({
+                    x: x,
+                    y: y,
+                    angle: Math.random() * Math.PI * 2,
+                    speed: Math.random() * 3 + 2,
+                    size: Math.random() * 3 + 1,
+                    color: `hsl(${Math.random() * 30 + 20}, 100%, 50%)`
+                });
+            }
+        }
+
+        function spawnPlanet() {
+            const size = Math.random() * 100 + 50;
+            planets.push({
+                x: Math.random() * (canvas.width - size) + size/2,
+                y: -size,
+                size: size,
+                speed: Math.random() * 2 + 1,
+                color: planetColors[Math.floor(Math.random() * planetColors.length)],
+                rings: Math.random() > 0.5,
+                ringColor: `hsl(${Math.random() * 360}, 70%, 50%)`
+            });
+            
+            // Schedule next planet
+            setTimeout(spawnPlanet, Math.random() * 10000 + 5000);
+        }
+
+        function spawnBonusShip() {
+            if (!gameRunning) return;
+            
+            const size = 30;
+            const multiplier = Math.random() > 0.5 ? 2 : 3;
+            bonusShips.push({
+                x: Math.random() * (canvas.width - size) + size/2,
+                y: -size,
+                width: size,
+                height: size,
+                speed: 2,
+                color: bonusColors[Math.floor(Math.random() * bonusColors.length)],
+                multiplier: multiplier,
+                pattern: Math.floor(Math.random() * 2),
+                patternStep: 0,
+                collected: false
+            });
+            
+            // Schedule next bonus ship
+            setTimeout(spawnBonusShip, Math.random() * 15000 + 10000);
+        }
+
+        function spawnEnemy() {
+            if (!gameRunning) return;
+            
+            const sizeOptions = [
+                { size: 20, points: 10, health: 1 },
+                { size: 30, points: 25, health: 2 },
+                { size: 40, points: 50, health: 3 }
+            ];
+            const type = Math.floor(Math.random() * sizeOptions.length);
+            const enemyType = sizeOptions[type];
+            const pattern = Math.floor(Math.random() * 3);
+            
+            enemies.push({
+                x: Math.random() * (canvas.width - enemyType.size) + enemyType.size/2,
+                y: -enemyType.size,
+                width: enemyType.size,
+                height: enemyType.size,
+                speed: Math.random() * 2 + 1,
+                color: enemyColors[Math.floor(Math.random() * enemyColors.length)],
+                pattern: pattern,
+                patternStep: 0,
+                health: enemyType.health,
+                value: enemyType.points,
+                lastShot: 0,
+                shootDelay: 1500 + Math.random() * 1000,
+                points: enemyType.points
+            });
+            
+            // Schedule next enemy
+            setTimeout(spawnEnemy, Math.random() * 1000 + 500);
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw stars
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+                ctx.fillStyle = star.color;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+            
+            // Handle input
+            if (keys.ArrowLeft) player.x -= player.speed;
+            if (keys.ArrowRight) player.x += player.speed;
+            if (keys.ArrowUp) player.y -= player.speed;
+            if (keys.ArrowDown) player.y += player.speed;
+            if (keys[' ']) player.shoot();
+            
+            // Update player
+            player.update();
+            
+            // Check multiplier expiration
+            if (multiplierActive && Date.now() > multiplierEndTime) {
+                multiplierActive = false;
+                scoreMultiplier = 1;
+                multiplierAnimations.push({
+                    x: canvas.width - 100,
+                    y: 50,
+                    text: "Multiplier Expired!",
+                    color: "#f00",
+                    startTime: Date.now()
+                });
+            }
+            
+            // Draw and update planets
+            planets.forEach((planet, pIndex) => {
+                // Move planet
+                planet.y += planet.speed;
+                
+                // Draw planet
+                ctx.fillStyle = planet.color;
+                ctx.beginPath();
+                ctx.arc(planet.x, planet.y, planet.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw rings if applicable
+                if (planet.rings) {
+                    ctx.strokeStyle = planet.ringColor;
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.ellipse(planet.x, planet.y, planet.size * 1.5, planet.size * 0.3, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // Remove if off screen
+                if (planet.y > canvas.height + planet.size) {
+                    planets.splice(pIndex, 1);
+                }
+            });
+            
+            // Update and draw explosions
+            explosions.forEach((explosion, exIndex) => {
+                const progress = (Date.now() - explosion.startTime) / explosion.duration;
+                
+                if (progress >= 1) {
+                    explosions.splice(exIndex, 1);
+                } else {
+                    // Update explosion radius
+                    explosion.radius = explosion.maxRadius * (1 - progress);
+                    
+                    // Draw explosion
+                    const gradient = ctx.createRadialGradient(
+                        explosion.x, explosion.y, 0,
+                        explosion.x, explosion.y, explosion.radius
+                    );
+                    gradient.addColorStop(0, `rgba(255, 100, 0, ${1 - progress})`);
+                    gradient.addColorStop(0.7, `rgba(255, 50, 0, ${0.7 - progress * 0.7})`);
+                    gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw particles
+                    explosion.particles.forEach(particle => {
+                        particle.x += Math.cos(particle.angle) * particle.speed;
+                        particle.y += Math.sin(particle.angle) * particle.speed;
+                        
+                        ctx.fillStyle = particle.color;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size * (1 - progress), 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    
+                    // Damage ships in radius (only in first half of explosion)
+                    if (progress < 0.5) {
+                        // Damage player
+                        const distToPlayer = Math.sqrt(
+                            Math.pow(explosion.x - player.x, 2) + 
+                            Math.pow(explosion.y - player.y, 2)
+                        );
+                        
+                        if (distToPlayer < explosion.radius) {
+                            // Damage proportional to distance
+                            const damage = Math.round(explosion.damage * (1 - distToPlayer / explosion.radius));
+                            if (damage > 0) {
+                                lives -= damage;
+                                if (lives <= 0) {
+                                    gameOver();
+                                }
+                            }
+                        }
+                        
+                        // Damage enemies
+                        enemies.forEach((enemy, eIndex) => {
+                            const distToEnemy = Math.sqrt(
+                                Math.pow(explosion.x - enemy.x, 2) + 
+                                Math.pow(explosion.y - enemy.y, 2)
+                            );
+                            
+                            if (distToEnemy < explosion.radius) {
+                                // Damage proportional to distance
+                                const damage = Math.round(explosion.damage * (1 - distToEnemy / explosion.radius));
+                                if (damage > 0) {
+                                    enemy.health -= damage;
+                                    
+                                    if (enemy.health <= 0) {
+                                        const pointsEarned = enemy.value * scoreMultiplier;
+                                        score += pointsEarned;
+                                        scoreDisplay.textContent = `Score: ${score}`;
+                                        
+                                        // Add point animation
+                                        multiplierAnimations.push({
+                                            x: enemy.x,
+                                            y: enemy.y,
+                                            text: `+${pointsEarned}`,
+                                            color: '#0f0',
+                                            startTime: Date.now()
+                                        });
+                                        
+                                        // Create chain reaction explosion
+                                        createExplosion(enemy.x, enemy.y, enemy.width * 3, 1);
+                                        enemies.splice(eIndex, 1);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+            
+            // Update and draw bonus ships
+            bonusShips.forEach((bonus, bIndex) => {
+                if (bonus.collected) return;
+                
+                // Move based on pattern
+                switch(bonus.pattern) {
+                    case 0: // Straight down
+                        bonus.y += bonus.speed;
+                        break;
+                    case 1: // Slight wave
+                        bonus.y += bonus.speed;
+                        bonus.x += Math.sin(bonus.patternStep) * 1.5;
+                        bonus.patternStep += 0.05;
+                        break;
+                }
+                
+                // Draw bonus ship
+                ctx.fillStyle = bonus.color;
+                ctx.beginPath();
+                ctx.moveTo(bonus.x, bonus.y - bonus.height/2);
+                ctx.lineTo(bonus.x + bonus.width/2, bonus.y + bonus.height/2);
+                ctx.lineTo(bonus.x - bonus.width/2, bonus.y + bonus.height/2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw multiplier text
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`x${bonus.multiplier}`, bonus.x, bonus.y + bonus.height/2 + 15);
+                ctx.textAlign = 'left';
+                
+                // Check collision with player
+                if (checkCollision(
+                    bonus.x - bonus.width/2, bonus.y - bonus.height/2, bonus.width, bonus.height,
+                    player.x - player.width/2, player.y - player.height/2, player.width, player.height
+                )) {
+                    bonus.collected = true;
+                    scoreMultiplier = bonus.multiplier;
+                    multiplierActive = true;
+                    multiplierEndTime = Date.now() + 10000; // 10 seconds
+                    
+                    // Add multiplier animation
+                    multiplierAnimations.push({
+                        x: bonus.x,
+                        y: bonus.y,
+                        text: `x${bonus.multiplier} Multiplier!`,
+                        color: bonus.color,
+                        startTime: Date.now()
+                    });
+                }
+                
+                // Remove if off screen
+                if (bonus.y > canvas.height + bonus.height) {
+                    bonusShips.splice(bIndex, 1);
+                }
+            });
+            
+            // Update and draw enemies
+            enemies.forEach((enemy, eIndex) => {
+                // Move based on pattern
+                switch(enemy.pattern) {
+                    case 0: // Straight down
+                        enemy.y += enemy.speed;
+                        break;
+                    case 1: // Zig-zag
+                        enemy.y += enemy.speed;
+                        enemy.x += Math.sin(enemy.patternStep) * 2;
+                        enemy.patternStep += 0.1;
+                        break;
+                    case 2: // Circle
+                        enemy.y += enemy.speed * 0.5;
+                        enemy.x += Math.cos(enemy.patternStep) * 3;
+                        enemy.patternStep += 0.05;
+                        break;
+                }
+                
+                // Enemy shooting
+                const now = Date.now();
+                if (now - enemy.lastShot > enemy.shootDelay) {
+                    enemy.bullets = enemy.bullets || [];
+                    enemy.bullets.push({
+                        x: enemy.x,
+                        y: enemy.y + enemy.height/2,
+                        width: 4,
+                        height: 10,
+                        speed: 5,
+                        color: '#f00'
+                    });
+                    enemy.lastShot = now;
+                }
+                
+                // Update enemy bullets
+                if (enemy.bullets) {
+                    enemy.bullets.forEach((bullet, bIndex) => {
+                        bullet.y += bullet.speed;
+                        
+                        // Draw bullet
+                        ctx.fillStyle = bullet.color;
+                        ctx.fillRect(bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height);
+                        
+                        // Check collision with player
+                        if (checkCollision(
+                            bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height,
+                            player.x - player.width/2, player.y - player.height/2, player.width, player.height
+                        )) {
+                            enemy.bullets.splice(bIndex, 1);
+                            lives--;
+                            if (lives <= 0) {
+                                gameOver();
+                            }
+                        }
+                        
+                        // Remove if off screen
+                        if (bullet.y > canvas.height) {
+                            enemy.bullets.splice(bIndex, 1);
+                        }
+                    });
+                }
+                
+                // Draw enemy
+                ctx.fillStyle = enemy.color;
+                ctx.beginPath();
+                ctx.moveTo(enemy.x, enemy.y - enemy.height/2);
+                ctx.lineTo(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                ctx.lineTo(enemy.x - enemy.width/2, enemy.y + enemy.height/2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw enemy cockpit
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y - 5, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw point value
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(enemy.points, enemy.x, enemy.y + enemy.height/2 + 12);
+                ctx.textAlign = 'left';
+                
+                // Remove if off screen
+                if (enemy.y > canvas.height + enemy.height) {
+                    enemies.splice(eIndex, 1);
+                }
+            });
+            
+            // Update and draw player bullets
+            player.bullets.forEach((bullet, bIndex) => {
+                bullet.y -= bullet.speed;
+                
+                // Draw bullet
+                ctx.fillStyle = bullet.color;
+                ctx.fillRect(bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height);
+                
+                // Check collision with enemies
+                enemies.forEach((enemy, eIndex) => {
+                    if (checkCollision(
+                        bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height,
+                        enemy.x - enemy.width/2, enemy.y - enemy.height/2, enemy.width, enemy.height
+                    )) {
+                        player.bullets.splice(bIndex, 1);
+                        enemy.health--;
+                        
+                        if (enemy.health <= 0) {
+                            const pointsEarned = enemy.value * scoreMultiplier;
+                            score += pointsEarned;
+                            scoreDisplay.textContent = `Score: ${score}`;
+                            
+                            // Add point animation
+                            multiplierAnimations.push({
+                                x: enemy.x,
+                                y: enemy.y,
+                                text: `+${pointsEarned}`,
+                                color: '#0f0',
+                                startTime: Date.now()
+                            });
+                            
+                            // Create explosion
+                            createExplosion(enemy.x, enemy.y, enemy.width * 3, 1);
+                            enemies.splice(eIndex, 1);
+                        }
+                    }
+                });
+                
+                // Check collision with bonus ships
+                bonusShips.forEach((bonus, bIndex) => {
+                    if (!bonus.collected && checkCollision(
+                        bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height,
+                        bonus.x - bonus.width/2, bonus.y - bonus.height/2, bonus.width, bonus.height
+                    )) {
+                        player.bullets.splice(bIndex, 1);
+                        bonus.collected = true;
+                        scoreMultiplier = bonus.multiplier;
+                        multiplierActive = true;
+                        multiplierEndTime = Date.now() + 10000; // 10 seconds
+                        
+                        // Add multiplier animation
+                        multiplierAnimations.push({
+                            x: bonus.x,
+                            y: bonus.y,
+                            text: `x${bonus.multiplier} Multiplier!`,
+                            color: bonus.color,
+                            startTime: Date.now()
+                        });
+                    }
+                });
+                
+                // Remove if off screen
+                if (bullet.y < 0) {
+                    player.bullets.splice(bIndex, 1);
+                }
+            });
+            
+            // Draw player
+            player.draw();
+            
+            // Draw lives
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Lives: ${lives}`, 20, 30);
+            
+            // Draw multiplier status
+            if (multiplierActive) {
+                const timeLeft = Math.ceil((multiplierEndTime - Date.now()) / 1000);
+                ctx.fillStyle = '#ff0';
+                ctx.font = '20px Arial';
+                ctx.fillText(`Multiplier: x${scoreMultiplier} (${timeLeft}s)`, canvas.width - 250, 30);
+            }
+            
+            // Draw and update multiplier animations
+            multiplierAnimations.forEach((anim, index) => {
+                const elapsed = Date.now() - anim.startTime;
+                const progress = elapsed / 1000; // 1 second duration
+                
+                if (progress > 1) {
+                    multiplierAnimations.splice(index, 1);
+                } else {
+                    ctx.fillStyle = anim.color;
+                    ctx.font = '24px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(anim.text, anim.x, anim.y - progress * 50);
+                    ctx.textAlign = 'left';
+                }
+            });
+            
+            // Continue game loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
+            return x1 < x2 + w2 &&
+                   x1 + w1 > x2 &&
+                   y1 < y2 + h2 &&
+                   y1 + h1 > y2;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            gameOverDisplay.style.display = 'block';
+            gameOverDisplay.querySelector('span').textContent = `Score: ${score}`;
+            
+            // Create big explosion at player position
+            createExplosion(player.x, player.y, 100, 0);
+        }
+    </script>
+</body>
+</html>

@@ -222,25 +222,25 @@
         <main>
             <div class="update-card">
                 <div class="update-header">
-                    <h2>Next Major Update Coming Soon!</h2>
-                    <span class="version-badge">1.9.8 → 1.9.9</span>
+                    <h2>Next Update Coming Soon!</h2>
+                    <span class="version-badge">1.10.9 → 1.10.10</span>
+
                 </div>
                 
                 <p>Next Update is on...</p>
                 <p class="countdown">
                     <i class="fas fa-calendar-alt"></i>
-                    August 13, <span id="copyright-year"></span>
+                    August 20, <span id="copyright-year"></span>
                 </p>
+                <p>Check back here on August 20, 2025!</p>
                 
-                <h3>Current Features (1.9.8):</h3>
+                <h3>Current Features (1.10.9):</h3>
+                <h4>Released August 14, 2025</h4>
                 <ul class="features-list">
-                    <li>Enhanced visual improvements!</li>
-                    <li>New interface!</li>
-                    <li>Bugfixes, new games, more activities!</li>
+                    <li>NEW GAME: The Box (BETA)</li>
+                    <li>NEW GAME: Space Shooters (BETA)</li>
                 
                 </ul>
-                <p>Please note this interface is new and there may be bugs</p>
-                <p>Check back here on August 13, 2025!</p>
             </div>
             
             <div class="update-card">
@@ -248,11 +248,10 @@
                     <h2>Previous Updates</h2>
                 </div>
                 
-                <h3>Version 1.8.8 </h3>
+                <h3>Version 1.9.9 </h3>
                 <ul class="features-list">
-                    <li>New Interface!</li>
-                    <li>System Update!</li>
-                    <li>Game Improvement!</li>
+                    <li>Edited code and games!</li>
+                    <li>Bugfixes</li>
                 </ul>
             </div>
         </main>
@@ -272,7 +271,6 @@
             document.getElementById('copyright-year').textContent = year;
             document.getElementById('footer-year').textContent = year;
             
-            // Add subtle animation to cards when they come into view
             const cards = document.querySelectorAll('.update-card');
             cards.forEach(card => {
                 card.style.opacity = '0';

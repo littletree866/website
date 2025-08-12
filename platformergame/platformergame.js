@@ -1031,7 +1031,7 @@ function initGame() {
     };
     
     // Start background music
-    bgMusic.volume = 0.5;
+    bgMusic.volume = 1;
     bgMusic.play();
     
     // Load first level
