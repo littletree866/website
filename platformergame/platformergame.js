@@ -38,7 +38,10 @@ const player = {
     invincible: false,
     invincibleTimer: 0,
     facing: 1, // 1 for right, -1 for left
-    jumpEffect: false
+    jumpEffect: false,
+    shoveCooldown: 0,
+    shovePower: 15,
+    shoveRadius: 60,
 };
 
 // Game Objects
@@ -69,6 +72,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowUp") keys.up = true;
     if (e.key === "r" && (gameOver || isGameComplete)) resetGame();
     if (e.key === "m") toggleMusic();
+    if (e.key === "f") attemptShove();
 });
 
 document.addEventListener("keyup", (e) => {
@@ -124,7 +128,7 @@ function drawParticles() {
     ctx.globalAlpha = 1;
 }
 
-// Level Generation 
+// Predefined Levels 
 function generateLevel(levelNum) {
     const level = {
         platforms: [],
@@ -136,7 +140,16 @@ function generateLevel(levelNum) {
         startPos: { x: 50, y: 100 }
     };
 
-    // Add checkpoints
+    // Base platform for all levels
+    level.platforms.push({
+        x: 0, y: canvas.height - 50, 
+        width: 200, 
+        height: 20, 
+        color: "#2ECC71", 
+        type: "normal"
+    });
+
+    // Add checkpoint
     level.checkpoints.push({
         x: canvas.width - 100,
         y: canvas.height - 150,
@@ -145,129 +158,158 @@ function generateLevel(levelNum) {
         activated: false
     });
 
-    // Base platform (wider for level 1)
-    level.platforms.push({
-        x: 0, y: canvas.height - 50, 
-        width: levelNum === 1 ? 300 : 200, 
-        height: 20, 
-        color: "#2ECC71", 
-        type: "normal"
-    });
-
-    // Generate platforms with increasing difficulty
-    const platformCount = 5 + levelNum * 2;
-    let lastX = 100;
-    let lastY = canvas.height - 100;
-    
-    for (let i = 0; i < platformCount; i++) {
-        const platformWidth = 80 + Math.random() * 70;
-        const platformX = lastX + 150 + Math.random() * 100;
-        const platformY = Math.max(
-            100, 
-            Math.min(
-                canvas.height - 150,
-                lastY + (Math.random() > 0.5 ? -1 : 1) * (50 + Math.random() * 100)
-            )
+    // Level-specific designs
+    if (levelNum === 1) {
+        // Level 1 - Basic introduction
+        level.platforms.push(
+            { x: 200, y: canvas.height - 100, width: 100, height: 15, color: "#2ECC71", type: "normal" },
+            { x: 350, y: canvas.height - 150, width: 100, height: 15, color: "#3498DB", type: "normal" },
+            { x: 500, y: canvas.height - 200, width: 100, height: 15, color: "#ec932cff", type: "normal" },
+            { x: 650, y: canvas.height - 250, width: 100, height: 15, color: "#2ECC71", type: "normal" }
         );
-        
-        // More moving platforms in higher levels
-        let type;
-        const rand = Math.random();
-        if (levelNum === 1) {
-            type = rand > 0.8 ? "moving" : (rand > 0.6 ? "bouncy" : "normal");
-        } else if (levelNum === 2) {
-            type = rand > 0.7 ? "moving" : (rand > 0.4 ? "bouncy" : "normal");
-        } else {
-            type = rand > 0.6 ? "moving" : (rand > 0.3 ? "bouncy" : "normal");
-        }
-        
-        level.platforms.push({
-            x: platformX,
-            y: platformY,
-            width: platformWidth,
-            height: 15,
-            color: ["#2ECC71", "#3498DB", "#9B59B6"][Math.floor(Math.random() * 3)],
-            type: type,
-            dir: Math.random() > 0.5 ? 1 : -1,
-            speed: 1 + Math.random() * levelNum * 0.5,
-            xStart: platformX - 50,
-            xEnd: platformX + 50
+
+        // Collectibles
+        level.collectibles.push(
+            { x: 250, y: canvas.height - 125, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 400, y: canvas.height - 175, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 550, y: canvas.height - 225, width: 20, height: 20, color: "#E67E22", type: "health", collected: false, rotation: 0 }
+        );
+
+        // Simple patrol enemy
+        level.enemies.push({
+            x: 400, y: canvas.height - 190, width: 30, height: 40, color: "#8B0000", type: "patrol",
+            speed: 1.5, dir: 1, xStart: 350, xEnd: 450
         });
-        
-        lastX = platformX;
-        lastY = platformY;
+
+        // Portal at the end
+        level.portals.push({
+            x: 700, y: canvas.height - 310, width: 40, height: 60, color: "#F39C12",
+            targetLevel: 2, isFinal: false
+        });
+
+    } else if (levelNum === 2) {
+        // Level 2 - More challenging with moving platforms
+        level.platforms.push(
+            { x: 200, y: canvas.height - 100, width: 80, height: 15, color: "#3498DB", type: "moving", dir: 1, speed: 1.5, xStart: 200, xEnd: 350 },
+            { x: 400, y: canvas.height - 150, width: 80, height: 15, color: "#9B59B6", type: "bouncy" },
+            { x: 550, y: canvas.height - 200, width: 80, height: 15, color: "#2ECC71", type: "moving", dir: -1, speed: 1.5, xStart: 450, xEnd: 600 },
+            { x: 700, y: canvas.height - 250, width: 80, height: 15, color: "#3498DB", type: "normal" }
+        );
+
+        // Collectibles
+        level.collectibles.push(
+            { x: 225, y: canvas.height - 125, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 425, y: canvas.height - 175, width: 20, height: 20, color: "#22e67aff", type: "health", collected: false, rotation: 0 },
+            { x: 575, y: canvas.height - 225, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 }
+        );
+
+        // Enemies
+        level.enemies.push(
+            {
+                x: 425, y: canvas.height - 190, width: 30, height: 40, color: "#8B0000", type: "jumper",
+                jumpForce: -14, jumpDelay: 2000, velY: 0, lastJump: Date.now()
+            },
+            {
+                x: 725, y: canvas.height - 290, width: 30, height: 40, color: "#8B0000", type: "patrol",
+                speed: 2, dir: -1, xStart: 650, xEnd: 750
+            }
+        );
+
+        // Portal at the end
+        level.portals.push({
+            x: 750, y: canvas.height - 310, width: 40, height: 60, color: "#F39C12",
+            targetLevel: 3, isFinal: false
+        });
+
+    } else if (levelNum === 3) {
+        // Level 3 - Final challenge with shooter enemy
+        level.platforms.push(
+            { x: 200, y: canvas.height - 120, width: 70, height: 15, color: "#9B59B6", type: "bouncy" },
+            { x: 350, y: canvas.height - 180, width: 70, height: 15, color: "#3498DB", type: "normal" },
+            { x: 500, y: canvas.height - 240, width: 70, height: 15, color: "#2ECC71", type: "moving", dir: 1, speed: 2, xStart: 450, xEnd: 550 },
+            { x: 650, y: canvas.height - 300, width: 70, height: 15, color: "#9B59B6", type: "bouncy" }
+        );
+
+        // Collectibles
+        level.collectibles.push(
+            { x: 225, y: canvas.height - 145, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 375, y: canvas.height - 205, width: 20, height: 20, color: "#E67E22", type: "health", collected: false, rotation: 0 },
+            { x: 525, y: canvas.height - 265, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 675, y: canvas.height - 325, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 }
+        );
+
+        // Enemies
+        level.enemies.push(
+            {
+                x: 375, y: canvas.height - 220, width: 30, height: 40, color: "#8B0000", type: "shooter",
+                fireRate: 1500, lastShot: 0
+            },
+            {
+                x: 675, y: canvas.height - 340, width: 30, height: 40, color: "#8B0000", type: "jumper",
+                jumpForce: -16, jumpDelay: 1500, velY: 0, lastJump: Date.now()
+            }
+        );
+
+        // Final portal
+        level.portals.push({
+            x: 700, y: canvas.height - 360, width: 40, height: 60, color: "#F39C12",
+            targetLevel: 1, isFinal: true
+        });
     }
 
-    // Add portal at last platform
-    level.portals.push({
-        x: lastX + 30,
-        y: lastY - 60,
-        width: 40,
-        height: 60,
-        color: "#F39C12",
-        targetLevel: levelNum < 3 ? levelNum + 1 : 1,
-        isFinal: levelNum >= 3
-    });
+    return level;
+}
 
-    // Add collectibles (more in higher levels)
-    level.platforms.forEach(platform => {
-        if (Math.random() > (0.6 - levelNum * 0.1)) {
-            level.collectibles.push({
-                x: platform.x + platform.width/2 - 10,
-                y: platform.y - 25,
-                width: 20,
-                height: 20,
-                color: Math.random() > 0.7 ? "#E67E22" : "#F1C40F",
-                type: Math.random() > 0.7 ? "health" : "coin",
-                collected: false,
-                rotation: 0
-            });
-        }
-    });
-
-    // Add enemies (more and varied in higher levels)
-    level.platforms.slice(1).forEach(platform => {
-        if (Math.random() > (0.7 - levelNum * 0.1)) {
-            const enemyTypes = ["patrol", "jumper", "shooter"];
-            const weights = levelNum === 1 ? [0.6, 0.3, 0.1] : 
-                          levelNum === 2 ? [0.4, 0.4, 0.2] : 
-                          [0.3, 0.3, 0.4];
+function attemptShove() {
+    if (player.shoveCooldown > 0) return;
+    
+    // Play shove sound if available
+    if (hurtSound) {
+        hurtSound.currentTime = 0;
+        hurtSound.play();
+    }
+    
+    // Create shove particles
+    createParticles(
+        player.x + (player.facing > 0 ? player.width : 0), 
+        player.y + player.height/2, 
+        "#FF5555", 
+        10
+    );
+    
+    // Check for enemies in shove range
+    let shovedEnemy = false;
+    enemies.forEach(enemy => {
+        const distX = enemy.x - player.x;
+        const distY = enemy.y - player.y;
+        const distance = Math.sqrt(distX * distX + distY * distY);
+        
+        // Check if enemy is in front of player and within radius
+        if (distance < player.shoveRadius && 
+            (player.facing > 0 ? distX > 0 : distX < 0)) {
             
-            let rand = Math.random();
-            let enemyType;
-            if (rand < weights[0]) enemyType = enemyTypes[0];
-            else if (rand < weights[0] + weights[1]) enemyType = enemyTypes[1];
-            else enemyType = enemyTypes[2];
+            // Apply shove force
+            enemy.x += player.facing * player.shovePower;
+            enemy.velY = -5; // Small upward bump
             
-            const enemy = {
-                x: platform.x + platform.width/2 - 15,
-                y: platform.y - 40,
-                width: 30,
-                height: 40,
-                color: "#8B0000",
-                type: enemyType
-            };
-            
-            if (enemyType === "patrol") {
-                enemy.speed = 1 + Math.random() * 2;
-                enemy.dir = Math.random() > 0.5 ? 1 : -1;
-                enemy.xStart = platform.x;
-                enemy.xEnd = platform.x + platform.width - enemy.width;
-            } else if (enemyType === "shooter") {
-                enemy.fireRate = 2000 - (levelNum * 300);
-                enemy.lastShot = 0;
-            } else if (enemyType === "jumper") {
-                enemy.jumpForce = -12 - (levelNum * 2);
-                enemy.jumpDelay = 1500 + Math.random() * 1500;
-                enemy.velY = 0;
-                enemy.lastJump = Date.now(); 
+            // For patrol enemies, reverse their direction
+            if (enemy.type === "patrol") {
+                enemy.dir *= -1;
             }
             
-            level.enemies.push(enemy);
+            // For shooter enemies, interrupt their shooting
+            if (enemy.type === "shooter") {
+                enemy.lastShot = Date.now();
+            }
+            
+            shovedEnemy = true;
+            createParticles(enemy.x + enemy.width/2, enemy.y + enemy.height/2, "#FF0000", 15);
         }
     });
-
-    return level;
+    
+    if (shovedEnemy) {
+        player.shoveCooldown = 500; // 0.5 second cooldown
+    }
 }
 
 // Camera system
@@ -317,8 +359,14 @@ function loadLevel(levelNum) {
 // Game Loop
 function gameLoop(timestamp) {
     if (!gameOver && !isGameComplete) {
+        if (!gameOver && !isGameComplete) {
         const deltaTime = timestamp - lastTime || 0;
         lastTime = timestamp;
+        
+
+        if (player.shoveCooldown > 0) {
+            player.shoveCooldown -= deltaTime;
+        }
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -347,6 +395,7 @@ function gameLoop(timestamp) {
     }
 
     requestAnimationFrame(gameLoop);
+}
 }
 
 // Player Update
@@ -495,6 +544,33 @@ function updatePlayer(deltaTime) {
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 }
+
+
+     for (let i = enemies.length - 1; i >= 0; i--) {
+        const enemy = enemies[i];
+        let onPlatform = false;
+        
+        platforms.forEach(platform => {
+            if (enemy.x + enemy.width > platform.x && 
+                enemy.x < platform.x + platform.width &&
+                enemy.y + enemy.height >= platform.y && 
+                enemy.y + enemy.height <= platform.y + platform.height) {
+                onPlatform = true;
+            }
+        });
+        
+        if (!onPlatform && enemy.y < canvas.height) {
+            enemy.velY += gravity;
+            enemy.y += enemy.velY;
+        }
+        
+        // Remove enemies that fall off screen
+        if (enemy.y > canvas.height + 100) {
+            enemies.splice(i, 1);
+            score += 50; // Bonus for shoving off
+            createParticles(enemy.x + enemy.width/2, canvas.height, "#FF0000", 20);
+        }
+    }
 
 // Update Platforms
 function updatePlatforms(deltaTime) {
@@ -1064,6 +1140,18 @@ function showDamageEffect() {
     }, 300);
 }
 
+// Reset game function
+function resetGame() {
+    score = 0;
+    health = 150;
+    gameOver = false;
+    isGameComplete = false;
+    gameOverScreen.style.display = "none";
+    victoryScreen.style.display = "none";
+    loadLevel(1);
+    bgMusic.currentTime = 0;
+    bgMusic.play();
+}
+
 // Start the game
 initGame();
-                
