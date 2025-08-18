@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clicker Quest</title>
+    <style>
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --text: #333333;
+            --money: #2ecc71;
+            --tutorial: #ff9f43;
+            --highlight: #ffe100;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        #game-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        #click-button {
+            padding: 20px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        #click-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        #click-button:active {
+            transform: scale(0.95);
+        }
+        
+        #score-display {
+            font-size: 28px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--money);
+        }
+        
+        .upgrade {
+            padding: 12px 20px;
+            margin: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .upgrade:hover:not(:disabled) {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .upgrade:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #upgrades-container {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .upgrade-info {
+            margin: 10px 0;
+            font-size: 18px;
+            color: var(--dark);
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .money {
+            color: var(--money);
+            font-weight: bold;
+        }
+        
+        /* Tutorial styles */
+        #tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        #tutorial-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        #tutorial-arrow {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            color: var(--tutorial);
+            font-size: 50px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        #tutorial-message {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        #tutorial-next {
+            background-color: var(--tutorial);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Highlight styles */
+        .highlight {
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 15px var(--highlight);
+            position: relative;
+            z-index: 101;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .block-interaction {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+    <link rel="icon" href="infinity.png">
+</head>
+<body>
+    <div id="game-container">
+        <h1>Clicker Quest</h1>
+        <div id="score-display">$0</div>
+        <button id="click-button">Click Me!</button>
+        
+        <div id="upgrades-container">
+            <h2>Investments</h2>
+            <div class="upgrade-info">Money per click: <span id="click-value" class="money">$1</span></div>
+            <div class="upgrade-info">Auto-earners: <span id="auto-clickers" class="money">0</span></div>
+            
+            <button class="upgrade" id="upgrade-click">Upgrade (+$1 per click) - Cost: <span class="money">$10</span></button>
+            <button class="upgrade" id="buy-auto-clicker">Buy Auto-Earner ($1/sec) - Cost: <span class="money">$50</span></button>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" style="display: none;">
+        <div id="tutorial-box">
+            <div id="tutorial-message"></div>
+        </div>
+        <div id="tutorial-arrow">↓</div>
+    </div>
+
+    <script>
+        // Game state
+        let money = 9;
+        let moneyPerClick = 1;
+        let autoEarners = 0;
+        let upgradeClickCost = 10;
+        let autoEarnerCost = 50;
+        let tutorialStep = 0;
+        let tutorialCompleted = false;
+        let currentHighlightedElement = null;
+
+        // Format money with dollar sign and commas
+        function formatMoney(amount) {
+            return '$' + Math.floor(amount).toLocaleString();
+        }
+
+        // DOM elements
+        const scoreDisplay = document.getElementById('score-display');
+        const clickButton = document.getElementById('click-button');
+        const clickValueDisplay = document.getElementById('click-value');
+        const autoClickersDisplay = document.getElementById('auto-clickers');
+        const upgradeClickButton = document.getElementById('upgrade-click');
+        const buyAutoClickerButton = document.getElementById('buy-auto-clicker');
+        const tutorialOverlay = document.getElementById('tutorial-overlay');
+        const tutorialMessage = document.getElementById('tutorial-message');
+        const tutorialNext = document.getElementById('tutorial-next');
+        const tutorialArrow = document.getElementById('tutorial-arrow');
+        const allInteractiveElements = [clickButton, upgradeClickButton, buyAutoClickerButton];
+
+        // Highlight an element and block others
+        function highlightElement(element) {
+            // Remove previous highlight
+            if (currentHighlightedElement) {
+                currentHighlightedElement.classList.remove('highlight');
+            }
+            
+            // Block all interactions
+            allInteractiveElements.forEach(el => {
+                if (el !== element) {
+                    el.classList.add('block-interaction');
+                } else {
+                    el.classList.remove('block-interaction');
+                }
+            });
+            
+            // Add highlight to current element
+            if (element) {
+                element.classList.add('highlight');
+                currentHighlightedElement = element;
+            } else {
+                // If no element to highlight, block all interactions
+                allInteractiveElements.forEach(el => {
+                    el.classList.add('block-interaction');
+                });
+            }
+        }
+
+        // Tutorial steps
+        const tutorialSteps = [
+            {
+                message: "Welcome to Clicker Quest! Click the button to earn money.",
+                highlight: clickButton,
+                arrow: { target: clickButton, position: "top" },
+                condition: () => money > 9
+            },
+            {
+                message: "Great! Now you have $10. Let's buy your first upgrade to earn more per click!",
+                highlight: upgradeClickButton,
+                arrow: { target: upgradeClickButton, position: "left" },
+                condition: () => money >= 10
+            },
+            {
+                message: "Perfect! Now you earn $2 per click. Keep clicking to buy more upgrades!",
+                highlight: null,
+                arrow: null,
+                condition: () => moneyPerClick > 1
+            }
+        ];
+
+        // Show tutorial step
+        function showTutorialStep(step) {
+            if (tutorialCompleted || step >= tutorialSteps.length) {
+                tutorialOverlay.style.display = "none";
+                tutorialCompleted = true;
+                // Remove all blocks and highlights when tutorial ends
+                allInteractiveElements.forEach(el => {
+                    el.classList.remove('block-interaction');
+                    el.classList.remove('highlight');
+                });
+                return;
+            }
+
+            const stepData = tutorialSteps[step];
+            tutorialMessage.textContent = stepData.message;
+            
+            // Highlight the current element
+            highlightElement(stepData.highlight);
+            
+            if (stepData.arrow) {
+                const targetRect = stepData.arrow.target.getBoundingClientRect();
+                tutorialArrow.style.display = "block";
+                
+                if (stepData.arrow.position === "top") {
+                    tutorialArrow.textContent = "↓";
+                    tutorialArrow.style.left = (targetRect.left + targetRect.width/2 - 25) + "px";
+                    tutorialArrow.style.top = (targetRect.top - 60) + "px";
+                    tutorialArrow.style.transform = "rotate(0deg)";
+                } else if (stepData.arrow.position === "left") {
+                    tutorialArrow.textContent = "→";
+                    tutorialArrow.style.left = (targetRect.left - 60) + "px";
+                    tutorialArrow.style.top = (targetRect.top + targetRect.height/2 - 25) + "px";
+                    tutorialArrow.style.transform = "rotate(0deg)";
+                }
+            } else {
+                tutorialArrow.style.display = "none";
+            }
+
+            tutorialOverlay.style.display = "flex";
+        }
+
+        // Check tutorial conditions
+        function checkTutorialConditions() {
+            if (tutorialCompleted) return;
+            
+            const currentStep = tutorialSteps[tutorialStep];
+            if (currentStep.condition && currentStep.condition()) {
+                tutorialStep++;
+                showTutorialStep(tutorialStep);
+            }
+        }
+
+        // Update the display
+        function updateDisplay() {
+            scoreDisplay.textContent = formatMoney(money);
+            clickValueDisplay.textContent = formatMoney(moneyPerClick);
+            autoClickersDisplay.textContent = autoEarners;
+            
+            // Enable/disable buttons based on money
+            upgradeClickButton.disabled = money < upgradeClickCost;
+            buyAutoClickerButton.disabled = money < autoEarnerCost;
+            
+            // Update button texts with current costs
+            upgradeClickButton.innerHTML = `Upgrade (+$${moneyPerClick} per click) - Cost: <span class="money">${formatMoney(upgradeClickCost)}</span>`;
+            buyAutoClickerButton.innerHTML = `Buy Auto-Earner ($${moneyPerClick}/sec) - Cost: <span class="money">${formatMoney(autoEarnerCost)}</span>`;
+            
+            // Check tutorial progress
+            checkTutorialConditions();
+        }
+
+        // Handle click
+        clickButton.addEventListener('click', () => {
+            if (tutorialStep === 0 || !tutorialCompleted) {
+                money += moneyPerClick;
+                updateDisplay();
+                
+                // Add click animation
+                clickButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    clickButton.style.transform = 'translateY(-3px)';
+                }, 100);
+            }
+        });
+
+        // Handle click upgrade
+        upgradeClickButton.addEventListener('click', () => {
+            if (money >= upgradeClickCost && (tutorialStep === 1 || tutorialCompleted)) {
+                money -= upgradeClickCost;
+                moneyPerClick += 1;
+                upgradeClickCost = Math.floor(upgradeClickCost * 1.5);
+                updateDisplay();
+            }
+        });
+
+        // Handle auto-earner purchase
+        buyAutoClickerButton.addEventListener('click', () => {
+            if (money >= autoEarnerCost && tutorialCompleted) {
+                money -= autoEarnerCost;
+                autoEarners += 1;
+                autoEarnerCost = Math.floor(autoEarnerCost * 1.5);
+                updateDisplay();
+            }
+        });
+
+        // Auto-earner functionality
+        setInterval(() => {
+            if (autoEarners > 0) {
+                money += autoEarners * 0.1; // Each auto-earner gives $0.1 per 100ms ($1 per second)
+                updateDisplay();
+            }
+        }, 100);
+
+        // Initialize the game
+        updateDisplay();
+        
+        // Start tutorial
+        showTutorialStep(0);
+    </script>
+</body>
+</html>
