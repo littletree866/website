@@ -12,6 +12,8 @@
             --money: #2ecc71;
             --tutorial: #ff9f43;
             --highlight: #ffe100;
+            --task: #9b59b6;
+            --reward: #f39c12;
         }
         
         body {
@@ -25,13 +27,31 @@
         }
         
         #game-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 30px auto;
             padding: 30px;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             position: relative;
+        }
+        
+        .game-sections {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        
+        .main-section {
+            flex: 2;
+        }
+        
+        .tasks-section {
+            flex: 1;
+            background: rgba(155, 89, 182, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--task);
         }
         
         #click-button {
@@ -117,50 +137,54 @@
             display: inline-block;
         }
         
+        h3 {
+            color: var(--task);
+            margin-bottom: 15px;
+        }
+        
         .money {
             color: var(--money);
             font-weight: bold;
         }
         
-        /* Tutorial styles */
-        #tutorial-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+        .task {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--task);
+            text-align: left;
         }
         
-        #tutorial-box {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 400px;
-            position: relative;
+        .task-progress {
+            height: 5px;
+            background: #eee;
+            border-radius: 3px;
+            margin: 5px 0;
+            overflow: hidden;
         }
         
-        #tutorial-arrow {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            color: var(--tutorial);
-            font-size: 50px;
-            animation: bounce 1s infinite;
+        .task-progress-bar {
+            height: 100%;
+            background: var(--task);
+            border-radius: 3px;
+            transition: width 0.3s ease;
         }
-
+        
+        .task-reward {
+            color: var(--reward);
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .task-complete {
+            background: #e8f5e8;
+            border-left: 4px solid var(--money);
+        }
+        
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-20px); }
-        }
-        
-        #tutorial-message {
-            margin-bottom: 20px;
-            font-size: 18px;
         }
         
         #tutorial-next {
@@ -190,229 +214,501 @@
             pointer-events: none;
             opacity: 0.6;
         }
+        
+        /* Reward animation */
+        .reward-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(243, 156, 18, 0.9);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: rewardPop 2s ease-out;
+        }
+        
+        @keyframes rewardPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        
+        .boost-active {
+            animation: boostGlow 1s infinite;
+        }
+        
+        @keyframes boostGlow {
+            0%, 100% { box-shadow: 0 0 20px var(--reward); }
+            50% { box-shadow: 0 0 40px var(--reward); }
+        }
+        
+        /* Save notification */
+        .save-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--money);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        .save-notification.show {
+            opacity: 1;
+        }
     </style>
     <link rel="icon" href="infinity.png">
 </head>
 <body>
     <div id="game-container">
         <h1>Clicker Quest</h1>
-        <div id="score-display">$0</div>
-        <button id="click-button">Click Me!</button>
-        
-        <div id="upgrades-container">
-            <h2>Investments</h2>
-            <div class="upgrade-info">Money per click: <span id="click-value" class="money">$1</span></div>
-            <div class="upgrade-info">Auto-earners: <span id="auto-clickers" class="money">0</span></div>
-            
-            <button class="upgrade" id="upgrade-click">Upgrade (+$1 per click) - Cost: <span class="money">$10</span></button>
-            <button class="upgrade" id="buy-auto-clicker">Buy Auto-Earner ($1/sec) - Cost: <span class="money">$50</span></button>
-        </div>
-    </div>
-
-    <!-- Tutorial Overlay -->
-    <div id="tutorial-overlay" style="display: none;">
-        <div id="tutorial-box">
-            <div id="tutorial-message"></div>
-        </div>
-        <div id="tutorial-arrow">↓</div>
-    </div>
-
-    <script>
-        // Game state
-        let money = 9;
-        let moneyPerClick = 1;
-        let autoEarners = 0;
-        let upgradeClickCost = 10;
-        let autoEarnerCost = 50;
-        let tutorialStep = 0;
-        let tutorialCompleted = false;
-        let currentHighlightedElement = null;
-
-        // Format money with dollar sign and commas
-        function formatMoney(amount) {
-            return '$' + Math.floor(amount).toLocaleString();
-        }
-
-        // DOM elements
-        const scoreDisplay = document.getElementById('score-display');
-        const clickButton = document.getElementById('click-button');
-        const clickValueDisplay = document.getElementById('click-value');
-        const autoClickersDisplay = document.getElementById('auto-clickers');
-        const upgradeClickButton = document.getElementById('upgrade-click');
-        const buyAutoClickerButton = document.getElementById('buy-auto-clicker');
-        const tutorialOverlay = document.getElementById('tutorial-overlay');
-        const tutorialMessage = document.getElementById('tutorial-message');
-        const tutorialNext = document.getElementById('tutorial-next');
-        const tutorialArrow = document.getElementById('tutorial-arrow');
-        const allInteractiveElements = [clickButton, upgradeClickButton, buyAutoClickerButton];
-
-        // Highlight an element and block others
-        function highlightElement(element) {
-            // Remove previous highlight
-            if (currentHighlightedElement) {
-                currentHighlightedElement.classList.remove('highlight');
-            }
-            
-            // Block all interactions
-            allInteractiveElements.forEach(el => {
-                if (el !== element) {
-                    el.classList.add('block-interaction');
-                } else {
-                    el.classList.remove('block-interaction');
-                }
-            });
-            
-            // Add highlight to current element
-            if (element) {
-                element.classList.add('highlight');
-                currentHighlightedElement = element;
-            } else {
-                // If no element to highlight, block all interactions
-                allInteractiveElements.forEach(el => {
-                    el.classList.add('block-interaction');
-                });
-            }
-        }
-
-        // Tutorial steps
-        const tutorialSteps = [
-            {
-                message: "Welcome to Clicker Quest! Click the button to earn money.",
-                highlight: clickButton,
-                arrow: { target: clickButton, position: "top" },
-                condition: () => money > 9
-            },
-            {
-                message: "Great! Now you have $10. Let's buy your first upgrade to earn more per click!",
-                highlight: upgradeClickButton,
-                arrow: { target: upgradeClickButton, position: "left" },
-                condition: () => money >= 10
-            },
-            {
-                message: "Perfect! Now you earn $2 per click. Keep clicking to buy more upgrades!",
-                highlight: null,
-                arrow: null,
-                condition: () => moneyPerClick > 1
-            }
-        ];
-
-        // Show tutorial step
-        function showTutorialStep(step) {
-            if (tutorialCompleted || step >= tutorialSteps.length) {
-                tutorialOverlay.style.display = "none";
-                tutorialCompleted = true;
-                // Remove all blocks and highlights when tutorial ends
-                allInteractiveElements.forEach(el => {
-                    el.classList.remove('block-interaction');
-                    el.classList.remove('highlight');
-                });
-                return;
-            }
-
-            const stepData = tutorialSteps[step];
-            tutorialMessage.textContent = stepData.message;
-            
-            // Highlight the current element
-            highlightElement(stepData.highlight);
-            
-            if (stepData.arrow) {
-                const targetRect = stepData.arrow.target.getBoundingClientRect();
-                tutorialArrow.style.display = "block";
+        <div class="game-sections">
+            <div class="main-section">
+                <div id="score-display">$0</div>
+                <button id="click-button">Click Me!</button>
                 
-                if (stepData.arrow.position === "top") {
-                    tutorialArrow.textContent = "↓";
-                    tutorialArrow.style.left = (targetRect.left + targetRect.width/2 - 25) + "px";
-                    tutorialArrow.style.top = (targetRect.top - 60) + "px";
-                    tutorialArrow.style.transform = "rotate(0deg)";
-                } else if (stepData.arrow.position === "left") {
-                    tutorialArrow.textContent = "→";
-                    tutorialArrow.style.left = (targetRect.left - 60) + "px";
-                    tutorialArrow.style.top = (targetRect.top + targetRect.height/2 - 25) + "px";
-                    tutorialArrow.style.transform = "rotate(0deg)";
-                }
-            } else {
-                tutorialArrow.style.display = "none";
-            }
-
-            tutorialOverlay.style.display = "flex";
-        }
-
-        // Check tutorial conditions
-        function checkTutorialConditions() {
-            if (tutorialCompleted) return;
+                <div id="upgrades-container">
+                    <h2>Investments</h2>
+                    <div class="upgrade-info">Money per click: <span id="click-value" class="money">$1</span></div>
+                    <div class="upgrade-info">Auto-earners: <span id="auto-clickers" class="money">0</span></div>
+                    
+                    <button class="upgrade" id="upgrade-click">Upgrade (+$1 per click) - Cost: <span class="money">$10</span></button>
+                    <button class="upgrade" id="buy-auto-clicker">Buy Auto-Earner ($1/sec) - Cost: <span class="money">$50</span></button>
+                </div>
+            </div>
             
-            const currentStep = tutorialSteps[tutorialStep];
-            if (currentStep.condition && currentStep.condition()) {
-                tutorialStep++;
-                showTutorialStep(tutorialStep);
+            <div class="tasks-section">
+                <h3>Tasks</h3>
+                <div id="tasks-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Notification -->
+    <div class="save-notification" id="save-notification">Game Saved!</div>
+
+   <script>
+    let money = 0;
+    let moneyPerClick = 1;
+    let autoEarners = 0;
+    let upgradeClickCost = 10;
+    let autoEarnerCost = 50;
+    let clickBoostActive = false;
+    let clickBoostEndTime = 0;
+    let totalUpgradesBought = 0;
+    let totalMoneyEarned = 0;
+    let activeTasks = [];
+    let completedTasks = new Set();
+    let lastAutoEarnTime = Date.now();
+    let lastUpdateTime = Date.now();
+    let autoEarnInterval = null;
+    let processingTask = false;
+
+    function formatMoney(amount) {
+        return '$' + Math.floor(amount).toLocaleString();
+    }
+
+    const scoreDisplay = document.getElementById('score-display');
+    const clickButton = document.getElementById('click-button');
+    const clickValueDisplay = document.getElementById('click-value');
+    const autoClickersDisplay = document.getElementById('auto-clickers');
+    const upgradeClickButton = document.getElementById('upgrade-click');
+    const buyAutoClickerButton = document.getElementById('buy-auto-clicker');
+    const tasksList = document.getElementById('tasks-list');
+
+    const taskTemplates = [
+        {
+            id: 'first_money',
+            name: 'First Earnings',
+            description: 'Reach $100',
+            check: () => totalMoneyEarned >= 100,
+            reward: { money: 50, boost: false },
+            minMoney: 0,
+            maxMoney: 500
+        },
+        {
+            id: 'first_upgrade',
+            name: 'First Investment',
+            description: 'Buy 1 upgrade',
+            check: () => totalUpgradesBought >= 1,
+            reward: { money: 25, boost: false },
+            minMoney: 0,
+            maxMoney: 500
+        },
+        {
+            id: 'first_auto',
+            name: 'First Auto-Earner',
+            description: 'Buy 1 auto-earner',
+            check: () => autoEarners >= 1,
+            reward: { money: 75, boost: false },
+            minMoney: 0,
+            maxMoney: 1000
+        },
+        {
+            id: 'money_1000',
+            name: 'Money Maker',
+            description: 'Reach $1,000',
+            check: () => totalMoneyEarned >= 1000,
+            reward: { money: 200, boost: true },
+            minMoney: 500,
+            maxMoney: 5000
+        },
+        {
+            id: 'upgrade_5',
+            name: 'Upgrade Master',
+            description: 'Buy 5 upgrades',
+            check: () => totalUpgradesBought >= 5,
+            reward: { money: 500, boost: true },
+            minMoney: 500,
+            maxMoney: 5000
+        },
+        {
+            id: 'auto_3',
+            name: 'Automation Expert',
+            description: 'Buy 3 auto-earners',
+            check: () => autoEarners >= 3,
+            reward: { money: 300, boost: false },
+            minMoney: 500,
+            maxMoney: 5000
+        },
+        {
+            id: 'money_10000',
+            name: 'Wealthy',
+            description: 'Reach $10,000',
+            check: () => totalMoneyEarned >= 10000,
+            reward: { money: 2000, boost: true },
+            minMoney: 5000,
+            maxMoney: 50000
+        },
+        {
+            id: 'upgrade_10',
+            name: 'Ultimate Investor',
+            description: 'Buy 10 upgrades',
+            check: () => totalUpgradesBought >= 10,
+            reward: { money: 1500, boost: true },
+            minMoney: 5000,
+            maxMoney: 50000
+        },
+        {
+            id: 'auto_10',
+            name: 'Automation King',
+            description: 'Buy 10 auto-earners',
+            check: () => autoEarners >= 10,
+            reward: { money: 5000, boost: true },
+            minMoney: 5000,
+            maxMoney: 50000
+        },
+        {
+            id: 'money_100000',
+            name: 'Millionaire',
+            description: 'Reach $100,000',
+            check: () => totalMoneyEarned >= 100000,
+            reward: { money: 10000, boost: true },
+            minMoney: 50000,
+            maxMoney: Infinity
+        },
+        {
+            id: 'upgrade_25',
+            name: 'Investment Guru',
+            description: 'Buy 25 upgrades',
+            check: () => totalUpgradesBought >= 25,
+            reward: { money: 10000, boost: true },
+            minMoney: 50000,
+            maxMoney: Infinity
+        },
+        {
+            id: 'auto_25',
+            name: 'Automation Emperor',
+            description: 'Buy 25 auto-earners',
+            check: () => autoEarners >= 25,
+            reward: { money: 15000, boost: true },
+            minMoney: 50000,
+            maxMoney: Infinity
+        }
+    ];
+
+    function loadGame() {
+    const savedData = localStorage.getItem('clickerQuestSave');
+    if (savedData) {
+        try {
+            const gameData = JSON.parse(savedData);
+            money = gameData.money || 0;
+            moneyPerClick = gameData.moneyPerClick || 1;
+            autoEarners = gameData.autoEarners || 0;
+            upgradeClickCost = gameData.upgradeClickCost || 10;
+            autoEarnerCost = gameData.autoEarnerCost || 50;
+            clickBoostActive = gameData.clickBoostActive || false;
+            clickBoostEndTime = gameData.clickBoostEndTime || 0;
+            totalUpgradesBought = gameData.totalUpgradesBought || 0;
+            totalMoneyEarned = gameData.totalMoneyEarned || 0;
+            completedTasks = new Set(gameData.completedTasks || []);
+            // CRITICAL: Capture the old save time first!
+            const previousSaveTime = gameData.lastAutoEarnTime || Date.now();
+            // Now set lastAutoEarnTime to the current time
+            lastAutoEarnTime = Date.now();
+
+            if (gameData.activeTasks) {
+                activeTasks = gameData.activeTasks.map(taskId => 
+                    taskTemplates.find(task => task.id === taskId)
+                ).filter(task => task);
+            }
+            
+            // Handle offline earnings SAFELY here, once.
+            if (autoEarners > 0) {
+                const offlineSeconds = (Date.now() - previousSaveTime) / 1000;
+                const offlineEarnings = autoEarners * offlineSeconds;
+                if (offlineEarnings > 0) {
+                    money += offlineEarnings;
+                    totalMoneyEarned += offlineEarnings;
+                    // You could add a notification here:
+                    console.log(`Earned $${offlineEarnings.toFixed(2)} while offline!`);
+                }
+            }
+            
+            if (clickBoostActive && Date.now() < clickBoostEndTime) {
+                clickButton.classList.add('boost-active');
+            } else {
+                clickBoostActive = false;
+                clickButton.classList.remove('boost-active');
+            }
+            
+            return true;
+        } catch (e) {
+            console.error("Error loading save file:", e);
+            return false;
+        }
+    }
+    return false;
+}    
+        
+
+    function getAvailableTasks() {
+        return taskTemplates.filter(task => 
+            !completedTasks.has(task.id) && 
+            !activeTasks.some(t => t.id === task.id) &&
+            totalMoneyEarned >= task.minMoney && 
+            totalMoneyEarned < task.maxMoney
+        );
+    }
+
+    function refreshActiveTasks() {
+        const availableTasks = getAvailableTasks();
+        while (activeTasks.length < 3 && availableTasks.length > 0) {
+            const randomIndex = Math.floor(Math.random() * availableTasks.length);
+            activeTasks.push(availableTasks[randomIndex]);
+            availableTasks.splice(randomIndex, 1);
+        }
+    }
+
+    function updateTasksDisplay() {
+        tasksList.innerHTML = '';
+        activeTasks.forEach(task => {
+            if (completedTasks.has(task.id)) return;
+            
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task';
+            taskElement.innerHTML = `
+                <div><strong>${task.name}</strong></div>
+                <div>${task.description}</div>
+                <div class="task-progress">
+                    <div class="task-progress-bar" style="width: ${task.check() ? 100 : 0}%"></div>
+                </div>
+                <div class="task-reward">
+                    Reward: ${formatMoney(task.reward.money)}${task.reward.boost ? ' + 2x Click Boost!' : ''}
+                </div>
+            `;
+            
+            if (task.check()) {
+                taskElement.classList.add('task-complete');
+                taskElement.innerHTML += '<div style="color: var(--money); margin-top: 5px;">✓ Complete! Click to claim</div>';
+                taskElement.addEventListener('click', () => claimTaskReward(task));
+            }
+            
+            tasksList.appendChild(taskElement);
+        });
+        
+        if (activeTasks.length < 3) {
+            refreshActiveTasks();
+        }
+    }
+
+    function checkTasks() {
+        if (processingTask) return;
+        
+        let completedTask = null;
+        for (const task of activeTasks) {
+            if (!completedTasks.has(task.id) && task.check()) {
+                completedTask = task;
+                break;
             }
         }
+        
+        if (completedTask) {
+            updateTasksDisplay();
+        }
+    }
 
-        // Update the display
-        function updateDisplay() {
+    function claimTaskReward(task) {
+        if (processingTask || completedTasks.has(task.id) || !task.check()) return;
+        
+        processingTask = true;
+        
+        money += task.reward.money;
+        
+        if (task.reward.boost) {
+            activateClickBoost();
+        }
+        
+        completedTasks.add(task.id);
+        activeTasks = activeTasks.filter(t => t.id !== task.id);
+        
+        showRewardAnimation(`Task Complete! +${formatMoney(task.reward.money)}${task.reward.boost ? ' + 2x Boost!' : ''}`);
+        
+        updateDisplay();
+        refreshActiveTasks();
+        updateTasksDisplay();
+        
+        processingTask = false;
+    }
+
+    function showRewardAnimation(message) {
+        const rewardElement = document.createElement('div');
+        rewardElement.className = 'reward-animation';
+        rewardElement.textContent = message;
+        document.body.appendChild(rewardElement);
+        
+        setTimeout(() => {
+            document.body.removeChild(rewardElement);
+        }, 2000);
+    }
+
+    function activateClickBoost() {
+        clickBoostActive = true;
+        clickBoostEndTime = Date.now() + 30000;
+        clickButton.classList.add('boost-active');
+        
+        const boostInterval = setInterval(() => {
+            if (Date.now() >= clickBoostEndTime) {
+                clickBoostActive = false;
+                clickButton.classList.remove('boost-active');
+                clearInterval(boostInterval);
+            }
+        }, 1000);
+    }
+
+    function getClickValue() {
+        return clickBoostActive ? moneyPerClick * 2 : moneyPerClick;
+    }
+
+    function updateDisplay() {
+        const now = Date.now();
+        if (now - lastUpdateTime > 1000) {
             scoreDisplay.textContent = formatMoney(money);
-            clickValueDisplay.textContent = formatMoney(moneyPerClick);
+            clickValueDisplay.textContent = formatMoney(getClickValue());
             autoClickersDisplay.textContent = autoEarners;
             
-            // Enable/disable buttons based on money
             upgradeClickButton.disabled = money < upgradeClickCost;
             buyAutoClickerButton.disabled = money < autoEarnerCost;
             
-            // Update button texts with current costs
             upgradeClickButton.innerHTML = `Upgrade (+$${moneyPerClick} per click) - Cost: <span class="money">${formatMoney(upgradeClickCost)}</span>`;
-            buyAutoClickerButton.innerHTML = `Buy Auto-Earner ($${moneyPerClick}/sec) - Cost: <span class="money">${formatMoney(autoEarnerCost)}</span>`;
+            buyAutoClickerButton.innerHTML = `Buy Auto-Earner ($${autoEarners + 1}/sec) - Cost: <span class="money">${formatMoney(autoEarnerCost)}</span>`;
             
-            // Check tutorial progress
-            checkTutorialConditions();
+            checkTasks();
+            lastUpdateTime = now;
         }
+    }
 
-        // Handle click
-        clickButton.addEventListener('click', () => {
-            if (tutorialStep === 0 || !tutorialCompleted) {
-                money += moneyPerClick;
-                updateDisplay();
-                
-                // Add click animation
-                clickButton.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    clickButton.style.transform = 'translateY(-3px)';
-                }, 100);
-            }
-        });
-
-        // Handle click upgrade
-        upgradeClickButton.addEventListener('click', () => {
-            if (money >= upgradeClickCost && (tutorialStep === 1 || tutorialCompleted)) {
-                money -= upgradeClickCost;
-                moneyPerClick += 1;
-                upgradeClickCost = Math.floor(upgradeClickCost * 1.5);
-                updateDisplay();
-            }
-        });
-
-        // Handle auto-earner purchase
-        buyAutoClickerButton.addEventListener('click', () => {
-            if (money >= autoEarnerCost && tutorialCompleted) {
-                money -= autoEarnerCost;
-                autoEarners += 1;
-                autoEarnerCost = Math.floor(autoEarnerCost * 1.5);
-                updateDisplay();
-            }
-        });
-
-        // Auto-earner functionality
-        setInterval(() => {
-            if (autoEarners > 0) {
-                money += autoEarners * 0.1; // Each auto-earner gives $0.1 per 100ms ($1 per second)
-                updateDisplay();
-            }
-        }, 100);
-
-        // Initialize the game
+    clickButton.addEventListener('click', () => {
+        const clickValue = getClickValue();
+        money += clickValue;
+        totalMoneyEarned += clickValue;
         updateDisplay();
         
-        // Start tutorial
-        showTutorialStep(0);
-    </script>
-</body>
+        clickButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            clickButton.style.transform = 'translateY(-3px)';
+        }, 100);
+    });
+
+    upgradeClickButton.addEventListener('click', () => {
+        if (money >= upgradeClickCost) {
+            money -= upgradeClickCost;
+            moneyPerClick += 1;
+            totalUpgradesBought++;
+            upgradeClickCost = Math.floor(upgradeClickCost * 1.25);
+            updateDisplay();
+        }
+    });
+
+    buyAutoClickerButton.addEventListener('click', () => {
+        if (money >= autoEarnerCost) {
+            money -= autoEarnerCost;
+            autoEarners += 1;
+            autoEarnerCost = Math.floor(autoEarnerCost * 1.35);
+            updateDisplay();
+            
+            if (autoEarners === 1 && !autoEarnInterval) {
+                startAutoEarnerInterval();
+            }
+        }
+    });
+
+        function startAutoEarnerInterval() {
+            if (autoEarnInterval) {
+                clearInterval(autoEarnInterval);
+            }
+            autoEarnInterval = setInterval(() => {
+                if (autoEarners > 0) {
+                    money += autoEarners;
+                    totalMoneyEarned += autoEarners;
+                    updateDisplay();
+                }
+            }, 1000); // Pays every 1000 milliseconds (1 second)
+        }
+
+        if (autoEarnInterval) {
+            clearInterval(autoEarnInterval);
+        }
+        
+        autoEarnInterval = setInterval(() => {
+            if (autoEarners > 0) {
+                const now = Date.now();
+                const elapsedSeconds = (now - lastAutoEarnTime) / 1000;
+                const earnings = autoEarners * elapsedSeconds;
+                
+                if (earnings >= 0.01) {
+                    money += earnings;
+                    totalMoneyEarned += earnings;
+                    lastAutoEarnTime = now;
+                    updateDisplay();
+                }
+            }
+        }, 1000);
+    
+
+    window.addEventListener('load', () => {
+        loadGame();
+        
+        if (activeTasks.length === 0) {
+            refreshActiveTasks();
+            updateTasksDisplay(); 
+        } else {
+            updateTasksDisplay();
+        }
+        
+        updateDisplay();
+        
+        if (autoEarners > 0 && !autoEarnInterval) {
+            startAutoEarnerInterval();
+        }
+    });
+</script>
 </html>
