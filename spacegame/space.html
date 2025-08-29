@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Space Shooter (BETA)</title>
+    <title>Space Shooter (Enhanced)</title>
     <link rel="icon" href="infinity.png">
     <style>
         body {
@@ -30,6 +30,14 @@
             position: absolute;
             top: 10px;
             left: 10px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 0 5px #0af;
+        }
+        #levelDisplay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             color: white;
             font-size: 24px;
             text-shadow: 0 0 5px #0af;
@@ -86,11 +94,37 @@
             color: white;
             text-shadow: 0 0 3px black;
         }
+        #messageDisplay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 32px;
+            text-align: center;
+            text-shadow: 0 0 10px #0af;
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #0af;
+        }
+        .typing-text {
+            border-right: 2px solid #0af;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: blink 0.7s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { border-color: transparent; }
+            50% { border-color: #0af; }
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="scoreDisplay">Score: 0</div>
+    <div id="levelDisplay">Level: 1</div>
     <div id="gameOver">GAME OVER<br><span style="font-size: 24px">Score: 0</span><br><button id="restartButton">Play Again</button></div>
     <div id="startScreen">
         <h1 style="font-size: 48px; text-shadow: 0 0 10px #0af;">GALACTIC SHOOTER</h1>
@@ -100,9 +134,9 @@
                 <p>- Use ARROW KEYS to move your ship</p>
                 <p>- Press SPACEBAR to shoot</p>
                 <p>- Destroy enemy ships to earn points</p>
-                <p>- Small ships: 10 points</p>
-                <p>- Medium ships: 25 points</p>
-                <p>- Large ships: 50 points</p>
+                <p>- Small ships: 30 points</p>
+                <p>- Medium ships: 50 points</p>
+                <p>- Large ships: 100 points</p>
                 <p>- Watch for bonus ships with score multipliers!</p>
                 <p>- Explosions damage nearby ships (including you!)</p>
                 <p>- You have 3 lives</p>
@@ -113,18 +147,21 @@
         </div>
         <button id="startButton">START MISSION</button>
     </div>
+    <div id="messageDisplay"></div>
 
     <script>
         // Game setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreDisplay = document.getElementById('scoreDisplay');
+        const levelDisplay = document.getElementById('levelDisplay');
         const gameOverDisplay = document.getElementById('gameOver');
         const startScreen = document.getElementById('startScreen');
         const startButton = document.getElementById('startButton');
         const restartButton = document.getElementById('restartButton');
         const instructionText = document.getElementById('instructionText');
         const instructions = document.getElementById('instructions');
+        const messageDisplay = document.getElementById('messageDisplay');
 
         // Set canvas size
         canvas.width = 800;
@@ -133,19 +170,24 @@
         // Game state
         let gameRunning = false;
         let score = 0;
+        let level = 1;
         let lives = 3;
         let scoreMultiplier = 1;
         let multiplierActive = false;
         let multiplierEndTime = 0;
         let multiplierAnimations = [];
         let explosions = [];
+        let enemySpawnRate = 7500; // Initial spawn rate in ms
+        let enemySpeedMultiplier = 1; // Initial speed multiplier
+
+        const powerups = [];
 
         // Player ship
         const player = {
             x: canvas.width / 2,
             y: canvas.height - 50,
-            width: 40,
-            height: 40,
+            width: 20,
+            height: 20,
             speed: 5,
             color: '#0af',
             bullets: [],
@@ -252,7 +294,21 @@
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
 
-        // Animate instructions
+        
+        function spawnLifePowerup(x, y) {
+        const size = 20;
+        powerups.push({
+            x: x,
+            y: y,
+            width: size,
+            height: size,
+            speed: 1,
+            color: '#0f0',
+            type: 'life',
+            collected: false
+        });
+    }
+
         function animateInstructions() {
             const height = instructions.clientHeight;
             const textHeight = instructionText.clientHeight;
@@ -273,12 +329,68 @@
         
         animateInstructions();
 
+        // Typewriter effect function
+        function typeWriter(text, element, speed, callback) {
+            let i = 0;
+            element.innerHTML = '';
+            element.style.display = 'block';
+            element.classList.add('typing-text');
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    element.classList.remove('typing-text');
+                    if (callback) {
+                        setTimeout(callback, 1000);
+                    }
+                }
+            }
+            
+            type();
+        }
+
+        // Level progression
+        function checkLevelProgression() {
+            const levelThresholds = [0, 1000, 2500, 5000, 8000, 12000];
+            
+            if (level < levelThresholds.length && score >= levelThresholds[level]) {
+                level++;
+                levelDisplay.textContent = `Level: ${level}`;
+                
+                // Increase difficulty
+                enemySpawnRate = Math.max(100, 500 - (level * 75));
+                enemySpeedMultiplier = 1 + (level * 0.2);
+                
+                // Show level up message
+                const messages = [
+                    "LEVEL UP! ENEMIES ARE GETTING FASTER",
+                    "ADVANCING TO NEXT PHASE. INCREASED THREAT DETECTED",
+                    "WARNING: ENEMY FLEETS STRENGTHENING",
+                    "NEXT WAVE INCOMING. PREPARE FOR HEAVY RESISTANCE",
+                    "MAXIMUM ALERT: ENEMY ARMADA APPROACHING"
+                ];
+                
+                const message = messages[Math.min(level-1, messages.length-1)];
+                typeWriter(message, messageDisplay, 50, () => {
+                    setTimeout(() => {
+                        messageDisplay.style.display = 'none';
+                    }, 2000);
+                });
+            }
+        }
+
         function startGame() {
             gameRunning = true;
             score = 0;
+            level = 1;
             lives = 3;
             scoreMultiplier = 1;
             multiplierActive = false;
+            enemySpawnRate = 500;
+            enemySpeedMultiplier = 1;
             player.x = canvas.width / 2;
             player.y = canvas.height - 50;
             player.bullets = [];
@@ -287,8 +399,17 @@
             planets.length = 0;
             explosions.length = 0;
             scoreDisplay.textContent = `Score: ${score}`;
+            levelDisplay.textContent = `Level: ${level}`;
             gameOverDisplay.style.display = 'none';
             startScreen.style.display = 'none';
+            messageDisplay.style.display = 'none';
+            
+            // Show starting message
+            typeWriter("INITIATING LAUNCH SEQUENCE. GOOD LUCK, PILOT!", messageDisplay, 50, () => {
+                setTimeout(() => {
+                    messageDisplay.style.display = 'none';
+                }, 2000);
+            });
             
             // Initial planet
             spawnPlanet();
@@ -327,6 +448,54 @@
                 });
             }
         }
+
+        function checkForChainReaction(x, y, radius) {
+            const chance = Math.random();
+            if (chance <= 0.075) { // 7.5% chance
+                createExplosion(x, y, radius * 1.5, 2); // Bigger explosion with more damage
+                
+                // Show chain reaction message
+                multiplierAnimations.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    text: "CHAIN REACTION!",
+                    color: "#f80",
+                    startTime: Date.now()
+                });
+            }
+        }
+
+        function checkForSelfDestruction(enemy) {
+        // Check if enemy is near the middle of the screen (vertical center)
+        const isNearMiddle = enemy.y > canvas.height/2 - 50 && enemy.y < canvas.height/2 + 50;
+        
+        if (isNearMiddle) {
+            // 2-4% chance of self-destruction when in the middle
+            const chance = Math.random();
+            if (chance <= 0.04) { // 4% chance
+                // Create explosion at enemy position
+                createExplosion(enemy.x, enemy.y, enemy.width * 4, 3); // Large, powerful explosion
+                
+                // Remove the enemy
+                const enemyIndex = enemies.indexOf(enemy);
+                if (enemyIndex > -1) {
+                    enemies.splice(enemyIndex, 1);
+                }
+                
+                // Show self-destruction message
+                multiplierAnimations.push({
+                    x: enemy.x,
+                    y: enemy.y - 30,
+                    text: "SELF-DESTRUCT!",
+                    color: "#f00",
+                    startTime: Date.now()
+                });
+                
+                return true;
+            }
+        }
+        return false;
+    }
 
         function spawnPlanet() {
             const size = Math.random() * 100 + 50;
@@ -370,36 +539,42 @@
             if (!gameRunning) return;
             
             const sizeOptions = [
-                { size: 20, points: 10, health: 1 },
-                { size: 30, points: 25, health: 2 },
-                { size: 40, points: 50, health: 3 }
+                { size: 20, points: 30, health: 1 },
+                { size: 30, points: 50, health: 2 },
+                { size: 40, points: 100, health: 3 }
             ];
             const type = Math.floor(Math.random() * sizeOptions.length);
             const enemyType = sizeOptions[type];
             const pattern = Math.floor(Math.random() * 3);
+            
+            // Adjust enemy health based on level
+            const healthBonus = Math.floor((level - 1) / 2);
             
             enemies.push({
                 x: Math.random() * (canvas.width - enemyType.size) + enemyType.size/2,
                 y: -enemyType.size,
                 width: enemyType.size,
                 height: enemyType.size,
-                speed: Math.random() * 2 + 1,
+                speed: (Math.random() * 2 + 1) * enemySpeedMultiplier,
                 color: enemyColors[Math.floor(Math.random() * enemyColors.length)],
                 pattern: pattern,
                 patternStep: 0,
-                health: enemyType.health,
+                health: enemyType.health + healthBonus,
                 value: enemyType.points,
                 lastShot: 0,
                 shootDelay: 1500 + Math.random() * 1000,
                 points: enemyType.points
             });
             
-            // Schedule next enemy
-            setTimeout(spawnEnemy, Math.random() * 1000 + 500);
+            // Schedule next enemy with level-adjusted spawn rate
+            setTimeout(spawnEnemy, Math.random() * enemySpawnRate + 300);
         }
 
         function gameLoop() {
             if (!gameRunning) return;
+            
+            // Check level progression
+            checkLevelProgression();
             
             // Clear canvas
             ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
@@ -439,6 +614,48 @@
                 });
             }
             
+            powerups.forEach((powerup, pIndex) => {
+            // Move powerup down
+            powerup.y += powerup.speed;
+            
+            // Draw powerup (life icon)
+            ctx.fillStyle = powerup.color;
+            ctx.beginPath();
+            ctx.moveTo(powerup.x, powerup.y - powerup.height/2);
+            ctx.lineTo(powerup.x + powerup.width/2, powerup.y + powerup.height/2);
+            ctx.lineTo(powerup.x - powerup.width/2, powerup.y + powerup.height/2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw plus sign inside
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(powerup.x - 2, powerup.y - 6, 4, 12);
+            ctx.fillRect(powerup.x - 6, powerup.y - 2, 12, 4);
+            
+            // Check collision with player
+            if (checkCollision(
+                powerup.x - powerup.width/2, powerup.y - powerup.height/2, powerup.width, powerup.height,
+                player.x - player.width/2, player.y - player.height/2, player.width, player.height
+            )) {
+                powerup.collected = true;
+                lives++;
+                
+                // Show life gained message
+                multiplierAnimations.push({
+                    x: powerup.x,
+                    y: powerup.y,
+                    text: "EXTRA LIFE!",
+                    color: '#0f0',
+                    startTime: Date.now()
+                });
+            }
+            
+            // Remove if collected or off screen
+            if (powerup.collected || powerup.y > canvas.height + powerup.height) {
+                powerups.splice(pIndex, 1);
+            }
+        });
+
             // Draw and update planets
             planets.forEach((planet, pIndex) => {
                 // Move planet
@@ -525,6 +742,10 @@
                                 Math.pow(explosion.x - enemy.x, 2) + 
                                 Math.pow(explosion.y - enemy.y, 2)
                             );
+
+                            if (checkForSelfDestruction(enemy)) {
+                                return; 
+                            }
                             
                             if (distToEnemy < explosion.radius) {
                                 // Damage proportional to distance
@@ -545,10 +766,27 @@
                                             color: '#0f0',
                                             startTime: Date.now()
                                         });
+
+                                         if (Math.random() <= 0.05) {
+                                            spawnLifePowerup(enemy.x, enemy.y);
+                                            
+                                            // Show life dropped message
+                                            multiplierAnimations.push({
+                                                x: enemy.x,
+                                                y: enemy.y - 20,
+                                                text: "LIFE!",
+                                                color: '#0f0',
+                                                startTime: Date.now()
+                                            });
+                                        }
                                         
-                                        // Create chain reaction explosion
+                                        // Add this line to check for chain reaction:
+                                        checkForChainReaction(enemy.x, enemy.y, enemy.width * 2);
+                                        
+                                        // Create normal explosion
                                         createExplosion(enemy.x, enemy.y, enemy.width * 3, 1);
                                         enemies.splice(eIndex, 1);
+
                                     }
                                 }
                             }
@@ -722,7 +960,7 @@
                         player.bullets.splice(bIndex, 1);
                         enemy.health--;
                         
-                        if (enemy.health <= 0) {
+                         if (enemy.health <= 0) {
                             const pointsEarned = enemy.value * scoreMultiplier;
                             score += pointsEarned;
                             scoreDisplay.textContent = `Score: ${score}`;
@@ -735,6 +973,22 @@
                                 color: '#0f0',
                                 startTime: Date.now()
                             });
+                            
+                             if (Math.random() <= 0.01) {
+                                spawnLifePowerup(enemy.x, enemy.y);
+                                
+                                // Show life dropped message
+                                multiplierAnimations.push({
+                                    x: enemy.x,
+                                    y: enemy.y - 20,
+                                    text: "LIFE!",
+                                    color: '#0f0',
+                                    startTime: Date.now()
+                                });
+                            }
+
+                            // Add this line to check for chain reaction:
+                            checkForChainReaction(enemy.x, enemy.y, enemy.width * 2);
                             
                             // Create explosion
                             createExplosion(enemy.x, enemy.y, enemy.width * 3, 1);
