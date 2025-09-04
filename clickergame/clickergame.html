@@ -9,13 +9,12 @@
             --dark: #2c3e50;
             --light: #f8f9fa;
             --text: #333333;
-            --money: #2ecc71;
+            --money: #27ae60;
             --tutorial: #ff9f43;
             --highlight: #ffe100;
             --task: #9b59b6;
             --reward: #f39c12;
         }
-        
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -25,7 +24,6 @@
             color: var(--text);
             min-height: 100vh;
         }
-        
         #game-container {
             max-width: 800px;
             margin: 30px auto;
@@ -35,17 +33,14 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             position: relative;
         }
-        
         .game-sections {
             display: flex;
             gap: 20px;
             justify-content: space-between;
         }
-        
         .main-section {
             flex: 2;
         }
-        
         .tasks-section {
             flex: 1;
             background: rgba(155, 89, 182, 0.1);
@@ -53,7 +48,6 @@
             border-radius: 10px;
             border: 2px solid var(--task);
         }
-        
         #click-button {
             padding: 20px 40px;
             font-size: 20px;
@@ -67,23 +61,19 @@
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
         #click-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(0, 0, 0, 0.15);
         }
-        
         #click-button:active {
             transform: scale(0.95);
         }
-        
         #score-display {
             font-size: 28px;
             margin: 20px 0;
             font-weight: bold;
             color: var(--money);
         }
-        
         .upgrade {
             padding: 12px 20px;
             margin: 8px;
@@ -99,36 +89,30 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: relative;
         }
-        
         .upgrade:hover:not(:disabled) {
             background: var(--secondary);
             transform: translateY(-2px);
         }
-        
         .upgrade:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
-        
         #upgrades-container {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        
         .upgrade-info {
             margin: 10px 0;
             font-size: 18px;
             color: var(--dark);
         }
-        
         h1 {
             color: var(--dark);
             margin-bottom: 20px;
             font-size: 2.5em;
         }
-        
         h2 {
             color: var(--dark);
             margin-bottom: 15px;
@@ -136,17 +120,14 @@
             padding-bottom: 10px;
             display: inline-block;
         }
-        
         h3 {
             color: var(--task);
             margin-bottom: 15px;
         }
-        
         .money {
             color: var(--money);
             font-weight: bold;
         }
-        
         .task {
             background: white;
             padding: 10px;
@@ -155,67 +136,46 @@
             border-left: 4px solid var(--task);
             text-align: left;
         }
-        
         .task-progress {
-            height: 5px;
+            height: 10px;
             background: #eee;
             border-radius: 3px;
             margin: 5px 0;
             overflow: hidden;
         }
-        
         .task-progress-bar {
             height: 100%;
             background: var(--task);
             border-radius: 3px;
             transition: width 0.3s ease;
         }
-        
         .task-reward {
             color: var(--reward);
             font-weight: bold;
             font-size: 14px;
         }
-        
         .task-complete {
             background: #e8f5e8;
             border-left: 4px solid var(--money);
         }
-        
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-20px); }
         }
-        
-        #tutorial-next {
-            background-color: var(--tutorial);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        /* Highlight styles */
         .highlight {
             animation: pulse 1s infinite;
             box-shadow: 0 0 15px var(--highlight);
             position: relative;
             z-index: 101;
         }
-        
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
-        
         .block-interaction {
             pointer-events: none;
             opacity: 0.6;
         }
-        
-        /* Reward animation */
         .reward-animation {
             position: fixed;
             top: 50%;
@@ -230,23 +190,18 @@
             z-index: 1000;
             animation: rewardPop 2s ease-out;
         }
-        
         @keyframes rewardPop {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
-        
         .boost-active {
             animation: boostGlow 1s infinite;
         }
-        
         @keyframes boostGlow {
             0%, 100% { box-shadow: 0 0 20px var(--reward); }
             50% { box-shadow: 0 0 40px var(--reward); }
         }
-        
-        /* Save notification */
         .save-notification {
             position: fixed;
             bottom: 20px;
@@ -260,9 +215,31 @@
             transition: opacity 0.3s;
             z-index: 1000;
         }
-        
         .save-notification.show {
             opacity: 1;
+        }
+        #boost-timer {
+            font-size: 16px;
+            color: var(--reward);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .control-buttons {
+            margin: 15px 0;
+        }
+        .control-buttons button {
+            margin: 0 8px;
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .control-buttons button:hover {
+            background: var(--secondary);
         }
     </style>
     <link rel="icon" href="check.png">
@@ -270,32 +247,33 @@
 <body>
     <div id="game-container">
         <h1>Clicker Quest</h1>
+        <div class="control-buttons">
+            <button id="save-btn">Save Game</button>
+            <button id="reset-btn">Reset Game</button>
+        </div>
+        <div id="boost-timer"></div>
         <div class="game-sections">
             <div class="main-section">
                 <div id="score-display">$0</div>
                 <button id="click-button">Click Me!</button>
-                
                 <div id="upgrades-container">
                     <h2>Investments</h2>
                     <div class="upgrade-info">Money per click: <span id="click-value" class="money">$1</span></div>
                     <div class="upgrade-info">Auto-earners: <span id="auto-clickers" class="money">0</span></div>
-                    
                     <button class="upgrade" id="upgrade-click">Upgrade (+$1 per click) - Cost: <span class="money">$10</span></button>
                     <button class="upgrade" id="buy-auto-clicker">Buy Auto-Earner ($1/sec) - Cost: <span class="money">$50</span></button>
                 </div>
             </div>
-            
             <div class="tasks-section">
                 <h3>Tasks</h3>
                 <div id="tasks-list"></div>
             </div>
         </div>
     </div>
-
-    <!-- Save Notification -->
     <div class="save-notification" id="save-notification">Game Saved!</div>
-
-   <script>
+    <audio id="click-sound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c2b7b.mp3"></audio>
+    <audio id="reward-sound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c2b7b.mp3"></audio>
+    <script>
     let money = 0;
     let moneyPerClick = 1;
     let autoEarners = 0;
@@ -311,6 +289,7 @@
     let lastUpdateTime = Date.now();
     let autoEarnInterval = null;
     let processingTask = false;
+    let boostTimerInterval = null;
 
     function formatMoney(amount) {
         return '$' + Math.floor(amount).toLocaleString();
@@ -323,6 +302,12 @@
     const upgradeClickButton = document.getElementById('upgrade-click');
     const buyAutoClickerButton = document.getElementById('buy-auto-clicker');
     const tasksList = document.getElementById('tasks-list');
+    const saveBtn = document.getElementById('save-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const saveNotification = document.getElementById('save-notification');
+    const clickSound = document.getElementById('click-sound');
+    const rewardSound = document.getElementById('reward-sound');
+    const boostTimer = document.getElementById('boost-timer');
 
     const taskTemplates = [
         {
@@ -436,65 +421,88 @@
     ];
 
     function loadGame() {
-    const savedData = localStorage.getItem('clickerQuestSave');
-    if (savedData) {
-        try {
-            const gameData = JSON.parse(savedData);
-            money = gameData.money || 0;
-            moneyPerClick = gameData.moneyPerClick || 1;
-            autoEarners = gameData.autoEarners || 0;
-            upgradeClickCost = gameData.upgradeClickCost || 10;
-            autoEarnerCost = gameData.autoEarnerCost || 50;
-            clickBoostActive = gameData.clickBoostActive || false;
-            clickBoostEndTime = gameData.clickBoostEndTime || 0;
-            totalUpgradesBought = gameData.totalUpgradesBought || 0;
-            totalMoneyEarned = gameData.totalMoneyEarned || 0;
-            completedTasks = new Set(gameData.completedTasks || []);
-            // CRITICAL: Capture the old save time first!
-            const previousSaveTime = gameData.lastAutoEarnTime || Date.now();
-            // Now set lastAutoEarnTime to the current time
-            lastAutoEarnTime = Date.now();
-
-            if (gameData.activeTasks) {
-                activeTasks = gameData.activeTasks.map(taskId => 
-                    taskTemplates.find(task => task.id === taskId)
-                ).filter(task => task);
-            }
-            
-            // Handle offline earnings SAFELY here, once.
-            if (autoEarners > 0) {
-                const offlineSeconds = (Date.now() - previousSaveTime) / 1000;
-                const offlineEarnings = autoEarners * offlineSeconds;
-                if (offlineEarnings > 0) {
-                    money += offlineEarnings;
-                    totalMoneyEarned += offlineEarnings;
-                    // You could add a notification here:
-                    console.log(`Earned $${offlineEarnings.toFixed(2)} while offline!`);
+        const savedData = localStorage.getItem('clickerQuestSave');
+        if (savedData) {
+            try {
+                const gameData = JSON.parse(savedData);
+                money = gameData.money || 0;
+                moneyPerClick = gameData.moneyPerClick || 1;
+                autoEarners = gameData.autoEarners || 0;
+                upgradeClickCost = gameData.upgradeClickCost || 10;
+                autoEarnerCost = gameData.autoEarnerCost || 50;
+                clickBoostActive = gameData.clickBoostActive || false;
+                clickBoostEndTime = gameData.clickBoostEndTime || 0;
+                totalUpgradesBought = gameData.totalUpgradesBought || 0;
+                totalMoneyEarned = gameData.totalMoneyEarned || 0;
+                completedTasks = new Set(gameData.completedTasks || []);
+                const previousSaveTime = gameData.lastAutoEarnTime || Date.now();
+                lastAutoEarnTime = Date.now();
+                if (gameData.activeTasks) {
+                    activeTasks = gameData.activeTasks.map(taskId =>
+                        taskTemplates.find(task => task.id === taskId)
+                    ).filter(task => task);
                 }
+                // Handle offline earnings
+                if (autoEarners > 0) {
+                    const offlineSeconds = (Date.now() - previousSaveTime) / 1000;
+                    const offlineEarnings = autoEarners * offlineSeconds;
+                    if (offlineEarnings > 0) {
+                        money += offlineEarnings;
+                        totalMoneyEarned += offlineEarnings;
+                        showRewardAnimation(`Offline earnings: +${formatMoney(offlineEarnings)}`);
+                    }
+                }
+                if (clickBoostActive && Date.now() < clickBoostEndTime) {
+                    clickButton.classList.add('boost-active');
+                    startBoostTimer();
+                } else {
+                    clickBoostActive = false;
+                    clickButton.classList.remove('boost-active');
+                    stopBoostTimer();
+                }
+                return true;
+            } catch (e) {
+                console.error("Error loading save file:", e);
+                return false;
             }
-            
-            if (clickBoostActive && Date.now() < clickBoostEndTime) {
-                clickButton.classList.add('boost-active');
-            } else {
-                clickBoostActive = false;
-                clickButton.classList.remove('boost-active');
-            }
-            
-            return true;
-        } catch (e) {
-            console.error("Error loading save file:", e);
-            return false;
+        }
+        return false;
+    }
+
+    function saveGame(showNotif = true) {
+        const gameData = {
+            money,
+            moneyPerClick,
+            autoEarners,
+            upgradeClickCost,
+            autoEarnerCost,
+            clickBoostActive,
+            clickBoostEndTime,
+            totalUpgradesBought,
+            totalMoneyEarned,
+            completedTasks: Array.from(completedTasks),
+            activeTasks: activeTasks.map(t => t.id),
+            lastAutoEarnTime: Date.now()
+        };
+        localStorage.setItem('clickerQuestSave', JSON.stringify(gameData));
+        if (showNotif) {
+            saveNotification.classList.add('show');
+            setTimeout(() => saveNotification.classList.remove('show'), 1200);
         }
     }
-    return false;
-}    
-        
+
+    function resetGame() {
+        if (confirm("Are you sure you want to reset your progress?")) {
+            localStorage.removeItem('clickerQuestSave');
+            location.reload();
+        }
+    }
 
     function getAvailableTasks() {
-        return taskTemplates.filter(task => 
-            !completedTasks.has(task.id) && 
+        return taskTemplates.filter(task =>
+            !completedTasks.has(task.id) &&
             !activeTasks.some(t => t.id === task.id) &&
-            totalMoneyEarned >= task.minMoney && 
+            totalMoneyEarned >= task.minMoney &&
             totalMoneyEarned < task.maxMoney
         );
     }
@@ -512,29 +520,36 @@
         tasksList.innerHTML = '';
         activeTasks.forEach(task => {
             if (completedTasks.has(task.id)) return;
-            
             const taskElement = document.createElement('div');
             taskElement.className = 'task';
+            let progress = 0;
+            if (task.id.startsWith('money_')) {
+                const target = parseInt(task.description.replace(/\D/g, ''));
+                progress = Math.min(100, (totalMoneyEarned / target) * 100);
+            } else if (task.id.startsWith('upgrade_')) {
+                const target = parseInt(task.description.replace(/\D/g, ''));
+                progress = Math.min(100, (totalUpgradesBought / target) * 100);
+            } else if (task.id.startsWith('auto_')) {
+                const target = parseInt(task.description.replace(/\D/g, ''));
+                progress = Math.min(100, (autoEarners / target) * 100);
+            }
             taskElement.innerHTML = `
                 <div><strong>${task.name}</strong></div>
                 <div>${task.description}</div>
                 <div class="task-progress">
-                    <div class="task-progress-bar" style="width: ${task.check() ? 100 : 0}%"></div>
+                    <div class="task-progress-bar" style="width: ${progress}%"></div>
                 </div>
                 <div class="task-reward">
                     Reward: ${formatMoney(task.reward.money)}${task.reward.boost ? ' + 2x Click Boost!' : ''}
                 </div>
             `;
-            
             if (task.check()) {
                 taskElement.classList.add('task-complete');
                 taskElement.innerHTML += '<div style="color: var(--money); margin-top: 5px;">✓ Complete! Click to claim</div>';
                 taskElement.addEventListener('click', () => claimTaskReward(task));
             }
-            
             tasksList.appendChild(taskElement);
         });
-        
         if (activeTasks.length < 3) {
             refreshActiveTasks();
         }
@@ -542,7 +557,6 @@
 
     function checkTasks() {
         if (processingTask) return;
-        
         let completedTask = null;
         for (const task of activeTasks) {
             if (!completedTasks.has(task.id) && task.check()) {
@@ -550,7 +564,6 @@
                 break;
             }
         }
-        
         if (completedTask) {
             updateTasksDisplay();
         }
@@ -558,24 +571,20 @@
 
     function claimTaskReward(task) {
         if (processingTask || completedTasks.has(task.id) || !task.check()) return;
-        
         processingTask = true;
-        
         money += task.reward.money;
-        
         if (task.reward.boost) {
             activateClickBoost();
         }
-        
         completedTasks.add(task.id);
         activeTasks = activeTasks.filter(t => t.id !== task.id);
-        
         showRewardAnimation(`Task Complete! +${formatMoney(task.reward.money)}${task.reward.boost ? ' + 2x Boost!' : ''}`);
-        
+        rewardSound.currentTime = 0;
+        rewardSound.play();
         updateDisplay();
         refreshActiveTasks();
         updateTasksDisplay();
-        
+        saveGame(false);
         processingTask = false;
     }
 
@@ -584,7 +593,6 @@
         rewardElement.className = 'reward-animation';
         rewardElement.textContent = message;
         document.body.appendChild(rewardElement);
-        
         setTimeout(() => {
             document.body.removeChild(rewardElement);
         }, 2000);
@@ -594,14 +602,30 @@
         clickBoostActive = true;
         clickBoostEndTime = Date.now() + 30000;
         clickButton.classList.add('boost-active');
-        
-        const boostInterval = setInterval(() => {
-            if (Date.now() >= clickBoostEndTime) {
+        startBoostTimer();
+    }
+
+    function startBoostTimer() {
+        stopBoostTimer();
+        boostTimerInterval = setInterval(() => {
+            const remaining = Math.max(0, Math.floor((clickBoostEndTime - Date.now()) / 1000));
+            if (clickBoostActive && remaining > 0) {
+                boostTimer.textContent = `Boost active! ${remaining}s left`;
+            } else {
                 clickBoostActive = false;
                 clickButton.classList.remove('boost-active');
-                clearInterval(boostInterval);
+                boostTimer.textContent = '';
+                stopBoostTimer();
             }
-        }, 1000);
+        }, 500);
+    }
+
+    function stopBoostTimer() {
+        if (boostTimerInterval) {
+            clearInterval(boostTimerInterval);
+            boostTimerInterval = null;
+        }
+        boostTimer.textContent = '';
     }
 
     function getClickValue() {
@@ -609,21 +633,14 @@
     }
 
     function updateDisplay() {
-        const now = Date.now();
-        if (now - lastUpdateTime > 1000) {
-            scoreDisplay.textContent = formatMoney(money);
-            clickValueDisplay.textContent = formatMoney(getClickValue());
-            autoClickersDisplay.textContent = autoEarners;
-            
-            upgradeClickButton.disabled = money < upgradeClickCost;
-            buyAutoClickerButton.disabled = money < autoEarnerCost;
-            
-            upgradeClickButton.innerHTML = `Upgrade (+$${moneyPerClick} per click) - Cost: <span class="money">${formatMoney(upgradeClickCost)}</span>`;
-            buyAutoClickerButton.innerHTML = `Buy Auto-Earner ($${autoEarners + 1}/sec) - Cost: <span class="money">${formatMoney(autoEarnerCost)}</span>`;
-            
-            checkTasks();
-            lastUpdateTime = now;
-        }
+        scoreDisplay.textContent = formatMoney(money);
+        clickValueDisplay.textContent = formatMoney(getClickValue());
+        autoClickersDisplay.textContent = autoEarners;
+        upgradeClickButton.disabled = money < upgradeClickCost;
+        buyAutoClickerButton.disabled = money < autoEarnerCost;
+        upgradeClickButton.innerHTML = `Upgrade (+$${moneyPerClick} per click) - Cost: <span class="money">${formatMoney(upgradeClickCost)}</span>`;
+        buyAutoClickerButton.innerHTML = `Buy Auto-Earner ($${autoEarners + 1}/sec) - Cost: <span class="money">${formatMoney(autoEarnerCost)}</span>`;
+        checkTasks();
     }
 
     clickButton.addEventListener('click', () => {
@@ -631,11 +648,13 @@
         money += clickValue;
         totalMoneyEarned += clickValue;
         updateDisplay();
-        
+        clickSound.currentTime = 0;
+        clickSound.play();
         clickButton.style.transform = 'scale(0.95)';
         setTimeout(() => {
-            clickButton.style.transform = 'translateY(-3px)';
+            clickButton.style.transform = '';
         }, 100);
+        saveGame(false);
     });
 
     upgradeClickButton.addEventListener('click', () => {
@@ -645,6 +664,7 @@
             totalUpgradesBought++;
             upgradeClickCost = Math.floor(upgradeClickCost * 1.25);
             updateDisplay();
+            saveGame(false);
         }
     });
 
@@ -654,61 +674,47 @@
             autoEarners += 1;
             autoEarnerCost = Math.floor(autoEarnerCost * 1.35);
             updateDisplay();
-            
+            saveGame(false);
             if (autoEarners === 1 && !autoEarnInterval) {
                 startAutoEarnerInterval();
             }
         }
     });
 
-        function startAutoEarnerInterval() {
-            if (autoEarnInterval) {
-                clearInterval(autoEarnInterval);
-            }
-            autoEarnInterval = setInterval(() => {
-                if (autoEarners > 0) {
-                    money += autoEarners;
-                    totalMoneyEarned += autoEarners;
-                    updateDisplay();
-                }
-            }, 1000); // Pays every 1000 milliseconds (1 second)
-        }
-
-        if (autoEarnInterval) {
-            clearInterval(autoEarnInterval);
-        }
-        
+    function startAutoEarnerInterval() {
+        if (autoEarnInterval) clearInterval(autoEarnInterval);
         autoEarnInterval = setInterval(() => {
             if (autoEarners > 0) {
-                const now = Date.now();
-                const elapsedSeconds = (now - lastAutoEarnTime) / 1000;
-                const earnings = autoEarners * elapsedSeconds;
-                
-                if (earnings >= 0.01) {
-                    money += earnings;
-                    totalMoneyEarned += earnings;
-                    lastAutoEarnTime = now;
-                    updateDisplay();
-                }
+                money += autoEarners;
+                totalMoneyEarned += autoEarners;
+                updateDisplay();
+                saveGame(false);
             }
         }, 1000);
-    
+    }
+
+    // Only one auto-earner interval runs
+    if (autoEarnInterval) clearInterval(autoEarnInterval);
+    startAutoEarnerInterval();
+
+    // Auto-save every 30 seconds
+    setInterval(() => saveGame(false), 30000);
+
+    saveBtn.addEventListener('click', () => saveGame(true));
+    resetBtn.addEventListener('click', resetGame);
 
     window.addEventListener('load', () => {
         loadGame();
-        
         if (activeTasks.length === 0) {
             refreshActiveTasks();
-            updateTasksDisplay(); 
+            updateTasksDisplay();
         } else {
             updateTasksDisplay();
         }
-        
         updateDisplay();
-        
         if (autoEarners > 0 && !autoEarnInterval) {
             startAutoEarnerInterval();
         }
     });
-</script>
+    </script>
 </html>
