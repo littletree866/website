@@ -208,6 +208,9 @@ h1 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .spell-btn {
@@ -242,6 +245,12 @@ h1 {
 
 .spell-btn:hover::before {
     left: 100%;
+}
+
+.mana-cost {
+    font-size: 0.9em;
+    opacity: 0.8;
+    color: #4cc9f0;
 }
 
 .action-btn {
@@ -315,10 +324,11 @@ h1 {
 
 .spell-effect {
     position: absolute;
-    font-size: 60px;
+    font-size: 2em;
     animation: spellEffect 0.7s forwards;
     pointer-events: none;
     z-index: 10;
+    text-shadow: 0 0 10px currentColor;
 }
 
 /* Powerful spell buttons */

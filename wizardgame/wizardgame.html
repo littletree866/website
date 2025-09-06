@@ -6,8 +6,102 @@
     <title>Wizard Battle</title>
     <link rel="stylesheet" href="wizardgame.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .spell-buttons {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
+            }
+            
+            .spell-btn {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+        }
+        
+        .preload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .spell-effect {
+            position: absolute;
+            pointer-events: none;
+            animation: spellFade 0.8s forwards;
+        }
+
+        @keyframes spellFade {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        .spell-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spell-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .spell-btn:not(:disabled):hover::after {
+            transform: translateX(100%);
+        }
+
+        .enemy {
+            transition: all 0.3s ease;
+        }
+
+        .enemy.damaged {
+            animation: damage 0.3s ease-in-out;
+        }
+
+        @keyframes damage {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .spell-emoji {
+            text-shadow: 0 0 10px #ffd700,
+                         0 0 20px #ffd700,
+                         0 0 30px #ff8c00;
+            font-size: 1.5em;
+            animation: spellGlow 0.8s forwards;
+        }
+
+        @keyframes spellGlow {
+            0% { opacity: 0; transform: scale(0.5); filter: brightness(1.5); }
+            50% { opacity: 1; transform: scale(1.2); filter: brightness(2); }
+            100% { opacity: 0; transform: scale(1); filter: brightness(1.5); }
+        }
+    </style>
 </head>
 <body>
+    <div id="preload" class="preload-overlay">Loading game resources...</div>
     <div class="map-container" id="map-container">
         <h1>World Map</h1>
         <div class="map" id="map">
@@ -79,5 +173,35 @@
         </div>
     </div>
     <script src="wizardgame.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            document.getElementById('preload').style.display = 'none';
+        });
+        
+        // Add touch event support
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.classList.contains('spell-btn')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        function castSpell(type) {
+            const effect = document.createElement('div');
+            effect.className = 'spell-effect';
+            effect.style.left = '50%';
+            effect.style.top = '50%';
+            effect.style.width = '100px';
+            effect.style.height = '100px';
+            effect.style.background = type === 'fire' ? 'radial-gradient(circle, #ff4400, transparent)' :
+                                    type === 'ice' ? 'radial-gradient(circle, #00ffff, transparent)' :
+                                    'radial-gradient(circle, #ffff00, transparent)';
+            document.body.appendChild(effect);
+            setTimeout(() => effect.remove(), 800);
+        }
+
+        // Add this to your existing spell casting logic
+        enemy.classList.add('damaged');
+        setTimeout(() => enemy.classList.remove('damaged'), 300);
+    </script>
 </body>
 </html>

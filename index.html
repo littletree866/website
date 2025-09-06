@@ -26,10 +26,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: var(--text);
-            background-color: var(--light);
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .container {
@@ -45,6 +53,7 @@
             padding: 60px 0;
             text-align: center;
             margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Add shadow for depth */
         }
         
         h1 {
@@ -63,6 +72,16 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .content-link {
@@ -74,13 +93,31 @@
             text-decoration: none;
             font-weight: 600;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .content-link::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
         }
         
         .content-link:hover {
             background: #f0f4ff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .content-link:hover::after {
+            transform: translateX(100%);
         }
         
         footer {
@@ -142,7 +179,7 @@
                 <a href="spacegame/space.html" class="content-link">Space Shooters</a>
                 <a href="clickergame/clickergame.html" class="content-link">Clicker Quest</a>
                 <a href="updateinfo.html" class="content-link">Update Info</a>
-                <a href="https://codeberg.org/littletree/pages" class="content-link">Github</a>
+                <a href="https://github.com/littletree866/website" class="content-link">Github</a>
                 <!-- Add more links -->
             </div>
         </div>

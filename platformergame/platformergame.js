@@ -359,24 +359,27 @@ function loadLevel(levelNum) {
 // Game Loop
 function gameLoop(timestamp) {
     if (!gameOver && !isGameComplete) {
-        if (!gameOver && !isGameComplete) {
         const deltaTime = timestamp - lastTime || 0;
         lastTime = timestamp;
-        
 
+        // Update player cooldowns
         if (player.shoveCooldown > 0) {
             player.shoveCooldown -= deltaTime;
         }
         
+        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Core game loop updates
         updateCamera();
+        updateParallax();
         updatePlayer(deltaTime);
         updatePlatforms(deltaTime);
         updateEnemies(deltaTime);
         updateProjectiles(deltaTime);
         updateParticles();
         
+        // Draw game elements
         drawPlatforms();
         drawCollectibles();
         drawEnemies();
@@ -386,16 +389,42 @@ function gameLoop(timestamp) {
         drawPlayer();
         drawParticles();
         
+        // Update UI
         healthDisplay.textContent = health;
         scoreDisplay.textContent = score;
+        
     } else if (gameOver) {
         drawGameOver();
+        gameOverScreen.style.display = "flex";
+        finalScoreDisplay.textContent = score;
     } else if (isGameComplete) {
         victoryScreen.style.display = "flex";
+        document.getElementById("finalScoreVictory").textContent = score;
     }
 
+    // Continue game loop
     requestAnimationFrame(gameLoop);
 }
+
+// Add parallax effect
+function updateParallax() {
+    const layers = document.querySelectorAll('.bg-layer');
+    const cameraX = cameraOffset.x;
+    
+    layers.forEach((layer, index) => {
+        const speed = (index + 1) * 0.2;
+        layer.style.transform = `translateX(${-cameraX * speed}px)`;
+    });
+}
+
+// Update the gameLoop to include parallax
+function gameLoop(timestamp) {
+    if (!gameOver && !isGameComplete) {
+        // ...existing code...
+        updateParallax();
+        // ...rest of gameLoop code...
+    }
+    requestAnimationFrame(gameLoop);
 }
 
 // Player Update
@@ -416,6 +445,10 @@ function updatePlayer(deltaTime) {
         player.x += player.speed;
         player.facing = 1;
     }
+
+    // Handle touch controls
+    if (isTouchingLeft) keys.left = true;
+    if (isTouchingRight) keys.right = true;
 
     // Apply gravity with terminal velocity
     player.velY = Math.min(player.velY + GRAVITY, MAX_FALL_SPEED);

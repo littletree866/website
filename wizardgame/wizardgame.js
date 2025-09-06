@@ -116,7 +116,7 @@ function createPowerfulSpellButtons() {
     const meteorBtn = document.createElement('button');
     meteorBtn.className = 'spell-btn powerful-spell';
     meteorBtn.id = 'meteor';
-    meteorBtn.textContent = 'Meteor (30 mana)';
+    meteorBtn.innerHTML = '☄️ Meteor <span class="mana-cost">(30 mana)</span>';
     meteorBtn.style.display = 'none';
     meteorBtn.setAttribute('data-level', '0');
     meteorBtn.addEventListener('click', () => castSpell('meteor'));
@@ -127,7 +127,7 @@ function createPowerfulSpellButtons() {
     const blizzardBtn = document.createElement('button');
     blizzardBtn.className = 'spell-btn powerful-spell';
     blizzardBtn.id = 'blizzard';
-    blizzardBtn.textContent = 'Blizzard (30 mana)';
+    blizzardBtn.innerHTML = '🌨️ Blizzard <span class="mana-cost">(30 mana)</span>';
     blizzardBtn.style.display = 'none';
     blizzardBtn.setAttribute('data-level', '0');
     blizzardBtn.addEventListener('click', () => castSpell('blizzard'));
@@ -370,7 +370,16 @@ function updateUI() {
         enemyStatusEl.textContent = `Status: ${status}`;
     }
     
-    // Update spell buttons
+    // Update spell buttons with emojis
+    const spellEmojis = {
+        fireball: '🔥',
+        frostbolt: '❄️',
+        lightning: '⚡',
+        heal: '💚',
+        meteor: '☄️',
+        blizzard: '🌨️'
+    };
+    
     for (const [spell, button] of Object.entries(spellButtons)) {
         if (!button) continue;
         
@@ -382,7 +391,8 @@ function updateUI() {
         }
         
         if (spellInfo.level > 0) {
-            button.textContent = `${spell.charAt(0).toUpperCase() + spell.slice(1)} (${spellInfo.manaCost} mana)`;
+            const spellName = spell.charAt(0).toUpperCase() + spell.slice(1);
+            button.innerHTML = `${spellEmojis[spell]} ${spellName} <span class="mana-cost">(${spellInfo.manaCost} mana)</span>`;
             button.setAttribute('data-level', spellInfo.level);
         }
         
@@ -421,30 +431,30 @@ function castSpell(spell) {
     
     switch (spell) {
         case 'fireball':
-            dealDamage(spellInfo.damage, 'fireball', getFireballEmoji(spellInfo.level));
+            dealDamage(spellInfo.damage, 'fireball', '🔥'.repeat(spellInfo.level));
             break;
         case 'frostbolt':
-            dealDamage(spellInfo.damage, 'frostbolt', getFrostboltEmoji(spellInfo.level));
+            dealDamage(spellInfo.damage, 'frostbolt', '❄️'.repeat(spellInfo.level));
             gameState.enemy.isSlowed = true;
-            addToLog(`The ${gameState.enemy.name} is slowed!`);
+            addToLog(`The ${gameState.enemy.name} is slowed! ❄️`, "special");
             break;
         case 'lightning':
-            dealDamage(spellInfo.damage, 'lightning', getLightningEmoji(spellInfo.level));
+            dealDamage(spellInfo.damage, 'lightning', '⚡'.repeat(spellInfo.level));
             break;
         case 'heal':
             const healAmount = Math.min(spellInfo.amount, gameState.player.maxHealth - gameState.player.health);
             gameState.player.health += healAmount;
-            createSpellEffect(getHealEmoji(spellInfo.level), document.getElementById('player'));
-            addToLog(`You heal for ${healAmount} health.`, "special");
+            createSpellEffect('💚'.repeat(spellInfo.level), document.getElementById('player'));
+            addToLog(`You heal for ${healAmount} health. 💚`, "special");
             break;
         case 'meteor':
-            dealDamage(spellInfo.damage, 'meteor', getMeteorEmoji(spellInfo.level));
+            dealDamage(spellInfo.damage, 'meteor', '☄️'.repeat(spellInfo.level));
             break;
         case 'blizzard':
-            dealDamage(spellInfo.damage, 'blizzard', getBlizzardEmoji(spellInfo.level));
+            dealDamage(spellInfo.damage, 'blizzard', '🌨️'.repeat(spellInfo.level));
             gameState.enemy.isSlowed = true;
             gameState.enemy.isFrozen = true;
-            addToLog(`The ${gameState.enemy.name} is frozen solid!`, "special");
+            addToLog(`The ${gameState.enemy.name} is frozen solid! ❄️`, "special");
             break;
     }
     
@@ -615,7 +625,7 @@ function showUpgradeOptions() {
 function createSpellEffect(emoji, targetElement) {
     const effect = document.createElement('div');
     effect.className = 'spell-effect';
-    effect.textContent = emoji;
+    effect.innerHTML = `<span class="spell-emoji">${emoji}</span>`;
     
     const rect = targetElement.getBoundingClientRect();
     effect.style.left = `${rect.left + rect.width / 2 - 30}px`;
