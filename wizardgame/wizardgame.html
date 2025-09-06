@@ -185,8 +185,6 @@
             }
         }, { passive: false });
 
-        function castSpell(type) {
-            const effect = document.createElement('div');
             effect.className = 'spell-effect';
             effect.style.left = '50%';
             effect.style.top = '50%';
@@ -197,7 +195,6 @@
                                     'radial-gradient(circle, #ffff00, transparent)';
             document.body.appendChild(effect);
             setTimeout(() => effect.remove(), 800);
-        }
 
         // Add this to your existing spell casting logic
         enemy.classList.add('damaged');

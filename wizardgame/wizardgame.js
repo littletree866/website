@@ -82,16 +82,16 @@ const shopEl = document.getElementById('shop');
 const usePotionBtn = document.getElementById('use-potion');
 
 const spellButtons = {
-    fireball: document.getElementById('fireball'),
-    frostbolt: document.getElementById('frostbolt'),
-    lightning: document.getElementById('lightning'),
-    heal: document.getElementById('heal'),
+    fireball: document.querySelector('#fireball'),
+    frostbolt: document.querySelector('#frostbolt'),
+    lightning: document.querySelector('#lightning'),
+    heal: document.querySelector('#heal'),
     meteor: null,
     blizzard: null
 };
 
-const nextEnemyBtn = document.getElementById('next-enemy');
-const restBtn = document.getElementById('rest');
+const nextEnemyBtn = document.querySelector('#next-enemy');
+const restBtn = document.querySelector('#rest');
 
 // Initialize game
 function initGame() {
@@ -371,32 +371,24 @@ function updateUI() {
     }
     
     // Update spell buttons with emojis
-    const spellEmojis = {
-        fireball: '🔥',
-        frostbolt: '❄️',
-        lightning: '⚡',
-        heal: '💚',
-        meteor: '☄️',
-        blizzard: '🌨️'
-    };
+    spellButtons.fireball.innerHTML = `🔥 Fireball <span class="mana-cost">(${gameState.player.spells.fireball.manaCost} mana)</span>`;
+    spellButtons.frostbolt.innerHTML = `❄️ Frostbolt <span class="mana-cost">(${gameState.player.spells.frostbolt.manaCost} mana)</span>`;
+    spellButtons.lightning.innerHTML = `⚡ Lightning <span class="mana-cost">(${gameState.player.spells.lightning.manaCost} mana)</span>`;
+    spellButtons.heal.innerHTML = `💚 Heal <span class="mana-cost">(${gameState.player.spells.heal.manaCost} mana)</span>`;
     
-    for (const [spell, button] of Object.entries(spellButtons)) {
-        if (!button) continue;
-        
-        const spellInfo = gameState.player.spells[spell];
-        if (!spellInfo) continue;
-        
-        if (spell === 'meteor' || spell === 'blizzard') {
-            button.style.display = spellInfo.unlocked ? 'block' : 'none';
-        }
-        
-        if (spellInfo.level > 0) {
-            const spellName = spell.charAt(0).toUpperCase() + spell.slice(1);
-            button.innerHTML = `${spellEmojis[spell]} ${spellName} <span class="mana-cost">(${spellInfo.manaCost} mana)</span>`;
-            button.setAttribute('data-level', spellInfo.level);
-        }
-        
-        button.disabled = gameState.player.mana < spellInfo.manaCost || gameState.player.health <= 0;
+    // Meteor and Blizzard buttons are handled separately as they have unlock conditions
+    if (gameState.player.spells.meteor.unlocked) {
+        spellButtons.meteor.style.display = 'inline-block';
+        spellButtons.meteor.innerHTML = `☄️ Meteor <span class="mana-cost">(${gameState.player.spells.meteor.manaCost} mana)</span>`;
+    } else {
+        spellButtons.meteor.style.display = 'none';
+    }
+    
+    if (gameState.player.spells.blizzard.unlocked) {
+        spellButtons.blizzard.style.display = 'inline-block';
+        spellButtons.blizzard.innerHTML = `🌨️ Blizzard <span class="mana-cost">(${gameState.player.spells.blizzard.manaCost} mana)</span>`;
+    } else {
+        spellButtons.blizzard.style.display = 'none';
     }
     
     nextEnemyBtn.disabled = !gameState.enemy || (gameState.enemy.health > 0);
@@ -420,8 +412,17 @@ function addToLog(message, type = "") {
 }
 
 function castSpell(spell) {
+    if (!gameState.enemy || gameState.player.health <= 0) {
+        addToLog("Cannot cast spells right now!", "enemy-turn");
+        return;
+    }
+
     const spellInfo = gameState.player.spells[spell];
-    
+    if (!spellInfo) {
+        addToLog("Spell not found!", "enemy-turn");
+        return;
+    }
+
     if (gameState.player.mana < spellInfo.manaCost) {
         addToLog("Not enough mana!", "enemy-turn");
         return;
@@ -465,7 +466,31 @@ function castSpell(spell) {
     updateUI();
 }
 
+function createSpellEffect(emoji, targetElement) {
+    const effect = document.createElement('div');
+    effect.className = 'spell-effect';
+    effect.innerHTML = `<span class="spell-emoji">${emoji}</span>`;
+    
+    const rect = targetElement.getBoundingClientRect();
+    effect.style.position = 'absolute';
+    effect.style.left = `${rect.left + rect.width/2}px`;
+    effect.style.top = `${rect.top + rect.height/2}px`;
+    effect.style.transform = 'translate(-50%, -50%)';
+    
+    document.body.appendChild(effect);
+    
+    // Add damaged class to enemy
+    if (targetElement.id === 'enemy') {
+        targetElement.classList.add('damaged');
+        setTimeout(() => targetElement.classList.remove('damaged'), 300);
+    }
+    
+    setTimeout(() => effect.remove(), 800);
+}
+
 function dealDamage(damage, spellName, emoji) {
+    if (!gameState.enemy || gameState.enemy.health <= 0) return;
+    
     const playerElement = document.getElementById('player');
     const enemyElement = document.getElementById('enemy');
     
@@ -477,7 +502,9 @@ function dealDamage(damage, spellName, emoji) {
     setTimeout(() => {
         createSpellEffect(emoji, enemyElement);
         
+        const previousHealth = gameState.enemy.health;
         gameState.enemy.health = Math.max(0, gameState.enemy.health - damage);
+        
         addToLog(`You hit the ${gameState.enemy.name} with ${spellName} for ${damage} damage!`);
         
         if (gameState.enemy.health <= 0) {
@@ -622,22 +649,6 @@ function showUpgradeOptions() {
     addToLog(`Your ${spellName} spell upgraded to level ${spell.level}!`, "special");
 }
 
-function createSpellEffect(emoji, targetElement) {
-    const effect = document.createElement('div');
-    effect.className = 'spell-effect';
-    effect.innerHTML = `<span class="spell-emoji">${emoji}</span>`;
-    
-    const rect = targetElement.getBoundingClientRect();
-    effect.style.left = `${rect.left + rect.width / 2 - 30}px`;
-    effect.style.top = `${rect.top + rect.height / 2 - 30}px`;
-    
-    document.body.appendChild(effect);
-    
-    setTimeout(() => {
-        effect.remove();
-    }, 700);
-}
-
 function rest() {
     const healthRecovered = Math.min(30, gameState.player.maxHealth - gameState.player.health);
     const manaRecovered = Math.min(40, gameState.player.maxMana - gameState.player.mana);
@@ -750,16 +761,35 @@ function updateShopDisplay() {
 }
 
 function setupEventListeners() {
-    spellButtons.fireball.addEventListener('click', () => castSpell('fireball'));
-    spellButtons.frostbolt.addEventListener('click', () => castSpell('frostbolt'));
-    spellButtons.lightning.addEventListener('click', () => castSpell('lightning'));
-    spellButtons.heal.addEventListener('click', () => castSpell('heal'));
-    
-    nextEnemyBtn.addEventListener('click', spawnEnemy);
-    restBtn.addEventListener('click', rest);
-    returnToBattleBtn.addEventListener('click', startBattle);
-    usePotionBtn.addEventListener('click', usePotion);
+    if (spellButtons.fireball) {
+        spellButtons.fireball.addEventListener('click', () => castSpell('fireball'));
+    }
+    if (spellButtons.frostbolt) {
+        spellButtons.frostbolt.addEventListener('click', () => castSpell('frostbolt'));
+    }
+    if (spellButtons.lightning) {
+        spellButtons.lightning.addEventListener('click', () => castSpell('lightning'));
+    }
+    if (spellButtons.heal) {
+        spellButtons.heal.addEventListener('click', () => castSpell('heal'));
+    }
+    if (spellButtons.meteor) {
+        spellButtons.meteor.addEventListener('click', () => castSpell('meteor'));
+    }
+    if (spellButtons.blizzard) {
+        spellButtons.blizzard.addEventListener('click', () => castSpell('blizzard'));
+    }
+
+    if (nextEnemyBtn) nextEnemyBtn.addEventListener('click', spawnEnemy);
+    if (restBtn) restBtn.addEventListener('click', rest);
+    if (returnToBattleBtn) returnToBattleBtn.addEventListener('click', startBattle);
+    if (usePotionBtn) usePotionBtn.addEventListener('click', usePotion);
 }
+
+// Ensure window.onload is set to initialize the game
+window.onload = function() {
+    initGame();
+};
 
 window.castSpell = castSpell;
 window.buyItem = buyItem;

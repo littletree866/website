@@ -170,7 +170,7 @@ function generateLevel(levelNum) {
 
         // Collectibles
         level.collectibles.push(
-            { x: 250, y: canvas.height - 125, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 250, y: canvas.height - 125, width: 20, height: 20, color: "#0ff166ff", type: "coin", collected: false, rotation: 0 },
             { x: 400, y: canvas.height - 175, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
             { x: 550, y: canvas.height - 225, width: 20, height: 20, color: "#E67E22", type: "health", collected: false, rotation: 0 }
         );
@@ -193,7 +193,7 @@ function generateLevel(levelNum) {
             { x: 200, y: canvas.height - 100, width: 80, height: 15, color: "#3498DB", type: "moving", dir: 1, speed: 1.5, xStart: 200, xEnd: 350 },
             { x: 400, y: canvas.height - 150, width: 80, height: 15, color: "#9B59B6", type: "bouncy" },
             { x: 550, y: canvas.height - 200, width: 80, height: 15, color: "#2ECC71", type: "moving", dir: -1, speed: 1.5, xStart: 450, xEnd: 600 },
-            { x: 700, y: canvas.height - 250, width: 80, height: 15, color: "#3498DB", type: "normal" }
+            { x: 700, y: canvas.height - 250, width: 80, height: 15, color: "#c2db34ff", type: "normal" }
         );
 
         // Collectibles
@@ -206,7 +206,7 @@ function generateLevel(levelNum) {
         // Enemies
         level.enemies.push(
             {
-                x: 425, y: canvas.height - 190, width: 30, height: 40, color: "#8B0000", type: "jumper",
+                x: 425, y: canvas.height - 190, width: 30, height: 40, color: "#2a008bff", type: "jumper",
                 jumpForce: -14, jumpDelay: 2000, velY: 0, lastJump: Date.now()
             },
             {
@@ -415,16 +415,6 @@ function updateParallax() {
         const speed = (index + 1) * 0.2;
         layer.style.transform = `translateX(${-cameraX * speed}px)`;
     });
-}
-
-// Update the gameLoop to include parallax
-function gameLoop(timestamp) {
-    if (!gameOver && !isGameComplete) {
-        // ...existing code...
-        updateParallax();
-        // ...rest of gameLoop code...
-    }
-    requestAnimationFrame(gameLoop);
 }
 
 // Player Update
