@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wealth</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #6e8efb, #a777e3);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
+    h1 {
+      color: #38bb1dc5;
+    }
+    button {
+      margin: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      background: #6e8efb;
+      color: white;
+      transition: "background" 0.2s;
+    }
+    button:hover {
+      background: #5669d8;
+    }
+    .disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+    #taskArea {
+      margin-top: 15px;
+    }
+    input {
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    #message {
+      min-height: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+      transition: opacity 0.5s;
+    }
+    .income-section, .opportunities-section {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f0f4ff;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>💰 Wealth</h1>
+    <h2 id="money">Money: $1</h2>
+
+    <button id="taskBtn">Do Task</button>
+    <button id="freelanceBtn">Free Money?</button>
+    <button id="investBtn" class="disabled">Invest $10</button>
+
+    <div id="taskArea"></div>
+    <p id="message"></p>
+
+    <div class="income-section">
+      <h3>📈 Passive Income</h3>
+      <p>Each investment gives +$1 every 2 seconds.</p>
+    </div>
+
+    <div id="opportunities" class="opportunities-section" style="display:none;">
+      <h3>🌟 New Opportunities</h3>
+      <button id="partTimeBtn">Work Part-Time Job (+$10)</button>
+      <button id="stockBtn">Stock Market (Risky)</button>
+    </div>
+
+    <div id="highTierOpportunities" class="opportunities-section" style="display:none;">
+      <h3>💎 Premium Opportunities</h3>
+      <button id="consultingBtn">Consulting Work (+$30)</button>
+      <button id="cryptoBtn">Crypto Trading (Very Risky)</button>
+      <button id="startupBtn">Launch Startup (-$50, Passive +$5)</button>
+    </div>
+  </div>
+
+  <script>
+    // Cache DOM elements
+    const elements = {
+      money: document.getElementById("money"),
+      task: document.getElementById("taskBtn"),
+      freelance: document.getElementById("freelanceBtn"),
+      invest: document.getElementById("investBtn"),
+      message: document.getElementById("message"),
+      taskArea: document.getElementById("taskArea"),
+      opportunities: document.getElementById("opportunities"),
+      highTierOpportunities: document.getElementById("highTierOpportunities"),
+      partTime: document.getElementById("partTimeBtn"),
+      stock: document.getElementById("stockBtn"),
+      consulting: document.getElementById("consultingBtn"),
+      crypto: document.getElementById("cryptoBtn"),
+      startup: document.getElementById("startupBtn")
+    };
+
+    // Game state
+    const state = {
+      money: 1,
+      investments: 0,
+      investmentCost: 10,
+      lastUpdate: performance.now(),
+      cooldowns: {
+        free: 0,
+        partTime: 15,
+        stock: 20,
+        task: 0,
+        consulting: 30,
+        crypto: 45,
+        startup: 60
+      },
+      tasksCompleted: 0,
+      startups: 0,
+      freeMoneyUses: 0  // Add this line
+    };
+
+    // Debounced UI update
+    let updatePending = false;
+    function updateUI() {
+      if (!updatePending) {
+        updatePending = true;
+        requestAnimationFrame(() => {
+          elements.money.textContent = `Money: $${state.money}`;
+          elements.invest.classList.toggle("disabled", state.money < state.investmentCost);
+          elements.opportunities.style.display = state.money >= 25 ? "block" : "none";
+          elements.highTierOpportunities.style.display = state.money >= 75 ? "block" : "none";
+          elements.startup.classList.toggle("disabled", state.money < 50);
+          updatePending = false;
+        });
+      }
+    }
+
+    // Optimized message display
+    function showMessage(text) {
+      elements.message.textContent = text;
+      elements.message.style.opacity = 1;
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          elements.message.style.opacity = 0;
+        });
+      }, 3000);
+    }
+
+    // Optimized cooldown handler
+    function startCooldown(button, duration, increment) {
+      button.disabled = true;
+      const startTime = performance.now();
+      const endTime = startTime + (duration * 1000);
+
+      function updateCooldown() {
+        const now = performance.now();
+        const remaining = Math.ceil((endTime - now) / 1000);
+
+        if (remaining > 0) {
+          button.textContent = `Cooldown: ${remaining}s`;
+          requestAnimationFrame(updateCooldown);
+        } else {
+          button.disabled = false;
+          button.textContent = button.dataset.originalText || "Ready";
+          if (increment) duration += 8;
+        }
+      }
+
+      requestAnimationFrame(updateCooldown);
+      return duration;
+    }
+
+    // Event delegation for task area
+    elements.taskArea.addEventListener('click', (e) => {
+      if (e.target.id === 'submitTask') {
+        handleTaskSubmission(e);
+      }
+    });
+
+    // Passive income handler using requestAnimationFrame
+    function updatePassiveIncome(timestamp) {
+      if (state.investments > 0 || state.startups > 0) {
+        const delta = timestamp - state.lastUpdate;
+        if (delta >= 2000) {
+          state.money += state.investments;  // $1 per investment
+          state.money += state.startups * 5; // $5 per startup
+          state.lastUpdate = timestamp;
+          updateUI();
+        }
+      }
+      requestAnimationFrame(updatePassiveIncome);
+    }
+
+    // Initialize passive income
+    requestAnimationFrame(updatePassiveIncome);
+
+    // Store original button text
+    elements.freelance.dataset.originalText = "Free Money?";
+    elements.partTime.dataset.originalText = "Work Part-Time Job (+$10)";
+    elements.stock.dataset.originalText = "Stock Market (Risky)";
+    elements.consulting.dataset.originalText = "Consulting Work (+$30)";
+    elements.crypto.dataset.originalText = "Crypto Trading (Very Risky)";
+    elements.startup.dataset.originalText = "Launch Startup (-$50, Passive +$5)";
+
+    elements.freelance.addEventListener("click", () => {
+      if (!elements.freelance.disabled) {
+        state.money += 5;
+        state.freeMoneyUses++;
+        const reward = 5;
+        showMessage(`💻 You got $${reward} for free!`);
+        updateUI();
+        // Increase cooldown by 5 seconds for each use
+        const baseCooldown = state.cooldowns.free;
+        const additionalCooldown = state.freeMoneyUses * 5;
+        state.cooldowns.free = startCooldown(elements.freelance, baseCooldown + additionalCooldown, false);
+      }
+    });
+
+    // Update all button event listeners
+    elements.invest.addEventListener("click", () => {
+      if (state.money >= state.investmentCost) {
+        state.money -= state.investmentCost;
+        state.investments++;
+        state.investmentCost += 5;
+        elements.invest.textContent = `Invest $${state.investmentCost}`;
+        showMessage(`📊 You now have ${state.investments} investment(s). They generate passive income!`);
+        updateUI();
+      }
+    });
+
+    elements.partTime.addEventListener("click", () => {
+      if (!elements.partTime.disabled) {
+        state.money += 10;
+        showMessage("🛠️ You worked a part-time job and earned $10!");
+        updateUI();
+        state.cooldowns.partTime = startCooldown(elements.partTime, state.cooldowns.partTime, true);
+      }
+    });
+
+    elements.stock.addEventListener("click", () => {
+      if (!elements.stock.disabled) {
+        let outcome = Math.random();
+        if (outcome < 0.5) {
+          state.money += 20;
+          showMessage("📈 Lucky! Your stock investment paid off. +$20");
+        } else {
+          state.money -= 10;
+          if (state.money < 0) state.money = 0;
+          showMessage("📉 Ouch! The stock market dipped. -$10");
+        }
+        updateUI();
+        state.cooldowns.stock = startCooldown(elements.stock, state.cooldowns.stock, true);
+      }
+    });
+
+    // Add new event listeners
+    elements.consulting.addEventListener("click", () => {
+      if (!elements.consulting.disabled) {
+        state.money += 30;
+        showMessage("💼 You completed a consulting project! +$30");
+        updateUI();
+        state.cooldowns.consulting = startCooldown(elements.consulting, state.cooldowns.consulting, true);
+      }
+    });
+
+    elements.crypto.addEventListener("click", () => {
+      if (!elements.crypto.disabled) {
+        let outcome = Math.random();
+        if (outcome < 0.3) {
+          state.money += 50;
+          showMessage("🚀 Crypto investment successful! +$50");
+        } else {
+          state.money -= 25;
+          if (state.money < 0) state.money = 0;
+          showMessage("💥 Crypto market crashed! -$75");
+        }
+        updateUI();
+        state.cooldowns.crypto = startCooldown(elements.crypto, state.cooldowns.crypto, true);
+      }
+    });
+
+    elements.startup.addEventListener("click", () => {
+      if (!elements.startup.disabled && state.money >= 50) {
+        state.money -= 50;
+        state.startups++;
+        showMessage("🚀 You launched a startup! It will generate $5 every 2 seconds.");
+        updateUI();
+        state.cooldowns.startup = startCooldown(elements.startup, state.cooldowns.startup, true);
+      }
+    });
+
+    function generateTask() {
+      elements.taskArea.innerHTML = "";
+      const taskType = Math.random() < 0.5 ? "math" : "word";
+
+      if (taskType === "math") {
+        const a = Math.floor(Math.random() * 10);
+        const b = Math.floor(Math.random() * 10);
+        const correct = a + b;
+        elements.taskArea.innerHTML = `Solve: ${a} + ${b} = <input id="answer" type="number"> <button id="submitTask" data-answer="${correct}">Submit</button>`;
+      } else {
+        const words = ["code", "game", "money", "task", "java"];
+        const word = words[Math.floor(Math.random() * words.length)];
+        elements.taskArea.innerHTML = `Type this word: <b>${word}</b><br><input id="wordInput"> <button id="submitTask" data-word="${word}">Submit</button>`;
+      }
+    }
+
+    function handleTaskSubmission(e) {
+      const button = e.target;
+      const isWord = button.hasAttribute('data-word');
+      const input = document.getElementById(isWord ? 'wordInput' : 'answer');
+      const correct = isWord ? 
+        input.value.trim() === button.dataset.word :
+        parseInt(input.value) === parseInt(button.dataset.answer);
+
+      if (correct) {
+        state.money++;
+        state.tasksCompleted++;
+        state.cooldowns.task = state.tasksCompleted * 1000;
+        showMessage(isWord ? "✨ Well done! You earned $1." : "✅ Correct! You earned $1.");
+        startCooldown(elements.task, state.cooldowns.task / 1000, false);
+      } else {
+        showMessage("❌ Wrong answer. No money earned.");
+      }
+      
+      updateUI();
+      elements.taskArea.innerHTML = "";
+    }
+
+    // Update task button event listener
+    elements.task.addEventListener("click", () => {
+      if (!elements.task.disabled) {
+        generateTask();
+      }
+    });
+
+    // Initialize button text
+    elements.task.dataset.originalText = "Do Task";
+
+    setInterval(() => {
+      if (state.investments > 0) {
+        state.money += state.investments;
+        updateUI();
+      }
+    }, 2000);
+
+    updateUI();
+  </script>
+</body>
+</html>
