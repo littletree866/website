@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wealth</title>
+  <title>💰Wealth</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #6e8efb, #a777e3);
       color: #333;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       margin: 0;
+      gap: 20px;
+      padding: 20px;
     }
     .card {
       background: white;
@@ -36,7 +37,7 @@
       font-size: 16px;
       background: #6e8efb;
       color: white;
-      transition: "background" 0.2s;
+      transition: background-color 0.2s;
     }
     button:hover {
       background: #5669d8;
@@ -65,6 +66,67 @@
       padding: 10px;
       background: #f0f4ff;
       border-radius: 12px;
+    }
+    .market-section {
+      flex-shrink: 0;
+      width: 300px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      max-height: 80vh;
+      overflow-y: auto;
+      display: none;
+    }
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .market-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .market-actions {
+      display: flex;
+      gap: 5px;
+    }
+    .market-button {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+    .game-panels {
+      display: flex;
+      gap: 20px;
+    }
+    .panel {
+      flex-shrink: 0;
+      width: 300px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      max-height: 80vh;
+      overflow-y: auto;
+      display: none;
+    }
+    .recipe-grid, .building-grid, .asset-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .recipe-item, .building-item, .asset-item {
+      background: #f0f4ff;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: left;
     }
   </style>
 </head>
@@ -97,10 +159,45 @@
       <button id="cryptoBtn">Crypto Trading (Very Risky)</button>
       <button id="startupBtn">Launch Startup (-$50, Passive +$5)</button>
     </div>
+
+    </div>
+  </div>
+
+  <div class="game-panels">
+    <div id="marketSection" class="market-section">
+      <h3>🏪 The Market</h3>
+      <p>Buy low, sell high!</p>
+      <div id="marketGrid" class="market-grid">
+        <!-- Market items will be dynamically added here -->
+      </div>
+    </div>
+
+    <div id="craftingPanel" class="panel">
+      <h3>🛠️ Crafting</h3>
+      <p>Create valuable items from resources</p>
+      <div id="recipeGrid" class="recipe-grid">
+        <!-- Recipes will be added here -->
+      </div>
+    </div>
+
+    <div id="buildingPanel" class="panel">
+      <h3>🏗️ Construction</h3>
+      <p>Build and manage businesses</p>
+      <div id="buildingGrid" class="building-grid">
+        <!-- Buildings will be added here -->
+      </div>
+    </div>
+
+    <div id="investingPanel" class="panel">
+      <h3>💹 Long-term Investments</h3>
+      <p>Invest in appreciating assets</p>
+      <div id="assetGrid" class="asset-grid">
+        <!-- Assets will be added here -->
+      </div>
+    </div>
   </div>
 
   <script>
-    // Cache DOM elements
     const elements = {
       money: document.getElementById("money"),
       task: document.getElementById("taskBtn"),
@@ -110,6 +207,14 @@
       taskArea: document.getElementById("taskArea"),
       opportunities: document.getElementById("opportunities"),
       highTierOpportunities: document.getElementById("highTierOpportunities"),
+      marketSection: document.getElementById("marketSection"),
+      marketGrid: document.getElementById("marketGrid"),
+      craftingPanel: document.getElementById("craftingPanel"),
+      buildingPanel: document.getElementById("buildingPanel"),
+      investingPanel: document.getElementById("investingPanel"),
+      recipeGrid: document.getElementById("recipeGrid"),
+      buildingGrid: document.getElementById("buildingGrid"),
+      assetGrid: document.getElementById("assetGrid"),
       partTime: document.getElementById("partTimeBtn"),
       stock: document.getElementById("stockBtn"),
       consulting: document.getElementById("consultingBtn"),
@@ -122,7 +227,7 @@
       money: 1,
       investments: 0,
       investmentCost: 10,
-      lastUpdate: performance.now(),
+      lastUpdate: Date.now(),
       cooldowns: {
         free: 0,
         partTime: 15,
@@ -134,7 +239,35 @@
       },
       tasksCompleted: 0,
       startups: 0,
-      freeMoneyUses: 0  // Add this line
+      freeMoneyUses: 0,
+      market: {
+        items: [
+          { name: "Coffee Beans", basePrice: 15, volatility: 0.3, currentPrice: 15, owned: 0 },
+          { name: "Tech Gadgets", basePrice: 30, volatility: 0.5, currentPrice: 30, owned: 0 },
+          { name: "Rare Gems", basePrice: 50, volatility: 0.7, currentPrice: 50, owned: 0 },
+          { name: "Art Pieces", basePrice: 75, volatility: 0.4, currentPrice: 75, owned: 0 }
+        ],
+        lastUpdate: performance.now()
+      },
+      crafting: {
+        recipes: [
+          { name: "Premium Coffee", ingredients: [{ name: "Coffee Beans", amount: 3 }], value: 60 },
+          { name: "Smart Device", ingredients: [{ name: "Tech Gadgets", amount: 2 }], value: 80 },
+          { name: "Jewelry", ingredients: [{ name: "Rare Gems", amount: 2 }], value: 150 },
+          { name: "Masterpiece", ingredients: [{ name: "Art Pieces", amount: 2 }], value: 200 }
+        ]
+      },
+      buildings: [
+        { name: "Coffee Shop", cost: 500, income: 50, owned: 0 },
+        { name: "Tech Store", cost: 1000, income: 100, owned: 0 },
+        { name: "Jewelry Store", cost: 2000, income: 200, owned: 0 },
+        { name: "Art Gallery", cost: 5000, income: 500, owned: 0 }
+      ],
+      assets: [
+        { name: "Stock Portfolio", cost: 1000, growth: 0.1, owned: 0 },
+        { name: "Real Estate", cost: 5000, growth: 0.2, owned: 0 },
+        { name: "Tech Startup", cost: 10000, growth: 0.5, owned: 0 }
+      ]
     };
 
     // Debounced UI update
@@ -143,76 +276,251 @@
       if (!updatePending) {
         updatePending = true;
         requestAnimationFrame(() => {
-          elements.money.textContent = `Money: $${state.money}`;
-          elements.invest.classList.toggle("disabled", state.money < state.investmentCost);
+          elements.money.textContent = `Money: $${Math.floor(Number(state.money))}`;
+          elements.invest.classList.toggle("disabled", Number(state.money) < Number(state.investmentCost));
           elements.opportunities.style.display = state.money >= 25 ? "block" : "none";
           elements.highTierOpportunities.style.display = state.money >= 75 ? "block" : "none";
+          elements.marketSection.style.display = state.money >= 250 ? "block" : "none";
+          elements.craftingPanel.style.display = state.money >= 500 ? "block" : "none";
+          elements.buildingPanel.style.display = state.money >= 1000 ? "block" : "none";
+          elements.investingPanel.style.display = state.money >= 2500 ? "block" : "none";
           elements.startup.classList.toggle("disabled", state.money < 50);
+          updateMarket();
+          updateCrafting();
+          updateBuildings();
+          updateInvestments();
           updatePending = false;
         });
       }
     }
 
-    // Optimized message display
-    function showMessage(text) {
-      elements.message.textContent = text;
-      elements.message.style.opacity = 1;
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          elements.message.style.opacity = 0;
+    function updateMarket() {
+      if (state.money < 250) return;
+      
+      const now = performance.now();
+      if (now - state.market.lastUpdate > 5000) {
+        state.market.items.forEach(item => {
+          const change = (Math.random() - 0.5) * item.volatility * item.basePrice;
+          item.currentPrice = Math.max(Math.round(item.basePrice * 0.5), 
+                                     Math.round(item.currentPrice + change));
         });
-      }, 3000);
+        state.market.lastUpdate = now;
+      }
+
+      elements.marketGrid.innerHTML = state.market.items.map(item => `
+        <div class="market-item">
+          <div>
+            <div>${item.name}</div>
+            <div>Price: $${item.currentPrice}</div>
+            <div>Owned: ${item.owned}</div>
+          </div>
+          <div class="market-actions">
+            <button class="market-button" onclick="buyItem('${item.name}')" ${state.money < item.currentPrice ? 'disabled' : ''}>Buy</button>
+            <button class="market-button" onclick="sellItem('${item.name}')" ${item.owned === 0 ? 'disabled' : ''}>Sell</button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    // Optimized cooldown handler
+    function buyItem(name) {
+      const item = state.market.items.find(i => i.name === name);
+      if (state.money >= item.currentPrice) {
+        state.money -= item.currentPrice;
+        item.owned++;
+        showMessage(`Bought ${item.name} for $${item.currentPrice}`);
+        updateUI();
+      }
+    }
+
+    function sellItem(name) {
+      const item = state.market.items.find(i => i.name === name);
+      if (item.owned > 0) {
+        state.money += item.currentPrice;
+        item.owned--;
+        showMessage(`Sold ${item.name} for $${item.currentPrice}`);
+        updateUI();
+      }
+    }
+
+    function updateCrafting() {
+      if (state.money < 500) return;
+      
+      elements.recipeGrid.innerHTML = state.crafting.recipes.map(recipe => {
+        const canCraft = recipe.ingredients.every(ing => 
+          state.market.items.find(i => i.name === ing.name)?.owned >= ing.amount
+        );
+        return `
+          <div class="recipe-item">
+            <div>${recipe.name} (Sells for $${recipe.value})</div>
+            <div>Requires: ${recipe.ingredients.map(i => `${i.amount}x ${i.name}`).join(', ')}</div>
+            <button onclick="craftItem('${recipe.name}')" ${canCraft ? '' : 'disabled'}>
+              Craft
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateBuildings() {
+      if (state.money < 1000) return;
+
+      elements.buildingGrid.innerHTML = state.buildings.map(building => `
+        <div class="building-item">
+          <div>${building.name}</div>
+          <div>Cost: $${building.cost}</div>
+          <div>Income: $${building.income}/min</div>
+          <div>Owned: ${building.owned}</div>
+          <button onclick="buyBuilding('${building.name}')" 
+            ${state.money < building.cost ? 'disabled' : ''}>
+            Buy
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function updateInvestments() {
+      if (state.money < 2500) return;
+
+      elements.assetGrid.innerHTML = state.assets.map(asset => `
+        <div class="asset-item">
+          <div>${asset.name}</div>
+          <div>Cost: $${asset.cost}</div>
+          <div>Growth: ${asset.growth * 100}%/min</div>
+          <div>Owned: ${asset.owned}</div>
+          <button onclick="buyAsset('${asset.name}')" 
+            ${state.money < asset.cost ? 'disabled' : ''}>
+            Buy
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function craftItem(name) {
+      const recipe = state.crafting.recipes.find(r => r.name === name);
+      if (!recipe) return;
+      
+      const canCraft = recipe.ingredients.every(ing => {
+        const item = state.market.items.find(i => i.name === ing.name);
+        return item?.owned >= ing.amount;
+      });
+
+      if (canCraft) {
+        recipe.ingredients.forEach(ing => {
+          const item = state.market.items.find(i => i.name === ing.name);
+          item.owned -= ing.amount;
+        });
+        changeMoney(recipe.value, 'crafting');
+        showMessage(`🛠️ Crafted ${recipe.name} for $${recipe.value}!`);
+        updateUI();
+      }
+    }
+
+    function buyBuilding(name) {
+      const building = state.buildings.find(b => b.name === name);
+      if (!building || state.money < building.cost) return;
+      
+      changeMoney(-building.cost, 'building-purchase');
+      building.owned++;
+      showMessage(`🏗️ Purchased ${building.name}!`);
+      updateUI();
+    }
+
+    function buyAsset(name) {
+      const asset = state.assets.find(a => a.name === name);
+      if (!asset || state.money < asset.cost) return;
+      
+      changeMoney(-asset.cost, 'asset-purchase');
+      asset.owned++;
+      showMessage(`💹 Invested in ${asset.name}!`);
+      updateUI();
+    }
+
+    // Add building and asset income to the game loop
+    let lastTick = Date.now();
+    function gameLoop() {
+      const now = Date.now();
+      const delta = now - lastTick;
+      
+      // Update cooldowns every 100ms
+      if (now - lastCooldownCheck() >= 100) {
+        updateCooldowns();
+        lastCooldownCheck = now;
+      }
+
+      if (delta >= 2000) {
+        // Passive income from investments
+        if (state.investments > 0) {
+          changeMoney(state.investments, 'passive-investment');
+        }
+        if (state.startups > 0) {
+          changeMoney(state.startups * 5, 'passive-startup');
+        }
+
+        // Building income (every minute)
+        if (delta >= 60000) {
+          state.buildings.forEach(building => {
+            if (building.owned > 0) {
+              changeMoney(building.owned * building.income, 'building-income');
+            }
+          });
+
+          // Asset growth (every minute)
+          state.assets.forEach(asset => {
+            if (asset.owned > 0) {
+              const growth = Math.floor(state.money * (asset.growth * asset.owned));
+              changeMoney(growth, 'asset-growth');
+            }
+          });
+          
+          lastTick = now;
+        }
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start game loop
+    gameLoop();
+
+    // Add money handling function near the top after state declaration
+    function changeMoney(amount, source) {
+      const oldMoney = state.money;
+      state.money = Math.max(0, Number(state.money) + Number(amount));
+      console.log(`Money changed: ${oldMoney} -> ${state.money} (${amount}) from ${source}`);
+      updateUI();
+    }
+
+    // Replace the startCooldown function with this fixed version
     function startCooldown(button, duration, increment) {
+      if (!button || duration === undefined) return duration;
+      
       button.disabled = true;
-      const startTime = performance.now();
-      const endTime = startTime + (duration * 1000);
+      const startTime = Date.now();
+      const endTime = startTime + (Math.max(0, duration) * 1000);
 
       function updateCooldown() {
-        const now = performance.now();
+        const now = Date.now();
         const remaining = Math.ceil((endTime - now) / 1000);
 
         if (remaining > 0) {
           button.textContent = `Cooldown: ${remaining}s`;
+          button.disabled = true;
           requestAnimationFrame(updateCooldown);
         } else {
           button.disabled = false;
           button.textContent = button.dataset.originalText || "Ready";
-          if (increment) duration += 8;
+          if (increment) {
+            duration += 8;
+          }
         }
       }
 
-      requestAnimationFrame(updateCooldown);
+      updateCooldown();
       return duration;
     }
 
-    // Event delegation for task area
-    elements.taskArea.addEventListener('click', (e) => {
-      if (e.target.id === 'submitTask') {
-        handleTaskSubmission(e);
-      }
-    });
-
-    // Passive income handler using requestAnimationFrame
-    function updatePassiveIncome(timestamp) {
-      if (state.investments > 0 || state.startups > 0) {
-        const delta = timestamp - state.lastUpdate;
-        if (delta >= 2000) {
-          state.money += state.investments;  // $1 per investment
-          state.money += state.startups * 5; // $5 per startup
-          state.lastUpdate = timestamp;
-          updateUI();
-        }
-      }
-      requestAnimationFrame(updatePassiveIncome);
-    }
-
-    // Initialize passive income
-    requestAnimationFrame(updatePassiveIncome);
-
-    // Store original button text
+    // Store original button text for all buttons
+    elements.task.dataset.originalText = "Do Task";
     elements.freelance.dataset.originalText = "Free Money?";
     elements.partTime.dataset.originalText = "Work Part-Time Job (+$10)";
     elements.stock.dataset.originalText = "Stock Market (Risky)";
@@ -220,89 +528,153 @@
     elements.crypto.dataset.originalText = "Crypto Trading (Very Risky)";
     elements.startup.dataset.originalText = "Launch Startup (-$50, Passive +$5)";
 
+    // Initialize cooldowns
+    let lastCooldownCheck = Date.now();
+    const buttonCooldowns = new Map();
+
+    function updateCooldowns() {
+      const now = Date.now();
+      buttonCooldowns.forEach((cooldown, button) => {
+        if (now >= cooldown.endTime) {
+          button.disabled = false;
+          button.textContent = button.dataset.originalText;
+          buttonCooldowns.delete(button);
+        }
+      });
+    }
+
+    // Update gameLoop to include cooldown checks
+    function gameLoop() {
+      const now = Date.now();
+      const delta = now - lastTick;
+      
+      // Update cooldowns every 100ms
+      if (now - lastCooldownCheck() >= 100) {
+        updateCooldowns();
+        lastCooldownCheck = now;
+      }
+
+      if (delta >= 2000) {
+        // Passive income from investments
+        if (state.investments > 0) {
+          changeMoney(state.investments, 'passive-investment');
+        }
+        if (state.startups > 0) {
+          changeMoney(state.startups * 5, 'passive-startup');
+        }
+
+        // Building income (every minute)
+        if (delta >= 60000) {
+          state.buildings.forEach(building => {
+            if (building.owned > 0) {
+              changeMoney(building.owned * building.income, 'building-income');
+            }
+          });
+
+          // Asset growth (every minute)
+          state.assets.forEach(asset => {
+            if (asset.owned > 0) {
+              const growth = Math.floor(state.money * (asset.growth * asset.owned));
+              changeMoney(growth, 'asset-growth');
+            }
+          });
+          
+          lastTick = now;
+        }
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Update the handleTaskSubmission function
+    function handleTaskSubmission(e) {
+      const button = e.target;
+      const isWord = button.hasAttribute('data-word');
+      const input = document.getElementById(isWord ? 'wordInput' : 'answer');
+      const correct = isWord ? 
+        input.value.trim() === button.dataset.word :
+        parseInt(input.value) === parseInt(button.dataset.answer);
+
+      if (correct) {
+        changeMoney(1, 'task-completion');
+        state.tasksCompleted++;
+        const cooldownTime = state.tasksCompleted * 1;  // 1 second per completed task
+        elements.task.disabled = true;
+        buttonCooldowns.set(elements.task, {
+          endTime: Date.now() + (cooldownTime * 1000)
+        });
+        showMessage(isWord ? "✨ Well done! You earned $1." : "✅ Correct! You earned $1.");
+      } else {
+        showMessage("❌ Wrong answer. No money earned.");
+      }
+      
+      updateUI();
+      elements.taskArea.innerHTML = "";
+    }
+
+    // Update button click handlers to use buttonCooldowns
     elements.freelance.addEventListener("click", () => {
       if (!elements.freelance.disabled) {
-        state.money += 5;
+        changeMoney(5, 'freelance');
         state.freeMoneyUses++;
-        const reward = 5;
-        showMessage(`💻 You got $${reward} for free!`);
-        updateUI();
-        // Increase cooldown by 5 seconds for each use
-        const baseCooldown = state.cooldowns.free;
-        const additionalCooldown = state.freeMoneyUses * 5;
-        state.cooldowns.free = startCooldown(elements.freelance, baseCooldown + additionalCooldown, false);
+        showMessage(`💻 You got $5 for free!`);
+        const cooldownTime = state.cooldowns.free + (state.freeMoneyUses * 5);
+        buttonCooldowns.set(elements.freelance, {
+          endTime: Date.now() + (cooldownTime * 1000)
+        });
+        elements.freelance.disabled = true;
       }
     });
 
-    // Update all button event listeners
     elements.invest.addEventListener("click", () => {
       if (state.money >= state.investmentCost) {
-        state.money -= state.investmentCost;
+        changeMoney(-state.investmentCost, 'investment-purchase');
         state.investments++;
         state.investmentCost += 5;
         elements.invest.textContent = `Invest $${state.investmentCost}`;
-        showMessage(`📊 You now have ${state.investments} investment(s). They generate passive income!`);
-        updateUI();
+        showMessage(`📊 You now have ${state.investments} investment(s)`);
       }
     });
 
     elements.partTime.addEventListener("click", () => {
       if (!elements.partTime.disabled) {
-        state.money += 10;
+        changeMoney(10, 'part-time');
         showMessage("🛠️ You worked a part-time job and earned $10!");
-        updateUI();
         state.cooldowns.partTime = startCooldown(elements.partTime, state.cooldowns.partTime, true);
       }
     });
 
     elements.stock.addEventListener("click", () => {
       if (!elements.stock.disabled) {
-        let outcome = Math.random();
-        if (outcome < 0.5) {
-          state.money += 20;
-          showMessage("📈 Lucky! Your stock investment paid off. +$20");
-        } else {
-          state.money -= 10;
-          if (state.money < 0) state.money = 0;
-          showMessage("📉 Ouch! The stock market dipped. -$10");
-        }
-        updateUI();
+        const outcome = Math.random() < 0.5;
+        changeMoney(outcome ? 20 : -10, 'stock-market');
+        showMessage(outcome ? "📈 Lucky! +$20" : "📉 Ouch! -$10");
         state.cooldowns.stock = startCooldown(elements.stock, state.cooldowns.stock, true);
       }
     });
 
-    // Add new event listeners
     elements.consulting.addEventListener("click", () => {
       if (!elements.consulting.disabled) {
-        state.money += 30;
+        changeMoney(30, 'consulting');
         showMessage("💼 You completed a consulting project! +$30");
-        updateUI();
         state.cooldowns.consulting = startCooldown(elements.consulting, state.cooldowns.consulting, true);
       }
     });
 
     elements.crypto.addEventListener("click", () => {
       if (!elements.crypto.disabled) {
-        let outcome = Math.random();
-        if (outcome < 0.3) {
-          state.money += 50;
-          showMessage("🚀 Crypto investment successful! +$50");
-        } else {
-          state.money -= 25;
-          if (state.money < 0) state.money = 0;
-          showMessage("💥 Crypto market crashed! -$75");
-        }
-        updateUI();
+        const outcome = Math.random() < 0.3;
+        changeMoney(outcome ? 50 : -25, 'crypto');
+        showMessage(outcome ? "🚀 Crypto investment successful! +$50" : "💥 Crypto market crashed! -$25");
         state.cooldowns.crypto = startCooldown(elements.crypto, state.cooldowns.crypto, true);
       }
     });
 
     elements.startup.addEventListener("click", () => {
       if (!elements.startup.disabled && state.money >= 50) {
-        state.money -= 50;
+        changeMoney(-50, 'startup-purchase');
         state.startups++;
         showMessage("🚀 You launched a startup! It will generate $5 every 2 seconds.");
-        updateUI();
         state.cooldowns.startup = startCooldown(elements.startup, state.cooldowns.startup, true);
       }
     });
@@ -332,11 +704,14 @@
         parseInt(input.value) === parseInt(button.dataset.answer);
 
       if (correct) {
-        state.money++;
+        changeMoney(1, 'task-completion');
         state.tasksCompleted++;
-        state.cooldowns.task = state.tasksCompleted * 1000;
+        const cooldownTime = state.tasksCompleted * 1;  // 1 second per completed task
+        elements.task.disabled = true;
+        buttonCooldowns.set(elements.task, {
+          endTime: Date.now() + (cooldownTime * 1000)
+        });
         showMessage(isWord ? "✨ Well done! You earned $1." : "✅ Correct! You earned $1.");
-        startCooldown(elements.task, state.cooldowns.task / 1000, false);
       } else {
         showMessage("❌ Wrong answer. No money earned.");
       }
@@ -345,24 +720,33 @@
       elements.taskArea.innerHTML = "";
     }
 
-    // Update task button event listener
+        // Event delegation for task area
+    elements.taskArea.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'submitTask') {
+        handleTaskSubmission(e);
+      }
+    });
+
+    // Task button click
     elements.task.addEventListener("click", () => {
       if (!elements.task.disabled) {
         generateTask();
       }
     });
 
-    // Initialize button text
-    elements.task.dataset.originalText = "Do Task";
+    // Show message function
+    function showMessage(msg) {
+      elements.message.style.opacity = 1;
+      elements.message.textContent = msg;
+      setTimeout(() => {
+        elements.message.style.opacity = 0;
+      }, 2000);
+    }
 
-    setInterval(() => {
-      if (state.investments > 0) {
-        state.money += state.investments;
-        updateUI();
-      }
-    }, 2000);
-
+    // Initial UI update
     updateUI();
   </script>
 </body>
 </html>
+
+
