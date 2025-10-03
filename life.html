@@ -128,6 +128,20 @@
       border-radius: 8px;
       text-align: left;
     }
+    .task-success {
+        color: #38bb1d;
+        font-weight: bold;
+        animation: fadeIn 0.5s;
+    }
+    .task-error {
+        color: #e74c3c;
+        font-weight: bold;
+        animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -245,7 +259,9 @@
           { name: "Coffee Beans", basePrice: 15, volatility: 0.3, currentPrice: 15, owned: 0 },
           { name: "Tech Gadgets", basePrice: 30, volatility: 0.5, currentPrice: 30, owned: 0 },
           { name: "Rare Gems", basePrice: 50, volatility: 0.7, currentPrice: 50, owned: 0 },
-          { name: "Art Pieces", basePrice: 75, volatility: 0.4, currentPrice: 75, owned: 0 }
+          { name: "Art Pieces", basePrice: 75, volatility: 0.4, currentPrice: 75, owned: 0 },
+          { name: "Gold Bars", basePrice: 100, volatility: 0.8, currentPrice: 100, owned: 0 },
+          { name: "Electronics", basePrice: 45, volatility: 0.4, currentPrice: 45, owned: 0 }
         ],
         lastUpdate: performance.now()
       },
@@ -254,14 +270,18 @@
           { name: "Premium Coffee", ingredients: [{ name: "Coffee Beans", amount: 3 }], value: 60 },
           { name: "Smart Device", ingredients: [{ name: "Tech Gadgets", amount: 2 }], value: 80 },
           { name: "Jewelry", ingredients: [{ name: "Rare Gems", amount: 2 }], value: 150 },
-          { name: "Masterpiece", ingredients: [{ name: "Art Pieces", amount: 2 }], value: 200 }
+          { name: "Masterpiece", ingredients: [{ name: "Art Pieces", amount: 2 }], value: 200 },
+          { name: "Gold Jewelry", ingredients: [{ name: "Gold Bars", amount: 1 }, { name: "Rare Gems", amount: 1 }], value: 250 },
+          { name: "Smart Watch", ingredients: [{ name: "Electronics", amount: 2 }, { name: "Tech Gadgets", amount: 1 }], value: 120 }
         ]
       },
       buildings: [
         { name: "Coffee Shop", cost: 500, income: 50, owned: 0 },
         { name: "Tech Store", cost: 1000, income: 100, owned: 0 },
         { name: "Jewelry Store", cost: 2000, income: 200, owned: 0 },
-        { name: "Art Gallery", cost: 5000, income: 500, owned: 0 }
+        { name: "Art Gallery", cost: 5000, income: 500, owned: 0 },
+        { name: "Electronics Store", cost: 3000, income: 300, owned: 0 },
+        { name: "Shopping Mall", cost: 10000, income: 1000, owned: 0 }
       ],
       assets: [
         { name: "Stock Portfolio", cost: 1000, growth: 0.1, owned: 0 },
@@ -494,29 +514,28 @@
     function startCooldown(button, duration, increment) {
       if (!button || duration === undefined) return duration;
       
-      button.disabled = true;
       const startTime = Date.now();
       const endTime = startTime + (Math.max(0, duration) * 1000);
+      button.disabled = true;
 
-      function updateCooldown() {
+      const updateCooldown = () => {
         const now = Date.now();
         const remaining = Math.ceil((endTime - now) / 1000);
 
         if (remaining > 0) {
           button.textContent = `Cooldown: ${remaining}s`;
-          button.disabled = true;
           requestAnimationFrame(updateCooldown);
         } else {
           button.disabled = false;
-          button.textContent = button.dataset.originalText || "Ready";
+          button.textContent = button.dataset.originalText;
           if (increment) {
-            duration += 8;
+            return duration + 8;
           }
         }
-      }
+      };
 
       updateCooldown();
-      return duration;
+      return increment ? duration + 8 : duration;
     }
 
     // Store original button text for all buttons
@@ -682,65 +701,71 @@
     function generateTask() {
       elements.taskArea.innerHTML = "";
       const taskType = Math.random() < 0.5 ? "math" : "word";
+      const difficulty = Math.min(Math.floor(state.tasksCompleted / 10), 3);
 
       if (taskType === "math") {
-        const a = Math.floor(Math.random() * 10);
-        const b = Math.floor(Math.random() * 10);
-        const correct = a + b;
-        elements.taskArea.innerHTML = `Solve: ${a} + ${b} = <input id="answer" type="number"> <button id="submitTask" data-answer="${correct}">Submit</button>`;
+        const operations = ['+', '-', '*'];
+        const op = operations[Math.floor(Math.random() * (difficulty > 1 ? 3 : 1))];
+        const a = Math.floor(Math.random() * (10 * (difficulty + 1)));
+        const b = Math.floor(Math.random() * (10 * (difficulty + 1)));
+        const correct = eval(`${a} ${op} ${b}`);
+        elements.taskArea.innerHTML = `
+            Solve: ${a} ${op} ${b} = 
+            <input id="answer" type="number"> 
+            <button id="submitTask" data-answer="${correct}">Submit</button>
+          `;
       } else {
-        const words = ["code", "game", "money", "task", "java"];
-        const word = words[Math.floor(Math.random() * words.length)];
-        elements.taskArea.innerHTML = `Type this word: <b>${word}</b><br><input id="wordInput"> <button id="submitTask" data-word="${word}">Submit</button>`;
+        const words = [
+            ["code", "game", "task"],
+            ["money", "wealth", "invest"],
+            ["javascript", "business", "success"],
+            ["entrepreneur", "innovation", "technology"]
+        ];
+        const word = words[difficulty][Math.floor(Math.random() * 3)];
+        elements.taskArea.innerHTML = `
+            Type this word: <b>${word}</b><br>
+            <input id="wordInput"> 
+            <button id="submitTask" data-word="${word}">Submit</button>
+          `;
       }
     }
 
-    function handleTaskSubmission(e) {
-      const button = e.target;
-      const isWord = button.hasAttribute('data-word');
-      const input = document.getElementById(isWord ? 'wordInput' : 'answer');
-      const correct = isWord ? 
-        input.value.trim() === button.dataset.word :
-        parseInt(input.value) === parseInt(button.dataset.answer);
+    // Improve cooldown handling
+    function startCooldown(button, duration, increment = false) {
+        if (!button || duration === undefined) return duration;
+        
+        const startTime = Date.now();
+        const endTime = startTime + (Math.max(0, duration) * 1000);
+        button.disabled = true;
 
-      if (correct) {
-        changeMoney(1, 'task-completion');
-        state.tasksCompleted++;
-        const cooldownTime = state.tasksCompleted * 1;  // 1 second per completed task
-        elements.task.disabled = true;
-        buttonCooldowns.set(elements.task, {
-          endTime: Date.now() + (cooldownTime * 1000)
-        });
-        showMessage(isWord ? "✨ Well done! You earned $1." : "✅ Correct! You earned $1.");
-      } else {
-        showMessage("❌ Wrong answer. No money earned.");
-      }
-      
-      updateUI();
-      elements.taskArea.innerHTML = "";
+        const updateCooldown = () => {
+          const now = Date.now();
+          const remaining = Math.ceil((endTime - now) / 1000);
+
+          if (remaining > 0) {
+            button.textContent = `Cooldown: ${remaining}s`;
+            requestAnimationFrame(updateCooldown);
+          } else {
+            button.disabled = false;
+            button.textContent = button.dataset.originalText;
+            if (increment) {
+              return duration + 8;
+            }
+          }
+        };
+
+        updateCooldown();
+        return increment ? duration + 8 : duration;
     }
 
-        // Event delegation for task area
-    elements.taskArea.addEventListener('click', (e) => {
-      if (e.target && e.target.id === 'submitTask') {
-        handleTaskSubmission(e);
-      }
-    });
-
-    // Task button click
-    elements.task.addEventListener("click", () => {
-      if (!elements.task.disabled) {
-        generateTask();
-      }
-    });
-
-    // Show message function
-    function showMessage(msg) {
-      elements.message.style.opacity = 1;
-      elements.message.textContent = msg;
-      setTimeout(() => {
-        elements.message.style.opacity = 0;
-      }, 2000);
+    // Add success/error animations to message display
+    function showMessage(msg, isSuccess = true) {
+        elements.message.style.opacity = 1;
+        elements.message.textContent = msg;
+        elements.message.className = isSuccess ? 'task-success' : 'task-error';
+        setTimeout(() => {
+            elements.message.style.opacity = 0;
+        }, 2000);
     }
 
     // Initial UI update
