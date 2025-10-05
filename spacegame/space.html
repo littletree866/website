@@ -246,19 +246,19 @@
         canvas.height = 600;
 
         // Game state
-        let gameRunning = false;
-        let score = 0;
-        let level = 1;
-        let lives = 3;
-        let scoreMultiplier = 1;
-        let multiplierActive = false;
-        let multiplierEndTime = 0;
-        let multiplierAnimations = [];
-        let explosions = [];
-        let enemySpawnRate = 7500; // Initial spawn rate in ms
-        let enemySpeedMultiplier = 1; // Initial speed multiplier
-
-        const powerups = [];
+        const gameState = {
+            score: 0,
+            level: 1,
+            lives: 3,
+            bossBattleActive: false,
+            bossHealth: 0,
+            maxBossHealth: 100,
+            achievements: [],
+            combo: 0,
+            maxCombo: 0,
+            powerups: [],
+            running: false
+        };
 
         // Player ship
         const player = {
@@ -272,31 +272,37 @@
             lastShot: 0,
             shootDelay: 300,
             draw: function() {
-                // Draw ship body
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y - this.height/2);
-                ctx.lineTo(this.x + this.width/2, this.y + this.height/2);
-                ctx.lineTo(this.x - this.width/2, this.y + this.height/2);
-                ctx.closePath();
-                ctx.fill();
+                // Ship body
+                ctx.save();
+                ctx.translate(this.x, this.y);
                 
-                // Draw cockpit
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y - 5, 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw engine glow
-                if (keys.ArrowUp || keys.ArrowDown) {
-                    ctx.fillStyle = '#ff0';
+                // Engine glow
+                if (keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight) {
+                    ctx.fillStyle = '#ff6600';
                     ctx.beginPath();
-                    ctx.moveTo(this.x - this.width/3, this.y + this.height/2);
-                    ctx.lineTo(this.x + this.width/3, this.y + this.height/2);
-                    ctx.lineTo(this.x, this.y + this.height/2 + 15);
+                    ctx.moveTo(-10, 10);
+                    ctx.lineTo(10, 10);
+                    ctx.lineTo(0, 25);
                     ctx.closePath();
                     ctx.fill();
                 }
+                
+                // Main ship body
+                ctx.fillStyle = '#0af';
+                ctx.beginPath();
+                ctx.moveTo(0, -20);
+                ctx.lineTo(-15, 10);
+                ctx.lineTo(15, 10);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Ship details
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(0, 0, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
             },
             update: function() {
                 // Keep player within bounds
@@ -434,13 +440,13 @@
         function checkLevelProgression() {
             const levelThresholds = [0, 1000, 2500, 5000, 8000, 12000];
             
-            if (level < levelThresholds.length && score >= levelThresholds[level]) {
-                level++;
-                levelDisplay.textContent = `Level: ${level}`;
+            if (gameState.level < levelThresholds.length && gameState.score >= levelThresholds[gameState.level]) {
+                gameState.level++;
+                levelDisplay.textContent = `Level: ${gameState.level}`;
                 
                 // Increase difficulty
-                enemySpawnRate = Math.max(100, 500 - (level * 75));
-                enemySpeedMultiplier = 1 + (level * 0.2);
+                enemySpawnRate = Math.max(100, 500 - (gameState.level * 75));
+                enemySpeedMultiplier = 1 + (gameState.level * 0.2);
                 
                 // Show level up message
                 const messages = [
@@ -451,7 +457,7 @@
                     "MAXIMUM ALERT: ENEMY ARMADA APPROACHING"
                 ];
                 
-                const message = messages[Math.min(level-1, messages.length-1)];
+                const message = messages[Math.min(gameState.level-1, messages.length-1)];
                 typeWriter(message, messageDisplay, 50, () => {
                     setTimeout(() => {
                         messageDisplay.style.display = 'none';
@@ -461,41 +467,32 @@
         }
 
         function startGame() {
-            gameRunning = true;
-            score = 0;
-            level = 1;
-            lives = 3;
-            scoreMultiplier = 1;
-            multiplierActive = false;
-            enemySpawnRate = 500;
-            enemySpeedMultiplier = 1;
+            gameState.running = true;
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.lives = 3;
+            gameState.bossBattleActive = false;
+            
+            // Reset player position
             player.x = canvas.width / 2;
-            player.y = canvas.height - 50;
-            player.bullets = [];
+            player.y = canvas.height - 100;
+            
+            // Clear arrays
             enemies.length = 0;
-            bonusShips.length = 0;
-            planets.length = 0;
+            player.bullets.length = 0;
             explosions.length = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            levelDisplay.textContent = `Level: ${level}`;
+            powerups.length = 0;
+            
+            // Update displays
+            updateScore();
+            updateLevel();
+            
+            // Hide menus
             gameOverDisplay.style.display = 'none';
             startScreen.style.display = 'none';
-            messageDisplay.style.display = 'none';
             
-            // Show starting message
-            typeWriter("INITIATING LAUNCH SEQUENCE. GOOD LUCK, PILOT!", messageDisplay, 50, () => {
-                setTimeout(() => {
-                    messageDisplay.style.display = 'none';
-                }, 2000);
-            });
-            
-            // Initial planet
-            spawnPlanet();
-            
-            // Start enemy spawning
+            // Start spawning
             spawnEnemy();
-            
-            // Start bonus ship spawning
             spawnBonusShip();
             
             // Start game loop
@@ -597,7 +594,7 @@
         }
 
         function spawnBonusShip() {
-            if (!gameRunning) return;
+            if (!gameState.running) return;
             
             const size = 30;
             const multiplier = Math.random() > 0.5 ? 2 : 3;
@@ -619,7 +616,7 @@
         }
 
         function spawnEnemy() {
-            if (!gameRunning) return;
+            if (!gameState.running) return;
             
             const sizeOptions = [
                 { size: 20, points: 30, health: 1 },
@@ -631,7 +628,7 @@
             const pattern = Math.floor(Math.random() * 3);
             
             // Adjust enemy health based on level
-            const healthBonus = Math.floor((level - 1) / 2);
+            const healthBonus = Math.floor((gameState.level - 1) / 2);
             
             enemies.push({
                 x: Math.random() * (canvas.width - enemyType.size) + enemyType.size/2,
@@ -653,17 +650,24 @@
             setTimeout(spawnEnemy, Math.random() * enemySpawnRate + 300);
         }
 
+        function showMessage(text, isWarning = false, duration = 2000) {
+            messageDisplay.innerText = text;
+            messageDisplay.style.color = isWarning ? 'red' : 'white';
+            messageDisplay.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDisplay.style.display = 'none';
+            }, duration);
+        }
+
         function gameLoop() {
-            if (!gameRunning) return;
+            if (!gameState.running) return;
             
-            // Check level progression
-            checkLevelProgression();
-            
-            // Clear canvas
+            // Clear canvas with fade effect
             ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw stars
+            // Update stars
             stars.forEach(star => {
                 star.y += star.speed;
                 if (star.y > canvas.height) {
@@ -674,492 +678,152 @@
                 ctx.fillRect(star.x, star.y, star.size, star.size);
             });
             
-            // Handle input
-            if (keys.ArrowLeft) player.x -= player.speed;
-            if (keys.ArrowRight) player.x += player.speed;
-            if (keys.ArrowUp) player.y -= player.speed;
-            if (keys.ArrowDown) player.y += player.speed;
+            // Handle player movement
+            if (keys.ArrowLeft) player.x = Math.max(20, player.x - player.speed);
+            if (keys.ArrowRight) player.x = Math.min(canvas.width - 20, player.x + player.speed);
+            if (keys.ArrowUp) player.y = Math.max(20, player.y - player.speed);
+            if (keys.ArrowDown) player.y = Math.min(canvas.height - 20, player.y + player.speed);
             if (keys[' ']) player.shoot();
             
-            // Update player
-            player.update();
-            
-            // Check multiplier expiration
-            if (multiplierActive && Date.now() > multiplierEndTime) {
-                multiplierActive = false;
-                scoreMultiplier = 1;
-                multiplierAnimations.push({
-                    x: canvas.width - 100,
-                    y: 50,
-                    text: "Multiplier Expired!",
-                    color: "#f00",
-                    startTime: Date.now()
-                });
-            }
-            
-            powerups.forEach((powerup, pIndex) => {
-            // Move powerup down
-            powerup.y += powerup.speed;
-            
-            // Draw powerup (life icon)
-            ctx.fillStyle = powerup.color;
-            ctx.beginPath();
-            ctx.moveTo(powerup.x, powerup.y - powerup.height/2);
-            ctx.lineTo(powerup.x + powerup.width/2, powerup.y + powerup.height/2);
-            ctx.lineTo(powerup.x - powerup.width/2, powerup.y + powerup.height/2);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Draw plus sign inside
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(powerup.x - 2, powerup.y - 6, 4, 12);
-            ctx.fillRect(powerup.x - 6, powerup.y - 2, 12, 4);
-            
-            // Check collision with player
-            if (checkCollision(
-                powerup.x - powerup.width/2, powerup.y - powerup.height/2, powerup.width, powerup.height,
-                player.x - player.width/2, player.y - player.height/2, player.width, player.height
-            )) {
-                powerup.collected = true;
-                lives++;
-                
-                // Show life gained message
-                multiplierAnimations.push({
-                    x: powerup.x,
-                    y: powerup.y,
-                    text: "EXTRA LIFE!",
-                    color: '#0f0',
-                    startTime: Date.now()
-                });
-            }
-            
-            // Remove if collected or off screen
-            if (powerup.collected || powerup.y > canvas.height + powerup.height) {
-                powerups.splice(pIndex, 1);
-            }
-        });
-
-            // Draw and update planets
-            planets.forEach((planet, pIndex) => {
-                // Move planet
-                planet.y += planet.speed;
-                
-                // Draw planet
-                ctx.fillStyle = planet.color;
-                ctx.beginPath();
-                ctx.arc(planet.x, planet.y, planet.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw rings if applicable
-                if (planet.rings) {
-                    ctx.strokeStyle = planet.ringColor;
-                    ctx.lineWidth = 5;
-                    ctx.beginPath();
-                    ctx.ellipse(planet.x, planet.y, planet.size * 1.5, planet.size * 0.3, 0, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                // Remove if off screen
-                if (planet.y > canvas.height + planet.size) {
-                    planets.splice(pIndex, 1);
-                }
-            });
-            
-            // Update and draw explosions
-            explosions.forEach((explosion, exIndex) => {
-                const progress = (Date.now() - explosion.startTime) / explosion.duration;
-                
-                if (progress >= 1) {
-                    explosions.splice(exIndex, 1);
-                } else {
-                    // Update explosion radius
-                    explosion.radius = explosion.maxRadius * (1 - progress);
-                    
-                    // Draw explosion
-                    const gradient = ctx.createRadialGradient(
-                        explosion.x, explosion.y, 0,
-                        explosion.x, explosion.y, explosion.radius
-                    );
-                    gradient.addColorStop(0, `rgba(255, 100, 0, ${1 - progress})`);
-                    gradient.addColorStop(0.7, `rgba(255, 50, 0, ${0.7 - progress * 0.7})`);
-                    gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
-                    
-                    ctx.fillStyle = gradient;
-                    ctx.beginPath();
-                    ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Draw particles
-                    explosion.particles.forEach(particle => {
-                        particle.x += Math.cos(particle.angle) * particle.speed;
-                        particle.y += Math.sin(particle.angle) * particle.speed;
-                        
-                        ctx.fillStyle = particle.color;
-                        ctx.beginPath();
-                        ctx.arc(particle.x, particle.y, particle.size * (1 - progress), 0, Math.PI * 2);
-                        ctx.fill();
-                    });
-                    
-                    // Damage ships in radius (only in first half of explosion)
-                    if (progress < 0.5) {
-                        // Damage player
-                        const distToPlayer = Math.sqrt(
-                            Math.pow(explosion.x - player.x, 2) + 
-                            Math.pow(explosion.y - player.y, 2)
-                        );
-                        
-                        if (distToPlayer < explosion.radius) {
-                            // Damage proportional to distance
-                            const damage = Math.round(explosion.damage * (1 - distToPlayer / explosion.radius));
-                            if (damage > 0) {
-                                lives -= damage;
-                                if (lives <= 0) {
-                                    gameOver();
-                                }
-                            }
-                        }
-                        
-                        // Damage enemies
-                        enemies.forEach((enemy, eIndex) => {
-                            const distToEnemy = Math.sqrt(
-                                Math.pow(explosion.x - enemy.x, 2) + 
-                                Math.pow(explosion.y - enemy.y, 2)
-                            );
-
-                            if (checkForSelfDestruction(enemy)) {
-                                return; 
-                            }
-                            
-                            if (distToEnemy < explosion.radius) {
-                                // Damage proportional to distance
-                                const damage = Math.round(explosion.damage * (1 - distToEnemy / explosion.radius));
-                                if (damage > 0) {
-                                    enemy.health -= damage;
-                                    
-                                    if (enemy.health <= 0) {
-                                        const pointsEarned = enemy.value * scoreMultiplier;
-                                        score += pointsEarned;
-                                        scoreDisplay.textContent = `Score: ${score}`;
-                                        
-                                        // Add point animation
-                                        multiplierAnimations.push({
-                                            x: enemy.x,
-                                            y: enemy.y,
-                                            text: `+${pointsEarned}`,
-                                            color: '#0f0',
-                                            startTime: Date.now()
-                                        });
-
-                                         if (Math.random() <= 0.05) {
-                                            spawnLifePowerup(enemy.x, enemy.y);
-                                            
-                                            // Show life dropped message
-                                            multiplierAnimations.push({
-                                                x: enemy.x,
-                                                y: enemy.y - 20,
-                                                text: "LIFE!",
-                                                color: '#0f0',
-                                                startTime: Date.now()
-                                            });
-                                        }
-                                        
-                                        // Add this line to check for chain reaction:
-                                        checkForChainReaction(enemy.x, enemy.y, enemy.width * 2);
-                                        
-                                        // Create normal explosion
-                                        createExplosion(enemy.x, enemy.y, enemy.width * 3, 1);
-                                        enemies.splice(eIndex, 1);
-
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-            
-            // Update and draw bonus ships
-            bonusShips.forEach((bonus, bIndex) => {
-                if (bonus.collected) return;
-                
-                // Move based on pattern
-                switch(bonus.pattern) {
-                    case 0: // Straight down
-                        bonus.y += bonus.speed;
-                        break;
-                    case 1: // Slight wave
-                        bonus.y += bonus.speed;
-                        bonus.x += Math.sin(bonus.patternStep) * 1.5;
-                        bonus.patternStep += 0.05;
-                        break;
-                }
-                
-                // Draw bonus ship
-                ctx.fillStyle = bonus.color;
-                ctx.beginPath();
-                ctx.moveTo(bonus.x, bonus.y - bonus.height/2);
-                ctx.lineTo(bonus.x + bonus.width/2, bonus.y + bonus.height/2);
-                ctx.lineTo(bonus.x - bonus.width/2, bonus.y + bonus.height/2);
-                ctx.closePath();
-                ctx.fill();
-                
-                // Draw multiplier text
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`x${bonus.multiplier}`, bonus.x, bonus.y + bonus.height/2 + 15);
-                ctx.textAlign = 'left';
-                
-                // Check collision with player
-                if (checkCollision(
-                    bonus.x - bonus.width/2, bonus.y - bonus.height/2, bonus.width, bonus.height,
-                    player.x - player.width/2, player.y - player.height/2, player.width, player.height
-                )) {
-                    bonus.collected = true;
-                    scoreMultiplier = bonus.multiplier;
-                    multiplierActive = true;
-                    multiplierEndTime = Date.now() + 10000; // 10 seconds
-                    
-                    // Add multiplier animation
-                    multiplierAnimations.push({
-                        x: bonus.x,
-                        y: bonus.y,
-                        text: `x${bonus.multiplier} Multiplier!`,
-                        color: bonus.color,
-                        startTime: Date.now()
-                    });
-                }
-                
-                // Remove if off screen
-                if (bonus.y > canvas.height + bonus.height) {
-                    bonusShips.splice(bIndex, 1);
-                }
-            });
-            
-            // Update and draw enemies
-            enemies.forEach((enemy, eIndex) => {
-                // Move based on pattern
-                switch(enemy.pattern) {
-                    case 0: // Straight down
-                        enemy.y += enemy.speed;
-                        break;
-                    case 1: // Zig-zag
-                        enemy.y += enemy.speed;
-                        enemy.x += Math.sin(enemy.patternStep) * 2;
-                        enemy.patternStep += 0.1;
-                        break;
-                    case 2: // Circle
-                        enemy.y += enemy.speed * 0.5;
-                        enemy.x += Math.cos(enemy.patternStep) * 3;
-                        enemy.patternStep += 0.05;
-                        break;
-                }
-                
-                // Enemy shooting
-                const now = Date.now();
-                if (now - enemy.lastShot > enemy.shootDelay) {
-                    enemy.bullets = enemy.bullets || [];
-                    enemy.bullets.push({
-                        x: enemy.x,
-                        y: enemy.y + enemy.height/2,
-                        width: 4,
-                        height: 10,
-                        speed: 5,
-                        color: '#f00'
-                    });
-                    enemy.lastShot = now;
-                }
-                
-                // Update enemy bullets
-                if (enemy.bullets) {
-                    enemy.bullets.forEach((bullet, bIndex) => {
-                        bullet.y += bullet.speed;
-                        
-                        // Draw bullet
-                        ctx.fillStyle = bullet.color;
-                        ctx.fillRect(bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height);
-                        
-                        // Check collision with player
-                        if (checkCollision(
-                            bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height,
-                            player.x - player.width/2, player.y - player.height/2, player.width, player.height
-                        )) {
-                            enemy.bullets.splice(bIndex, 1);
-                            lives--;
-                            if (lives <= 0) {
-                                gameOver();
-                            }
-                        }
-                        
-                        // Remove if off screen
-                        if (bullet.y > canvas.height) {
-                            enemy.bullets.splice(bIndex, 1);
-                        }
-                    });
-                }
-                
-                // Draw enemy
-                ctx.fillStyle = enemy.color;
-                ctx.beginPath();
-                ctx.moveTo(enemy.x, enemy.y - enemy.height/2);
-                ctx.lineTo(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
-                ctx.lineTo(enemy.x - enemy.width/2, enemy.y + enemy.height/2);
-                ctx.closePath();
-                ctx.fill();
-                
-                // Draw enemy cockpit
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(enemy.x, enemy.y - 5, 5, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw point value
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(enemy.points, enemy.x, enemy.y + enemy.height/2 + 12);
-                ctx.textAlign = 'left';
-                
-                // Remove if off screen
-                if (enemy.y > canvas.height + enemy.height) {
-                    enemies.splice(eIndex, 1);
-                }
-            });
-            
-            // Update and draw player bullets
-            player.bullets.forEach((bullet, bIndex) => {
-                bullet.y -= bullet.speed;
-                
-                // Draw bullet
-                ctx.fillStyle = bullet.color;
-                ctx.fillRect(bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height);
-                
-                // Check collision with enemies
-                enemies.forEach((enemy, eIndex) => {
-                    if (checkCollision(
-                        bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height,
-                        enemy.x - enemy.width/2, enemy.y - enemy.height/2, enemy.width, enemy.height
-                    )) {
-                        player.bullets.splice(bIndex, 1);
-                        enemy.health--;
-                        
-                         if (enemy.health <= 0) {
-                            const pointsEarned = enemy.value * scoreMultiplier;
-                            score += pointsEarned;
-                            scoreDisplay.textContent = `Score: ${score}`;
-                            
-                            // Add point animation
-                            multiplierAnimations.push({
-                                x: enemy.x,
-                                y: enemy.y,
-                                text: `+${pointsEarned}`,
-                                color: '#0f0',
-                                startTime: Date.now()
-                            });
-                            
-                             if (Math.random() <= 0.01) {
-                                spawnLifePowerup(enemy.x, enemy.y);
-                                
-                                // Show life dropped message
-                                multiplierAnimations.push({
-                                    x: enemy.x,
-                                    y: enemy.y - 20,
-                                    text: "LIFE!",
-                                    color: '#0f0',
-                                    startTime: Date.now()
-                                });
-                            }
-
-                            // Add this line to check for chain reaction:
-                            checkForChainReaction(enemy.x, enemy.y, enemy.width * 2);
-                            
-                            // Create explosion
-                            createExplosion(enemy.x, enemy.y, enemy.width * 3, 1);
-                            enemies.splice(eIndex, 1);
-                        }
-                    }
-                });
-                
-                // Check collision with bonus ships
-                bonusShips.forEach((bonus, bIndex) => {
-                    if (!bonus.collected && checkCollision(
-                        bullet.x - bullet.width/2, bullet.y, bullet.width, bullet.height,
-                        bonus.x - bonus.width/2, bonus.y - bonus.height/2, bonus.width, bonus.height
-                    )) {
-                        player.bullets.splice(bIndex, 1);
-                        bonus.collected = true;
-                        scoreMultiplier = bonus.multiplier;
-                        multiplierActive = true;
-                        multiplierEndTime = Date.now() + 10000; // 10 seconds
-                        
-                        // Add multiplier animation
-                        multiplierAnimations.push({
-                            x: bonus.x,
-                            y: bonus.y,
-                            text: `x${bonus.multiplier} Multiplier!`,
-                            color: bonus.color,
-                            startTime: Date.now()
-                        });
-                    }
-                });
-                
-                // Remove if off screen
-                if (bullet.y < 0) {
-                    player.bullets.splice(bIndex, 1);
-                }
-            });
+            // Update and draw everything
+            updateEnemies();
+            updateBullets();
+            updatePowerups();
+            updateExplosions();
             
             // Draw player
             player.draw();
             
-            // Draw lives
-            ctx.fillStyle = '#fff';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Lives: ${lives}`, 20, 30);
+            // Draw HUD
+            drawHUD();
             
-            // Draw multiplier status
-            if (multiplierActive) {
-                const timeLeft = Math.ceil((multiplierEndTime - Date.now()) / 1000);
-                ctx.fillStyle = '#ff0';
-                ctx.font = '20px Arial';
-                ctx.fillText(`Multiplier: x${scoreMultiplier} (${timeLeft}s)`, canvas.width - 250, 30);
-            }
-            
-            // Draw and update multiplier animations
-            multiplierAnimations.forEach((anim, index) => {
-                const elapsed = Date.now() - anim.startTime;
-                const progress = elapsed / 1000; // 1 second duration
-                
-                if (progress > 1) {
-                    multiplierAnimations.splice(index, 1);
-                } else {
-                    ctx.fillStyle = anim.color;
-                    ctx.font = '24px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(anim.text, anim.x, anim.y - progress * 50);
-                    ctx.textAlign = 'left';
-                }
-            });
-            
-            // Continue game loop
             requestAnimationFrame(gameLoop);
         }
 
-        function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
-            return x1 < x2 + w2 &&
-                   x1 + w1 > x2 &&
-                   y1 < y2 + h2 &&
-                   y1 + h1 > y2;
+        function updateScore() {
+            scoreDisplay.textContent = `Score: ${gameState.score}`;
         }
 
-        function gameOver() {
-            gameRunning = false;
-            gameOverDisplay.style.display = 'block';
-            gameOverDisplay.querySelector('span').textContent = `Score: ${score}`;
-            
-            // Create big explosion at player position
-            createExplosion(player.x, player.y, 100, 0);
+        function updateLevel() {
+            levelDisplay.textContent = `Level: ${gameState.level}`;
         }
+
+        function drawHUD() {
+            // Draw lives
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Lives: ${gameState.lives}`, 20, 30);
+            
+            // Draw combo if active
+            if (gameState.combo > 0) {
+                ctx.fillStyle = '#ff00ff';
+                ctx.font = '24px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${gameState.combo}x COMBO!`, canvas.width - 20, 30);
+                ctx.textAlign = 'left';
+            }
+            
+            // Draw boss health bar if active
+            if (gameState.bossBattleActive) {
+                const barWidth = canvas.width * 0.6;
+                const barHeight = 20;
+                const barX = (canvas.width - barWidth) / 2;
+                const barY = 20;
+                
+                ctx.fillStyle = '#333';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+                
+                const healthPercent = gameState.bossHealth / gameState.maxBossHealth;
+                ctx.fillStyle = `hsl(${healthPercent * 120}, 100%, 50%)`;
+                ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+            }
+        }
+
+        // Add new power-up types
+        const POWERUP_TYPES = [
+    { type: 'shield', icon: '🛡️', duration: 5000, color: '#00ff00' },
+    { type: 'rapid', icon: '⚡', duration: 8000, color: '#ffff00' },
+    { type: 'spread', icon: '➗', duration: 6000, color: '#ff00ff' },
+    { type: 'freeze', icon: '❄️', duration: 4000, color: '#00ffff' },
+    { type: 'bomb', icon: '💣', duration: 0, color: '#ff0000' }
+];
+
+const BOSS_TYPES = [
+    {
+        name: "DREADNOUGHT",
+        health: 100,
+        sprite: '👾',
+        patterns: ['circle', 'spread', 'laser'],
+        spawnScore: 1000
+    },
+    {
+        name: "NEMESIS",
+        health: 150,
+        sprite: '👹',
+        patterns: ['wave', 'burst', 'chase'],
+        spawnScore: 2500
+    }
+];
+
+const ACHIEVEMENTS = [
+    { id: 'combo10', name: 'Combo Master', desc: '10x hit combo', score: 500 },
+    { id: 'boss1', name: 'Boss Slayer', desc: 'Defeat first boss', score: 1000 },
+    { id: 'perfectRound', name: 'Perfect Round', desc: 'Clear wave without damage', score: 750 }
+];
+
+function spawnBoss() {
+    if (state.bossBattleActive) return;
+    
+    const bossType = BOSS_TYPES[Math.floor(score / 2500)];
+    if (!bossType) return;
+    
+    state.bossBattleActive = true;
+    state.bossHealth = bossType.health;
+    state.maxBossHealth = bossType.health;
+    
+    // Boss announcement
+    showMessage(`WARNING: ${bossType.name} APPROACHING!`, true, 3000);
+    
+    // Boss music/effects could be added here
+}
+
+function updateBossHealth(damage) {
+    state.bossHealth = Math.max(0, state.bossHealth - damage);
+    if (state.bossHealth === 0) {
+        defeatedBoss();
+    }
+}
+
+function defeatedBoss() {
+    state.bossBattleActive = false;
+    score += 1000;
+    showMessage("BOSS DEFEATED! +1000", true, 2000);
+    unlockAchievement('boss1');
+    spawnPowerup(boss.x, boss.y);
+}
+
+function unlockAchievement(id) {
+    if (state.achievements.includes(id)) return;
+    
+    const achievement = ACHIEVEMENTS.find(a => a.id === id);
+    if (!achievement) return;
+    
+    state.achievements.push(id);
+    score += achievement.score;
+    
+    // Show achievement notification
+    const notification = document.createElement('div');
+    notification.className = 'achievement';
+    notification.innerHTML = `
+        🏆 ${achievement.name}
+        <br>${achievement.desc}
+        <br>+${achievement.score} points!
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+
+
     </script>
 </body>
 </html>

@@ -1,181 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>🧩 Puzzle Master</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        
-        .game-container {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-            text-align: center;
-        }
+<meta charset="UTF-8">
+<title>🧩 Puzzle Master</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
 
-        .puzzle-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            gap: 5px;
-            margin: 20px 0;
-        }
+    .game-container {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        text-align: center;
+        width: 380px;
+    }
 
-        .puzzle-tile {
-            height: 100px;
-            background: #f0f4ff;
-            border: none;
-            border-radius: 8px;
-            font-size: 24px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
+    .puzzle-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        gap: 5px;
+        margin: 20px auto;
+    }
 
-        .puzzle-tile:hover:not(:disabled) {
-            transform: scale(0.95);
-            background: #e0e7ff;
-        }
+    .puzzle-tile {
+        height: 100px;
+        background: #0e0f0f;
+        border: none;
+        border-radius: 8px;
+        font-size: 28px;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.25s, background 0.25s;
+    }
 
-        .puzzle-tile:disabled {
-            background: #ddd;
-            cursor: not-allowed;
-        }
+    .puzzle-tile.movable {
+        box-shadow: 0 0 8px #6e8efb;
+    }
 
-        .controls {
-            margin-top: 20px;
-        }
+    .puzzle-tile:hover.movable {
+        background: #4a56d6;
+        transform: scale(0.95);
+    }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            background: #6e8efb;
-            color: white;
-            cursor: pointer;
-            margin: 5px;
-        }
+    .puzzle-tile.empty {
+        background: #ddd;
+        cursor: default;
+    }
 
-        button:hover {
-            background: #5669d8;
-        }
+    .controls {
+        margin-top: 20px;
+    }
 
-        .moves {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #666;
-        }
-    </style>
+    button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #6e8efb;
+        color: white;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    button:hover {
+        background: #5669d8;
+    }
+
+    .moves, .timer, .level {
+        margin-top: 10px;
+        font-weight: bold;
+        color: #444;
+    }
+
+    .win-message {
+        font-size: 20px;
+        font-weight: bold;
+        color: green;
+        margin-top: 15px;
+        display: none;
+    }
+
+    #modeSelect {
+        margin-bottom: 15px;
+    }
+</style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🧩 Puzzle Master</h1>
-        <div class="puzzle-grid" id="puzzleGrid"></div>
-        <div class="controls">
-            <button id="newGameBtn">New Game</button>
-            <button id="solveBtn">Solve</button>
-        </div>
-        <div class="moves">Moves: <span id="moveCount">0</span></div>
+<div class="game-container">
+    <h1>🧩 Puzzle Master</h1>
+    
+    <div id="modeSelect">
+        <button id="endlessModeBtn">Endless Mode</button>
+        <button id="lastStandBtn">Last Stand Mode</button>
     </div>
 
-    <script>
-        const state = {
-            tiles: [],
-            moves: 0,
-            solved: false
-        };
+    <div class="puzzle-grid" id="puzzleGrid" style="display:none;"></div>
 
-        function initializePuzzle() {
-            state.tiles = Array.from({length: 8}, (_, i) => i + 1);
-            state.tiles.push(null); // Empty tile
-            state.moves = 0;
-            state.solved = false;
-            shufflePuzzle();
-            updateUI();
-        }
+    <div class="controls" id="controls" style="display:none;">
+        <button id="newGameBtn">Restart</button>
+    </div>
 
-        function shufflePuzzle() {
-            for (let i = state.tiles.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [state.tiles[i], state.tiles[j]] = [state.tiles[j], state.tiles[i]];
+    <div class="level" id="levelDisplay" style="display:none;">Level: 1</div>
+    <div class="moves">Moves: <span id="moveCount">0</span></div>
+    <div class="timer">Time: <span id="timer">0</span>s</div>
+    <div class="win-message" id="winMessage">🎉 You solved it!</div>
+</div>
+
+<script>
+const state = {
+    tiles: [],
+    moves: 0,
+    solved: false,
+    timer: 0,
+    timerInterval: null,
+    mode: null, // "endless" or "laststand"
+    level: 1,
+    moveLimit: null,
+    timeLimit: null,
+    countdownInterval: null
+};
+
+const grid = document.getElementById('puzzleGrid');
+const winMessage = document.getElementById('winMessage');
+const moveDisplay = document.getElementById('moveCount');
+const timerDisplay = document.getElementById('timer');
+const levelDisplay = document.getElementById('levelDisplay');
+
+// =============================
+// MODE SELECT
+// =============================
+document.getElementById('endlessModeBtn').onclick = () => startMode('endless');
+document.getElementById('lastStandBtn').onclick = () => startMode('laststand');
+
+function startMode(mode) {
+    state.mode = mode;
+    document.getElementById('modeSelect').style.display = 'none';
+    grid.style.display = 'grid';
+    document.getElementById('controls').style.display = 'block';
+    if (mode === 'laststand') levelDisplay.style.display = 'block';
+    initializePuzzle();
+}
+
+// =============================
+// PUZZLE INITIALIZATION
+// =============================
+function initializePuzzle() {
+    state.tiles = Array.from({length: 8}, (_, i) => i + 1);
+    state.tiles.push(null);
+    state.moves = 0;
+    state.solved = false;
+    winMessage.style.display = "none";
+
+    shufflePuzzle();
+    setupTimerAndLimits();
+    updateUI();
+}
+
+// =============================
+// TIMER & LIMIT LOGIC
+// =============================
+function setupTimerAndLimits() {
+    stopAllTimers();
+    if (state.mode === 'endless') {
+        state.timer = 0;
+        state.timerInterval = setInterval(() => {
+            state.timer++;
+            timerDisplay.textContent = state.timer;
+        }, 1000);
+    } else if (state.mode === 'laststand') {
+        // Time decreases per level: 180s → 165s → ... → 30s minimum
+        const baseTime = Math.max(180 - (state.level - 1) * 15, 30);
+        state.timeLimit = baseTime;
+        state.timer = baseTime;
+
+        // Move limit decreases per level (example: 100 - 10*(level-1))
+        state.moveLimit = Math.max(100 - (state.level - 1) * 10, 20);
+
+        levelDisplay.textContent = `Level: ${state.level}`;
+        timerDisplay.textContent = state.timer;
+
+        state.countdownInterval = setInterval(() => {
+            state.timer--;
+            timerDisplay.textContent = state.timer;
+            if (state.timer <= 0) {
+                gameOver("⏰ Time's up! You reached Level " + state.level);
             }
-            // Ensure puzzle is solvable
-            if (!isSolvable()) {
-                shufflePuzzle();
-            }
+        }, 1000);
+    }
+}
+
+function stopAllTimers() {
+    clearInterval(state.timerInterval);
+    clearInterval(state.countdownInterval);
+}
+
+// =============================
+// PUZZLE SHUFFLE + UI
+// =============================
+function shufflePuzzle() {
+    let attempts = 0;
+    do {
+        for (let i = state.tiles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [state.tiles[i], state.tiles[j]] = [state.tiles[j], state.tiles[i]];
         }
+        attempts++;
+    } while (!isSolvable() && attempts < 50);
+}
 
-        function isSolvable() {
-            let inversions = 0;
-            const tiles = state.tiles.filter(t => t !== null);
-            for (let i = 0; i < tiles.length - 1; i++) {
-                for (let j = i + 1; j < tiles.length; j++) {
-                    if (tiles[i] > tiles[j]) inversions++;
-                }
-            }
-            return inversions % 2 === 0;
+function isSolvable() {
+    let inversions = 0;
+    const tiles = state.tiles.filter(t => t !== null);
+    for (let i = 0; i < tiles.length - 1; i++) {
+        for (let j = i + 1; j < tiles.length; j++) {
+            if (tiles[i] > tiles[j]) inversions++;
         }
+    }
+    return inversions % 2 === 0;
+}
 
-        function updateUI() {
-            const grid = document.getElementById('puzzleGrid');
-            grid.innerHTML = '';
-            state.tiles.forEach((tile, index) => {
-                const button = document.createElement('button');
-                button.className = 'puzzle-tile';
-                button.textContent = tile || '';
-                button.disabled = !canMove(index);
-                button.onclick = () => moveTile(index);
-                grid.appendChild(button);
-            });
-            document.getElementById('moveCount').textContent = state.moves;
+function updateUI() {
+    grid.innerHTML = '';
+    state.tiles.forEach((tile, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'puzzle-tile';
+        if (tile === null) {
+            btn.classList.add('empty');
+        } else {
+            btn.textContent = tile;
+            if (canMove(index)) btn.classList.add('movable');
+            btn.onclick = () => moveTile(index);
         }
+        grid.appendChild(btn);
+    });
+    moveDisplay.textContent = state.moves;
+}
 
-        function canMove(index) {
-            if (state.tiles[index] === null) return false;
-            const row = Math.floor(index / 3);
-            const col = index % 3;
-            const emptyIndex = state.tiles.indexOf(null);
-            const emptyRow = Math.floor(emptyIndex / 3);
-            const emptyCol = emptyIndex % 3;
-            return (Math.abs(row - emptyRow) + Math.abs(col - emptyCol)) === 1;
-        }
+// =============================
+// TILE MOVEMENT
+// =============================
+function canMove(index) {
+    if (state.tiles[index] === null) return false;
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+    const emptyIndex = state.tiles.indexOf(null);
+    const emptyRow = Math.floor(emptyIndex / 3);
+    const emptyCol = emptyIndex % 3;
+    return (Math.abs(row - emptyRow) + Math.abs(col - emptyCol)) === 1;
+}
 
-        function moveTile(index) {
-            if (!canMove(index) || state.solved) return;
-            
-            const emptyIndex = state.tiles.indexOf(null);
-            [state.tiles[index], state.tiles[emptyIndex]] = [state.tiles[emptyIndex], state.tiles[index]];
-            state.moves++;
-            
-            if (checkWin()) {
-                state.solved = true;
-                setTimeout(() => alert('Puzzle solved! 🎉'), 100);
-            }
-            
-            updateUI();
-        }
+function moveTile(index) {
+    if (!canMove(index) || state.solved) return;
+    const emptyIndex = state.tiles.indexOf(null);
+    [state.tiles[index], state.tiles[emptyIndex]] = [state.tiles[emptyIndex], state.tiles[index]];
+    state.moves++;
+    moveDisplay.textContent = state.moves;
 
-        function checkWin() {
-            return state.tiles.slice(0, -1).every((tile, index) => tile === index + 1);
-        }
+    if (state.mode === 'laststand' && state.moves > state.moveLimit) {
+        return gameOver("🚫 Move limit reached! You made it to Level " + state.level);
+    }
 
-        document.getElementById('newGameBtn').onclick = initializePuzzle;
-        document.getElementById('solveBtn').onclick = () => {
-            state.tiles = [...Array(8)].map((_, i) => i + 1);
-            state.tiles.push(null);
-            state.solved = true;
-            updateUI();
-        };
+    if (checkWin()) handleWin();
+    updateUI();
+}
 
-        // Start game
-        initializePuzzle();
-    </script>
+// =============================
+// WIN & GAME OVER HANDLING
+// =============================
+function checkWin() {
+    return state.tiles.slice(0, -1).every((t, i) => t === i + 1);
+}
+
+function handleWin() {
+    state.solved = true;
+    stopAllTimers();
+    winMessage.style.display = "block";
+
+    if (state.mode === 'laststand') {
+        setTimeout(() => {
+            state.level++;
+            winMessage.style.display = "none";
+            initializePuzzle();
+        }, 1500);
+    }
+}
+
+function gameOver(msg) {
+    stopAllTimers();
+    alert(msg);
+    resetToMenu();
+}
+
+// =============================
+// RESET
+// =============================
+function resetToMenu() {
+    grid.style.display = 'none';
+    document.getElementById('controls').style.display = 'none';
+    levelDisplay.style.display = 'none';
+    document.getElementById('modeSelect').style.display = 'block';
+}
+
+document.getElementById('newGameBtn').onclick = initializePuzzle;
+</script>
 </body>
 </html>
