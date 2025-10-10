@@ -26,11 +26,8 @@ All games are built using:
 
 ## 🔄 Version History
 
-Current Version: 1.11.13 (October 5, 2025)
+Current Version: 1.12.14 (October 10, 2025)
 - Updated space shooters
-- Added Puzzle Master game
-- Enhanced Wealth Builder mechanics
-- Improved UI/UX across all games
 - Fixed various bugs and performance issues
 
 ## 📅 Updates
