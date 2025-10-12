@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metropolis Builder - Enhanced City Building Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a3c7c, #4a5ca5);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #ffd700, #ffec8b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .city-container {
+            flex: 1;
+            min-width: 500px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .city-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 4px;
+            aspect-ratio: 1/1;
+            background: linear-gradient(45deg, #2d5016, #3a6620);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cell {
+            background: rgba(144, 238, 144, 0.7);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+            z-index: 10;
+        }
+        
+        .cell.residential {
+            background: linear-gradient(135deg, #ffb6c1, #ff8ba0);
+        }
+        
+        .cell.commercial {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+        }
+        
+        .cell.industrial {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+        }
+        
+        .cell.park {
+            background: linear-gradient(135deg, #90ee90, #32cd32);
+        }
+        
+        .cell.power-plant {
+            background: linear-gradient(135deg, #ff4500, #ff6347);
+        }
+        
+        .cell.road {
+            background: linear-gradient(135deg, #696969, #4a4a4a);
+        }
+        
+        .cell.water {
+            background: linear-gradient(135deg, #1e90ff, #00bfff);
+        }
+        
+        .controls-panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: rgba(30, 144, 255, 0.5);
+            font-weight: bold;
+        }
+        
+        .buildings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .building-option {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .building-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .building-option.selected {
+            border-color: #1e90ff;
+            background: rgba(30, 144, 255, 0.2);
+        }
+        
+        .building-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .upgrades-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .upgrade-option {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upgrade-option:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .upgrade-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .upgrade-icon {
+            font-size: 2rem;
+            width: 50px;
+            text-align: center;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .challenges-panel {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .challenge {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .challenge-progress {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.5s;
+            z-index: 100;
+        }
+        
+        .message.show {
+            transform: translateX(0);
+        }
+        
+        .resources {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .time-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .time-btn {
+            flex: 1;
+            padding: 8px;
+            background: rgba(30, 144, 255, 0.5);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .time-btn:hover {
+            background: rgba(30, 144, 255, 0.7);
+        }
+        
+        @media (max-width: 900px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .city-container, .controls-panel {
+                min-width: 100%;
+            }
+            
+            .stats-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Metropolis Builder</h1>
+            <p class="subtitle">Build your dream city from the ground up!</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="city-container">
+                <div class="city-header">
+                    <h2>Your City</h2>
+                    <div class="resources">
+                        <div class="resource">💰 <span id="money">$2000</span></div>
+                        <div class="resource">👥 <span id="population">0</span></div>
+                        <div class="resource">⚡ <span id="energy">100</span></div>
+                    </div>
+                </div>
+                <div class="city-grid" id="cityGrid">
+                    <!-- Grid will be generated by JavaScript -->
+                </div>
+                <div class="time-controls">
+                    <button class="time-btn" id="pauseBtn">⏸️ Pause</button>
+                    <button class="time-btn" id="normalBtn">⏵ Normal</button>
+                    <button class="time-btn" id="fastBtn">⏩ Fast</button>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="tabs">
+                    <div class="tab active" data-tab="build">Build</div>
+                    <div class="tab" data-tab="upgrades">Upgrades</div>
+                    <div class="tab" data-tab="manage">Manage</div>
+                </div>
+                
+                <div id="buildTab" class="tab-content">
+                    <h3>Buildings</h3>
+                    <div class="buildings-grid">
+                        <div class="building-option selected" data-type="residential">
+                            <div class="building-icon">🏠</div>
+                            <div>Residential</div>
+                            <div>$100</div>
+                        </div>
+                        <div class="building-option" data-type="commercial">
+                            <div class="building-icon">🏪</div>
+                            <div>Commercial</div>
+                            <div>$150</div>
+                        </div>
+                        <div class="building-option" data-type="industrial">
+                            <div class="building-icon">🏭</div>
+                            <div>Industrial</div>
+                            <div>$200</div>
+                        </div>
+                        <div class="building-option" data-type="road">
+                            <div class="building-icon">🛣️</div>
+                            <div>Road</div>
+                            <div>$50</div>
+                        </div>
+                        <div class="building-option" data-type="park">
+                            <div class="building-icon">🌳</div>
+                            <div>Park</div>
+                            <div>$80</div>
+                        </div>
+                        <div class="building-option" data-type="power-plant">
+                            <div class="building-icon">⚡</div>
+                            <div>Power Plant</div>
+                            <div>$300</div>
+                        </div>
+                    </div>
+                    
+                    <div class="building-option" data-type="destroy" style="grid-column: 1 / -1; margin-top: 10px;">
+                        <div class="building-icon">🗑️</div>
+                        <div>Destroy Building</div>
+                        <div>50% Refund</div>
+                    </div>
+                </div>
+                
+                <div id="upgradesTab" class="tab-content" style="display: none;">
+                    <h3>Upgrades</h3>
+                    <div class="upgrades-grid">
+                        <div class="upgrade-option" data-upgrade="efficiency">
+                            <div class="upgrade-icon">📈</div>
+                            <div>
+                                <div>Efficiency Upgrade</div>
+                                <div>+20% income from all buildings</div>
+                                <div>Cost: $500</div>
+                            </div>
+                        </div>
+                        <div class="upgrade-option" data-upgrade="capacity">
+                            <div class="upgrade-icon">🏘️</div>
+                            <div>
+                                <div>Housing Capacity</div>
+                                <div>+5 population per residential</div>
+                                <div>Cost: $400</div>
+                            </div>
+                        </div>
+                        <div class="upgrade-option" data-upgrade="renewable">
+                            <div class="upgrade-icon">🌞</div>
+                            <div>
+                                <div>Renewable Energy</div>
+                                <div>+50 max energy</div>
+                                <div>Cost: $600</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="manageTab" class="tab-content" style="display: none;">
+                    <h3>City Management</h3>
+                    <div class="stats-panel">
+                        <div class="stat-card">
+                            <div>Residential</div>
+                            <div class="stat-value" id="residentialCount">0</div>
+                            <div>Houses</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>Commercial</div>
+                            <div class="stat-value" id="commercialCount">0</div>
+                            <div>Businesses</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>Industrial</div>
+                            <div class="stat-value" id="industrialCount">0</div>
+                            <div>Factories</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>Income</div>
+                            <div class="stat-value" id="income">$0</div>
+                            <div>Per Cycle</div>
+                        </div>
+                    </div>
+                    <div class="challenge">
+                        <div>Expand City</div>
+                        <div class="challenge-progress">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div>0/20</div>
+                    </div>
+                    <div class="challenge">
+                        <div>Diversify Economy</div>
+                        <div class="challenge-progress">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div>0/3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="challenges-panel">
+            <h3>Challenges & Achievements</h3>
+            <div class="challenge">
+                <div>Build 5 Residential Zones</div>
+                <div class="challenge-progress">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div>0/5</div>
+            </div>
+            <div class="challenge">
+                <div>Reach 100 Population</div>
+                <div class="challenge-progress">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div>0/100</div>
+            </div>
+            <div class="challenge">
+                <div>Earn $1000 in one cycle</div>
+                <div class="challenge-progress">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div>0/1000</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="message" id="message"></div>
+
+    <script>
+        // Game state
+        const gameState = {
+            money: 2000,
+            population: 0,
+            energy: 100,
+            residentialCount: 0,
+            commercialCount: 0,
+            industrialCount: 0,
+            roadCount: 0,
+            parkCount: 0,
+            powerPlantCount: 0,
+            selectedBuilding: 'residential',
+            grid: [],
+            upgrades: {
+                efficiency: false,
+                capacity: false,
+                renewable: false
+            },
+            challenges: {
+                residential5: { current: 0, target: 5, completed: false },
+                population100: { current: 0, target: 100, completed: false },
+                income1000: { current: 0, target: 1000, completed: false },
+                expandCity: { current: 0, target: 20, completed: false },
+                diversify: { current: 0, target: 3, completed: false }
+            },
+            gameSpeed: 1, // 0 = paused, 1 = normal, 2 = fast
+            cycleCount: 0
+        };
+
+        // Building data
+        const buildingData = {
+            residential: { 
+                cost: 100, 
+                population: 10, 
+                income: 5, 
+                energy: -2, 
+                symbol: '🏠',
+                description: 'Houses citizens and increases population'
+            },
+            commercial: { 
+                cost: 150, 
+                population: 0, 
+                income: 15, 
+                energy: -5, 
+                symbol: '🏪',
+                description: 'Generates income from commerce'
+            },
+            industrial: { 
+                cost: 200, 
+                population: 0, 
+                income: 25, 
+                energy: -10, 
+                symbol: '🏭',
+                description: 'Generates high income but consumes more energy'
+            },
+            road: { 
+                cost: 50, 
+                population: 0, 
+                income: 0, 
+                energy: 0, 
+                symbol: '🛣️',
+                description: 'Connects your city (required for some buildings)'
+            },
+            park: { 
+                cost: 80, 
+                population: 5, 
+                income: 2, 
+                energy: -1, 
+                symbol: '🌳',
+                description: 'Increases happiness and population'
+            },
+            'power-plant': { 
+                cost: 300, 
+                population: 0, 
+                income: 0, 
+                energy: 30, 
+                symbol: '⚡',
+                description: 'Generates energy for your city'
+            }
+        };
+
+        // Initialize the game
+        function initGame() {
+            createGrid();
+            updateUI();
+            setupEventListeners();
+            startGameLoop();
+            
+            // Show welcome message
+            showMessage("Welcome to Metropolis Builder! Start by placing residential zones.");
+        }
+
+        // Create the city grid
+        function createGrid() {
+            const gridElement = document.getElementById('cityGrid');
+            gridElement.innerHTML = '';
+            
+            gameState.grid = [];
+            
+            for (let y = 0; y < 10; y++) {
+                gameState.grid[y] = [];
+                for (let x = 0; x < 10; x++) {
+                    gameState.grid[y][x] = { type: 'empty', x, y, level: 1 };
+                    
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    
+                    cell.addEventListener('click', () => handleCellClick(x, y));
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+            
+            // Add some initial roads
+            gameState.grid[5][4].type = 'road';
+            gameState.grid[5][5].type = 'road';
+            updateGrid();
+        }
+
+        // Handle cell click events
+        function handleCellClick(x, y) {
+            const cell = gameState.grid[y][x];
+            
+            if (gameState.selectedBuilding === 'destroy') {
+                // Destroy building
+                if (cell.type !== 'empty' && cell.type !== 'road') {
+                    const refund = Math.floor(buildingData[cell.type].cost * 0.5);
+                    gameState.money += refund;
+                    
+                    // Update energy if it's a power plant
+                    if (cell.type === 'power-plant') {
+                        gameState.energy -= buildingData['power-plant'].energy;
+                    }
+                    
+                    cell.type = 'empty';
+                    showMessage(`Destroyed building. Refund: $${refund}`);
+                    updateGrid();
+                    updateUI();
+                    updateChallenges();
+                }
+                return;
+            }
+            
+            // Build new building
+            if (cell.type === 'empty') {
+                const building = buildingData[gameState.selectedBuilding];
+                
+                // Check if we have enough money
+                if (gameState.money >= building.cost) {
+                    // Check if we have enough energy (for non-power plants)
+                    if (gameState.selectedBuilding !== 'power-plant' && 
+                        (gameState.energy + building.energy) < 0) {
+                        showMessage("Not enough energy! Build a power plant.");
+                        return;
+                    }
+                    
+                    gameState.money -= building.cost;
+                    cell.type = gameState.selectedBuilding;
+                    
+                    // Update energy
+                    gameState.energy += building.energy;
+                    
+                    showMessage(`Built ${gameState.selectedBuilding} for $${building.cost}`);
+                    updateGrid();
+                    updateUI();
+                    updateChallenges();
+                } else {
+                    showMessage("Not enough money!");
+                }
+            } else {
+                showMessage("This cell is already occupied!");
+            }
+        }
+
+        // Update the grid display
+        function updateGrid() {
+            // Reset counts
+            gameState.residentialCount = 0;
+            gameState.commercialCount = 0;
+            gameState.industrialCount = 0;
+            gameState.roadCount = 0;
+            gameState.parkCount = 0;
+            gameState.powerPlantCount = 0;
+            
+            // Update each cell
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = gameState.grid[y][x];
+                    const cellElement = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+                    
+                    // Reset cell classes
+                    cellElement.className = 'cell';
+                    
+                    // Update cell content and classes based on type
+                    if (cell.type !== 'empty') {
+                        cellElement.classList.add(cell.type);
+                        cellElement.textContent = buildingData[cell.type].symbol;
+                        
+                        // Update counts
+                        if (cell.type === 'residential') gameState.residentialCount++;
+                        if (cell.type === 'commercial') gameState.commercialCount++;
+                        if (cell.type === 'industrial') gameState.industrialCount++;
+                        if (cell.type === 'road') gameState.roadCount++;
+                        if (cell.type === 'park') gameState.parkCount++;
+                        if (cell.type === 'power-plant') gameState.powerPlantCount++;
+                    } else {
+                        cellElement.textContent = '';
+                    }
+                }
+            }
+            
+            // Calculate population and income
+            calculateStats();
+        }
+
+        // Calculate game statistics
+        function calculateStats() {
+            // Base population from residential buildings
+            let basePopulation = gameState.residentialCount * buildingData.residential.population;
+            basePopulation += gameState.parkCount * buildingData.park.population;
+            
+            // Apply capacity upgrade
+            if (gameState.upgrades.capacity) {
+                basePopulation = Math.floor(basePopulation * 1.25);
+            }
+            
+            gameState.population = basePopulation;
+            
+            // Income from all buildings
+            let income = 0;
+            income += gameState.residentialCount * buildingData.residential.income;
+            income += gameState.commercialCount * buildingData.commercial.income;
+            income += gameState.industrialCount * buildingData.industrial.income;
+            income += gameState.parkCount * buildingData.park.income;
+            
+            // Apply efficiency upgrade
+            if (gameState.upgrades.efficiency) {
+                income = Math.floor(income * 1.2);
+            }
+            
+            // Update money with income
+            gameState.money += income;
+            
+            // Update UI
+            document.getElementById('income').textContent = `$${income}`;
+            
+            // Update challenge progress
+            gameState.challenges.income1000.current = Math.max(gameState.challenges.income1000.current, income);
+        }
+
+        // Update the UI with current game state
+        function updateUI() {
+            document.getElementById('money').textContent = `$${gameState.money}`;
+            document.getElementById('population').textContent = gameState.population;
+            document.getElementById('energy').textContent = gameState.energy;
+            document.getElementById('residentialCount').textContent = gameState.residentialCount;
+            document.getElementById('commercialCount').textContent = gameState.commercialCount;
+            document.getElementById('industrialCount').textContent = gameState.industrialCount;
+            
+            // Update upgrade availability
+            updateUpgradesUI();
+        }
+
+        // Update upgrades UI based on affordability
+        function updateUpgradesUI() {
+            const upgrades = document.querySelectorAll('.upgrade-option');
+            upgrades.forEach(upgrade => {
+                const upgradeType = upgrade.dataset.upgrade;
+                const cost = getUpgradeCost(upgradeType);
+                
+                if (gameState.upgrades[upgradeType]) {
+                    upgrade.classList.add('disabled');
+                    upgrade.innerHTML = `
+                        <div class="upgrade-icon">✅</div>
+                        <div>
+                            <div>${getUpgradeName(upgradeType)}</div>
+                            <div>Already Purchased</div>
+                        </div>
+                    `;
+                } else if (gameState.money >= cost) {
+                    upgrade.classList.remove('disabled');
+                } else {
+                    upgrade.classList.add('disabled');
+                }
+            });
+        }
+
+        // Get upgrade cost
+        function getUpgradeCost(upgradeType) {
+            const costs = {
+                efficiency: 500,
+                capacity: 400,
+                renewable: 600
+            };
+            return costs[upgradeType] || 0;
+        }
+
+        // Get upgrade name
+        function getUpgradeName(upgradeType) {
+            const names = {
+                efficiency: "Efficiency Upgrade",
+                capacity: "Housing Capacity",
+                renewable: "Renewable Energy"
+            };
+            return names[upgradeType] || "Upgrade";
+        }
+
+        // Update challenges progress
+        function updateChallenges() {
+            // Update challenge progress
+            gameState.challenges.residential5.current = gameState.residentialCount;
+            gameState.challenges.population100.current = gameState.population;
+            gameState.challenges.expandCity.current = gameState.residentialCount + gameState.commercialCount + gameState.industrialCount;
+            gameState.challenges.diversify.current = 
+                (gameState.residentialCount > 0 ? 1 : 0) + 
+                (gameState.commercialCount > 0 ? 1 : 0) + 
+                (gameState.industrialCount > 0 ? 1 : 0);
+            
+            // Update UI for challenges
+            const challenges = document.querySelectorAll('.challenge');
+            challenges.forEach((challenge, index) => {
+                const challengeKeys = Object.keys(gameState.challenges);
+                const key = challengeKeys[index];
+                const challengeData = gameState.challenges[key];
+                
+                const progressBar = challenge.querySelector('.progress-bar');
+                const progressText = challenge.querySelector('div:last-child');
+                
+                const progress = Math.min(100, (challengeData.current / challengeData.target) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${challengeData.current}/${challengeData.target}`;
+                
+                // Check if challenge is completed
+                if (challengeData.current >= challengeData.target && !challengeData.completed) {
+                    challengeData.completed = true;
+                    showMessage(`Challenge completed: ${challenge.querySelector('div:first-child').textContent}!`);
+                    
+                    // Reward for completing challenge
+                    gameState.money += 200;
+                }
+            });
+        }
+
+        // Show a temporary message
+        function showMessage(text) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.classList.add('show');
+            
+            setTimeout(() => {
+                messageElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Game loop for periodic updates
+        function startGameLoop() {
+            setInterval(() => {
+                if (gameState.gameSpeed > 0) {
+                    gameState.cycleCount++;
+                    calculateStats();
+                    updateUI();
+                    updateChallenges();
+                    
+                    // Random events
+                    if (Math.random() < 0.1) { // 10% chance per cycle
+                        triggerRandomEvent();
+                    }
+                }
+            }, 2000 / gameState.gameSpeed); // Normal speed: 2 seconds per cycle
+        }
+
+        // Random events to make the game more interesting
+        function triggerRandomEvent() {
+            const events = [
+                {
+                    message: "Tourist season! Extra income from commercial zones.",
+                    effect: () => {
+                        gameState.money += gameState.commercialCount * 10;
+                    }
+                },
+                {
+                    message: "Energy surge! Power plants produce extra energy.",
+                    effect: () => {
+                        gameState.energy += gameState.powerPlantCount * 5;
+                    }
+                },
+                {
+                    message: "Population boom! Residential zones attract more people.",
+                    effect: () => {
+                        gameState.population += Math.floor(gameState.residentialCount * 2);
+                    }
+                }
+            ];
+            
+            const event = events[Math.floor(Math.random() * events.length)];
+            showMessage(event.message);
+            event.effect();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Building selection
+            document.querySelectorAll('.building-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.building-option').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                    gameState.selectedBuilding = option.dataset.type;
+                });
+            });
+            
+            // Tab selection
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    
+                    // Update active tab
+                    document.querySelectorAll('.tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    tab.classList.add('active');
+                    
+                    // Show correct tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.getElementById(`${tabName}Tab`).style.display = 'block';
+                });
+            });
+            
+            // Upgrade purchases
+            document.querySelectorAll('.upgrade-option').forEach(upgrade => {
+                upgrade.addEventListener('click', () => {
+                    if (upgrade.classList.contains('disabled')) return;
+                    
+                    const upgradeType = upgrade.dataset.upgrade;
+                    const cost = getUpgradeCost(upgradeType);
+                    
+                    if (gameState.money >= cost) {
+                        gameState.money -= cost;
+                        gameState.upgrades[upgradeType] = true;
+                        
+                        // Apply upgrade effects
+                        if (upgradeType === 'renewable') {
+                            gameState.energy += 50;
+                        }
+                        
+                        showMessage(`Purchased ${getUpgradeName(upgradeType)} for $${cost}`);
+                        updateUI();
+                    }
+                });
+            });
+            
+            // Time controls
+            document.getElementById('pauseBtn').addEventListener('click', () => {
+                gameState.gameSpeed = 0;
+            });
+            
+            document.getElementById('normalBtn').addEventListener('click', () => {
+                gameState.gameSpeed = 1;
+            });
+            
+            document.getElementById('fastBtn').addEventListener('click', () => {
+                gameState.gameSpeed = 2;
+            });
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
