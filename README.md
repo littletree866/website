@@ -27,8 +27,9 @@ All games are built using:
 ## 🔄 Version History
 
 Current Version: 1.13.15 (October 25, 2025)
-- Updated space shooters
-- Fixed various bugs and performance issues
+- Fixed platformer game bugs 
+- 2 fresh new levels (5 total)
+
 
 ## 📅 Updates
 

@@ -222,7 +222,7 @@ function generateLevel(levelNum) {
         });
 
     } else if (levelNum === 3) {
-        // Level 3 - Final challenge with shooter enemy
+        // Level 3 - 3rd Challenge
         level.platforms.push(
             { x: 200, y: canvas.height - 120, width: 70, height: 15, color: "#9B59B6", type: "bouncy" },
             { x: 350, y: canvas.height - 180, width: 70, height: 15, color: "#3498DB", type: "normal" },
@@ -253,8 +253,44 @@ function generateLevel(levelNum) {
         // Final portal
         level.portals.push({
             x: 700, y: canvas.height - 360, width: 40, height: 60, color: "#F39C12",
+            targetLevel: 1, isFinal: false
+        });
+
+    } else if (levelNum === 4) {
+        // Level 4 - 4th Challenge
+        level.platforms.push(
+            { x: 200, y: canvas.height - 120, width: 70, height: 15, color: "#e4cf15ff", type: "normal" },
+            { x: 350, y: canvas.height - 180, width: 70, height: 15, color: "#5bdb34ff", type: "normal" },
+            { x: 500, y: canvas.height - 240, width: 70, height: 15, color: "#cc6d2eff", type: "moving", dir: 1, speed: 2, xStart: 450, xEnd: 550 },
+            { x: 650, y: canvas.height - 300, width: 70, height: 15, color: "#a527d6ff", type: "bouncy" }
+        );
+
+        // Collectibles
+        level.collectibles.push(
+            { x: 225, y: canvas.height - 145, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 375, y: canvas.height - 205, width: 20, height: 20, color: "#E67E22", type: "health", collected: false, rotation: 0 },
+            { x: 525, y: canvas.height - 265, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 },
+            { x: 675, y: canvas.height - 325, width: 20, height: 20, color: "#F1C40F", type: "coin", collected: false, rotation: 0 }
+        );
+
+        // Enemies
+        level.enemies.push(
+            {
+                x: 375, y: canvas.height - 220, width: 30, height: 40, color: "#8B0000", type: "shooter",
+                fireRate: 1500, lastShot: 0
+            },
+            {
+                x: 675, y: canvas.height - 340, width: 30, height: 40, color: "#e9e512ff", type: "jumper",
+                jumpForce: -16, jumpDelay: 1500, velY: 0, lastJump: Date.now()
+            }
+        );
+
+        // Final portal
+        level.portals.push({
+            x: 700, y: canvas.height - 360, width: 40, height: 60, color: "#F39C12",
             targetLevel: 1, isFinal: true
         });
+        
     }
 
     return level;
