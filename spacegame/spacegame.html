@@ -159,23 +159,23 @@
 
         const POWERUP_TYPES = [
             { type: 'shield', icon: '🛡️', duration: 5000, color: '#00ff00' },
-            { type: 'rapid', icon: '⚡', duration: 8000, color: '#ffff00' },
-            { type: 'spread', icon: '➗', duration: 6000, color: '#ff00ff' },
-            { type: 'freeze', icon: '❄️', duration: 4000, color: '#00ffff' },
+            { type: 'rapid', icon: '⚡', duration: 5000, color: '#ffff00' },
+            { type: 'spread', icon: '➗', duration: 5000, color: '#ff00ff' },
+            { type: 'freeze', icon: '❄️', duration: 5000, color: '#00ffff' },
             { type: 'bomb', icon: '💣', duration: 0, color: '#ff0000' }
         ];
 
         const BOSS_TYPES = [
             {
                 name: "Ghost",
-                health: 125,
+                health: 165,
                 sprite: '👾',
                 patterns: ['circle', 'spread', 'laser'],
                 spawnScore: 1000
             },
             {
                 name: "Boss",
-                health: 150,
+                health: 135,
                 sprite: '👹',
                 patterns: ['wave', 'burst', 'chase'],
                 spawnScore: 2500
@@ -332,7 +332,7 @@
             return {
                 score: 0,
                 level: 1,
-                lives: 3,
+                lives: 5,
                 bossBattleActive: false,
                 bossHealth: 0,
                 maxBossHealth: 100,
