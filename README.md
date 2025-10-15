@@ -1,7 +1,5 @@
 # Littletree866's Github Site
 
-A collection of browser-based games and simulations built with HTML, CSS, and JavaScript.
-
 ## 🎮 Games
 
 - **Wizard Battle** - Turn-based fantasy combat game
@@ -27,8 +25,7 @@ All games are built using:
 ## 🔄 Version History
 
 Current Version: 1.13.15 (October 25, 2025)
-- Fixed platformer game bugs 
-- 2 fresh new levels (5 total)
+
 
 
 ## 📅 Updates
