@@ -462,14 +462,11 @@
       const now = Date.now();
       const delta = now - lastTick;
       
-      // Update cooldowns every 100ms
-      if (now - lastCooldownCheck() >= 100) {
-        updateCooldowns();
-        lastCooldownCheck = now;
-      }
+      // Update cooldowns
+      updateCooldowns();
 
+      // Handle passive income every 2 seconds
       if (delta >= 2000) {
-        // Passive income from investments
         if (state.investments > 0) {
           changeMoney(state.investments, 'passive-investment');
         }
@@ -477,15 +474,14 @@
           changeMoney(state.startups * 5, 'passive-startup');
         }
 
-        // Building income (every minute)
-        if (delta >= 60000) {
+        // Building and asset income every minute
+        if (now - lastTick >= 60000) {
           state.buildings.forEach(building => {
             if (building.owned > 0) {
               changeMoney(building.owned * building.income, 'building-income');
             }
           });
 
-          // Asset growth (every minute)
           state.assets.forEach(asset => {
             if (asset.owned > 0) {
               const growth = Math.floor(state.money * (asset.growth * asset.owned));
@@ -498,6 +494,99 @@
       }
       
       requestAnimationFrame(gameLoop);
+    }
+
+    elements.task.addEventListener("click", () => {
+      if (!elements.task.disabled) {
+        generateTask();
+      }
+    });
+
+    // Event delegation for task submission
+    elements.taskArea.addEventListener("click", (e) => {
+      if (e.target.id === "submitTask") {
+        handleTaskSubmission(e);
+      }
+    });
+
+    function updateCooldowns() {
+      const now = Date.now();
+      buttonCooldowns.forEach((cooldown, button) => {
+        if (now >= cooldown.endTime) {
+          button.disabled = false;
+          button.textContent = button.dataset.originalText;
+          buttonCooldowns.delete(button);
+        } else {
+          const remaining = Math.ceil((cooldown.endTime - now) / 1000);
+          button.textContent = `Cooldown: ${remaining}s`;
+        }
+      });
+    }
+
+    // Remove the duplicate gameLoop function and keep only this version
+    function gameLoop() {
+      const now = Date.now();
+      const delta = now - lastTick;
+      
+      // Update cooldowns
+      updateCooldowns();
+
+      // Handle passive income every 2 seconds
+      if (delta >= 2000) {
+        if (state.investments > 0) {
+          changeMoney(state.investments, 'passive-investment');
+        }
+        if (state.startups > 0) {
+          changeMoney(state.startups * 5, 'passive-startup');
+        }
+
+        // Building and asset income every minute
+        if (now - lastTick >= 60000) {
+          state.buildings.forEach(building => {
+            if (building.owned > 0) {
+              changeMoney(building.owned * building.income, 'building-income');
+            }
+          });
+
+          state.assets.forEach(asset => {
+            if (asset.owned > 0) {
+              const growth = Math.floor(state.money * (asset.growth * asset.owned));
+              changeMoney(growth, 'asset-growth');
+            }
+          });
+          
+          lastTick = now;
+        }
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    function handleTaskSubmission(e) {
+      const button = e.target;
+      const isWord = button.hasAttribute('data-word');
+      const input = document.getElementById(isWord ? 'wordInput' : 'answer');
+      
+      if (!input || !input.value) return;
+
+      const correct = isWord ? 
+        input.value.trim().toLowerCase() === button.dataset.word.toLowerCase() :
+        parseInt(input.value) === parseInt(button.dataset.answer);
+
+      if (correct) {
+        changeMoney(1, 'task-completion');
+        state.tasksCompleted++;
+        const cooldownTime = Math.min(state.tasksCompleted, 30);  // Cap at 30 seconds
+        buttonCooldowns.set(elements.task, {
+          endTime: Date.now() + (cooldownTime * 1000)
+        });
+        showMessage("✨ Well done! You earned $1.", true);
+      } else {
+        showMessage("❌ Wrong answer. Try again!", false);
+      }
+      
+      input.value = '';
+      updateUI();
     }
 
     // Start game loop
@@ -568,14 +657,11 @@
       const now = Date.now();
       const delta = now - lastTick;
       
-      // Update cooldowns every 100ms
-      if (now - lastCooldownCheck() >= 100) {
-        updateCooldowns();
-        lastCooldownCheck = now;
-      }
+      // Update cooldowns
+      updateCooldowns();
 
+      // Handle passive income every 2 seconds
       if (delta >= 2000) {
-        // Passive income from investments
         if (state.investments > 0) {
           changeMoney(state.investments, 'passive-investment');
         }
@@ -583,15 +669,14 @@
           changeMoney(state.startups * 5, 'passive-startup');
         }
 
-        // Building income (every minute)
-        if (delta >= 60000) {
+        // Building and asset income every minute
+        if (now - lastTick >= 60000) {
           state.buildings.forEach(building => {
             if (building.owned > 0) {
               changeMoney(building.owned * building.income, 'building-income');
             }
           });
 
-          // Asset growth (every minute)
           state.assets.forEach(asset => {
             if (asset.owned > 0) {
               const growth = Math.floor(state.money * (asset.growth * asset.owned));
@@ -611,25 +696,27 @@
       const button = e.target;
       const isWord = button.hasAttribute('data-word');
       const input = document.getElementById(isWord ? 'wordInput' : 'answer');
+      
+      if (!input || !input.value) return;
+
       const correct = isWord ? 
-        input.value.trim() === button.dataset.word :
+        input.value.trim().toLowerCase() === button.dataset.word.toLowerCase() :
         parseInt(input.value) === parseInt(button.dataset.answer);
 
       if (correct) {
         changeMoney(1, 'task-completion');
         state.tasksCompleted++;
-        const cooldownTime = state.tasksCompleted * 1;  // 1 second per completed task
-        elements.task.disabled = true;
+        const cooldownTime = Math.min(state.tasksCompleted, 30);  // Cap at 30 seconds
         buttonCooldowns.set(elements.task, {
           endTime: Date.now() + (cooldownTime * 1000)
         });
-        showMessage(isWord ? "✨ Well done! You earned $1." : "✅ Correct! You earned $1.");
+        showMessage("✨ Well done! You earned $1.", true);
       } else {
-        showMessage("❌ Wrong answer. No money earned.");
+        showMessage("❌ Wrong answer. Try again!", false);
       }
       
+      input.value = '';
       updateUI();
-      elements.taskArea.innerHTML = "";
     }
 
     // Update button click handlers to use buttonCooldowns

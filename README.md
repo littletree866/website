@@ -1,19 +1,5 @@
 # Littletree866's Github Site
 
-## 🎮 Games
-
-- **Wizard Battle** - Turn-based fantasy combat game
-- **Platformer** - Classic side-scrolling platformer
-- **Space Shooters** - Space-themed arcade shooter
-- **Clicker Quest** - Incremental clicking adventure
-- **Puzzle Master** - Classic sliding tile puzzle game
-
-## 💡 Simulations
-
-- **Supply & Demand** - Economic simulation
-- **Wealth Builder** - Financial management game
-- **The Box** - Physics-based sandbox
-
 ## 🛠️ Technical Details
 
 All games are built using:
@@ -29,6 +15,10 @@ Current Version: 1.13.15 (October 25, 2025)
 - Space Game fix
 - New City Game
 - Overall polish throughoutsit
+- New feature! Mystery Snapshots!
+- Space Game and Puzzle flaticons fixed
+- Life game bugfixes
+- NOTE: Some bugs have still not been fixed. They will be fixed in future updates.
 
 ## 📅 Updates
 
