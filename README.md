@@ -1,5 +1,7 @@
 # Littletree866's Github Site
 
+- Like early updates? Occasionally updates will be 2-6 days earlier than scheduled. That way, you can enjoy earlier!
+
 ## 🛠️ Technical Details
 
 All games are built using:
