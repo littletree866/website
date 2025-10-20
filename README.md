@@ -1,6 +1,6 @@
 # Littletree866's Github Site
 
-- Like early updates? Occasionally updates will be 2-6 days earlier than scheduled. That way, you can enjoy earlier!
+- Like early updates? Occasionally updates will be 2-6 days earlier then scheduled. That way, you can enjoy things earlier!
 
 ## 🛠️ Technical Details
 
