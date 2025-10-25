@@ -94,7 +94,7 @@
             align-items: center;
             font-size: 1.5rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
@@ -337,6 +337,66 @@
             background: rgba(30, 144, 255, 0.7);
         }
         
+        /* Add new styles */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            z-index: 100;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            top: -10px;
+            left: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .cell:hover .tooltip,
+        .building-option:hover .tooltip,
+        .upgrade-option:hover .tooltip {
+            opacity: 1;
+        }
+
+        .cell {
+            transition: all 0.3s ease;
+        }
+
+        .cell.can-upgrade::after {
+            content: '⬆️';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.8rem;
+        }
+
+        .cell.disaster {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .happiness-indicator {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.8rem;
+        }
+
+        .environmental-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.8rem;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
         @media (max-width: 900px) {
             .game-area {
                 flex-direction: column;
@@ -529,7 +589,97 @@
     <div class="message" id="message"></div>
 
     <script>
-        // Game state
+        // Extend building data with new properties
+        const buildingData = {
+            residential: { 
+                cost: 100, 
+                population: 10, 
+                income: 5, 
+                energy: -2, 
+                symbol: '🏠',
+                description: 'Houses citizens and increases population',
+                maxLevel: 3,
+                upgradeCost: 200,
+                happiness: 5,
+                environmental: -2,
+                levelModifiers: {
+                    population: 1.5,
+                    income: 1.3
+                }
+            },
+            commercial: { 
+                cost: 150, 
+                population: 0, 
+                income: 15, 
+                energy: -5, 
+                symbol: '🏪',
+                description: 'Generates income from commerce',
+                maxLevel: 3,
+                upgradeCost: 300,
+                happiness: 3,
+                environmental: -3,
+                levelModifiers: {
+                    income: 1.5
+                }
+            },
+            industrial: { 
+                cost: 200, 
+                population: 0, 
+                income: 25, 
+                energy: -10, 
+                symbol: '🏭',
+                description: 'Generates high income but consumes more energy',
+                maxLevel: 3,
+                upgradeCost: 400,
+                happiness: -2,
+                environmental: -5,
+                levelModifiers: {
+                    income: 1.8,
+                    energy: 1.3
+                }
+            },
+            road: { 
+                cost: 50, 
+                population: 0, 
+                income: 0, 
+                energy: 0, 
+                symbol: '🛣️',
+                description: 'Connects your city (required for some buildings)'
+            },
+            park: { 
+                cost: 80, 
+                population: 5, 
+                income: 2, 
+                energy: -1, 
+                symbol: '🌳',
+                description: 'Increases happiness and population',
+                maxLevel: 2,
+                upgradeCost: 150,
+                happiness: 8,
+                environmental: 10,
+                levelModifiers: {
+                    happiness: 1.5,
+                    environmental: 1.3
+                }
+            },
+            'power-plant': { 
+                cost: 300, 
+                population: 0, 
+                income: 0, 
+                energy: 30, 
+                symbol: '⚡',
+                description: 'Generates energy for your city',
+                maxLevel: 2,
+                upgradeCost: 500,
+                happiness: -3,
+                environmental: -8,
+                levelModifiers: {
+                    energy: 1.5
+                }
+            }
+        };
+
+        // Extend game state
         const gameState = {
             money: 2000,
             population: 0,
@@ -555,58 +705,13 @@
                 diversify: { current: 0, target: 3, completed: false }
             },
             gameSpeed: 1, // 0 = paused, 1 = normal, 2 = fast
-            cycleCount: 0
-        };
-
-        // Building data
-        const buildingData = {
-            residential: { 
-                cost: 100, 
-                population: 10, 
-                income: 5, 
-                energy: -2, 
-                symbol: '🏠',
-                description: 'Houses citizens and increases population'
-            },
-            commercial: { 
-                cost: 150, 
-                population: 0, 
-                income: 15, 
-                energy: -5, 
-                symbol: '🏪',
-                description: 'Generates income from commerce'
-            },
-            industrial: { 
-                cost: 200, 
-                population: 0, 
-                income: 25, 
-                energy: -10, 
-                symbol: '🏭',
-                description: 'Generates high income but consumes more energy'
-            },
-            road: { 
-                cost: 50, 
-                population: 0, 
-                income: 0, 
-                energy: 0, 
-                symbol: '🛣️',
-                description: 'Connects your city (required for some buildings)'
-            },
-            park: { 
-                cost: 80, 
-                population: 5, 
-                income: 2, 
-                energy: -1, 
-                symbol: '🌳',
-                description: 'Increases happiness and population'
-            },
-            'power-plant': { 
-                cost: 300, 
-                population: 0, 
-                income: 0, 
-                energy: 30, 
-                symbol: '⚡',
-                description: 'Generates energy for your city'
+            cycleCount: 0,
+            happiness: 50,
+            environmental: 50,
+            disasters: {
+                earthquake: { chance: 0.01, damage: 0.3 },
+                fire: { chance: 0.02, damage: 0.2 },
+                flood: { chance: 0.015, damage: 0.25 }
             }
         };
 
@@ -638,7 +743,7 @@
                     cell.dataset.x = x;
                     cell.dataset.y = y;
                     
-                    cell.addEventListener('click', () => handleCellClick(x, y));
+                    cell.addEventListener('click', (event) => handleCellClick(x, y, event));
                     
                     gridElement.appendChild(cell);
                 }
@@ -651,7 +756,13 @@
         }
 
         // Handle cell click events
-        function handleCellClick(x, y) {
+        function handleCellClick(x, y, event) {
+            if (event.button === 2) { // Right click
+                event.preventDefault();
+                upgradeBuilding(x, y);
+                return;
+            }
+            
             const cell = gameState.grid[y][x];
             
             if (gameState.selectedBuilding === 'destroy') {
@@ -727,7 +838,15 @@
                     // Update cell content and classes based on type
                     if (cell.type !== 'empty') {
                         cellElement.classList.add(cell.type);
-                        cellElement.textContent = buildingData[cell.type].symbol;
+                        cellElement.innerHTML = `
+                            ${buildingData[cell.type].symbol}
+                            <span class="happiness-indicator">${'😊'.repeat(cell.level)}</span>
+                            <div class="tooltip">
+                                ${cell.type.charAt(0).toUpperCase() + cell.type.slice(1)} (Level ${cell.level})
+                                <br>Income: $${calculateBuildingIncome(cell)}
+                                <br>Energy: ${calculateBuildingEnergy(cell)}
+                            </div>
+                        `;
                         
                         // Update counts
                         if (cell.type === 'residential') gameState.residentialCount++;
@@ -737,7 +856,11 @@
                         if (cell.type === 'park') gameState.parkCount++;
                         if (cell.type === 'power-plant') gameState.powerPlantCount++;
                     } else {
-                        cellElement.textContent = '';
+                        cellElement.innerHTML = '';
+                    }
+                    
+                    if (cell.level < buildingData[cell.type].maxLevel) {
+                        cellElement.classList.add('can-upgrade');
                     }
                 }
             }
@@ -779,6 +902,24 @@
             
             // Update challenge progress
             gameState.challenges.income1000.current = Math.max(gameState.challenges.income1000.current, income);
+            
+            // Calculate happiness and environmental impact
+            let happiness = 50;
+            let environmental = 50;
+            
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = gameState.grid[y][x];
+                    if (cell.type !== 'empty' && cell.type !== 'road') {
+                        const building = buildingData[cell.type];
+                        happiness += building.happiness * cell.level;
+                        environmental += building.environmental * cell.level;
+                    }
+                }
+            }
+            
+            gameState.happiness = Math.max(0, Math.min(100, happiness));
+            gameState.environmental = Math.max(0, Math.min(100, environmental));
         }
 
         // Update the UI with current game state
@@ -789,6 +930,8 @@
             document.getElementById('residentialCount').textContent = gameState.residentialCount;
             document.getElementById('commercialCount').textContent = gameState.commercialCount;
             document.getElementById('industrialCount').textContent = gameState.industrialCount;
+            document.getElementById('happiness').textContent = gameState.happiness;
+            document.getElementById('environmental').textContent = gameState.environmental;
             
             // Update upgrade availability
             updateUpgradesUI();
@@ -997,6 +1140,128 @@
             document.getElementById('fastBtn').addEventListener('click', () => {
                 gameState.gameSpeed = 2;
             });
+            
+            // Right-click event prevention
+            document.getElementById('cityGrid').addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+
+        // Add building upgrade function
+        function upgradeBuilding(x, y) {
+            const cell = gameState.grid[y][x];
+            if (!cell || cell.type === 'empty' || cell.type === 'road') return;
+            
+            const building = buildingData[cell.type];
+            const upgradeCost = building.upgradeCost * cell.level;
+            
+            if (cell.level >= building.maxLevel) {
+                showMessage("Building is at maximum level!");
+                return;
+            }
+            
+            if (gameState.money >= upgradeCost) {
+                gameState.money -= upgradeCost;
+                cell.level++;
+                showMessage(`Upgraded ${cell.type} to level ${cell.level}`);
+                updateGrid();
+                updateUI();
+            } else {
+                showMessage("Not enough money for upgrade!");
+            }
+        }
+
+        // Add disaster events
+        function triggerDisaster() {
+            for (const [type, data] of Object.entries(gameState.disasters)) {
+                if (Math.random() < data.chance) {
+                    const cells = getRandomOccupiedCells(Math.floor(10 * data.damage));
+                    cells.forEach(cell => {
+                        const building = gameState.grid[cell.y][cell.x];
+                        if (building.type !== 'empty' && building.type !== 'road') {
+                            building.level = Math.max(1, building.level - 1);
+                            const element = document.querySelector(`.cell[data-x="${cell.x}"][data-y="${cell.y}"]`);
+                            element.classList.add('disaster');
+                            setTimeout(() => element.classList.remove('disaster'), 1000);
+                        }
+                    });
+                    showMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} has damaged some buildings!`);
+                    updateGrid();
+                    return;
+                }
+            }
+        }
+
+        // Helper function to get random occupied cells
+        function getRandomOccupiedCells(count) {
+            const occupied = [];
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    if (gameState.grid[y][x].type !== 'empty') {
+                        occupied.push({x, y});
+                    }
+                }
+            }
+            return occupied.sort(() => Math.random() - 0.5).slice(0, count);
+        }
+
+        // Modify handleCellClick to support right-click upgrades
+        function handleCellClick(x, y, event) {
+            if (event.button === 2) { // Right click
+                event.preventDefault();
+                upgradeBuilding(x, y);
+                return;
+            }
+            
+            const cell = gameState.grid[y][x];
+            
+            if (gameState.selectedBuilding === 'destroy') {
+                // Destroy building
+                if (cell.type !== 'empty' && cell.type !== 'road') {
+                    const refund = Math.floor(buildingData[cell.type].cost * 0.5);
+                    gameState.money += refund;
+                    
+                    // Update energy if it's a power plant
+                    if (cell.type === 'power-plant') {
+                        gameState.energy -= buildingData['power-plant'].energy;
+                    }
+                    
+                    cell.type = 'empty';
+                    showMessage(`Destroyed building. Refund: $${refund}`);
+                    updateGrid();
+                    updateUI();
+                    updateChallenges();
+                }
+                return;
+            }
+            
+            // Build new building
+            if (cell.type === 'empty') {
+                const building = buildingData[gameState.selectedBuilding];
+                
+                // Check if we have enough money
+                if (gameState.money >= building.cost) {
+                    // Check if we have enough energy (for non-power plants)
+                    if (gameState.selectedBuilding !== 'power-plant' && 
+                        (gameState.energy + building.energy) < 0) {
+                        showMessage("Not enough energy! Build a power plant.");
+                        return;
+                    }
+                    
+                    gameState.money -= building.cost;
+                    cell.type = gameState.selectedBuilding;
+                    
+                    // Update energy
+                    gameState.energy += building.energy;
+                    
+                    showMessage(`Built ${gameState.selectedBuilding} for $${building.cost}`);
+                    updateGrid();
+                    updateUI();
+                    updateChallenges();
+                } else {
+                    showMessage("Not enough money!");
+                }
+            } else {
+                showMessage("This cell is already occupied!");
+            }
         }
 
         // Initialize the game when the page loads

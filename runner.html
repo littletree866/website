@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dash</title>
+<style>
+  body { margin: 0; background: #111; overflow: hidden; font-family: sans-serif; color: #fff; }
+  canvas { display: block; background: #222; margin: 0 auto; }
+  #score { position: absolute; top: 10px; left: 10px; font-size: 24px; }
+  #restart { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+             padding: 10px 20px; font-size: 20px; display: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="score">Time: 0s</div>
+<button id="restart">Restart</button>
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const shapes = {
+    square: {color:'#e74c3c', width:40, height:40, jump:11},
+    triangle: {color:'#3498db', width:30, height:30, jump:9},
+    circle: {color:'#2ecc71', width:35, height:35, jump:13}
+};
+
+let player = {
+    x: 100,
+    y: canvas.height - 60,
+    vy: 0,
+    width: shapes.square.width,
+    height: shapes.square.height,
+    shape: 'square',
+    onGround: true
+};
+
+let gravity = 0.55;
+let scrollSpeed = 6;
+let obstacles = [];
+let powerUps = [];
+let score = 0;
+let gameOver = false;
+let timeElapsed = 0;
+let multiplier = 1;
+
+let shapeOrder = ['square','triangle','circle'];
+let currentShapeIndex = 0;
+let keys = {};
+
+document.addEventListener('keydown', e=>{
+    keys[e.code] = true;
+    if(e.key==='1') changeShape('square');
+    if(e.key==='2') changeShape('triangle');
+    if(e.key==='3') changeShape('circle');
+});
+
+document.addEventListener('keyup', e=>{ keys[e.code]=false; });
+
+document.getElementById('restart').addEventListener('click', resetGame);
+
+function changeShape(shape){
+    player.shape = shape;
+    player.width = shapes[shape].width;
+    player.height = shapes[shape].height;
+    // Simple particle effect
+    for(let i=0;i<10;i++){
+        particles.push({
+            x: player.x+player.width/2,
+            y: player.y+player.height/2,
+            vx: (Math.random()-0.5)*4,
+            vy: (Math.random()-0.5)*4,
+            life: 20
+        });
+    }
+}
+
+function autoChangeShape(){
+    currentShapeIndex = (currentShapeIndex + 1) % shapeOrder.length;
+    changeShape(shapeOrder[currentShapeIndex]);
+}
+
+// Automatically change shape every 5 seconds
+setInterval(autoChangeShape, 5000);
+
+function resetGame(){
+    player.x = 100;
+    player.y = canvas.height - 60;
+    player.vy = 0;
+    player.onGround = true;
+    obstacles = [];
+    powerUps = [];
+    scrollSpeed = 6;
+    score = 0;
+    timeElapsed = 0;
+    multiplier = 1;
+    gameOver = false;
+    document.getElementById('restart').style.display='none';
+    requestAnimationFrame(gameLoop);
+}
+
+// Particles for effects
+let particles = [];
+
+function spawnObstacle(){
+    let types = ['square','triangle','circle'];
+    let type = types[Math.floor(Math.random()*types.length)];
+    let height = shapes[type].height;
+    let gap = 950; // Smarter spacing
+    obstacles.push({
+        x: canvas.width + gap,
+        y: canvas.height - height - 20,
+        width: shapes[type].width,
+        height: height,
+        type: type
+    });
+}
+
+function spawnPowerUp(){
+    powerUps.push({
+        x: canvas.width + 50 + Math.random()*100,
+        y: canvas.height - 60 - Math.random()*150,
+        type: 'shield',
+        width: 25,
+        height: 25
+    });
+}
+
+function update(){
+    if(gameOver) return;
+
+    // Player jump
+    if(keys['Space'] && player.onGround){
+        player.vy = -shapes[player.shape].jump;
+        player.onGround = false;
+    }
+
+    player.vy += gravity;
+    player.y += player.vy;
+    if(player.y + player.height >= canvas.height - 20){
+        player.y = canvas.height - player.height - 20;
+        player.vy = 0;
+        player.onGround = true;
+    }
+
+    // Obstacles movement
+    for(let obs of obstacles){
+        obs.x -= scrollSpeed;
+        if(player.x < obs.x + obs.width &&
+           player.x + player.width > obs.x &&
+           player.y < obs.y + obs.height &&
+           player.y + player.height > obs.y){
+            if(player.shape !== obs.type){
+                gameOver = true;
+                document.getElementById('restart').style.display='block';
+            }
+        }
+    }
+
+    obstacles = obstacles.filter(o=>o.x+o.width>0);
+
+    // PowerUps
+    for(let pu of powerUps){
+        pu.x -= scrollSpeed;
+        if(player.x < pu.x+pu.width && player.x+player.width > pu.x &&
+           player.y < pu.y+pu.height && player.y+player.height > pu.y){
+            multiplier = 2;
+            setTimeout(()=>{multiplier=1},5000);
+            pu.collected = true;
+        }
+    }
+    powerUps = powerUps.filter(p=>!p.collected && p.x+p.width>0);
+
+    // Random spawns
+    if(Math.random()<0.02) spawnObstacle();
+    if(Math.random()<0.005) spawnPowerUp();
+
+    // Increase difficulty
+    timeElapsed += 1/60;
+    if(Math.floor(timeElapsed)%30===0 && Math.floor(timeElapsed)!==0){
+        scrollSpeed = 4 + Math.floor(timeElapsed/30);
+    }
+
+    score = Math.floor(timeElapsed*multiplier);
+
+    document.getElementById('score').innerText = "Time: "+score+"s";
+
+    // Update particles
+    for(let p of particles){
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+    }
+    particles = particles.filter(p=>p.life>0);
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Ground
+    ctx.fillStyle = '#555';
+    ctx.fillRect(0,canvas.height-20,canvas.width,20);
+
+    // Player
+    ctx.fillStyle = shapes[player.shape].color;
+    if(player.shape==='triangle'){
+        ctx.beginPath();
+        ctx.moveTo(player.x,player.y+player.height);
+        ctx.lineTo(player.x+player.width/2,player.y);
+        ctx.lineTo(player.x+player.width,player.y+player.height);
+        ctx.closePath();
+        ctx.fill();
+    } else if(player.shape==='circle'){
+        ctx.beginPath();
+        ctx.arc(player.x+player.width/2,player.y+player.height/2,player.width/2,0,Math.PI*2);
+        ctx.fill();
+    } else {
+        ctx.fillRect(player.x,player.y,player.width,player.height);
+    }
+
+    // Obstacles
+    for(let obs of obstacles){
+        ctx.fillStyle = shapes[obs.type].color;
+        if(obs.type==='triangle'){
+            ctx.beginPath();
+            ctx.moveTo(obs.x,obs.y+obs.height);
+            ctx.lineTo(obs.x+obs.width/2,obs.y);
+            ctx.lineTo(obs.x+obs.width,obs.y+obs.height);
+            ctx.closePath();
+            ctx.fill();
+        } else if(obs.type==='circle'){
+            ctx.beginPath();
+            ctx.arc(obs.x+obs.width/2,obs.y+obs.height/2,obs.width/2,0,Math.PI*2);
+            ctx.fill();
+        } else {
+            ctx.fillRect(obs.x,obs.y,obs.width,obs.height);
+        }
+    }
+
+    // PowerUps
+    for(let pu of powerUps){
+        ctx.fillStyle = '#f1c40f';
+        ctx.beginPath();
+        ctx.arc(pu.x+pu.width/2, pu.y+pu.height/2, pu.width/2, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    // Particles
+    for(let p of particles){
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(p.x,p.y,2,2);
+    }
+}
+
+function gameLoop(){
+    update();
+    draw();
+    if(!gameOver) requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
