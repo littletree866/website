@@ -12,7 +12,16 @@ All games are built using:
 
 ## 🔄 Version History
 
-Current Version: 1.13.15 (October 25, 2025)
+Current Version: 1.14.15 (November 12, 2025)
+- Added Geometry Runner game
+- Added comprehensive website documentation
+- Performance improvements across all games
+- Fixed several bugs in Space Game
+- UI/UX improvements in Clicker Quest
+- Added new features to City Builder
+- Mobile responsiveness improvements
+
+Previous Version: 1.13.15 (October 25, 2025)
 - Remade Platformer Game
 - Space Game fix
 - New City Game
@@ -20,7 +29,6 @@ Current Version: 1.13.15 (October 25, 2025)
 - New feature! Mystery Snapshots!
 - Space Game and Puzzle flaticons fixed
 - Life game bugfixes
-- NOTE: Some bugs have still not been fixed. They will be fixed in future updates.
 
 ## 📅 Updates
 
