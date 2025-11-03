@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Documentation - Littletree866</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--dark);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Website Documentation</h1>
+        
+        <div class="section">
+            <h2>Overview</h2>
+            <p>This website serves as a collection of interactive games and simulations created by Littletree866. The site was founded on March 22, 2025, and features various categories of content.</p>
+        </div>
+
+        <div class="section">
+            <h2>Site Structure</h2>
+            <h3>Categories:</h3>
+            <table>
+                <tr>
+                    <th>Category</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>New!</td>
+                    <td>Latest additions to the website (Currently featuring Geometry Runner)</td>
+                </tr>
+                <tr>
+                    <td>Games</td>
+                    <td>Interactive games including Wizard Battle, Platformer, Space Game, Clicker Quest, and Puzzle Master</td>
+                </tr>
+                <tr>
+                    <td>Simulations</td>
+                    <td>Educational simulations including Supply & Demand, Wealth Builder, The Box, and City Builder</td>
+                </tr>
+                <tr>
+                    <td>Information</td>
+                    <td>Meta content including Update Info, Snapshots, and Source Code links</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Technical Details</h2>
+            <h3>Features:</h3>
+            <ul>
+                <li>Responsive design that works on both desktop and mobile devices</li>
+                <li>Animated gradient background</li>
+                <li>Interactive hover effects on links</li>
+                <li>Modern CSS animations and transitions</li>
+                <li>Font Awesome integration for icons</li>
+                <li>Custom favicon</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Games and Simulations</h2>
+            <h3>Games Directory:</h3>
+            <ul>
+                <li><strong>Geometry Runner</strong> - Located in /newgames/runner.html</li>
+                <li><strong>Wizard Battle</strong> - Located in /wizardgame/wizardgame.html</li>
+                <li><strong>Platformer</strong> - Located in /platformergame/platformergame.html</li>
+                <li><strong>Space Game</strong> - Located in /spacegame/spacegame.html</li>
+                <li><strong>Clicker Quest</strong> - Located in /clickergame/clickergame.html</li>
+                <li><strong>Puzzle Master</strong> - Located in /puzzle/puzzle.html</li>
+            </ul>
+
+            <h3>Simulations Directory:</h3>
+            <ul>
+                <li><strong>Supply & Demand</strong> - Located in /s&d/money.html</li>
+                <li><strong>Wealth Builder</strong> - Located in /lifegame/life.html</li>
+                <li><strong>The Box</strong> - Located in /box/box.html</li>
+                <li><strong>City Builder</strong> - Located in /citygame/citygame.html</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Maintenance</h2>
+            <p>Last updated: November 12, 2025</p>
+            <p>The website is actively maintained and updated. For the latest changes and updates, please refer to the Update Info page.</p>
+            <p>The source code is publicly available on GitHub at: <a href="https://github.com/littletree866/website">https://github.com/littletree866/website</a></p>
+        </div>
+    </div>
+</body>
+</html>
