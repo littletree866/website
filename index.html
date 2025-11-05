@@ -146,6 +146,29 @@
         .content-link:hover::after {
             transform: translateX(100%);
         }
+
+        /* Add new category styles */
+        .category-header {
+            color: white;
+            margin: 20px 0 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .new-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+
+        .content-link i {
+            margin-right: 10px;
+        }
         
         footer {
             background: var(--dark);
@@ -188,24 +211,20 @@
         <div class="container">
             
             <div class="links-section">
-                <!-- NEW! --> 
-                <h2 style="color: white; margin: 10px 0;">New!</h2>
-                <a href="newgames/runner.html" class="content-link">🏃 Geometry Runner</a>
+                <h2 class="category-header">Featured <span class="new-badge">New!</span></h2>
+                <a href="newgames/empire.html" class="content-link"><i class="fas fa-crown"></i>Empire BETA</a>
+                <a href="newgames/runner.html" class="content-link"><i class="fas fa-running"></i>Geometry Runner</a>
 
-                <!-- Games Category -->
-                <h2 style="color: white; margin: 10px 0;">Games</h2>
-                <a href="wizardgame/wizardgame.html" class="content-link">⚔️ Wizard Battle</a>
-                <a href="platformergame/platformergame.html" class="content-link">🏃 Platformer!</a>
-                <a href="spacegame/spacegame.html" class="content-link">🚀 Space Game</a>
-                <a href="clickergame/clickergame.html" class="content-link">👆 Clicker Quest</a>
-                <a href="puzzle/puzzle.html" class="content-link">🧩 Puzzle Master</a>
-
-                <!-- Simulation Category -->
-                <h2 style="color: white; margin: 20px 0 10px;">Simulations</h2>
+                <h2 class="category-header">Action Games</h2>
+                <a href="spacegame/spacegame.html" class="content-link"><i class="fas fa-rocket"></i>Space Game</a>
+                <a href="platformergame/platformergame.html" class="content-link"><i class="fas fa-flag"></i>Platformer</a>
+                
+                <h2 class="category-header">Strategy & Simulation</h2>
+                <a href="citygame/citygame.html" class="content-link"><i class="fas fa-city"></i>City Builder</a>
+                <a href="wizardgame/wizardgame.html" class="content-link"><i class="fas fa-hat-wizard"></i>Wizard Battle</a>
                 <a href="s&d/money.html" class="content-link">📊 Supply & Demand</a>
                 <a href="lifegame/life.html" class="content-link">💰 Wealth Builder*</a>
                 <a href="box/box.html" class="content-link">📦 The Box</a>
-                <a href="citygame/citygame.html" class="content-link">🏙️ City Builder</a>
                 
                 <!-- Info Links -->
                 <h2 style="color: white; margin: 20px 0 10px;">Information</h2>

@@ -1,27 +1,33 @@
-# Littletree866's Github Site
+# Littletree866's Game Collection
 
-- Like early updates? Occasionally updates will be 2-6 days earlier then scheduled. That way, you can enjoy things earlier!
+A modern collection of browser-based games built with vanilla JavaScript.
 
-## 🛠️ Technical Details
+## ⚡ Key Features
 
-All games are built using:
-- HTML5
-- CSS3 (with modern features like Grid and Flexbox)
-- Vanilla JavaScript (No frameworks)
-- Responsive design principles
+- Pure vanilla JavaScript - no dependencies
+- Responsive design for all devices
+- Modern CSS effects and transitions
+- Local save system
+- Regular content updates
 
-## 🔄 Version History
+## 🔧 Technical Stack
 
-Current Version: 1.14.15 (November 12, 2025)
-- Added Geometry Runner game
-- Added comprehensive website documentation
-- Performance improvements across all games
-- Fixed several bugs in Space Game
-- UI/UX improvements in Clicker Quest
-- Added new features to City Builder
-- Mobile responsiveness improvements
+- HTML5 Canvas for game rendering
+- CSS3 with Grid/Flexbox layouts
+- ES6+ JavaScript
+- Local Storage for game saves
+- Custom physics engines
 
-Previous Version: 1.13.15 (October 25, 2025)
+## 📅 Recent Updates
+
+Version 1.14.15 (November 12, 2025)
+- Added Empire BETA game with strategic gameplay
+- Enhanced Geometry Runner with particle effects
+- Improved mobile responsiveness
+- Performance optimizations
+- UI/UX improvements across all games
+
+Version 1.13.15 (October 25, 2025)
 - Remade Platformer Game
 - Space Game fix
 - New City Game
@@ -29,13 +35,6 @@ Previous Version: 1.13.15 (October 25, 2025)
 - New feature! Mystery Snapshots!
 - Space Game and Puzzle flaticons fixed
 - Life game bugfixes
-
-## 📅 Updates
-
-Regular updates are released with:
-- New games and features
-- Bug fixes and improvements
-- Performance optimizations
 
 ## 🔗 Links
 
