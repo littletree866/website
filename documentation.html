@@ -12,6 +12,16 @@
             --secondary: #a777e3;
             --dark: #2c3e50;
             --light: #f8f9fa;
+            --text: #333;
+            --sidebar-width: 250px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #8ea8ff;
+            --secondary: #b891ed;
+            --dark: #1a1a1a;
+            --light: #2d2d2d;
+            --text: #e0e0e0;
         }
 
         body {
@@ -23,6 +33,37 @@
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
+            color: var(--text);
+            scroll-behavior: smooth;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--primary);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
         }
 
         .container {
@@ -32,6 +73,7 @@
             background: rgba(255, 255, 255, 0.95);
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
 
         h1, h2, h3 {
@@ -46,12 +88,41 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .code-block {
-            background: #f8f9fa;
-            padding: 15px;
+        details {
+            margin-bottom: 15px;
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 10px;
+            background: var(--primary);
+            color: white;
             border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            overflow-x: auto;
+            transition: all 0.3s ease;
+        }
+
+        summary:hover {
+            background: var(--secondary);
+        }
+
+        .code-block {
+            position: relative;
+            background: var(--dark);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
         }
 
         table {
@@ -75,6 +146,41 @@
             background-color: #f2f2f2;
         }
 
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            z-index: 1000;
+        }
+
+        [data-tooltip] {
+            position: relative;
+            text-decoration: underline dotted;
+            cursor: help;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -83,121 +189,188 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Website Documentation</h1>
-        
-        <div class="section">
-            <h2>Overview</h2>
-            <p>This website serves as a collection of interactive games and simulations created by Littletree866. The site was founded on March 22, 2025, and features various categories of content.</p>
-        </div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </button>
 
-        <div class="section">
-            <h2>Site Structure</h2>
-            <h3>Categories:</h3>
-            <table>
-                <tr>
-                    <th>Category</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td>New!</td>
-                    <td>Latest additions to the website (Currently featuring Geometry Runner)</td>
-                </tr>
-                <tr>
-                    <td>Games</td>
-                    <td>Interactive games including Wizard Battle, Platformer, Space Game, Clicker Quest, and Puzzle Master</td>
-                </tr>
-                <tr>
-                    <td>Simulations</td>
-                    <td>Educational simulations including Supply & Demand, Wealth Builder, The Box, and City Builder</td>
-                </tr>
-                <tr>
-                    <td>Information</td>
-                    <td>Meta content including Update Info, Snapshots, and Source Code links</td>
-                </tr>
-            </table>
-        </div>
+    <nav class="sidebar">
+        <h2>Contents</h2>
+        <ul id="nav-links">
+            <!-- Navigation links will be generated by JavaScript -->
+        </ul>
+    </nav>
 
-        <div class="section">
-            <h2>Technical Details</h2>
-            <h3>Features:</h3>
-            <ul>
-                <li>Responsive design that works on both desktop and mobile devices</li>
-                <li>Animated gradient background</li>
-                <li>Interactive hover effects on links</li>
-                <li>Modern CSS animations and transitions</li>
-                <li>Font Awesome integration for icons</li>
-                <li>Custom favicon</li>
-            </ul>
-        </div>
+    <div class="main-content">
+        <div class="container">
+            <h1>Website Documentation</h1>
+            
+            <div class="section">
+                <h2>Overview</h2>
+                <p>This website serves as a collection of interactive games and simulations created by Littletree866. The site was founded on March 22, 2025, and features various categories of content.</p>
+            </div>
 
-        <div class="section">
-            <h2>Games and Simulations</h2>
-            <h3>Games Directory:</h3>
-            <ul>
-                <li><strong>Geometry Runner</strong> - Located in /newgames/runner.html</li>
-                <li><strong>Wizard Battle</strong> - Located in /wizardgame/wizardgame.html</li>
-                <li><strong>Platformer</strong> - Located in /platformergame/platformergame.html</li>
-                <li><strong>Space Game</strong> - Located in /spacegame/spacegame.html</li>
-                <li><strong>Clicker Quest</strong> - Located in /clickergame/clickergame.html</li>
-                <li><strong>Puzzle Master</strong> - Located in /puzzle/puzzle.html</li>
-            </ul>
+            <div class="section">
+                <h2>Site Structure</h2>
+                <h3>Categories:</h3>
+                <table>
+                    <tr>
+                        <th>Category</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>New!</td>
+                        <td>Latest additions to the website (Currently featuring Geometry Runner)</td>
+                    </tr>
+                    <tr>
+                        <td>Games</td>
+                        <td>Interactive games including Wizard Battle, Platformer, Space Game, Clicker Quest, and Puzzle Master</td>
+                    </tr>
+                    <tr>
+                        <td>Simulations</td>
+                        <td>Educational simulations including Supply & Demand, Wealth Builder, The Box, and City Builder</td>
+                    </tr>
+                    <tr>
+                        <td>Information</td>
+                        <td>Meta content including Update Info, Snapshots, and Source Code links</td>
+                    </tr>
+                </table>
+            </div>
 
-            <h3>Simulations Directory:</h3>
-            <ul>
-                <li><strong>Supply & Demand</strong> - Located in /s&d/money.html</li>
-                <li><strong>Wealth Builder</strong> - Located in /lifegame/life.html</li>
-                <li><strong>The Box</strong> - Located in /box/box.html</li>
-                <li><strong>City Builder</strong> - Located in /citygame/citygame.html</li>
-            </ul>
-        </div>
+            <div class="section">
+                <h2>Technical Details</h2>
+                <details>
+                    <summary>Features</summary>
+                    <ul>
+                        <li>Responsive design that works on both desktop and mobile devices</li>
+                        <li>Animated gradient background</li>
+                        <li>Interactive hover effects on links</li>
+                        <li>Modern CSS animations and transitions</li>
+                        <li>Font Awesome integration for icons</li>
+                        <li>Custom favicon</li>
+                    </ul>
+                </details>
+            </div>
 
-        <div class="section">
-            <h2>Maintenance</h2>
-            <p>Last updated: November 12, 2025</p>
-            <p>The website is actively maintained and updated. For the latest changes and updates, please refer to the Update Info page.</p>
-            <p>The source code is publicly available on GitHub at: <a href="https://github.com/littletree866/website">https://github.com/littletree866/website</a></p>
-        </div>
+            <div class="section">
+                <h2>Games and Simulations</h2>
+                <h3>Games Directory:</h3>
+                <ul>
+                    <li><strong>Geometry Runner</strong> - Located in /newgames/runner.html</li>
+                    <li><strong>Wizard Battle</strong> - Located in /wizardgame/wizardgame.html</li>
+                    <li><strong>Platformer</strong> - Located in /platformergame/platformergame.html</li>
+                    <li><strong>Space Game</strong> - Located in /spacegame/spacegame.html</li>
+                    <li><strong>Clicker Quest</strong> - Located in /clickergame/clickergame.html</li>
+                    <li><strong>Puzzle Master</strong> - Located in /puzzle/puzzle.html</li>
+                </ul>
 
-        <div class="section">
-            <h2>Game Development Guidelines</h2>
-            <div class="code-block">
-                <h3>Standard Game Structure</h3>
-                ```javascript
-                class Game {
-                    constructor() {
-                        this.canvas = document.getElementById('gameCanvas');
-                        this.ctx = this.canvas.getContext('2d');
-                        this.setupEventListeners();
-                        this.init();
+                <h3>Simulations Directory:</h3>
+                <ul>
+                    <li><strong>Supply & Demand</strong> - Located in /s&d/money.html</li>
+                    <li><strong>Wealth Builder</strong> - Located in /lifegame/life.html</li>
+                    <li><strong>The Box</strong> - Located in /box/box.html</li>
+                    <li><strong>City Builder</strong> - Located in /citygame/citygame.html</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Maintenance</h2>
+                <p>Last updated: November 12, 2025</p>
+                <p>The website is actively maintained and updated. For the latest changes and updates, please refer to the Update Info page.</p>
+                <p>The source code is publicly available on GitHub at: <a href="https://github.com/littletree866/website">https://github.com/littletree866/website</a></p>
+            </div>
+
+            <div class="section">
+                <h2>Game Development Guidelines</h2>
+                <div class="code-block">
+                    <h3>Standard Game Structure</h3>
+                    ```javascript
+                    class Game {
+                        constructor() {
+                            this.canvas = document.getElementById('gameCanvas');
+                            this.ctx = this.canvas.getContext('2d');
+                            this.setupEventListeners();
+                            this.init();
+                        }
+
+                        init() {
+                            // Game initialization
+                        }
+
+                        update(deltaTime) {
+                            // Update game state
+                        }
+
+                        render() {
+                            // Render game objects
+                        }
                     }
+                    ```
+                </div>
+            </div>
 
-                    init() {
-                        // Game initialization
-                    }
-
-                    update(deltaTime) {
-                        // Update game state
-                    }
-
-                    render() {
-                        // Render game objects
-                    }
-                }
-                ```
+            <div class="section">
+                <h2>Performance Best Practices</h2>
+                <ul>
+                    <li>Use requestAnimationFrame for game loops</li>
+                    <li>Implement object pooling for particles</li>
+                    <li>Optimize collision detection with spatial partitioning</li>
+                    <li>Cache DOM queries and canvas contexts</li>
+                    <li>Use sprite batching for rendering</li>
+                </ul>
             </div>
         </div>
-
-        <div class="section">
-            <h2>Performance Best Practices</h2>
-            <ul>
-                <li>Use requestAnimationFrame for game loops</li>
-                <li>Implement object pooling for particles</li>
-                <li>Optimize collision detection with spatial partitioning</li>
-                <li>Cache DOM queries and canvas contexts</li>
-                <li>Use sprite batching for rendering</li>
-            </ul>
-        </div>
     </div>
+
+    <button class="scroll-top" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Generate navigation links
+        const sections = document.querySelectorAll('h2');
+        const navLinks = document.getElementById('nav-links');
+        sections.forEach(section => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `#${section.textContent.toLowerCase().replace(/\s+/g, '-')}`;
+            a.textContent = section.textContent;
+            li.appendChild(a);
+            navLinks.appendChild(li);
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            document.documentElement.setAttribute('data-theme',
+                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+            );
+        }
+
+        // Scroll to top
+        window.onscroll = function() {
+            const scrollBtn = document.querySelector('.scroll-top');
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollBtn.style.display = 'block';
+            } else {
+                scrollBtn.style.display = 'none';
+            }
+        };
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('.code-block').forEach(block => {
+            const btn = document.createElement('button');
+            btn.className = 'copy-button';
+            btn.innerHTML = '<i class="fas fa-copy"></i>';
+            btn.onclick = () => {
+                navigator.clipboard.writeText(block.textContent);
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+            };
+            block.appendChild(btn);
+        });
+    </script>
 </body>
 </html>
