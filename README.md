@@ -20,9 +20,9 @@ A modern collection of browser-based games built with vanilla JavaScript.
 
 ## 📅 Recent Updates
 
-Version 1.14.15 (November 12, 2025)
-Version 1.13.15 (October 25, 2025)
-Version 1.12.14 (October 10, 2025)
+- Version 1.14.15 (November 12, 2025)
+- Version 1.13.15 (October 25, 2025)
+- Version 1.12.14 (October 10, 2025)
 
 
 ## 🔗 Links
