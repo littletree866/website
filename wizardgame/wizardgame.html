@@ -114,7 +114,7 @@
         <div class="inventory-shop">
             <div class="inventory" id="inventory">
                 <h3>Inventory</h3>
-                <!-- Inventory items will be added here -->
+                <!-- Inventory items will be added -->
             </div>
             <div class="shop" id="shop">
                 <h3>Magic Shop</h3>
@@ -129,6 +129,10 @@
         <div class="game-info">
             <div class="player-stats">
                 <h2>Arcane Mage</h2>
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                    <button class="action-btn" id="save-wizard" style="padding:6px 10px;font-size:0.9rem;">Save</button>
+                    <button class="action-btn" id="load-wizard" style="padding:6px 10px;font-size:0.9rem;">Load</button>
+                </div>
                 <p>Level: <span id="player-level">1</span></p>
                 <p>Health: <span id="player-health-text">100</span>/<span id="player-max-health">100</span></p>
                 <div class="health-bar">
@@ -186,20 +190,72 @@
             }
         }, { passive: false });
 
-            effect.className = 'spell-effect';
-            effect.style.left = '50%';
-            effect.style.top = '50%';
-            effect.style.width = '100px';
-            effect.style.height = '100px';
-            effect.style.background = type === 'fire' ? 'radial-gradient(circle, #ff4400, transparent)' :
-                                    type === 'ice' ? 'radial-gradient(circle, #00ffff, transparent)' :
-                                    'radial-gradient(circle, #ffff00, transparent)';
-            document.body.appendChild(effect);
-            setTimeout(() => effect.remove(), 800);
+        // Helper: create a non-blocking spell visual effect and remove it after animation.
+        function createSpellEffect(type, targetEl) {
+            try {
+                const effect = document.createElement('div');
+                effect.className = 'spell-effect';
+                // position in center of target element if present, otherwise center of screen
+                const rect = targetEl ? targetEl.getBoundingClientRect() : null;
+                effect.style.left = rect ? `${rect.left + rect.width / 2}px` : '50%';
+                effect.style.top = rect ? `${rect.top + rect.height / 2}px` : '50%';
+                effect.style.width = '100px';
+                effect.style.height = '100px';
+                effect.style.position = 'fixed';
+                effect.style.transform = 'translate(-50%, -50%)';
+                effect.style.borderRadius = '50%';
+                effect.style.pointerEvents = 'none';
+                effect.style.zIndex = 9999;
+                if (type === 'fire') {
+                    effect.style.background = 'radial-gradient(circle, #ff4400, transparent)';
+                } else if (type === 'ice') {
+                    effect.style.background = 'radial-gradient(circle, #00ffff, transparent)';
+                } else if (type === 'lightning') {
+                    effect.style.background = 'radial-gradient(circle, #ffff80, transparent)';
+                } else {
+                    effect.style.background = 'radial-gradient(circle, rgba(255,255,255,0.2), transparent)';
+                }
+                document.body.appendChild(effect);
+                setTimeout(()=> effect.remove(), 800);
+            } catch (err) {
+                // fail silently to avoid breaking game logic
+                console.warn('createSpellEffect failed', err);
+            }
+        }
 
-        // Add this to your existing spell casting logic
-        enemy.classList.add('damaged');
-        setTimeout(() => enemy.classList.remove('damaged'), 300);
+        // Helper: animate enemy damaged state safely
+        function flashEnemyDamaged(enemyEl) {
+            if (!enemyEl) return;
+            enemyEl.classList.add('damaged');
+            setTimeout(()=> enemyEl.classList.remove('damaged'), 300);
+        }
+
+        // Expose helpers to global scope so existing game code can call them if desired
+        window.createSpellEffect = createSpellEffect;
+        window.flashEnemyDamaged = flashEnemyDamaged;
+
+        // Simple wizard save/load
+        const WIZARD_SAVE_KEY = 'wizard_save_v1';
+        document.getElementById('save-wizard').addEventListener('click', ()=>{
+            const data = {
+                level: Number(document.getElementById('player-level').textContent) || 1,
+                xp: Number(document.getElementById('player-xp').textContent) || 0,
+                gold: Number(document.getElementById('player-gold').textContent) || 0
+            };
+            localStorage.setItem(WIZARD_SAVE_KEY, JSON.stringify(data));
+            alert('Wizard saved');
+        });
+        document.getElementById('load-wizard').addEventListener('click', ()=>{
+            const s = localStorage.getItem(WIZARD_SAVE_KEY);
+            if (!s) { alert('No save found'); return; }
+            try {
+                const obj = JSON.parse(s);
+                document.getElementById('player-level').textContent = obj.level || 1;
+                document.getElementById('player-xp').textContent = obj.xp || 0;
+                document.getElementById('player-gold').textContent = obj.gold || 0;
+                alert('Wizard loaded');
+            } catch(e){ alert('Load failed'); }
+        });
     </script>
 </body>
 </html>

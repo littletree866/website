@@ -122,7 +122,8 @@
         <div id="hud">
             <div>Score: <span id="scoreDisplay">0</span></div>
             <div>Level: <span id="levelDisplay">1</span></div>
-            <div>Lives: <span id="livesDisplay">3</span></div>
+            <div>Lives: <span id="livesDisplay">5</span></div>
+            <div>Best: <span id="bestDisplay">0</span></div>
             <div class="health-bar">
                 <div class="health-fill"></div>
             </div>
@@ -204,6 +205,10 @@
         const instructions = document.getElementById('instructions');
         const messageDisplay = document.getElementById('messageDisplay');
         const finalScoreDisplay = document.getElementById('finalScore');
+        const SPACE_BEST_KEY = 'space_best';
+        const bestDisplay = document.getElementById('bestDisplay');
+        let spaceBest = Number(localStorage.getItem(SPACE_BEST_KEY) || 0);
+        if (spaceBest) bestDisplay.textContent = spaceBest;
 
         // Game variables
         let gameState = initGameState();
@@ -613,319 +618,8 @@
             const healthBar = document.querySelector('.health-fill');
             const healthPercent = (gameState.lives / 3) * 100;
             healthBar.style.width = `${healthPercent}%`;
-        }
-
-        function checkCollisions() {
-            // Check player collision with enemies
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
-                if (checkCollision(player, enemy)) {
-                    // Player hit
-                    gameState.lives--;
-                    updateHUD();
-                    createExplosion(enemy.x, enemy.y, enemy.width, 1);
-                    enemies.splice(i, 1);
-                    
-                    if (gameState.lives <= 0) {
-                        gameOver();
-                    }
-                    break;
-                }
-            }
-            
-            // Check player collision with bonus ships
-            for (let i = bonusShips.length - 1; i >= 0; i--) {
-                const ship = bonusShips[i];
-                if (checkCollision(player, ship)) {
-                    // Collect bonus
-                    gameState.score += 100 * ship.multiplier;
-                    updateHUD();
-                    bonusShips.splice(i, 1);
-                    showMessage(`Bonus! +${100 * ship.multiplier} points`);
-                    break;
-                }
-            }
-        }
-
-        function checkBulletCollisions(bullet, bulletIndex) {
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
-                if (checkCollision(bullet, enemy)) {
-                    enemy.health--;
-                    player.bullets.splice(bulletIndex, 1);
-                    
-                    if (enemy.health <= 0) {
-                        enemies.splice(i, 1);
-                        gameState.score += enemy.points;
-                        updateHUD();
-                        createExplosion(enemy.x, enemy.y, enemy.width, 1);
-                        checkForChainReaction(enemy.x, enemy.y, enemy.width);
-                        
-                        // Increase combo
-                        gameState.combo++;
-                        if (gameState.combo > gameState.maxCombo) {
-                            gameState.maxCombo = gameState.combo;
-                            if (gameState.maxCombo >= 10) {
-                                unlockAchievement('combo10');
-                            }
-                        }
-                        
-                        // Random powerup spawn
-                        if (Math.random() < 0.1) {
-                            spawnPowerup(enemy.x, enemy.y);
-                        }
-                    }
-                    return;
-                }
-            }
-        }
-
-        function checkCollision(a, b) {
-            const halfWidthA = Math.abs(a.width/2);
-            const halfWidthB = Math.abs(b.width/2);
-            const halfHeightA = Math.abs(a.height/2);
-            const halfHeightB = Math.abs(b.height/2);
-
-            return (a.x - halfWidthA) < (b.x + halfWidthB) &&
-                   (a.x + halfWidthA) > (b.x - halfWidthB) &&
-                   (a.y - halfHeightA) < (b.y + halfHeightB) &&
-                   (a.y + halfHeightA) > (b.y - halfHeightB);
-        }
-
-        function checkLevelProgression() {
-            // Increase level based on score
-            const newLevel = Math.floor(gameState.score / 1000) + 1;
-            if (newLevel > gameState.level) {
-                gameState.level = newLevel;
-                updateHUD();
-                showMessage(`Level ${gameState.level}!`);
-                
-                // Increase difficulty
-                enemySpawnRate = Math.max(300, 1500 - (gameState.level * 100));
-                enemySpeedMultiplier = 1 + (gameState.level * 0.1);
-            }
-            
-            // Check for boss spawn
-            if (!gameState.bossBattleActive && gameState.score >= 1000) {
-                spawnBoss();
-            }
-        }
-
-        function spawnBoss() {
-            if (gameState.bossBattleActive) return;
-            
-            const bossType = BOSS_TYPES[0]; // Use first boss for now
-            if (!bossType) return;
-            
-            gameState.bossBattleActive = true;
-            gameState.bossHealth = bossType.health;
-            gameState.maxBossHealth = bossType.health;
-            
-            const boss = {
-                x: canvas.width / 2,
-                y: -50,
-                width: 80,
-                height: 80,
-                health: bossType.health,
-                type: bossType,
-                pattern: 0,
-                patternStep: 0,
-                points: 500,
-                speed: 1,
-                color: '#f00'
-            };
-            
-            enemies.push(boss);
-            showMessage(`WARNING: ${bossType.name} APPROACHING!`, true, 3000);
-        }
-
-        function spawnEnemy() {
-            if (!gameState.running) return;
-            
-            const sizeOptions = [
-                { size: 20, points: 30, health: 1 },
-                { size: 30, points: 50, health: 2 },
-                { size: 40, points: 100, health: 3 }
-            ];
-            const type = Math.floor(Math.random() * sizeOptions.length);
-            const enemyType = sizeOptions[type];
-            const pattern = Math.floor(Math.random() * 3);
-            
-            // Adjust enemy health based on level and ensure it's positive
-            const healthBonus = Math.max(0, Math.floor((gameState.level - 1) / 2));
-            const spawnX = Math.max(enemyType.size/2, Math.min(canvas.width - enemyType.size/2, 
-                Math.random() * (canvas.width - enemyType.size) + enemyType.size/2));
-            
-            enemies.push({
-                x: spawnX,
-                y: -enemyType.size,
-                width: Math.abs(enemyType.size),
-                height: Math.abs(enemyType.size),
-                speed: Math.max(0.5, (Math.random() * 2 + 1) * enemySpeedMultiplier),
-                color: enemyColors[Math.floor(Math.random() * enemyColors.length)],
-                pattern: pattern,
-                patternStep: 0,
-                health: Math.max(1, enemyType.health + healthBonus),
-                value: Math.max(1, enemyType.points),
-                lastShot: 0,
-                shootDelay: Math.max(500, 1500 + Math.random() * 1000),
-                points: Math.max(1, enemyType.points)
-            });
-            
-            setTimeout(spawnEnemy, Math.max(300, Math.random() * enemySpawnRate + 300));
-        }
-        
-        function spawnBonusShip() {
-            if (!gameState.running) return;
-            
-            const size = 30;
-            const multiplier = Math.random() > 0.5 ? 2 : 3;
-            bonusShips.push({
-                x: Math.random() * (canvas.width - size) + size/2,
-                y: -size,
-                width: size,
-                height: size,
-                speed: 2,
-                color: bonusColors[Math.floor(Math.random() * bonusColors.length)],
-                multiplier: multiplier,
-                pattern: Math.floor(Math.random() * 2),
-                patternStep: 0,
-                collected: false
-            });
-            
-            // Schedule next bonus ship
-            setTimeout(spawnBonusShip, Math.random() * 15000 + 10000);
-        }
-
-        function spawnPlanet() {
-            const size = Math.random() * 100 + 50;
-            planets.push({
-                x: Math.random() * (canvas.width - size) + size/2,
-                y: -size,
-                size: size,
-                speed: Math.random() * 2 + 1,
-                color: planetColors[Math.floor(Math.random() * planetColors.length)],
-                rings: Math.random() > 0.5,
-                ringColor: `hsl(${Math.random() * 360}, 70%, 50%)`
-            });
-            
-            // Schedule next planet
-            setTimeout(spawnPlanet, Math.random() * 10000 + 5000);
-        }
-
-        function spawnPowerup(x, y) {
-            const powerupType = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
-            gameState.powerups.push({
-                x: x,
-                y: y,
-                width: 30,
-                height: 30,
-                speed: 2,
-                type: powerupType.type,
-                color: powerupType.color
-            });
-        }
-
-        function applyPowerup(powerup) {
-            const powerupType = POWERUP_TYPES.find(p => p.type === powerup.type);
-            if (!powerupType) return;
-
-            switch(powerup.type) {
-                case 'shield':
-                    gameState.activeEffects.push({
-                        type: 'shield',
-                        endTime: Date.now() + powerupType.duration
-                    });
-                    break;
-                case 'rapid':
-                    player.shootDelay = 150;
-                    setTimeout(() => player.shootDelay = 300, powerupType.duration);
-                    break;
-                case 'spread':
-                    // Implementation for spread shot
-                    break;
-                case 'freeze':
-                    enemies.forEach(enemy => enemy.speed *= 0.5);
-                    setTimeout(() => enemies.forEach(enemy => enemy.speed *= 2), powerupType.duration);
-                    break;
-                case 'bomb':
-                    enemies.forEach(enemy => {
-                        createExplosion(enemy.x, enemy.y, 50, 999);
-                        enemy.health = 0;
-                    });
-                    break;
-            }
-
-            showMessage(`${powerupType.icon} Power-up activated!`);
-        }
-
-        function createExplosion(x, y, radius, damage) {
-            explosions.push({
-                x: Math.max(0, Math.min(x, canvas.width)),
-                y: Math.max(0, Math.min(y, canvas.height)),
-                radius: Math.max(1, Math.abs(radius)),
-                maxRadius: Math.max(1, Math.abs(radius)),
-                damage: Math.max(1, damage),
-                particles: [],
-                startTime: Date.now(),
-                duration: 500 // ms
-            });
-        }
-
-        function checkForChainReaction(x, y, radius) {
-            const chance = Math.random();
-            if (chance <= 0.075) { // 7.5% chance
-                createExplosion(x, y, radius * 1.5, 2); // Bigger explosion with more damage
-                
-                // Show chain reaction message
-                showMessage("CHAIN REACTION!", false, 1500);
-            }
-        }
-
-        function checkForSelfDestruction(enemy) {
-            // Check if enemy is near the middle of the screen (vertical center)
-            const isNearMiddle = enemy.y > canvas.height/2 - 50 && enemy.y < canvas.height/2 + 50;
-            
-            if (isNearMiddle) {
-                // 2-4% chance of self-destruction when in the middle
-                const chance = Math.random();
-                if (chance <= 0.04) { // 4% chance
-                    // Create explosion at enemy position
-                    createExplosion(enemy.x, enemy.y, enemy.width * 4, 3); // Large, powerful explosion
-                    
-                    // Remove the enemy
-                    const enemyIndex = enemies.indexOf(enemy);
-                    if (enemyIndex > -1) {
-                        enemies.splice(enemyIndex, 1);
-                    }
-                    
-                    // Show self-destruction message
-                    showMessage("SELF-DESTRUCT!", false, 1500);
-                    
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function showMessage(text, isWarning = false, duration = 2000) {
-            messageDisplay.innerText = text;
-            messageDisplay.style.color = isWarning ? 'red' : 'white';
-            messageDisplay.style.display = 'block';
-            
-            setTimeout(() => {
-                messageDisplay.style.display = 'none';
-            }, duration);
-        }
-
-        function unlockAchievement(id) {
-            const achievement = ACHIEVEMENTS.find(a => a.id === id);
-            if (achievement && !gameState.achievements.includes(id)) {
-                gameState.achievements.push(id);
-                gameState.score += achievement.score;
-                updateHUD();
-                showMessage(`Achievement: ${achievement.name}! +${achievement.score} points`);
-            }
+            // update best display live if changed
+            if (gameState.score > spaceBest) { spaceBest = gameState.score; localStorage.setItem(SPACE_BEST_KEY, String(spaceBest)); bestDisplay.textContent = spaceBest; }
         }
 
         function gameOver() {
@@ -933,6 +627,8 @@
             gameState.currentState = GAME_STATES.GAME_OVER;
             gameOverDisplay.style.display = 'flex';
             finalScoreDisplay.textContent = gameState.score;
+            // persist best
+            if (gameState.score > spaceBest) { spaceBest = gameState.score; localStorage.setItem(SPACE_BEST_KEY, String(spaceBest)); bestDisplay.textContent = spaceBest; }
         }
 
         function togglePause() {

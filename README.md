@@ -20,10 +20,16 @@ A modern collection of browser-based games built with vanilla JavaScript.
 
 ## 📅 Recent Updates
 
+- Version 1.15.16 (November 25, 2025)
 - Version 1.14.15 (November 12, 2025)
 - Version 1.13.15 (October 25, 2025)
 - Version 1.12.14 (October 10, 2025)
 
+## 💾 Saves & High Scores
+
+- Clicker Quest+, Runner, Space Game, and Platformer now persist best scores/local progress to localStorage.
+- Mini Empire & City Builder autosave periodically and restore progress on page load.
+- Wizard Battle and Empire support saving/loading player progress.
 
 ## 🔗 Links
 

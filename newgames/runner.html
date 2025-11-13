@@ -64,6 +64,7 @@
 </head>
 <body>
 <div id="score">Score: 0</div>
+<div id="bestScore" style="position:absolute;top:10px;right:10px;font-size:16px;opacity:0.85">Best: 0s</div>
 <button id="restart" class="button hidden">Restart</button>
 <div id="homeScreen">
   <h1 id="gameTitle">Geometric Dash</h1>
@@ -243,6 +244,9 @@
                     gameOver = true;
                     document.getElementById('restart').style.display='block';
                     sounds.die.play();
+                    // persist best (timeElapsed is in seconds-ish)
+                    const final = Math.floor(timeElapsed);
+                    if (!bestRun || final > bestRun) { bestRun = final; localStorage.setItem(BEST_RUN_KEY, String(bestRun)); bestEl.textContent = 'Best: ' + bestRun + 's'; }
                 }
             }
         }
@@ -408,6 +412,11 @@
         document.getElementById('homeScreen').classList.add('hidden');
         resetGame();
     });
+
+    const BEST_RUN_KEY = 'runner_best';
+    const bestEl = document.getElementById('bestScore');
+    let bestRun = Number(localStorage.getItem(BEST_RUN_KEY) || 0);
+    if (bestRun > 0) bestEl.textContent = 'Best: ' + bestRun + 's';
 
     function gameLoop(){
         update();

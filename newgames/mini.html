@@ -153,6 +153,23 @@ button:disabled { background:#333; cursor:not-allowed; opacity:0.6; }
   const startBtn=document.getElementById("startGame");
 
   let mode="none",food=10,money=10,pop=0,level=1,defense=0,running=false,turn=0;
+  const MINI_SAVE_KEY = 'mini_empire_save';
+  function saveMiniState(){
+    const s = { food, money, pop, level, defense, turn };
+    localStorage.setItem(MINI_SAVE_KEY, JSON.stringify(s));
+  }
+  function loadMiniState(){
+    const s = localStorage.getItem(MINI_SAVE_KEY);
+    if(!s) return false;
+    try{
+      const obj = JSON.parse(s);
+      food = obj.food||food; money = obj.money||money; pop = obj.pop||pop; level = obj.level||level; defense = obj.defense||defense; turn = obj.turn||turn;
+      updateStats(); return true;
+    }catch(e){ return false; }
+  }
+  // attempt to load autosave on startup
+  if(loadMiniState()){ alert('Autosave loaded'); }
+  setInterval(()=>{ if(running) saveMiniState(); }, 5000);
 
   // -------- Terrain generation (random base) --------
   const terrains=["plains","rock", "plains", "plains"]; // plains 75%, rock 25%
@@ -284,6 +301,8 @@ button:disabled { background:#333; cursor:not-allowed; opacity:0.6; }
     running=true;
     setInterval(gameLoop,1500);
   };
+  // expose manual save quick button (keeps UI minimal)
+  document.addEventListener('keydown',(e)=>{ if(e.key.toLowerCase()==='p'){ saveMiniState(); alert('Game saved'); }});
 </script>
 </body>
 </html>

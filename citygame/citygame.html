@@ -183,6 +183,7 @@
 /* -------------------------
    Data & Initial State
    ------------------------- */
+const CITY_SAVE_KEY = 'city_save_v1';
 const buildingData = {
   residential: {
     cost:100,population:10,income:5,energy:-2,symbol:'🏠',
@@ -660,6 +661,29 @@ function init(){
   updateUI();
   startGameLoop();
   showMessage('Welcome — left click to build, right-click to upgrade.');
+  // restore if autosave exists
+  try {
+    const s = localStorage.getItem(CITY_SAVE_KEY);
+    if (s) {
+      const obj = JSON.parse(s);
+      // restore a few top-level values safely
+      if (typeof obj.money === 'number') gameState.money = obj.money;
+      if (typeof obj.population === 'number') gameState.population = obj.population;
+      if (typeof obj.energy === 'number') gameState.energy = obj.energy;
+      if (Array.isArray(obj.grid) && obj.grid.length === GRID_SIZE) {
+        gameState.grid = obj.grid;
+        updateGrid();
+      }
+      showMessage('Autosave loaded');
+    }
+  } catch(e) { console.warn('city load failed', e); }
+  // periodic autosave
+  setInterval(()=> {
+    try {
+      const snap = { money: gameState.money, population: gameState.population, energy: gameState.energy, grid: gameState.grid };
+      localStorage.setItem(CITY_SAVE_KEY, JSON.stringify(snap));
+    } catch(e) {}
+  }, 8000);
 }
 
 window.addEventListener('DOMContentLoaded', init);

@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Littletree866's Github page</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="icon/icon.png">
-    <style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Littletree866's Github page</title>
+	<meta name="description" content="A collection of browser games by Littletree866 — platformers, strategy, puzzles and more. Play online demos and read the changelog.">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="icon" href="icon/icon.png">
+	<style>
 
         h1, h4, h5, h6 {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             font-size: 15px;
             font-weight: lighter;
+            color: #1c1c1e;
 
         }
 
         a {
             color: #924bcc;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Courier New", Courier, monospace;
             text-decoration: none !important;
         }
 
-        button {
-            position: fixed;
-            left: 950px;
-            top: 450px;
-        }
+        .debug-button {
+			position: fixed;
+			right: 20px;
+			bottom: 20px;
+			z-index: 9999;
+			border-radius: 8px;
+			box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+		}
 
         p {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             text-align: center;
         }
 
@@ -103,10 +108,11 @@
         
         .content-link {
             display: block;
-            background: white;
+            background: rgb(13, 13, 13);
             padding: 18px 25px;
             border-radius: 8px;
             color: var(--dark);
+            -webkit-text-fill-color: #f0f4ff;
             text-decoration: none;
             font-weight: 600;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -128,7 +134,7 @@
         }
         
         .content-link:hover {
-            background: #f0f4ff;
+            background: #121213;
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
@@ -145,6 +151,7 @@
             border-radius: 8px;
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(5px);
+            font-family: 'Courier New', Courier, monospace;
         }
 
         .new-badge {
@@ -152,7 +159,7 @@
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 0.8em;
+            font-size: 1em;
             margin-left: 8px;
         }
 
@@ -161,7 +168,7 @@
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 0.8em;
+            font-size: 1em;
             margin-left: 8px;
         }
 
@@ -170,7 +177,7 @@
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 0.8em;
+            font-size: 1em;
             margin-left: 8px;
         }
 
@@ -205,44 +212,44 @@
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <p style="font-weight: bold;">Welcome to Littletree866 V1.14.15!</p>
-            <p>Feel free to explore!</p>
-            <p>Founded March 22, 2025!</p>
-            <p>Last updated November 12, 2025!</p>
-            <p>Please be patient with bugs and performance issues</p>
-        </div>
-    </header>
-    
-    <main class="main-content">
-        <div class="container">
-            
-            <div class="links-section">
-                <h2 class="category-header">Featured</h2>
-                <a href="newgames/empire.html" class="content-link">👑Empire BETA <span class="new-badge">New!</span></a>
-                <a href="newgames/runner.html" class="content-link">🏃‍♂️Geometry Runner BETA <span class="new-badge">New!</span></a>
-
-                <h2 class="category-header">Games</h2>
-                <a href="spacegame/spacegame.html" class="content-link">🚀 Space Game <span class="new-badge3">Updated!</span></a>
-                <a href="clickergame/clickergame.html" class="content-link">👆 Clicker Quest+ <span class="new-badge2">Recent!</span></a>
-                <a href="platformergame/platformergame.html" class="content-link">👟Platformer</a>
-                <a href="puzzle/puzzle.html" class="content-link">🧩Puzzle Master</a>
-                <a href="wizardgame/wizardgame.html" class="content-link">🧙‍♂️ Wizard Battle</a>
+	<a href="#main" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to content</a>
+	<header>
+		<div class="container">
+			<p style="font-weight: bold;">Welcome to Littletree866 V1.14.15!</p>
+			<p>Feel free to explore!</p>
+			<p>Founded March 22, 2025!</p>
+			<p>Last updated November 12, 2025!</p>
+			<p>Please be patient with bugs and performance issues</p>
+		</div>
+	</header>
+	
+	<main class="main-content">
+		<div class="container" id="main">
+			
+			<div class="links-section">
+				<h2 class="category-header">Featured</h2>
+                <a href="newgames/pokemon.html" class="content-link"> ☠️Pokémon</a>
+				   
+                <!-- Games Links -->
+				<h2 class="category-header">Games</h2>
+				<a href="spacegame/spacegame.html" class="content-link">🚀 Space Game </a>
+				<a href="clickergame/clickergame.html" class="content-link">👆 Clicker Quest+ </a>
+				<a href="platformergame/platformergame.html" class="content-link">👟Platformer</a>
+				<a href="puzzle/puzzle.html" class="content-link">🧩Puzzle Master</a>
+				<a href="wizardgame/wizardgame.html" class="content-link">🧙‍♂️ Wizard Battle</a>
  
-
+				<a href="newgames/runner.html" class="content-link">🏃‍♂️Geometry Runner<a>
+                <!-- Simulations Links -->
                  <h2 class="category-header">Simulations</h2>
-                <a href="lifegame/life.html" class="content-link">💰 Wealth Builder <span class="new-badge3">Updated!</span></a>
-                <a href="citygame/citygame.html" class="content-link">🏙️ City Builder  <span class="new-badge2">Recent!</span></a>
+                <a href="lifegame/life.html" class="content-link">💰 Wealth Builder </span></a>
+                <a href="citygame/citygame.html" class="content-link">🏙️ City Builder </a>
                 <a href="sandd/money.html" class="content-link">📊 Supply & Demand</a>
                 <a href="box/box.html" class="content-link">📦 The Box</a>
-
-
-                
+                <a href="newgames/empire.html" class="content-link">👑Empire Game</a>
                 <!-- Info Links -->
-                <h2 class="category-header">ℹ️Information</h2>
-                <a href="documentation.html" class="content-link">📚 Documentation <span class="new-badge3">Updated!</span></a>
-                <a href="snapshots/snapshots.html" class="content-link">🖼️ Snapshots <span class="new-badge3">Updated!</span></a>
+                <h2 class="category-header">Information</h2>
+                <a href="documentation.html" class="content-link">📚 Documentation </a>
+                <a href="snapshots/snapshots.html" class="content-link">🖼️ Snapshots</a>
                 <a href="updateinfo/updateinfo.html" class="content-link">📝 Update Info</a>
    
                 <a href="https://github.com/littletree866/website" class="content-link">💻 Source Code</a>

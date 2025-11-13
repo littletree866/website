@@ -61,6 +61,15 @@ canvas {
       armor:{name:"Leather Armor",def:1}
     }
   };
+  const EMPIRE_SAVE_KEY = 'empire_save_v1';
+  // restore if present
+  try {
+    const s = localStorage.getItem(EMPIRE_SAVE_KEY);
+    if (s) {
+      const p = JSON.parse(s);
+      Object.assign(player, p);
+    }
+  } catch(e) { console.warn('empire load failed', e); }
 
   // ===== Regions & Areas =====
   const regions={
@@ -255,7 +264,10 @@ canvas {
       ctx.fillText(item.atk ? `ATK +${item.atk}` : `DEF +${item.def}`, x + 420, y + 35);
       y += 70;
     });
-
+    // persist player display update
+    ctx.fillStyle="#fff";
+    ctx.font="18px Arial";
+    ctx.fillText(`Gold: $${player.gold}`, 640, 40);
     drawButton(30,30,100,40,"Back");
   }
 
@@ -282,6 +294,8 @@ canvas {
     if(currentEnemy.hp<=0){
       goldAnim.push({x:400,y:300,amount:currentEnemy.loot,alpha:1});
       player.gold+=currentEnemy.loot;
+      // persist after loot
+      try { localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player)); } catch(e){}
       gainExp(currentEnemy.loot * 2);
       player.hp=player.maxHp;
       setTimeout(()=>fadeTo("region"),700);
@@ -353,6 +367,8 @@ canvas {
           player.gold -= item.cost;
           if(item.atk) player.equipment.weapon = item;
           else player.equipment.armor = item;
+          // persist after purchase
+          try { localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player)); } catch(e){}
         }
         y += 70;
       });

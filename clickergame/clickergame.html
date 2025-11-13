@@ -107,6 +107,7 @@
 <div id="game">
   <h1>Clicker Quest+</h1>
   <div id="money">$0</div>
+  <div id="best" style="font-size:0.9em;color:#555;margin-bottom:6px;">Best: $0</div>
   <button id="click">Click!</button>
 
   <div class="upgrade">
@@ -131,6 +132,10 @@ let money = 0, perClick = 1, perSec = 0;
 let clickCost = 10, autoCost = 50, boostCost = 200;
 let boostActive = false, boostTimer = null;
 
+// persisted best
+const BEST_KEY = 'clicker_best';
+function loadBest(){ return Number(localStorage.getItem(BEST_KEY) || 0); }
+function saveBest(v){ localStorage.setItem(BEST_KEY, String(Math.floor(v))); }
 const moneyEl = document.getElementById('money');
 const clickBtn = document.getElementById('click');
 const clickSound = document.getElementById('clickSound');
@@ -138,11 +143,14 @@ const bonusSound = document.getElementById('bonusSound');
 const clickCostEl = document.getElementById('clickCost');
 const autoCostEl = document.getElementById('autoCost');
 const boostCostEl = document.getElementById('boostCost');
+const bestEl = document.getElementById('best');
+let best = loadBest();
 
 function fmt(n){return '$' + Math.floor(n).toLocaleString();}
 
 function updateUI(){
   moneyEl.textContent = fmt(money);
+  bestEl.textContent = 'Best: ' + fmt(best);
   clickCostEl.textContent = fmt(clickCost);
   autoCostEl.textContent = fmt(autoCost);
   boostCostEl.textContent = fmt(boostCost);
@@ -165,8 +173,8 @@ function clickGain(e){
   const value = boostActive ? perClick * 2 : perClick;
   money += value;
   addFloatingText(value, e.clientX, e.clientY);
-  clickSound.currentTime = 0;
-  clickSound.play();
+  try { clickSound.currentTime = 0; clickSound.play(); } catch(e) { /* ignore */ }
+  if (money > best) { best = money; saveBest(best); }
   updateUI();
 }
 
@@ -206,6 +214,8 @@ function autoEarnings(){
     const rect = moneyEl.getBoundingClientRect();
     addFloatingText(perSec, rect.x+rect.width/2, rect.y);
   }
+  // check best
+  if (money > best) { best = money; saveBest(best); }
   updateUI();
 }
 function spawnBonus(){
@@ -214,11 +224,12 @@ function spawnBonus(){
   coin.style.left = Math.random()*80 + 10 + '%';
   coin.style.bottom='20px';
   document.body.appendChild(coin);
-  coin.addEventListener('click',()=>{
+  // pass the click event object through to handler so addFloatingText has coordinates
+  coin.addEventListener('click',(evt)=>{
     const bonus = Math.floor(Math.random()*200)+100;
     money+=bonus;
-    bonusSound.currentTime=0; bonusSound.play();
-    addFloatingText(bonus, event.clientX, event.clientY);
+    try { bonusSound.currentTime=0; bonusSound.play(); } catch(e){ /* ignore autoplay restrictions */ }
+    addFloatingText(bonus, evt.clientX, evt.clientY);
     coin.remove();
     updateUI();
   });

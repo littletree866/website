@@ -109,6 +109,7 @@
     </div>
 
     <div class="level" id="levelDisplay" style="display:none;">Level: 1</div>
+    <div class="level" id="bestRecord" style="margin-top:6px;display:none;">Best Level: <span id="bestLevel">1</span></div>
     <div class="moves">Moves: <span id="moveCount">0</span></div>
     <div class="timer">Time: <span id="timer">0</span>s</div>
     <div class="win-message" id="winMessage">🎉 You solved it!</div>
@@ -134,11 +135,15 @@ const moveDisplay = document.getElementById('moveCount');
 const timerDisplay = document.getElementById('timer');
 const levelDisplay = document.getElementById('levelDisplay');
 
+const PUZZLE_BEST_KEY = 'puzzle_best_laststand';
+let bestLevel = Number(localStorage.getItem(PUZZLE_BEST_KEY) || 1);
+document.getElementById('bestLevel').textContent = bestLevel;
+
 // =============================
 // MODE SELECT
 // =============================
-document.getElementById('endlessModeBtn').onclick = () => startMode('endless');
-document.getElementById('lastStandBtn').onclick = () => startMode('laststand');
+document.getElementById('endlessModeBtn').onclick = () => { startMode('endless'); setupModeUI(); };
+document.getElementById('lastStandBtn').onclick = () => { startMode('laststand'); setupModeUI(); };
 
 function startMode(mode) {
     state.mode = mode;
@@ -287,6 +292,8 @@ function handleWin() {
     if (state.mode === 'laststand') {
         setTimeout(() => {
             state.level++;
+            // persist best
+            if (state.level > bestLevel) { bestLevel = state.level; localStorage.setItem(PUZZLE_BEST_KEY, String(bestLevel)); document.getElementById('bestLevel').textContent = bestLevel; }
             winMessage.style.display = "none";
             initializePuzzle();
         }, 1500);
@@ -310,6 +317,15 @@ function resetToMenu() {
 }
 
 document.getElementById('newGameBtn').onclick = initializePuzzle;
+
+// show best record for laststand mode toggle
+function setupModeUI() {
+    if (state.mode === 'laststand') {
+        document.getElementById('bestRecord').style.display = 'block';
+    } else {
+        document.getElementById('bestRecord').style.display = 'none';
+    }
+}
 </script>
 </body>
 </html>
