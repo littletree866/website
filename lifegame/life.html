@@ -2,165 +2,166 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Wealth — Fixed</title>
+  <title>Wealth</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="check.png" />
   <style>
-    /* filepath: d:\Misc\Coding\Repositories\website\lifegame\life.html - simplified and functional styles */
-    body { background: linear-gradient(180deg,#eef2fb,#f7f9ff); font-family: "Segoe UI", Tahoma, sans-serif; color:#123; margin:0; padding:24px; display:flex; justify-content:center; }
-    .card { width:960px; max-width:96%; background:#fff; border-radius:12px; padding:18px; box-shadow:0 8px 30px rgba(10,20,50,0.06); }
-    h1 { color:#148A2DCC; margin:0 0 8px 0; font-size:1.6rem; }
-    h2 { margin:6px 0 16px; font-size:1.1rem; color:#333; }
-    .controls { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-    button{ background:#6e8efb; color:#fff; border:0; padding:10px 12px; border-radius:8px; cursor:pointer; }
-    button.disabled { background:#ccc; cursor:not-allowed; }
-    #taskArea { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
-    input { padding:6px; font-size:15px; border-radius:6px; border:1px solid #ddd; }
-    #message { min-height:22px; font-weight:bold; margin-top:10px; opacity:1; color:#444; }
-    .panels { display:flex; gap:12px; margin-top:14px; flex-wrap:wrap; }
-    .panel { flex:1; min-width:260px; border:1px solid #eef; padding:12px; border-radius:8px; background:#fbfdff; }
-    .row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #eef; }
-    .small { font-size:0.9rem; color:#666; }
-    @media(max-width:760px){ .panels{flex-direction:column} }
+    body {
+      font-family: 'Ink Free', cursive;
+      background: linear-gradient(135deg,#6e8efb,#a777e3);
+      color:#333;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100vh;
+      margin:0;
+      gap:20px;
+      padding:20px;
+    }
+    .card {
+      background:#fff;
+      padding:20px;
+      border-radius:16px;
+      box-shadow:0 6px 16px rgba(0,0,0,.15);
+      text-align:center;
+      max-width:520px;
+      width:90%;
+    }
+    h1 { color:#148A2DCC; margin:0 0 8px 0; }
+    h2 { margin:6px 0 16px; }
+    button {
+      margin:8px;
+      padding:10px 18px;
+      border:none;
+      border-radius:8px;
+      font-family: 'Ink Free', cursive;
+      cursor:pointer;
+      font-size:15px;
+      background:#6e8efb;
+      color:#fff;
+      transition:background-color .15s;
+    }
+    button:hover { background:#5669d8; }
+    button:disabled, .disabled { background:gray; cursor:not-allowed; }
+    #taskArea { margin-top:12px; }
+    input { padding:6px; font-size:15px; border-radius:6px; border:1px solid #ccc; }
+    #message { min-height:22px; font-weight:bold; margin-top:10px; opacity:0; transition:opacity .25s; }
+    .income-section, .opportunities-section {
+      margin-top:16px; padding:10px; background:#f0f4ff; border-radius:12px;
+    }
+    .game-panels { display:flex; gap:20px; margin-top:12px; align-items:flex-start; flex-wrap:wrap; }
+    .panel, .market-section {
+      flex-shrink:0; width:300px; padding:16px; background:#fff; border-radius:16px; box-shadow:0 6px 16px rgba(0,0,0,.15); max-height:60vh; overflow:auto;
+      display:none;
+    }
+    .market-grid, .recipe-grid, .building-grid, .asset-grid { display:grid; gap:10px; margin-top:10px; }
+    .market-item, .recipe-item, .building-item, .asset-item { background:#f8fbff; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; }
+    .task-success { color:#1d9a2d; }
+    .task-error { color:#e74c3c; }
+    @media (max-width:920px) {
+      .game-panels { flex-direction:column; align-items:stretch; }
+      .panel, .market-section { width:100%; }
+    }
   </style>
 </head>
 <body>
-  <div class="card" role="main">
+  <div class="card">
     <h1>💰 Wealth</h1>
     <h2 id="money">Money: $1</h2>
 
-    <div class="controls">
-      <button id="taskBtn">Do Task (+$5)</button>
-      <button id="freelanceBtn">Freelance (+$random)</button>
-      <button id="investBtn">Invest $10 (requires $10)</button>
-      <button id="saveBtn" style="background:#4caf50">Save</button>
-      <button id="loadBtn" style="background:#888">Load</button>
+    <button id="taskBtn">Do Task</button>
+    <button id="freelanceBtn">Free Money?</button>
+    <button id="investBtn" class="disabled">Invest $10</button>
+
+    <div id="taskArea"></div>
+    <p id="message"></p>
+
+    <div class="income-section">
+      <h3>📈 Passive Income</h3>
+      <p>Each investment gives +$1 every 2 seconds (shown as continuous income).</p>
     </div>
 
-    <div id="message" aria-live="polite"></div>
+    <div id="opportunities" class="opportunities-section" style="display:none;">
+      <h3>🌟 New Opportunities</h3>
+      <button id="partTimeBtn">Work Part-Time Job (+$10)</button>
+      <button id="stockBtn">Stock Market (Risky)</button>
+    </div>
 
-    <div class="panels">
-      <div class="panel">
-        <h3>Income</h3>
-        <div class="row"><div>Passive income</div><div id="passive">$0 / s</div></div>
-        <div class="row"><div>Last reward</div><div id="lastReward">$0</div></div>
-      </div>
+    <div id="highTierOpportunities" class="opportunities-section" style="display:none;">
+      <h3>💎 Premium Opportunities</h3>
+      <button id="consultingBtn">Consulting Work (+$30)</button>
+      <button id="cryptoBtn">Crypto Trading (Very Risky)</button>
+      <button id="startupBtn">Launch Startup (-$50, Passive +$5)</button>
+    </div>
+  </div>
 
-      <div class="panel">
-        <h3>Opportunities</h3>
-        <div class="row"><div>Investments</div><div id="investCount">0</div></div>
-        <div class="row"><div>Freelance gigs</div><div id="gigCount">0</div></div>
-      </div>
+  <div class="game-panels">
+    <div id="marketSection" class="market-section">
+      <h3>🏪 The Market</h3>
+      <p>Buy low, sell high!</p>
+      <div id="marketGrid" class="market-grid"></div>
+    </div>
 
-      <div class="panel">
-        <h3>Market</h3>
-        <div class="row"><div>Stocks (demo)</div><div id="marketIndex">Stable</div></div>
-        <div style="margin-top:12px;" class="small">Tip: Invest to increase passive income. Freelance gives randomness.</div>
-      </div>
+    <div id="craftingPanel" class="panel">
+      <h3>🛠️ Crafting</h3>
+      <p>Create valuable items from resources</p>
+      <div id="recipeGrid" class="recipe-grid"></div>
+    </div>
+
+    <div id="buildingPanel" class="panel">
+      <h3>🏗️ Construction</h3>
+      <p>Build and manage businesses</p>
+      <div id="buildingGrid" class="building-grid"></div>
+    </div>
+
+    <div id="investingPanel" class="panel">
+      <h3>💹 Long-term Investments</h3>
+      <p>Invest in appreciating assets</p>
+      <div id="assetGrid" class="asset-grid"></div>
     </div>
   </div>
 
   <script>
-    // Simple working life/wealth demo with autosave
-    const MONEY_KEY = 'wealth_save_v1';
-    const state = {
-      money: 1,
-      passive: 0,
-      investments: 0,
-      gigs: 0,
-      lastReward: 0
+    // ---------- Elements ----------
+    const elements = {
+      money: document.getElementById("money"),
+      taskBtn: document.getElementById("taskBtn"),
+      freelanceBtn: document.getElementById("freelanceBtn"),
+      investBtn: document.getElementById("investBtn"),
+      message: document.getElementById("message"),
+      taskArea: document.getElementById("taskArea"),
+      opportunities: document.getElementById("opportunities"),
+      highTierOpportunities: document.getElementById("highTierOpportunities"),
+      marketSection: document.getElementById("marketSection"),
+      marketGrid: document.getElementById("marketGrid"),
+      craftingPanel: document.getElementById("craftingPanel"),
+      buildingPanel: document.getElementById("buildingPanel"),
+      investingPanel: document.getElementById("investingPanel"),
+      recipeGrid: document.getElementById("recipeGrid"),
+      buildingGrid: document.getElementById("buildingGrid"),
+      assetGrid: document.getElementById("assetGrid"),
+      partTimeBtn: document.getElementById("partTimeBtn"),
+      stockBtn: document.getElementById("stockBtn"),
+      consultingBtn: document.getElementById("consultingBtn"),
+      cryptoBtn: document.getElementById("cryptoBtn"),
+      startupBtn: document.getElementById("startupBtn")
     };
 
-    const moneyEl = document.getElementById('money');
-    const passiveEl = document.getElementById('passive');
-    const investBtn = document.getElementById('investBtn');
-    const taskBtn = document.getElementById('taskBtn');
-    const freelanceBtn = document.getElementById('freelanceBtn');
-    const lastRewardEl = document.getElementById('lastReward');
-    const investCountEl = document.getElementById('investCount');
-    const gigCountEl = document.getElementById('gigCount');
-    const messageEl = document.getElementById('message');
-    const marketIndexEl = document.getElementById('marketIndex');
-
-    function fmt(n){ return '$' + Math.floor(n).toLocaleString(); }
-
-    function load(){
-      try {
-        const s = localStorage.getItem(MONEY_KEY);
-        if(s){ Object.assign(state, JSON.parse(s)); show('Autosave loaded'); }
-      } catch(e){ console.warn('load failed', e); }
-      render();
-    }
-    function save(){ localStorage.setItem(MONEY_KEY, JSON.stringify(state)); show('Saved'); }
-
-    function show(txt, ms=2200){
-      messageEl.textContent = txt;
-      clearTimeout(messageEl._t);
-      messageEl._t = setTimeout(()=> { if(messageEl.textContent === txt) messageEl.textContent = ''; }, ms);
-    }
-
-    function render(){
-      moneyEl.textContent = 'Money: ' + fmt(state.money);
-      passiveEl.textContent = fmt(state.passive) + ' / s';
-      lastRewardEl.textContent = fmt(state.lastReward);
-      investCountEl.textContent = state.investments;
-      gigCountEl.textContent = state.gigs;
-      investBtn.classList.toggle('disabled', state.money < 10);
-      marketIndexEl.textContent = Math.random() < 0.5 ? 'Stable' : (Math.random()<0.5?'Bullish':'Volatile');
-    }
-
-    // Buttons
-    taskBtn.addEventListener('click', ()=> {
-      const earn = 5;
-      state.money += earn;
-      state.lastReward = earn;
-      show('Task completed: +' + fmt(earn));
-      render();
-    });
-
-    freelanceBtn.addEventListener('click', ()=> {
-      const earn = Math.floor(Math.random()*40) + 2;
-      state.money += earn;
-      state.gigs++;
-      state.lastReward = earn;
-      show('Freelance paid +' + fmt(earn));
-      render();
-    });
-
-    investBtn.addEventListener('click', ()=> {
-      if(state.money < 10){ show('Not enough money'); return; }
-      state.money -= 10;
-      state.investments++;
-      // Each investment increases passive income slightly
-      state.passive = Math.round((state.passive + 0.6) * 100) / 100;
-      show('Invested $10 — passive income increased');
-      render();
-    });
-
-    document.getElementById('saveBtn').addEventListener('click', save);
-    document.getElementById('loadBtn').addEventListener('click', ()=> { load(); show('Loaded'); });
-
-    // Passive income tick
-    setInterval(()=> {
-      if(state.passive > 0){
-        state.money += state.passive;
-        state.lastReward = state.passive;
-      }
-      // small market movement
-      if(Math.random() < 0.04) {
-        // passive may gain/lose small percent
-        const change = (Math.random()-0.5) * 0.1;
-        state.passive = Math.max(0, Math.round((state.passive * (1 + change)) * 100) / 100);
-      }
-      save(); // autosave each tick
-      render();
-    }, 1000);
-
-    // Load on start
-    load();
-  </script>
-</body>
-</html>
+    // ---------- Game state ----------
+    const state = {
+      money: 1,
+      investments: 0,
+      investmentCost: 10,
+      investmentsYieldPerSec: 0.5, // $1 every 2s -> 0.5/sec
+      startups: 0,
+      startupYieldPerSec: 2.5, // $5 every 2s -> 2.5/sec
+      buildings: [
+        { name: "Coffee Shop", cost:500, incomePerMin:50, owned:0 },
+        { name: "Tech Store", cost:1000, incomePerMin:100, owned:0 },
+        { name: "Jewelry Store", cost:2000, incomePerMin:200, owned:0 },
+        { name: "Art Gallery", cost:5000, incomePerMin:500, owned:0 },
+        { name: "Electronics Store", cost:3000, incomePerMin:300, owned:0 },
+        { name: "Shopping Mall", cost:10000, incomePerMin:1000, owned:0 }
       ],
       assets: [
         { name:"Stock Portfolio", cost:1000, growthPerMin:0.10, owned:0 },

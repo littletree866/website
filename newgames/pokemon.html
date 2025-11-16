@@ -10,12 +10,6 @@ Features added:
 - Party management + switching in-battle
 - Persistent save using localStorage
 - Visual HUD and simple animations
-
-Save as "index.html" and open in a modern browser. Controls:
-- Arrow keys / WASD to move
-- Space or Enter to interact
-- F = Fight (open moves in battle), B = Bag, S = Switch, R = Run
-Enjoy!
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +21,7 @@ Enjoy!
   :root{
     --bg:#071228;--panel:#0d1724;--muted:#9fb2d0;--accent:#ffd36b;
   }
-  *{box-sizing:border-box;font-family:Inter,Segoe UI,Arial,sans-serif}
+  *{box-sizing:border-box;font-family:"Ink free", cursive} /* changed font to Ink free, cursive */
   body{margin:0;background:linear-gradient(#041028,#071427);color:#e6eef8;display:flex;justify-content:center;padding:12px 8px}
   #game{width:980px;max-width:calc(100% - 16px);display:grid;grid-template-columns:640px 320px;gap:12px}
   .mapwrap{background:linear-gradient(180deg,#082036,#061426);border-radius:10px;padding:10px}
@@ -123,648 +117,746 @@ Enjoy!
   </div>
 
 <script>
-/* =========================
-   Game: Overworld + Battles
-   ========================= */
+      /* =========================
+        Game: Overworld + Battles
+        ========================= */
 
-/* ---------- Data ---------- */
-const POKEMON_DB = [
-  { id:'pikachu', name:'Pikachu', emoji:'⚡', base:{hp:35,atk:55,def:40,spd:90}, moves:['thundershock','quickattack','growl'], types:['electric']},
-  { id:'charmander', name:'Charmander', emoji:'🔥', base:{hp:39,atk:52,def:43,spd:65}, moves:['ember','scratch','smokescreen'], types:['fire']},
-  { id:'bulbasaur', name:'Bulbasaur', emoji:'🌿', base:{hp:45,atk:49,def:49,spd:45}, moves:['vinewhip','tackle','leechseed'], types:['grass']},
-  { id:'squirtle', name:'Squirtle', emoji:'💧', base:{hp:44,atk:48,def:65,spd:43}, moves:['watergun','tackle','withdraw'], types:['water']},
-  { id:'pidgey', name:'Pidgey', emoji:'🕊️', base:{hp:40,atk:45,def:40,spd:56}, moves:['tackle','quickattack','tailwhip'], types:['normal','flying']},
-  { id:'eevee', name:'Eevee', emoji:'🦊', base:{hp:55,atk:55,def:50,spd:55}, moves:['tackle','quickattack','growl'], types:['normal']},
-  { id:'oddish', name:'Oddish', emoji:'🌸', base:{hp:45,atk:50,def:55,spd:30}, moves:['absorb','poisonpowder','growth'], types:['grass','poison']},
-  { id:'magikarp', name:'Magikarp', emoji:'🐟', base:{hp:20,atk:10,def:55,spd:80}, moves:['splash','tackle'], types:['water']},
-  { id:'growlithe', name:'Growlithe', emoji:'🐕', base:{hp:55,atk:70,def:45,spd:60}, moves:['ember','bite','roar','flamewheel'], types:['fire']},
-  { id:'sandshrew', name:'Sandshrew', emoji:'🦔', base:{hp:50,atk:75,def:85,spd:40}, moves:['scratch','sandattack','poisonsting'], types:['ground']},
-  { id:'starly', name:'Starly', emoji:'🐦', base:{hp:40,atk:55,def:30,spd:60}, moves:['tackle','quickattack','wingattack'], types:['normal','flying']}
-];
+      /* ---------- Data ---------- */
+      const POKEMON_DB = [
+        { id:'pikachu', name:'Pikachu', emoji:'⚡', base:{hp:35,atk:55,def:40,spd:90}, moves:['thundershock','quickattack','growl'], types:['electric']},
+        { id:'charmander', name:'Charmander', emoji:'🔥', base:{hp:39,atk:52,def:43,spd:65}, moves:['ember','scratch','smokescreen'], types:['fire']},
+        { id:'bulbasaur', name:'Bulbasaur', emoji:'🌿', base:{hp:45,atk:49,def:49,spd:45}, moves:['vinewhip','tackle','leechseed'], types:['grass']},
+        { id:'squirtle', name:'Squirtle', emoji:'💧', base:{hp:44,atk:48,def:65,spd:43}, moves:['watergun','tackle','withdraw'], types:['water']},
+        { id:'pidgey', name:'Pidgey', emoji:'🕊️', base:{hp:40,atk:45,def:40,spd:56}, moves:['tackle','quickattack','tailwhip'], types:['normal','flying']},
+        { id:'eevee', name:'Eevee', emoji:'🦊', base:{hp:55,atk:55,def:50,spd:55}, moves:['tackle','quickattack','growl'], types:['normal']},
+        { id:'oddish', name:'Oddish', emoji:'🌸', base:{hp:45,atk:50,def:55,spd:30}, moves:['absorb','poisonpowder','growth'], types:['grass','poison']},
+        { id:'magikarp', name:'Magikarp', emoji:'🐟', base:{hp:20,atk:10,def:55,spd:80}, moves:['splash','tackle'], types:['water']},
+        { id:'growlithe', name:'Growlithe', emoji:'🐕', base:{hp:55,atk:70,def:45,spd:60}, moves:['ember','bite','roar','flamewheel'], types:['fire']},
+        { id:'sandshrew', name:'Sandshrew', emoji:'🦔', base:{hp:50,atk:75,def:85,spd:40}, moves:['scratch','sandattack','poisonsting'], types:['ground']},
+        { id:'starly', name:'Starly', emoji:'🐦', base:{hp:40,atk:55,def:30,spd:60}, moves:['tackle','quickattack','wingattack'], types:['normal','flying']}
+      ];
 
-const MOVE_DB = {
-  thundershock:{name:'Thunder Shock',power:40,acc:100,type:'electric'},
-  quickattack:{name:'Quick Attack',power:40,acc:100,type:'normal',priority:1},
-  growl:{name:'Growl',power:0,acc:100,type:'normal'},
-  ember:{name:'Ember',power:40,acc:100,type:'fire'},
-  scratch:{name:'Scratch',power:40,acc:100,type:'normal'},
-  smokescreen:{name:'Smokescreen',power:0,acc:100,type:'normal'},
-  vinewhip:{name:'Vine Whip',power:45,acc:100,type:'grass'},
-  tackle:{name:'Tackle',power:40,acc:100,type:'normal'},
-  leechseed:{name:'Leech Seed',power:0,acc:90,type:'grass'},
-  watergun:{name:'Water Gun',power:40,acc:100,type:'water'},
-  withdraw:{name:'Withdraw',power:0,acc:100,type:'water'},
-  tailwhip:{name:'Tail Whip',power:0,acc:100,type:'normal'},
-  absorb:{name:'Absorb',power:20,acc:100,type:'grass'},
-  poisonpowder:{name:'Poison Powder',power:0,acc:75,type:'poison'},
-  growth:{name:'Growth',power:0,acc:100,type:'normal'},
-  splash:{name:'Splash',power:0,acc:100,type:'normal'},
-  bite:{name:'Bite',power:60,acc:100,type:'dark',critRate:1},
-  roar:{name:'Roar',power:0,acc:100,type:'normal',effect:'lower-atk'},
-  flamewheel:{name:'Flame Wheel',power:60,acc:100,type:'fire',effect:'burn-10'},
-  sandattack:{name:'Sand Attack',power:0,acc:100,type:'ground',effect:'lower-acc'},
-  wingattack:{name:'Wing Attack',power:60,acc:100,type:'flying'},
-  poisonsting:{name:'Poison Sting',power:15,acc:100,type:'poison',effect:'poison-30'}
-};
+      const MOVE_DB = {
+        thundershock:{name:'Thunder Shock',power:40,acc:100,type:'electric'},
+        quickattack:{name:'Quick Attack',power:40,acc:100,type:'normal',priority:1},
+        growl:{name:'Growl',power:0,acc:100,type:'normal'},
+        ember:{name:'Ember',power:40,acc:100,type:'fire'},
+        scratch:{name:'Scratch',power:40,acc:100,type:'normal'},
+        smokescreen:{name:'Smokescreen',power:0,acc:100,type:'normal'},
+        vinewhip:{name:'Vine Whip',power:45,acc:100,type:'grass'},
+        tackle:{name:'Tackle',power:40,acc:100,type:'normal'},
+        leechseed:{name:'Leech Seed',power:0,acc:90,type:'grass'},
+        watergun:{name:'Water Gun',power:40,acc:100,type:'water'},
+        withdraw:{name:'Withdraw',power:0,acc:100,type:'water'},
+        tailwhip:{name:'Tail Whip',power:0,acc:100,type:'normal'},
+        absorb:{name:'Absorb',power:20,acc:100,type:'grass'},
+        poisonpowder:{name:'Poison Powder',power:0,acc:75,type:'poison'},
+        growth:{name:'Growth',power:0,acc:100,type:'normal'},
+        splash:{name:'Splash',power:0,acc:100,type:'normal'},
+        bite:{name:'Bite',power:60,acc:100,type:'dark',critRate:1},
+        roar:{name:'Roar',power:0,acc:100,type:'normal',effect:'lower-atk'},
+        flamewheel:{name:'Flame Wheel',power:60,acc:100,type:'fire',effect:'burn-10'},
+        sandattack:{name:'Sand Attack',power:0,acc:100,type:'ground',effect:'lower-acc'},
+        wingattack:{name:'Wing Attack',power:60,acc:100,type:'flying'},
+        poisonsting:{name:'Poison Sting',power:15,acc:100,type:'poison',effect:'poison-30'}
+      };
 
-/* simplified type chart */
-function typeEffectiveness(moveType, targetTypes){
-  if(!targetTypes) return 1;
-  const strong = {fire:['grass'], water:['fire'], grass:['water'], electric:['water']};
-  const weak = {fire:['water'], water:['grass'], grass:['fire'], electric:[]};
-  let mult=1;
-  for(const t of targetTypes){
-    if(strong[moveType] && strong[moveType].includes(t)) mult*=2;
-    if(weak[moveType] && weak[moveType].includes(t)) mult*=0.5;
-  }
-  return mult;
-}
-
-/* ---------- Utilities ---------- */
-function randint(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-
-/* ---------- Player state ---------- */
-let state = {
-  pos:{x:6,y:6},
-  steps:0,
-  gold:50,
-  party: [],
-  items: {pokeball:5,potion:3},
-  location:'route', // 'route' or 'town' etc
-  mapName:'Route',
-  encounterActive:false,
-  wild:null,
-};
-
-/* create Pokémon instance from DB at level */
-function spawnPokemon(dbEntry, level=randint(3,7)){
-  const hp = Math.max(8, Math.floor(dbEntry.base.hp * (1 + level*0.07)));
-  return {
-    id:dbEntry.id, name:dbEntry.name, emoji:dbEntry.emoji,
-    level, baseHp:hp, hp:hp,
-    atk:Math.floor(dbEntry.base.atk*(1+level*0.05)),
-    def:Math.floor(dbEntry.base.def*(1+level*0.04)),
-    spd:Math.floor(dbEntry.base.spd*(1+level*0.03)),
-    moves: dbEntry.moves.slice(0,4),
-    types: dbEntry.types.slice(),
-  };
-}
-
-/* Give starter if none */
-if(!localStorage.getItem('pokeramble_save')) {
-  state.party.push(spawnPokemon(POKEMON_DB.find(p=>p.id==='charmander'),5));
-  state.party.push(spawnPokemon(POKEMON_DB.find(p=>p.id==='pidgey'),4));
-}
-
-/* ---------- Map ---------- */
-/* Tile-based map (20x15 tiles) */
-const TILE = 32;
-const MAP_W = 20, MAP_H = 15;
-let map = [];
-
-const TILES = {
-  town: {color:'#5a6b7a',symbol:'🏠'},
-  water: {color:'#083a5a',animated:true},
-  grass: {color:'#163c21',symbol:'🌿'},
-  mountain: {color:'#4a4a4a',symbol:'⛰️'},
-  forest: {color:'#1a4a2a',symbol:'🌲'},
-  desert: {color:'#a98',symbol:'🏜️'},
-  path: {color:'#2b3b46'},
-  heal: {color:'#6b3a3a',symbol:'💊'},
-  shop: {color:'#5a4b2a',symbol:'🏪'},
-  gym: {color:'#4a5a8a',symbol:'🏆'},
-  house: {color:'#6b5a4a',symbol:'🏡'}
-};
-
-function generateMap(){
-  // simple map layout: town at left, route grass elsewhere, water river
-  map = Array.from({length:MAP_H},(_,y)=>Array.from({length:MAP_W},(_,x)=>{
-    // Create town area (3x5)
-    if(x<4 && y>4 && y<10) return 'town';
-    // Create forests near edges
-    if((x<3 || x>MAP_W-4) && Math.random()<0.4) return 'forest';
-    // Create mountain range
-    if(x>14 && y<5 && Math.random()<0.6) return 'mountain';
-    // Create desert patch
-    if(x>12 && y>10 && Math.random()<0.4) return 'desert';
-    // Create river with bridges
-    if(x>8 && x<12 && y>2 && y<6 && y!==4) return 'water';
-    // Random grass patches
-    if(Math.random() < 0.18) return 'grass';
-    return 'path';
-  }));
-  // Place buildings
-  map[7][1] = 'heal';
-  map[6][1] = 'shop';
-  map[5][2] = 'gym';
-  map[8][2] = 'house';
-}
-generateMap();
-
-/* ---------- Canvas drawing ---------- */
-const canvas = document.getElementById('map');
-const ctx = canvas.getContext('2d');
-
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  
-  // Apply day/night cycle
-  const hour = new Date().getHours();
-  const nightAlpha = hour >= 20 || hour <= 5 ? 0.3 : 0;
-  
-  // Draw tiles with improved graphics
-  for(let y=0;y<MAP_H;y++){
-    for(let x=0;x<MAP_W;x++){
-      const t = map[y][x];
-      const tile = TILES[t];
-      const px = x*TILE, py = y*TILE;
-      
-      // Base tile
-      ctx.fillStyle = tile.color;
-      ctx.fillRect(px,py,TILE,TILE);
-      
-      // Decorative elements
-      if(tile.symbol){
-        ctx.font = '16px serif';
-        ctx.fillText(tile.symbol, px+8, py+20);
+      /* simplified type chart */
+      function typeEffectiveness(moveType, targetTypes){
+        if(!targetTypes) return 1;
+        const strong = {fire:['grass'], water:['fire'], grass:['water'], electric:['water']};
+        const weak = {fire:['water'], water:['grass'], grass:['fire'], electric:[]};
+        let mult=1;
+        for(const t of targetTypes){
+          if(strong[moveType] && strong[moveType].includes(t)) mult*=2;
+          if(weak[moveType] && weak[moveType].includes(t)) mult*=0.5;
+        }
+        return mult;
       }
-      
-      // Animated water
-      if(tile.animated){
-        const wave = Math.sin(Date.now()/500 + x*0.5 + y*0.5) * 2;
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        ctx.fillRect(px+4, py+wave+4, TILE-8, 2);
+
+      /* ---------- Utilities ---------- */
+      function randint(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+      function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+      /* ---------- Player state ---------- */
+      let state = {
+        pos:{x:6,y:6},
+        steps:0,
+        gold:50,
+        party: [],
+        items: {pokeball:5,potion:3},
+        location:'route', // 'route' or 'town' etc
+        mapName:'Route',
+        encounterActive:false,
+        wild:null,
+      };
+
+      /* create Pokémon instance from DB at level */
+      function spawnPokemon(dbEntry, level=randint(3,7)){
+        const hp = Math.max(8, Math.floor(dbEntry.base.hp * (1 + level*0.07)));
+        return {
+          id:dbEntry.id, name:dbEntry.name, emoji:dbEntry.emoji,
+          level, baseHp:hp, hp:hp,
+          atk:Math.floor(dbEntry.base.atk*(1+level*0.05)),
+          def:Math.floor(dbEntry.base.def*(1+level*0.04)),
+          spd:Math.floor(dbEntry.base.spd*(1+level*0.03)),
+          moves: dbEntry.moves.slice(0,4),
+          types: dbEntry.types.slice(),
+        };
       }
-      
-      // Grid and shadows
-      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-      ctx.strokeRect(px,py,TILE,TILE);
-    }
-  }
-  
-  // Draw player with shadow and direction
-  const px = state.pos.x * TILE + TILE/2;
-  const py = state.pos.y * TILE + TILE/2;
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.beginPath(); 
-  ctx.ellipse(px,py+12,12,6,0,0,Math.PI*2);
-  ctx.fill();
-  
-  // Player sprite with movement animation
-  const bounce = Math.sin(Date.now()/200) * 2;
-  ctx.fillStyle = '#ffd36b';
-  ctx.beginPath();
-  ctx.arc(px, py+bounce, 12, 0, Math.PI*2);
-  ctx.fill();
-  
-  // Night overlay
-  if(nightAlpha > 0){
-    ctx.fillStyle = `rgba(0,0,32,${nightAlpha})`;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
-}
-draw();
 
-/* ---------- UI Helpers ---------- */
-const worldLog = document.getElementById('worldLog');
-function wlog(txt){
-  const d = document.createElement('div'); d.textContent = txt;
-  worldLog.appendChild(d); worldLog.scrollTop = worldLog.scrollHeight;
-}
-function updateHUD(){
-  document.getElementById('steps').textContent = state.steps;
-  document.getElementById('gold').textContent = state.gold;
-  document.getElementById('locName').textContent = state.mapName;
-  document.getElementById('encRate').textContent = Math.round(encounterRate()*100)+'%';
+      /* Give starter if none */
+      if(!localStorage.getItem('pokeramble_save')) {
+        state.party.push(spawnPokemon(POKEMON_DB.find(p=>p.id==='charmander'),5));
+        state.party.push(spawnPokemon(POKEMON_DB.find(p=>p.id==='pidgey'),4));
+      }
 
-  // party small
-  const partySmall = document.getElementById('partySmall');
-  partySmall.innerHTML = '';
-  state.party.forEach((p,i)=>{
-    const el = document.createElement('div'); el.style.padding='6px'; el.style.background='#072433'; el.style.borderRadius='6px';
-    el.innerHTML = `<div style="font-size:18px">${p.emoji}</div><div style="font-size:11px">${p.name} L${p.level}</div>`;
-    partySmall.appendChild(el);
-  });
+      /* ---------- Map ---------- */
+      /* Tile-based map (20x15 tiles) */
+      const TILE = 32;
+      const MAP_W = 20, MAP_H = 15;
+      let map = [];
 
-  // inventory
-  const inv = document.getElementById('inventory'); inv.innerHTML = '';
-  for(const k in state.items){
-    const it = document.createElement('div'); it.className='item';
-    it.innerHTML = `<div style="font-weight:700">${k}</div><div class="muted">${state.items[k]}</div>`;
-    inv.appendChild(it);
-  }
-}
-updateHUD();
+      const TILES = {
+        town: {color:'#5a6b7a',symbol:'🏠'},
+        water: {color:'#083a5a',animated:true},
+        grass: {color:'#163c21',symbol:'🌿'},
+        mountain: {color:'#4a4a4a',symbol:'⛰️'},
+        forest: {color:'#1a4a2a',symbol:'🌲'},
+        desert: {color:'#a98',symbol:'🏜️'},
+        path: {color:'#2b3b46'},
+        heal: {color:'#6b3a3a',symbol:'💊'},
+        shop: {color:'#5a4b2a',symbol:'🏪'},
+        gym: {color:'#4a5a8a',symbol:'🏆'},
+        house: {color:'#6b5a4a',symbol:'🏡'}
+      };
 
-/* ---------- Movement & Encounters ---------- */
-const keysDown = {};
-document.addEventListener('keydown', (e)=>{
-  keysDown[e.key.toLowerCase()] = true;
-  // interaction
-  if(e.key === ' ' || e.key === 'Enter'){ interact(); e.preventDefault(); }
-});
-document.addEventListener('keyup', (e)=>{ keysDown[e.key.toLowerCase()] = false; });
+      function generateMap(){
+        // simple map layout: town at left, route grass elsewhere, water river
+        map = Array.from({length:MAP_H},(_,y)=>Array.from({length:MAP_W},(_,x)=>{
+          // Create town area (3x5)
+          if(x<4 && y>4 && y<10) return 'town';
+          // Create forests near edges
+          if((x<3 || x>MAP_W-4) && Math.random()<0.4) return 'forest';
+          // Create mountain range
+          if(x>14 && y<5 && Math.random()<0.6) return 'mountain';
+          // Create desert patch
+          if(x>12 && y>10 && Math.random()<0.4) return 'desert';
+          // Create river with bridges
+          if(x>8 && x<12 && y>2 && y<6 && y!==4) return 'water';
+          // Random grass patches
+          if(Math.random() < 0.18) return 'grass';
+          return 'path';
+        }));
+        // Place buildings
+        map[7][1] = 'heal';
+        map[6][1] = 'shop';
+        map[5][2] = 'gym';
+        map[8][2] = 'house';
+      }
+      generateMap();
 
-let lastMoveTime = 0;
-function stepTick(){
-  const now = Date.now();
-  if(now - lastMoveTime < 120) return;
-  lastMoveTime = now;
-  // read movement keys
-  let dx=0, dy=0;
-  if(keysDown['arrowup']||keysDown['w']) dy=-1;
-  if(keysDown['arrowdown']||keysDown['s']) dy=1;
-  if(keysDown['arrowleft']||keysDown['a']) dx=-1;
-  if(keysDown['arrowright']||keysDown['d']) dx=1;
-  if(dx===0 && dy===0) return;
-  movePlayer(dx,dy);
-}
-setInterval(stepTick,50);
+      /* ---------- Canvas drawing ---------- */
+      const canvas = document.getElementById('map');
+      const ctx = canvas.getContext('2d');
 
-function inBounds(x,y){ return x>=0 && x<MAP_W && y>=0 && y<MAP_H; }
+      // render interpolation for smooth movement
+      let renderX = state.pos.x * TILE + TILE/2;
+      let renderY = state.pos.y * TILE + TILE/2;
+      let particles = [];
+      let cameraShake = 0;
+      let flashAlpha = 0;
 
-function movePlayer(dx,dy){
-  const nx = state.pos.x + dx, ny = state.pos.y + dy;
-  if(!inBounds(nx,ny)) { wlog('You bump into the edge.'); return; }
-  // simple collision: water tiles can't be entered unless in town
-  const tile = map[ny][nx];
-  if(tile === 'water'){ wlog('You cannot walk into deep water.'); return; }
-  state.pos.x = nx; state.pos.y = ny;
-  state.steps++;
-  if(tile === 'town'){ state.mapName='Town'; } else if(tile==='heal'){ state.mapName='Heal Center'; } else if(tile==='shop'){ state.mapName='Shop'; } else state.mapName='Route';
-  draw();
-  updateHUD();
-  // check encounter on grass
-  const currentTile = map[ny][nx];
-  if(currentTile === 'grass'){
-    if(Math.random() < encounterRate()){
-      triggerEncounter();
-    }
-  }
-}
+      function spawnStepParticles(x,y){
+        for(let i=0;i<6;i++){
+          particles.push({
+            x: x + (Math.random()-0.5)*12,
+            y: y + TILE/2 + 6,
+            vx: (Math.random()-0.5)*0.6,
+            vy: -Math.random()*1.2,
+            life: 400 + Math.random()*300,
+            t: Date.now()
+          });
+        }
+      }
 
-/* encounter rate depends on steps and location -- base 12% in grass */
-function encounterRate(){
-  return 0.12; // constant for simplicity (displayed as %)
-}
+      function drawParticles(now){
+        for(let i=particles.length-1;i>=0;i--){
+          const p = particles[i];
+          const age = now - p.t;
+          if(age > p.life){ particles.splice(i,1); continue; }
+          const a = 1 - (age / p.life);
+          p.x += p.vx; p.y += p.vy; p.vy += 0.03;
+          ctx.fillStyle = `rgba(220,255,200,${0.8*a})`;
+          ctx.fillRect(p.x, p.y, 2, 2);
+        }
+      }
 
-/* ---------- Encounter handling (start battle) ---------- */
-const encounterPanel = document.getElementById('encounterPanel');
-let inBattle = false;
+      function draw(){
+        const now = Date.now();
+        // smooth render pos toward logical pos
+        const targetX = state.pos.x * TILE + TILE/2;
+        const targetY = state.pos.y * TILE + TILE/2;
+        renderX += (targetX - renderX) * 0.28;
+        renderY += (targetY - renderY) * 0.28;
 
-function triggerEncounter(forced=false){
-  if(inBattle) return;
-  // spawn random wild from subset (higher chance for common ones)
-  const pool = POKEMON_DB;
-  const pick = pool[randint(0,pool.length-1)];
-  const wild = spawnPokemon(pick, randint(3,8));
-  state.wild = JSON.parse(JSON.stringify(wild));
-  inBattle = true;
-  state.encounterActive = true;
-  wlog(`A wild ${wild.name} appeared!`);
-  renderEncounterUI();
-  // open battle modal-like area inside encounterPanel
-}
+        // camera shake
+        if(cameraShake > 0) cameraShake *= 0.92;
 
-function renderEncounterUI(){
-  const wild = state.wild;
-  encounterPanel.innerHTML = '';
-  if(!inBattle){
-    encounterPanel.innerHTML = '<div class="muted">No battle.</div>';
-    return;
-  }
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-weight:800">${wild.name} L${wild.level} ${wild.emoji}</div>
-        <div class="muted">HP: <span id="wildHP">${wild.hp}</span> / ${wild.baseHp}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="muted">Your active</div>
-        <div id="activeInfo"></div>
-      </div>
-    </div>
-    <div style="height:8px"></div>
-    <div style="display:flex;gap:6px">
-      <button class="btn" id="fightBtnBatt">Fight</button>
-      <button class="btn" id="bagBtnBatt">Bag</button>
-      <button class="btn" id="switchBtnBatt">Switch</button>
-      <button class="btn" id="runBtnBatt">Run</button>
-    </div>
-    <div style="height:8px"></div>
-    <div id="battleLog" style="background:rgba(255,255,255,0.02);padding:8px;border-radius:6px;height:120px;overflow:auto"></div>
-  `;
-  encounterPanel.appendChild(wrapper);
-  renderActiveInEncounter();
-  // handlers
-  document.getElementById('fightBtnBatt').onclick = ()=> openMovesUI();
-  document.getElementById('bagBtnBatt').onclick = ()=> openBagUI();
-  document.getElementById('switchBtnBatt').onclick = ()=> openSwitchUI();
-  document.getElementById('runBtnBatt').onclick = ()=> attemptRun();
-}
+        ctx.clearRect(0,0,canvas.width,canvas.height);
 
-function renderActiveInEncounter(){
-  const ai = document.getElementById('activeInfo');
-  const p = state.party[0] || null;
-  if(!p) ai.innerHTML = '<div class="muted">No Pokémon</div>';
-  else ai.innerHTML = `<div style="font-weight:700">${p.name} L${p.level} ${p.emoji}</div><div class="muted">HP: ${p.hp}/${p.baseHp}</div>`;
-}
+        // slight camera transform for shake
+        ctx.save();
+        const sx = (Math.random()-0.5)*cameraShake;
+        const sy = (Math.random()-0.5)*cameraShake;
+        ctx.translate(sx, sy);
 
-function addBattleLog(txt){
-  const el = document.getElementById('battleLog');
-  if(!el) return;
-  const d = document.createElement('div'); d.textContent = txt; el.appendChild(d); el.scrollTop = el.scrollHeight;
-}
+        // Draw tiles with gradients and grass animation
+        for(let y=0;y<MAP_H;y++){
+          for(let x=0;x<MAP_W;x++){
+            const t = map[y][x];
+            const tile = TILES[t] || TILES.path;
+            const px = x*TILE, py = y*TILE;
 
-/* ---------- Battle UI: Moves, Bag, Switch ---------- */
-function openMovesUI(){
-  const wild = state.wild; if(!wild) return;
-  const el = encounterPanel;
-  el.innerHTML = '';
-  const active = state.party[0];
-  if(!active){ addBattleLog('No Pokémon to fight with!'); renderEncounterUI(); return; }
-  const cont = document.createElement('div');
-  cont.innerHTML = `<div style="font-weight:800">Choose a move for ${active.name}</div><div style="height:8px"></div>`;
-  active.moves.forEach(m=>{
-    const md = MOVE_DB[m];
-    const btn = document.createElement('button'); btn.className='btn'; btn.style.display='block'; btn.style.width='100%';
-    btn.textContent = md ? md.name : m;
-    btn.onclick = ()=> {
-      performPlayerMove(active, wild, m);
-      renderEncounterUI(); // redisplay after turn resolves
-    };
-    cont.appendChild(btn);
-  });
-  const back = document.createElement('button'); back.className='btn'; back.textContent='Back'; back.onclick=renderEncounterUI; cont.appendChild(back);
-  el.appendChild(cont);
-}
+            // base gradient
+            const g = ctx.createLinearGradient(px,py,px,TILE+py);
+            g.addColorStop(0, shade(tile.color, 12));
+            g.addColorStop(1, tile.color);
+            ctx.fillStyle = g;
+            ctx.fillRect(px,py,TILE,TILE);
 
-function openBagUI(){
-  const el = encounterPanel; el.innerHTML=''; const cont = document.createElement('div');
-  cont.innerHTML = `<div style="font-weight:800">Bag</div><div style="height:8px"></div>`;
-  // Pokéball
-  const ballBtn = document.createElement('button'); ballBtn.className='btn'; ballBtn.textContent=`Pokéball (${state.items.pokeball || 0})`;
-  ballBtn.onclick = ()=> {
-    if((state.items.pokeball||0) <= 0){ addBattleLog('No Pokéballs!'); return; }
-    state.items.pokeball--; attemptCatch(); renderEncounterUI(); updateHUD();
-  };
-  cont.appendChild(ballBtn);
-  // Potion
-  const potBtn = document.createElement('button'); potBtn.className='btn'; potBtn.textContent=`Potion (${state.items.potion||0})`;
-  potBtn.onclick = ()=> {
-    if((state.items.potion||0) <= 0){ addBattleLog('No Potions!'); return; }
-    const p = state.party[0];
-    if(!p) { addBattleLog('No active Pokémon'); return; }
-    state.items.potion--; p.hp = Math.min(p.baseHp, p.hp + 20); addBattleLog(`${p.name} healed 20 HP.`); updateHUD(); // enemy turn after using
-    setTimeout(()=> enemyTurn(), 400);
-    renderEncounterUI();
-  };
-  cont.appendChild(potBtn);
-  const back = document.createElement('button'); back.className='btn'; back.textContent='Back'; back.onclick=renderEncounterUI; cont.appendChild(back);
-  el.appendChild(cont);
-}
+            // grass blades (animated)
+            if(t === 'grass' || t === 'forest'){
+              const blades = 6;
+              for(let b=0;b<blades;b++){
+                const bx = px + 4 + b*(TILE-8)/blades + (Math.sin(now/400 + x*3 + b)*1.5);
+                const by = py + 18 + Math.cos(now/300 + y*2 + b)*1.5;
+                ctx.fillStyle = 'rgba(20,90,30,0.9)';
+                ctx.fillRect(bx, by, 2, 8);
+              }
+            }
 
-function openSwitchUI(){
-  const el = encounterPanel; el.innerHTML=''; const cont = document.createElement('div');
-  cont.innerHTML = `<div style="font-weight:800">Switch Pokémon</div><div style="height:8px"></div>`;
-  state.party.forEach((p,idx)=>{
-    const btn = document.createElement('button'); btn.className='btn'; btn.style.display='block'; btn.style.width='100%';
-    btn.textContent = `${p.name} L${p.level} HP:${p.hp}/${p.baseHp}`;
-    btn.onclick = ()=> {
-      if(p.hp <= 0){ addBattleLog(`${p.name} has fainted.`); return; }
-      // put chosen Pokémon at index 0 (active)
-      state.party.splice(idx,1); state.party.unshift(p);
-      addBattleLog(`Go! ${p.name}!`);
+            // animated water ripple
+            if(tile.animated){
+              const wave = Math.sin(now/500 + x*0.5 + y*0.5) * 2;
+              ctx.fillStyle = 'rgba(255,255,255,0.08)';
+              ctx.fillRect(px+4, py+wave+4, TILE-8, 2);
+            }
+
+            // subtle grid
+            ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+            ctx.strokeRect(px,py,TILE,TILE);
+          }
+        }
+
+        // shadow under player
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath();
+        ctx.ellipse(renderX, renderY + 12, 14, 6, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        // simple trainer sprite (head, body, backpack)
+        const bob = Math.sin(now/180) * 2;
+        // backpack
+        ctx.fillStyle = '#c55';
+        roundRect(ctx, renderX-8, renderY-2 + bob, 14, 14, 3);
+        // body
+        ctx.fillStyle = '#ffd36b';
+        roundRect(ctx, renderX-10, renderY-6 + bob, 20, 12, 4);
+        // head
+        ctx.fillStyle = '#fff0e0';
+        ctx.beginPath();
+        ctx.arc(renderX, renderY-6 + bob, 6, 0, Math.PI*2);
+        ctx.fill();
+
+        // particles
+        drawParticles(now);
+
+        ctx.restore();
+
+        // flash overlay when encounter just started
+        if(flashAlpha > 0){
+          ctx.fillStyle = `rgba(255,255,255,${flashAlpha})`;
+          ctx.fillRect(0,0,canvas.width,canvas.height);
+          flashAlpha *= 0.85;
+        }
+      }
+
+      // small helpers
+      function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.fill(); }
+      function shade(col, amt){
+        // simple shade: expect #rrggbb
+        try{
+          const c = col.replace('#','');
+          const r = clamp(parseInt(c.substring(0,2),16) - amt,0,255);
+          const g = clamp(parseInt(c.substring(2,4),16) - amt,0,255);
+          const b = clamp(parseInt(c.substring(4,6),16) - amt,0,255);
+          return `rgb(${r},${g},${b})`;
+        }catch(e){ return col; }
+      }
+
+      draw();
+
+      /* ---------- UI Helpers ---------- */
+      const worldLog = document.getElementById('worldLog');
+      function wlog(txt){
+        const d = document.createElement('div'); d.textContent = txt;
+        worldLog.appendChild(d); worldLog.scrollTop = worldLog.scrollHeight;
+      }
+      function updateHUD(){
+        document.getElementById('steps').textContent = state.steps;
+        document.getElementById('gold').textContent = state.gold;
+        document.getElementById('locName').textContent = state.mapName;
+        document.getElementById('encRate').textContent = Math.round(encounterRate()*100)+'%';
+
+        // party small
+        const partySmall = document.getElementById('partySmall');
+        partySmall.innerHTML = '';
+        state.party.forEach((p,i)=>{
+          const el = document.createElement('div'); el.style.padding='6px'; el.style.background='#072433'; el.style.borderRadius='6px';
+          el.innerHTML = `<div style="font-size:18px">${p.emoji}</div><div style="font-size:11px">${p.name} L${p.level}</div>`;
+          partySmall.appendChild(el);
+        });
+
+        // inventory
+        const inv = document.getElementById('inventory'); inv.innerHTML = '';
+        for(const k in state.items){
+          const it = document.createElement('div'); it.className='item';
+          it.innerHTML = `<div style="font-weight:700">${k}</div><div class="muted">${state.items[k]}</div>`;
+          inv.appendChild(it);
+        }
+      }
+      updateHUD();
+
+      /* ---------- Movement & Encounters ---------- */
+      const keysDown = {};
+      document.addEventListener('keydown', (e)=>{
+        keysDown[e.key.toLowerCase()] = true;
+        // interaction
+        if(e.key === ' ' || e.key === 'Enter'){ interact(); e.preventDefault(); }
+      });
+      document.addEventListener('keyup', (e)=>{ keysDown[e.key.toLowerCase()] = false; });
+
+      let lastMoveTime = 0;
+      function stepTick(){
+        const now = Date.now();
+        if(now - lastMoveTime < 120) return;
+        lastMoveTime = now;
+        // read movement keys
+        let dx=0, dy=0;
+        if(keysDown['arrowup']||keysDown['w']) dy=-1;
+        if(keysDown['arrowdown']||keysDown['s']) dy=1;
+        if(keysDown['arrowleft']||keysDown['a']) dx=-1;
+        if(keysDown['arrowright']||keysDown['d']) dx=1;
+        if(dx===0 && dy===0) return;
+        movePlayer(dx,dy);
+      }
+      setInterval(stepTick,50);
+
+      function inBounds(x,y){ return x>=0 && x<MAP_W && y>=0 && y<MAP_H; }
+
+      function movePlayer(dx,dy){
+         const nx = state.pos.x + dx, ny = state.pos.y + dy;
+         if(!inBounds(nx,ny)) { wlog('You bump into the edge.'); return; }
+         // simple collision: water tiles can't be entered unless in town
+         const tile = map[ny][nx];
+         if(tile === 'water'){ wlog('You cannot walk into deep water.'); return; }
+         state.pos.x = nx; state.pos.y = ny;
+         state.steps++;
+         // spawn little grass/dust particles when stepping
+         spawnStepParticles(state.pos.x * TILE + TILE/2, state.pos.y * TILE + TILE/2);
+         if(tile === 'town'){ state.mapName='Town'; } else if(tile==='heal'){ state.mapName='Heal Center'; } else if(tile==='shop'){ state.mapName='Shop'; } else state.mapName='Route';
+         draw();
+         updateHUD();
+         // check encounter on grass
+         const currentTile = map[ny][nx];
+         if(currentTile === 'grass'){
+           if(Math.random() < encounterRate()){
+             triggerEncounter();
+           }
+         }
+       }
+
+      /* encounter rate depends on steps and location -- base 12% in grass, slightly increases with steps */
+      function encounterRate(){
+        // only meaningful in grass; global call still returns base displayed value
+        const base = 0.12;
+        const bonus = (state.steps % 60) / 1000; // tiny increase as you walk
+        return base + bonus;
+      }
+
+      /* ---------- Encounter handling (start battle) ---------- */
+      const encounterPanel = document.getElementById('encounterPanel');
+      let inBattle = false;
+
+      function triggerEncounter(forced=false){
+        if(inBattle) return;
+        // spawn random wild from subset (higher chance for common ones)
+        const pool = POKEMON_DB;
+        const pick = pool[randint(0,pool.length-1)];
+        const wild = spawnPokemon(pick, randint(3,8));
+        state.wild = JSON.parse(JSON.stringify(wild));
+        inBattle = true;
+        state.encounterActive = true;
+        wlog(`A wild ${wild.name} appeared!`);
+        // visual emphasis: camera shake + flash
+        cameraShake = 6;
+        flashAlpha = 0.9;
+         renderEncounterUI();
+        // open battle modal-like area inside encounterPanel
+      }
+
+      function renderEncounterUI(){
+        const wild = state.wild;
+        encounterPanel.innerHTML = '';
+        if(!inBattle){
+          encounterPanel.innerHTML = '<div class="muted">No battle.</div>';
+          return;
+        }
+        const wrapper = document.createElement('div');
+        // improved layout with simple HP bars
+        wrapper.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:800">${wild.name} L${wild.level} ${wild.emoji}</div>
+              <div style="height:8px"></div>
+              <div style="width:220px;background:rgba(255,255,255,0.04);border-radius:6px;padding:3px">
+                <div id="wildHpBar" style="height:10px;background:linear-gradient(90deg,#4fcf4f,#2ea72e);width:${Math.round((wild.hp/wild.baseHp)*100)}%;border-radius:4px"></div>
+              </div>
+              <div class="muted">HP: <span id="wildHP">${wild.hp}</span> / ${wild.baseHp}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="muted">Your active</div>
+              <div id="activeInfo"></div>
+            </div>
+          </div>
+          <div style="height:8px"></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn" id="fightBtnBatt">Fight</button>
+            <button class="btn" id="bagBtnBatt">Bag</button>
+            <button class="btn" id="switchBtnBatt">Switch</button>
+            <button class="btn" id="runBtnBatt">Run</button>
+          </div>
+          <div style="height:8px"></div>
+          <div id="battleLog" style="background:rgba(255,255,255,0.02);padding:8px;border-radius:6px;height:120px;overflow:auto"></div>
+        `;
+        encounterPanel.appendChild(wrapper);
+        renderActiveInEncounter();
+        // handlers
+        document.getElementById('fightBtnBatt').onclick = ()=> openMovesUI();
+        document.getElementById('bagBtnBatt').onclick = ()=> openBagUI();
+        document.getElementById('switchBtnBatt').onclick = ()=> openSwitchUI();
+        document.getElementById('runBtnBatt').onclick = ()=> attemptRun();
+      }
+
+      function renderActiveInEncounter(){
+        const ai = document.getElementById('activeInfo');
+        const p = state.party[0] || null;
+        if(!p) ai.innerHTML = '<div class="muted">No Pokémon</div>';
+        else {
+          const pct = Math.round((p.hp / p.baseHp) * 100);
+          ai.innerHTML = `<div style="font-weight:700">${p.name} L${p.level} ${p.emoji}</div>
+                          <div style="height:6px"></div>
+                          <div style="width:120px;background:rgba(255,255,255,0.04);border-radius:6px;padding:3px">
+                            <div style="height:8px;background:linear-gradient(90deg,#ffb76e,#ff7a7a);width:${pct}%;border-radius:4px"></div>
+                          </div>
+                          <div class="muted">HP: ${p.hp}/${p.baseHp}</div>`;
+        }
+      }
+
+      function addBattleLog(txt){
+        const el = document.getElementById('battleLog');
+        if(!el) return;
+        const d = document.createElement('div'); d.textContent = txt; el.appendChild(d); el.scrollTop = el.scrollHeight;
+      }
+
+      /* ---------- Battle UI: Moves, Bag, Switch ---------- */
+      function openMovesUI(){
+        const wild = state.wild; if(!wild) return;
+        const el = encounterPanel;
+        el.innerHTML = '';
+        const active = state.party[0];
+        if(!active){ addBattleLog('No Pokémon to fight with!'); renderEncounterUI(); return; }
+        const cont = document.createElement('div');
+        cont.innerHTML = `<div style="font-weight:800">Choose a move for ${active.name}</div><div style="height:8px"></div>`;
+        active.moves.forEach(m=>{
+          const md = MOVE_DB[m];
+          const btn = document.createElement('button'); btn.className='btn'; btn.style.display='block'; btn.style.width='100%';
+          btn.textContent = md ? md.name : m;
+          btn.onclick = ()=> {
+            performPlayerMove(active, wild, m);
+            renderEncounterUI(); // redisplay after turn resolves
+          };
+          cont.appendChild(btn);
+        });
+        const back = document.createElement('button'); back.className='btn'; back.textContent='Back'; back.onclick=renderEncounterUI; cont.appendChild(back);
+        el.appendChild(cont);
+      }
+
+      function openBagUI(){
+        const el = encounterPanel; el.innerHTML=''; const cont = document.createElement('div');
+        cont.innerHTML = `<div style="font-weight:800">Bag</div><div style="height:8px"></div>`;
+        // Pokéball
+        const ballBtn = document.createElement('button'); ballBtn.className='btn'; ballBtn.textContent=`Pokéball (${state.items.pokeball || 0})`;
+        ballBtn.onclick = ()=> {
+          if((state.items.pokeball||0) <= 0){ addBattleLog('No Pokéballs!'); return; }
+          state.items.pokeball--; attemptCatch(); renderEncounterUI(); updateHUD();
+        };
+        cont.appendChild(ballBtn);
+        // Potion
+        const potBtn = document.createElement('button'); potBtn.className='btn'; potBtn.textContent=`Potion (${state.items.potion||0})`;
+        potBtn.onclick = ()=> {
+          if((state.items.potion||0) <= 0){ addBattleLog('No Potions!'); return; }
+          const p = state.party[0];
+          if(!p) { addBattleLog('No active Pokémon'); return; }
+          state.items.potion--; p.hp = Math.min(p.baseHp, p.hp + 20); addBattleLog(`${p.name} healed 20 HP.`); updateHUD(); // enemy turn after using
+          setTimeout(()=> enemyTurn(), 400);
+          renderEncounterUI();
+        };
+        cont.appendChild(potBtn);
+        const back = document.createElement('button'); back.className='btn'; back.textContent='Back'; back.onclick=renderEncounterUI; cont.appendChild(back);
+        el.appendChild(cont);
+      }
+
+      function openSwitchUI(){
+        const el = encounterPanel; el.innerHTML=''; const cont = document.createElement('div');
+        cont.innerHTML = `<div style="font-weight:800">Switch Pokémon</div><div style="height:8px"></div>`;
+        state.party.forEach((p,idx)=>{
+          const btn = document.createElement('button'); btn.className='btn'; btn.style.display='block'; btn.style.width='100%';
+          btn.textContent = `${p.name} L${p.level} HP:${p.hp}/${p.baseHp}`;
+          btn.onclick = ()=> {
+            if(p.hp <= 0){ addBattleLog(`${p.name} has fainted.`); return; }
+            // put chosen Pokémon at index 0 (active)
+            state.party.splice(idx,1); state.party.unshift(p);
+            addBattleLog(`Go! ${p.name}!`);
+            renderEncounterUI();
+            // enemy may attack after switch
+            setTimeout(()=> enemyTurn(),400);
+          };
+          cont.appendChild(btn);
+        });
+        const back = document.createElement('button'); back.className='btn'; back.textContent='Back'; back.onclick=renderEncounterUI; cont.appendChild(back);
+        el.appendChild(cont);
+      }
+
+      /* ---------- Battle Logic ---------- */
+      function performPlayerMove(user, target, moveId){
+        const md = MOVE_DB[moveId];
+        if(!md) return;
+        
+        // Critical hits
+        const crit = Math.random() < (md.critRate || 0.0625);
+        
+        // Status effects
+        if(md.effect){
+          const [effect, chance] = md.effect.split('-');
+          if(Math.random()*100 < parseInt(chance)){
+            target.status = effect;
+            addBattleLog(`${target.name} was ${effect}ed!`);
+          }
+        }
+        
+        // Damage calculation with weather bonus
+        let modifier = 1;
+        if(crit) modifier *= 1.5;
+        if(state.weather === 'sunny' && md.type === 'fire') modifier *= 1.5;
+        if(state.weather === 'rain' && md.type === 'water') modifier *= 1.5;
+        
+        // accuracy
+        if(md.acc && Math.random()*100 > md.acc){ addBattleLog(`${user.name}'s ${md.name} missed!`); setTimeout(()=> enemyTurn(),400); return; }
+        // power 0 -> status simulated
+        if(md.power === 0){
+          if(moveId === 'leechseed'){
+            const drain = Math.max(1, Math.floor(target.baseHp * 0.06));
+            target.hp = Math.max(0, target.hp - drain); user.hp = Math.min(user.baseHp, user.hp + Math.floor(drain/2));
+            addBattleLog(`${user.name} used ${md.name}! ${target.name} lost ${drain}.`);
+          } else {
+            addBattleLog(`${user.name} used ${md.name}!`);
+          }
+          renderEncounterUI();
+          setTimeout(()=> enemyTurn(),400);
+          return;
+        }
+        // damage calc
+        const stab = user.types && user.types.includes(md.type) ? 1.2 : 1;
+        const eff = typeEffectiveness(md.type, target.types);
+        const randf = (Math.random()*0.2)+0.9;
+        const base = Math.max(1, Math.floor(((user.atk/target.def) * md.power) * stab * eff * randf));
+        target.hp = Math.max(0, target.hp - base);
+        let txt = `${user.name} used ${md.name}! It dealt ${base} dmg.`;
+        if(eff>=2) txt+=' It\'s super effective!';
+        if(eff<=0.5) txt+=' It\'s not very effective.';
+        addBattleLog(txt);
+        renderEncounterUI();
+        // check faint
+        if(target.hp<=0){
+          addBattleLog(`${target.name} fainted!`);
+          // reward and auto-catch chance? player gets gold and possible catch
+          state.gold += 10 + target.level;
+          addBattleLog(`You earned ${10+target.level} gold.`);
+          updateHUD();
+          endBattle(true);
+          return;
+        }
+        // enemy move
+        setTimeout(()=> enemyTurn(), 600);
+      }
+
+      function enemyTurn(){
+        const wild = state.wild; if(!wild) return;
+        const playerActive = state.party[0];
+        if(!playerActive) { addBattleLog('You have no Pokémon left!'); endBattle(false); return; }
+        // choose move
+        const choice = wild.moves[randint(0,wild.moves.length-1)];
+        const md = MOVE_DB[choice];
+        addBattleLog(`${wild.name} used ${md ? md.name : choice}!`);
+        // if power 0 maybe leechseed
+        if(md.power === 0){
+          if(choice === 'leechseed'){
+            const drain = Math.max(1, Math.floor(playerActive.baseHp * 0.06));
+            playerActive.hp = Math.max(0, playerActive.hp - drain);
+            wild.hp = Math.min(wild.baseHp, wild.hp + Math.floor(drain/2));
+            addBattleLog(`${playerActive.name} lost ${drain} HP.`);
+          } else addBattleLog('It had no effect.');
+          renderEncounterUI();
+          if(playerActive.hp<=0){ addBattleLog(`${playerActive.name} fainted!`); handlePlayerFaint(); }
+          return;
+        }
+        // damage
+        const stab = wild.types && wild.types.includes(md.type) ? 1.2 : 1;
+        const eff = typeEffectiveness(md.type, playerActive.types);
+        const base = Math.max(1, Math.floor(((wild.atk/playerActive.def)*md.power)*stab*eff*((Math.random()*0.2)+0.9)));
+        playerActive.hp = Math.max(0, playerActive.hp - base);
+        addBattleLog(`${playerActive.name} took ${base} damage.`);
+        renderEncounterUI();
+        if(playerActive.hp<=0){ addBattleLog(`${playerActive.name} fainted!`); handlePlayerFaint(); }
+      }
+
+      function handlePlayerFaint(){
+        // find next healthy
+        const idx = state.party.findIndex(p=>p.hp>0);
+        if(idx===-1){ addBattleLog('All your Pokémon have fainted. You blacked out.'); endBattle(false); return; }
+        // bring that Pokémon forward
+        const next = state.party.splice(idx,1)[0];
+        state.party.unshift(next);
+        addBattleLog(`${next.name} was sent out!`);
+        renderEncounterUI();
+      }
+
+      function attemptCatch(){
+        const wild = state.wild; if(!wild) return;
+        const ballMod = 30; // base
+        const chance = clamp(ballMod + Math.floor((1 - wild.hp/wild.baseHp)*60), 5, 95);
+        const roll = randint(1,100);
+        addBattleLog(`You throw a Pokéball... (${chance}% chance)`);
+        if(roll <= chance){
+          addBattleLog(`Gotcha! You caught ${wild.name}!`);
+          // add to party (or PC) - just add to party
+          state.party.push(JSON.parse(JSON.stringify(wild)));
+          endBattle(true);
+          updateHUD();
+        } else {
+          addBattleLog(`${wild.name} broke free!`);
+          setTimeout(()=> enemyTurn(),400);
+        }
+      }
+
+      function attemptRun(){
+        const wild = state.wild; if(!wild) return;
+        const playerSpd = state.party[0] ? state.party[0].spd : 10;
+        const chance = clamp(30 + (playerSpd - wild.spd), 5, 95);
+        if(randint(1,100) <= chance){
+          addBattleLog('You successfully ran away!');
+          endBattle(false);
+        } else {
+          addBattleLog('Could not escape!');
+          setTimeout(()=> enemyTurn(),400);
+        }
+      }
+
+      function endBattle(won){
+        inBattle = false;
+        state.encounterActive = false;
+        state.wild = null;
+        renderEncounterUI();
+        wlog(won ? 'Battle ended — you won!' : 'Battle ended.');
+        updateHUD();
+      }
+
+      /* ---------- Shop & Heal ---------- */
+      document.getElementById('openShop').onclick = ()=> openShop();
+      function openShop(){
+        // simple prompt shop
+        const offer = prompt('Shop: 1) Pokéball 10G, 2) Potion 20G\nEnter 1 or 2 to buy, or Cancel.');
+        if(offer===null) return;
+        if(offer==='1'){ if(state.gold>=10){ state.gold-=10; state.items.pokeball=(state.items.pokeball||0)+1; wlog('Bought a Pokéball.'); updateHUD(); } else wlog('Not enough gold.'); }
+        if(offer==='2'){ if(state.gold>=20){ state.gold-=20; state.items.potion=(state.items.potion||0)+1; wlog('Bought a Potion.'); updateHUD(); } else wlog('Not enough gold.'); }
+      }
+      document.getElementById('healCenter').onclick = ()=> {
+        if(map[state.pos.y][state.pos.x] === 'heal' || state.mapName==='Town'){
+          state.party.forEach(p=> p.hp = p.baseHp);
+          wlog('Your Pokémon were fully healed.');
+          updateHUD();
+        } else wlog('You must be at the Heal Center (in town) to heal.');
+      };
+
+      /* ---------- Save / Load ---------- */
+      document.getElementById('saveBtn').onclick = ()=> {
+        localStorage.setItem('pokeramble_save', JSON.stringify(state));
+        wlog('Game saved.');
+      };
+      document.getElementById('loadBtn').onclick = ()=> {
+        const s = localStorage.getItem('pokeramble_save');
+        if(!s){ wlog('No save found.'); return; }
+        state = JSON.parse(s);
+        wlog('Save loaded.');
+        draw(); updateHUD();
+      };
+      document.getElementById('resetBtn').onclick = ()=> {
+        if(confirm('Reset save and restart?')){ localStorage.removeItem('pokeramble_save'); location.reload(); }
+      };
+
+      /* ---------- Misc UI ---------- */
+      document.getElementById('startBattleBtn').onclick = ()=> triggerEncounter(true);
+      document.getElementById('teleportTown').onclick = ()=> { state.pos = {x:1,y:7}; draw(); updateHUD(); wlog('Teleported to town (debug).'); };
+      document.getElementById('showHelp').onclick = ()=> alert('Controls:\\n- Arrow keys/WASD: move\\n- Space/Enter: interact\\n- During battle: use the UI for Fight/Bag/Switch/Run\\n- Save/Load uses localStorage');
+      document.getElementById('viewStats').onclick = ()=> alert(JSON.stringify({steps:state.steps,gold:state.gold,party:state.party.map(p=>p.name)},null,2));
+
+      /* ---------- Interaction with tiles ---------- */
+      function interact(){
+        const tile = map[state.pos.y][state.pos.x];
+        if(tile === 'shop'){ openShop(); return; }
+        if(tile === 'heal'){ state.party.forEach(p=>p.hp=p.baseHp); wlog('Healed at the center.'); updateHUD(); return; }
+        // check if near NPC (town)
+        if(tile === 'town'){ wlog('You wander through town. Shops and people here.'); return; }
+        // else nothing
+        wlog('Nothing to interact with here.');
+      }
+
+      /* ---------- Draw loop ---------- */
+      setInterval(draw, 40);
+
+      /* ---------- Periodic autosave & HUD ---------- */
+      setInterval(()=> {
+        updateHUD();
+        // autosave lightly
+        localStorage.setItem('pokeramble_autosave', JSON.stringify(state));
+      }, 2000);
+
+      /* ---------- Keyboard shortcuts for battle quick actions ---------- */
+      document.addEventListener('keydown', (e)=>{
+        if(!inBattle) return;
+        const k = e.key.toLowerCase();
+        if(k==='f') openMovesUI();
+        if(k==='b') openBagUI();
+        if(k==='s') openSwitchUI();
+        if(k==='r') attemptRun();
+      });
+
+      /* ---------- Initialization UI ---------- */
+      updateHUD();
       renderEncounterUI();
-      // enemy may attack after switch
-      setTimeout(()=> enemyTurn(),400);
-    };
-    cont.appendChild(btn);
-  });
-  const back = document.createElement('button'); back.className='btn'; back.textContent='Back'; back.onclick=renderEncounterUI; cont.appendChild(back);
-  el.appendChild(cont);
-}
-
-/* ---------- Battle Logic ---------- */
-function performPlayerMove(user, target, moveId){
-  const md = MOVE_DB[moveId];
-  if(!md) return;
-  
-  // Critical hits
-  const crit = Math.random() < (md.critRate || 0.0625);
-  
-  // Status effects
-  if(md.effect){
-    const [effect, chance] = md.effect.split('-');
-    if(Math.random()*100 < parseInt(chance)){
-      target.status = effect;
-      addBattleLog(`${target.name} was ${effect}ed!`);
-    }
-  }
-  
-  // Damage calculation with weather bonus
-  let modifier = 1;
-  if(crit) modifier *= 1.5;
-  if(state.weather === 'sunny' && md.type === 'fire') modifier *= 1.5;
-  if(state.weather === 'rain' && md.type === 'water') modifier *= 1.5;
-  
-  // accuracy
-  if(md.acc && Math.random()*100 > md.acc){ addBattleLog(`${user.name}'s ${md.name} missed!`); setTimeout(()=> enemyTurn(),400); return; }
-  // power 0 -> status simulated
-  if(md.power === 0){
-    if(moveId === 'leechseed'){
-      const drain = Math.max(1, Math.floor(target.baseHp * 0.06));
-      target.hp = Math.max(0, target.hp - drain); user.hp = Math.min(user.baseHp, user.hp + Math.floor(drain/2));
-      addBattleLog(`${user.name} used ${md.name}! ${target.name} lost ${drain}.`);
-    } else {
-      addBattleLog(`${user.name} used ${md.name}!`);
-    }
-    renderEncounterUI();
-    setTimeout(()=> enemyTurn(),400);
-    return;
-  }
-  // damage calc
-  const stab = user.types && user.types.includes(md.type) ? 1.2 : 1;
-  const eff = typeEffectiveness(md.type, target.types);
-  const randf = (Math.random()*0.2)+0.9;
-  const base = Math.max(1, Math.floor(((user.atk/target.def) * md.power) * stab * eff * randf));
-  target.hp = Math.max(0, target.hp - base);
-  let txt = `${user.name} used ${md.name}! It dealt ${base} dmg.`;
-  if(eff>=2) txt+=' It\'s super effective!';
-  if(eff<=0.5) txt+=' It\'s not very effective.';
-  addBattleLog(txt);
-  renderEncounterUI();
-  // check faint
-  if(target.hp<=0){
-    addBattleLog(`${target.name} fainted!`);
-    // reward and auto-catch chance? player gets gold and possible catch
-    state.gold += 10 + target.level;
-    addBattleLog(`You earned ${10+target.level} gold.`);
-    updateHUD();
-    endBattle(true);
-    return;
-  }
-  // enemy move
-  setTimeout(()=> enemyTurn(), 600);
-}
-
-function enemyTurn(){
-  const wild = state.wild; if(!wild) return;
-  const playerActive = state.party[0];
-  if(!playerActive) { addBattleLog('You have no Pokémon left!'); endBattle(false); return; }
-  // choose move
-  const choice = wild.moves[randint(0,wild.moves.length-1)];
-  const md = MOVE_DB[choice];
-  addBattleLog(`${wild.name} used ${md ? md.name : choice}!`);
-  // if power 0 maybe leechseed
-  if(md.power === 0){
-    if(choice === 'leechseed'){
-      const drain = Math.max(1, Math.floor(playerActive.baseHp * 0.06));
-      playerActive.hp = Math.max(0, playerActive.hp - drain);
-      wild.hp = Math.min(wild.baseHp, wild.hp + Math.floor(drain/2));
-      addBattleLog(`${playerActive.name} lost ${drain} HP.`);
-    } else addBattleLog('It had no effect.');
-    renderEncounterUI();
-    if(playerActive.hp<=0){ addBattleLog(`${playerActive.name} fainted!`); handlePlayerFaint(); }
-    return;
-  }
-  // damage
-  const stab = wild.types && wild.types.includes(md.type) ? 1.2 : 1;
-  const eff = typeEffectiveness(md.type, playerActive.types);
-  const base = Math.max(1, Math.floor(((wild.atk/playerActive.def)*md.power)*stab*eff*((Math.random()*0.2)+0.9)));
-  playerActive.hp = Math.max(0, playerActive.hp - base);
-  addBattleLog(`${playerActive.name} took ${base} damage.`);
-  renderEncounterUI();
-  if(playerActive.hp<=0){ addBattleLog(`${playerActive.name} fainted!`); handlePlayerFaint(); }
-}
-
-function handlePlayerFaint(){
-  // find next healthy
-  const idx = state.party.findIndex(p=>p.hp>0);
-  if(idx===-1){ addBattleLog('All your Pokémon have fainted. You blacked out.'); endBattle(false); return; }
-  // bring that Pokémon forward
-  const next = state.party.splice(idx,1)[0];
-  state.party.unshift(next);
-  addBattleLog(`${next.name} was sent out!`);
-  renderEncounterUI();
-}
-
-function attemptCatch(){
-  const wild = state.wild; if(!wild) return;
-  const ballMod = 30; // base
-  const chance = clamp(ballMod + Math.floor((1 - wild.hp/wild.baseHp)*60), 5, 95);
-  const roll = randint(1,100);
-  addBattleLog(`You throw a Pokéball... (${chance}% chance)`);
-  if(roll <= chance){
-    addBattleLog(`Gotcha! You caught ${wild.name}!`);
-    // add to party (or PC) - just add to party
-    state.party.push(JSON.parse(JSON.stringify(wild)));
-    endBattle(true);
-    updateHUD();
-  } else {
-    addBattleLog(`${wild.name} broke free!`);
-    setTimeout(()=> enemyTurn(),400);
-  }
-}
-
-function attemptRun(){
-  const wild = state.wild; if(!wild) return;
-  const playerSpd = state.party[0] ? state.party[0].spd : 10;
-  const chance = clamp(30 + (playerSpd - wild.spd), 5, 95);
-  if(randint(1,100) <= chance){
-    addBattleLog('You successfully ran away!');
-    endBattle(false);
-  } else {
-    addBattleLog('Could not escape!');
-    setTimeout(()=> enemyTurn(),400);
-  }
-}
-
-function endBattle(won){
-  inBattle = false;
-  state.encounterActive = false;
-  state.wild = null;
-  renderEncounterUI();
-  wlog(won ? 'Battle ended — you won!' : 'Battle ended.');
-  updateHUD();
-}
-
-/* ---------- Shop & Heal ---------- */
-document.getElementById('openShop').onclick = ()=> openShop();
-function openShop(){
-  // simple prompt shop
-  const offer = prompt('Shop: 1) Pokéball 10G, 2) Potion 20G\nEnter 1 or 2 to buy, or Cancel.');
-  if(offer===null) return;
-  if(offer==='1'){ if(state.gold>=10){ state.gold-=10; state.items.pokeball=(state.items.pokeball||0)+1; wlog('Bought a Pokéball.'); updateHUD(); } else wlog('Not enough gold.'); }
-  if(offer==='2'){ if(state.gold>=20){ state.gold-=20; state.items.potion=(state.items.potion||0)+1; wlog('Bought a Potion.'); updateHUD(); } else wlog('Not enough gold.'); }
-}
-document.getElementById('healCenter').onclick = ()=> {
-  if(map[state.pos.y][state.pos.x] === 'heal' || state.mapName==='Town'){
-    state.party.forEach(p=> p.hp = p.baseHp);
-    wlog('Your Pokémon were fully healed.');
-    updateHUD();
-  } else wlog('You must be at the Heal Center (in town) to heal.');
-};
-
-/* ---------- Save / Load ---------- */
-document.getElementById('saveBtn').onclick = ()=> {
-  localStorage.setItem('pokeramble_save', JSON.stringify(state));
-  wlog('Game saved.');
-};
-document.getElementById('loadBtn').onclick = ()=> {
-  const s = localStorage.getItem('pokeramble_save');
-  if(!s){ wlog('No save found.'); return; }
-  state = JSON.parse(s);
-  wlog('Save loaded.');
-  draw(); updateHUD();
-};
-document.getElementById('resetBtn').onclick = ()=> {
-  if(confirm('Reset save and restart?')){ localStorage.removeItem('pokeramble_save'); location.reload(); }
-};
-
-/* ---------- Misc UI ---------- */
-document.getElementById('startBattleBtn').onclick = ()=> triggerEncounter(true);
-document.getElementById('teleportTown').onclick = ()=> { state.pos = {x:1,y:7}; draw(); updateHUD(); wlog('Teleported to town (debug).'); };
-document.getElementById('showHelp').onclick = ()=> alert('Controls:\\n- Arrow keys/WASD: move\\n- Space/Enter: interact\\n- During battle: use the UI for Fight/Bag/Switch/Run\\n- Save/Load uses localStorage');
-document.getElementById('viewStats').onclick = ()=> alert(JSON.stringify({steps:state.steps,gold:state.gold,party:state.party.map(p=>p.name)},null,2));
-
-/* ---------- Interaction with tiles ---------- */
-function interact(){
-  const tile = map[state.pos.y][state.pos.x];
-  if(tile === 'shop'){ openShop(); return; }
-  if(tile === 'heal'){ state.party.forEach(p=>p.hp=p.baseHp); wlog('Healed at the center.'); updateHUD(); return; }
-  // check if near NPC (town)
-  if(tile === 'town'){ wlog('You wander through town. Shops and people here.'); return; }
-  // else nothing
-  wlog('Nothing to interact with here.');
-}
-
-/* ---------- Draw loop ---------- */
-setInterval(draw, 80);
-
-/* ---------- Periodic autosave & HUD ---------- */
-setInterval(()=> {
-  updateHUD();
-  // autosave lightly
-  localStorage.setItem('pokeramble_autosave', JSON.stringify(state));
-}, 2000);
-
-/* ---------- Keyboard shortcuts for battle quick actions ---------- */
-document.addEventListener('keydown', (e)=>{
-  if(!inBattle) return;
-  const k = e.key.toLowerCase();
-  if(k==='f') openMovesUI();
-  if(k==='b') openBagUI();
-  if(k==='s') openSwitchUI();
-  if(k==='r') attemptRun();
-});
-
-/* ---------- Initialization UI ---------- */
-updateHUD();
-renderEncounterUI();
-wlog('Ready. Walk into grass to trigger random wild Pokémon encounters. Good luck!');
+      wlog('Ready. Walk into grass to trigger random wild Pokémon encounters. Good luck!');
 </script>
 </body>
 </html>

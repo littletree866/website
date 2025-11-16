@@ -11,7 +11,7 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Ink Free', cursive;
     background: linear-gradient(135deg, var(--darker), var(--dark));
     color: var(--light);
     margin: 0;
