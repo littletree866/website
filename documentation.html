@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Documentation - Littletree866</title>
+    <title>Website Documentation</title>
     <link rel="icon" href="icon/icon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,12 +17,13 @@
         }
 
         [data-theme="dark"] {
-            --primary: #8ea8ff;
-            --secondary: #b891ed;
-            --dark: #1a1a1a;
-            --light: #2d2d2d;
-            --text: #e0e0e0;
+            --primary: #6a5dfc;      /* main accent */
+            --secondary: #938bff;    /* softer accent */
+            --dark: #0f0f12;         /* background */
+            --light: #1c1c21;        /* raised surfaces */
+            --text: #121010;         /* main text */
         }
+
 
         body {
             font-family: 'ink free', cursive;
@@ -78,6 +79,7 @@
 
         h1, h2, h3 {
             color: var(--dark);
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         }
 
         .section {
@@ -368,13 +370,78 @@
                 <p><a class="content-link" href="wizardgame/wizardgame.html" target="_blank">Play Wizard Battle</a></p>
             </div>
 
+            
+            <!-- ADDED: pages referenced on index.html that were missing from the docs -->
+            <div class="section">
+                <h2 id="platformer">The Impossible Game (Platformer)</h2>
+                <p>Fast-paced precision platformer with boxed levels and checkpoints.</p>
+                <ul>
+                    <li>File: platformergame/platformergame.html</li>
+                    <li>Controls: Arrow keys / WASD (move), Space to jump</li>
+                    <li>Notes: challenging levels; best-times are local only.</li>
+                </ul>
+                <p><a class="content-link" href="platformergame/platformergame.html" target="_blank">Play The Impossible Game</a></p>
+            </div>
+
+            <div class="section">
+                <h2 id="wealth">Wealth Builder (Life Simulation)</h2>
+                <p>Simple life / economy simulation demonstrating growth and rules for wealth distribution.</p>
+                <ul>
+                    <li>File: lifegame/life.html</li>
+                    <li>Controls: Start / stop buttons, speed control</li>
+                    <li>Notes: experimental simulation used for tuning economy rules.</li>
+                </ul>
+                <p><a class="content-link" href="lifegame/life.html" target="_blank">Open Wealth Builder</a></p>
+            </div>
+
+            <div class="section">
+                <h2 id="citybuilder">City Builder</h2>
+                <p>Small city-building demo with zoning and basic resource flows.</p>
+                <ul>
+                    <li>File: citygame/citygame.html</li>
+                    <li>Controls: click to place buildings; UI buttons for tools</li>
+                    <li>Notes: prototype; save/load may be limited.</li>
+                </ul>
+                <p><a class="content-link" href="citygame/citygame.html" target="_blank">Open City Builder</a></p>
+            </div>
+
+            <div class="section">
+                <h2 id="sandd">Supply & Demand</h2>
+                <p>Micro-economy demo that visualizes supply/demand interactions and price changes.</p>
+                <ul>
+                    <li>File: s&d/money.html</li>
+                    <li>Controls: sliders and toggles to change supply/demand parameters</li>
+                    <li>Notes: educational demo — uses simple rules to show market response.</li>
+                </ul>
+                <p><a class="content-link" href="s&d/money.html" target="_blank">Open Supply & Demand</a></p>
+            </div>
+
+            <div class="section">
+                <h2 id="box">The Box</h2>
+                <p>Small interactive experiment for UI/physics tests.</p>
+                <ul>
+                    <li>File: box/box.html</li>
+                    <li>Controls: mouse interactions; drag/throw depending on demo variant</li>
+                    <li>Notes: useful for quick prototyping and experimentation.</li>
+                </ul>
+                <p><a class="content-link" href="box/box.html" target="_blank">Open The Box</a></p>
+            </div>
             <div class="section">
                 <h2 id="snapshots">Snapshots</h2>
                 <p>Timed reveal preview page (mystery image with fade-in towards reveal date).</p>
                 <ul><li>File: snapshots/snapshots.html</li></ul>
                 <p><a class="content-link" href="snapshots/snapshots.html" target="_blank">Open Snapshots</a></p>
             </div>
-
+            <div class="section">
+                <h2 id="source">Source Code</h2>
+                <p>Repository containing the site and game source files.</p>
+                <ul>
+                    <li>Remote: https://github.com/littletree866/website</li>
+                    <li>Notes: Most demos are single-file pages; clone to explore examples and assets.</li>
+                </ul>
+                <p><a class="content-link" href="https://github.com/littletree866/website" target="_blank" rel="noopener noreferrer">Open Source Repository</a></p>
+            </div>
+            <!-- end added sections -->
             <div class="section">
                 <h2 id="readme">README & License</h2>
                 <p>Repository overview and license.</p>
@@ -385,29 +452,8 @@
                 <p><a class="content-link" href="README.md" target="_blank">Open README</a></p>
             </div>
 
-            <div class="section">
-                <h2 id="others">Other Pages & Tests</h2>
-                <p>Small utilities, debug pages and work-in-progress demos (sandd, box, etc.).</p>
-                <ul>
-                    <li>Look in directories: sandd/, box/, newgames/</li>
-                </ul>
-            </div>
+          
 
-            <div class="section">
-                <h2 id="changelog">Last changes since last push</h2>
-                <p class="muted">
-                    This documentation was updated to reflect gameplay improvements, bug fixes and persistence changes across the runner, PokéRamble, Mini Empire and Empire demos:
-                </p>
-                <ul>
-                    <li>Runner: visuals, paused-on-hide, spawn spacing, particle & sound polish, best-run saved.</li>
-                    <li>PokéRamble: move/effect parsing fixes, catch formula tuned, autosave + inventory/bag improvements.</li>
-                    <li>Mini: terrain/save/load fixes, raid resolution correctness, tutorial & tech unlock flow.</li>
-                    <li>Empire: equipment-aware unlocks and persistent shop purchases; shop items carry types and equip on buy.</li>
-                </ul>
-                <p class="muted">If you maintain a changelog or release notes, please copy these bullets into it for the next release entry.</p>
-            </div>
-
-            <!-- end added sections -->
         </div>
     </div>
 
