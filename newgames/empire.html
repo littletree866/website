@@ -108,6 +108,21 @@ canvas {
     ],
   };
 
+  // Ensure unlock checks include equipment stats
+  function getPlayerTotalAttack(){ return player.attack + (player.equipment.weapon && player.equipment.weapon.atk ? player.equipment.weapon.atk : 0); }
+  function getPlayerTotalDefense(){ return player.defense + (player.equipment.armor && player.equipment.armor.def ? player.equipment.armor.def : 0); }
+
+  function checkAreaUnlocked(area){
+    if(!area.req) return true;
+    const {atk=0,def=0}=area.req;
+    return getPlayerTotalAttack()>=atk && getPlayerTotalDefense()>=def;
+  }
+  function checkRegionUnlocked(name){
+    if(name==="Siege Lands") return true;
+    const req=regionUnlocks[name];
+    return req && getPlayerTotalAttack()>=req.atk && getPlayerTotalDefense()>=req.def;
+  }
+
   // ===== Draw World Map =====
   function drawWorld(){
     ctx.clearRect(0,0,800,600);
@@ -222,19 +237,15 @@ canvas {
   }
 
   // ===== Logic =====
-  function checkAreaUnlocked(area){
-    if(!area.req) return true;
-    const {atk=0,def=0}=area.req;
-    return player.attack>=atk && player.defense>=def;
-  }
-  function checkRegionUnlocked(name){
-    if(name==="Siege Lands") return true;
-    const req=regionUnlocks[name];
-    return req && player.attack>=req.atk && player.defense>=req.def;
-  }
   function fadeTo(target){transitioning=true;fade.style.opacity=1;
     setTimeout(()=>{scene=target;fade.style.opacity=0;transitioning=false;},600);
   }
+
+  // prepare shop items to carry type info
+  const shopList = [
+    ...shopItems.weapons.map(i => ({...i, type:'weapon'})),
+    ...shopItems.armor.map(i => ({...i, type:'armor'}))
+  ];
 
   // ===== Draw Shop =====
   function drawShop() {
@@ -248,15 +259,15 @@ canvas {
     ctx.fillText("Shop", 360, 50);
     ctx.fillText(`$${player.gold}`, 650, 50);
 
-    // Draw items
+    // Draw items from shopList
     let y = 120;
-    [...shopItems.weapons, ...shopItems.armor].forEach((item, i) => {
+    shopList.forEach((item, i) => {
       const x = 150;
       ctx.fillStyle = player.gold >= item.cost ? "#444" : "#333";
       ctx.fillRect(x, y, 500, 60);
       ctx.strokeStyle = "#666";
       ctx.strokeRect(x, y, 500, 60);
-      
+
       ctx.fillStyle = "#fff";
       ctx.font = "18px Arial";
       ctx.fillText(item.name, x + 20, y + 35);
@@ -360,15 +371,16 @@ canvas {
     }
     else if(scene==="shop"){
       if(mx>30&&mx<130&&my>30&&my<70){fadeTo("region");return;}
-      
       let y = 120;
-      [...shopItems.weapons, ...shopItems.armor].forEach((item, i) => {
-        if(mx>150 && mx<650 && my>y && my<y+60 && player.gold >= item.cost) {
-          player.gold -= item.cost;
-          if(item.atk) player.equipment.weapon = item;
-          else player.equipment.armor = item;
-          // persist after purchase
-          try { localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player)); } catch(e){}
+      shopList.forEach((item, i) => {
+        if(mx>150 && mx<650 && my>y && my<y+60) {
+          if(player.gold >= item.cost){
+            player.gold -= item.cost;
+            if(item.type === 'weapon') player.equipment.weapon = item;
+            else player.equipment.armor = item;
+            // persist after purchase
+            try { localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player)); } catch(e){}
+          }
         }
         y += 70;
       });

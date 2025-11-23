@@ -566,7 +566,11 @@ Features added:
 
       function addBattleLog(txt){
         const el = document.getElementById('battleLog');
-        if(!el) return;
+        if(!el) {
+          // fallback to world log
+          wlog(txt);
+          return;
+        }
         const d = document.createElement('div'); d.textContent = txt; el.appendChild(d); el.scrollTop = el.scrollHeight;
       }
 
@@ -643,25 +647,34 @@ Features added:
       function performPlayerMove(user, target, moveId){
         const md = MOVE_DB[moveId];
         if(!md) return;
-        
+
         // Critical hits
         const crit = Math.random() < (md.critRate || 0.0625);
-        
-        // Status effects
+
+        // Effect parsing improved
         if(md.effect){
-          const [effect, chance] = md.effect.split('-');
-          if(Math.random()*100 < parseInt(chance)){
-            target.status = effect;
-            addBattleLog(`${target.name} was ${effect}ed!`);
+          const parts = md.effect.split('-');
+          let effectName = parts[0];
+          let param = parts[1] !== undefined ? parts[1] : null;
+          let chance = 100;
+          // if second part is numeric, treat it as chance or magnitude; otherwise the whole string is effectName like "lower-atk"
+          if(param !== null && !isNaN(Number(param))) {
+            chance = Number(param);
+          } else if(parts.length > 1) {
+            // rejoin back (handles "lower-atk" style)
+            effectName = parts.join('-');
+          }
+
+          if(Math.random()*100 < chance){
+            // apply effectName in a few supported ways
+            if(effectName.startsWith('poison')) { target.status = 'poison'; addBattleLog(`${target.name} was poisoned!`); }
+            else if(effectName.startsWith('burn')) { target.status = 'burn'; addBattleLog(`${target.name} was burned!`); }
+            else if(effectName === 'lower-atk') { target.atk = Math.max(1, (target.atk || 1) - 5); addBattleLog(`${target.name}'s Attack fell!`); }
+            else if(effectName === 'lower-acc') { target.accuracy = (target.accuracy||100) - 15; addBattleLog(`${target.name}'s accuracy fell!`); }
+            // other effects can be added here
           }
         }
-        
-        // Damage calculation with weather bonus
-        let modifier = 1;
-        if(crit) modifier *= 1.5;
-        if(state.weather === 'sunny' && md.type === 'fire') modifier *= 1.5;
-        if(state.weather === 'rain' && md.type === 'water') modifier *= 1.5;
-        
+
         // accuracy
         if(md.acc && Math.random()*100 > md.acc){ addBattleLog(`${user.name}'s ${md.name} missed!`); setTimeout(()=> enemyTurn(),400); return; }
         // power 0 -> status simulated
@@ -691,7 +704,6 @@ Features added:
         // check faint
         if(target.hp<=0){
           addBattleLog(`${target.name} fainted!`);
-          // reward and auto-catch chance? player gets gold and possible catch
           state.gold += 10 + target.level;
           addBattleLog(`You earned ${10+target.level} gold.`);
           updateHUD();
@@ -743,15 +755,16 @@ Features added:
         renderEncounterUI();
       }
 
+      // Improved catch chance to be less brutal and more consistent
       function attemptCatch(){
         const wild = state.wild; if(!wild) return;
-        const ballMod = 30; // base
-        const chance = clamp(ballMod + Math.floor((1 - wild.hp/wild.baseHp)*60), 5, 95);
+        const hpFactor = 1 - (wild.hp / wild.baseHp);
+        // basic formula: base 30% + HP factor * 50
+        const chance = clamp(30 + Math.round(hpFactor * 50) + (state.items && state.items.pokeball ? 0 : 0), 5, 95);
         const roll = randint(1,100);
         addBattleLog(`You throw a Pokéball... (${chance}% chance)`);
         if(roll <= chance){
           addBattleLog(`Gotcha! You caught ${wild.name}!`);
-          // add to party (or PC) - just add to party
           state.party.push(JSON.parse(JSON.stringify(wild)));
           endBattle(true);
           updateHUD();

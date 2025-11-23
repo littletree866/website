@@ -99,7 +99,7 @@
     };
 
     let gravity = 0.65;
-    let scrollSpeed = 1;
+    let scrollSpeed = 4;
     let obstacles = [];
     let powerUps = [];
     let score = 0;
@@ -180,7 +180,7 @@
         player.onGround = true;
         obstacles = [];
         powerUps = [];
-        scrollSpeed = 6;
+        scrollSpeed = 4;
         score = 0;
         timeElapsed = 0;
         multiplier = 1;
@@ -192,18 +192,26 @@
     // Particles for effects
     let particles = [];
 
+    // track last obstacle spawn x to keep spacing consistent
+    let lastObstacleX = 0;
+
     function spawnObstacle(){
         let types = ['square','triangle','circle'];
         let type = types[Math.floor(Math.random()*types.length)];
         let height = shapes[type].height;
-        let gap = 950; // Smarter spacing
+        // smarter spacing: spawn at right plus variable gap (200-400)
+        const gap = 200 + Math.random()*200;
+        const spawnX = Math.max(canvas.width + gap, lastObstacleX + 120);
         obstacles.push({
-            x: canvas.width + gap,
+            x: spawnX,
             y: canvas.height - height - 20,
             width: shapes[type].width,
             height: height,
             type: type
         });
+        lastObstacleX = spawnX;
+        // limit obstacles array to avoid runaway memory
+        if(obstacles.length > 12) obstacles.shift();
     }
 
     function spawnPowerUp(){
@@ -216,8 +224,21 @@
         });
     }
 
+    // Add pause on visibility change to avoid runaway timeElapsed
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // stop timers by setting gameOver true but keep state; resume will requestAnimationFrame again
+            // safer alternative: pause updates but keep drawing - simpler: set a paused flag
+            paused = true;
+        } else {
+            paused = false;
+        }
+    });
+
+    let paused = false;
+
     function update(){
-        if(gameOver) return;
+        if(gameOver || paused) return;
 
         // Player jump
         if(keys['Space'] && player.onGround){
@@ -307,31 +328,59 @@
         }
     }
 
+    // Background generation: draw starfield, mountains and clouds
     function createStarField() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 400;
-        const ctx = canvas.getContext('2d');
-        // Add star drawing code here
-        return canvas;
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 400;
+        const g = c.getContext('2d');
+        g.fillStyle = '#000';
+        g.fillRect(0,0,c.width,c.height);
+        for(let i=0;i<150;i++){
+            const x = Math.random()*c.width;
+            const y = Math.random()*c.height*0.6;
+            const r = Math.random()*1.6;
+            g.fillStyle = `rgba(255,255,255,${0.6+Math.random()*0.4})`;
+            g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+        }
+        return c;
     }
 
     function createMountains() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 400;
-        const ctx = canvas.getContext('2d');
-        // Add mountain drawing code here
-        return canvas;
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 400;
+        const g = c.getContext('2d');
+        // layered mountains
+        for(let layer=0;layer<3;layer++){
+            const baseY = 260 + layer*30;
+            g.fillStyle = `rgba(${30+layer*20},${30+layer*20},${30+layer*20},${0.9 - layer*0.25})`;
+            g.beginPath();
+            g.moveTo(0,400);
+            for(let x=0;x<=800;x+=20){
+                const y = baseY - Math.abs(Math.sin((x+layer*120)/120))*80 - Math.random()*10*layer;
+                g.lineTo(x,y);
+            }
+            g.lineTo(800,400);
+            g.closePath();
+            g.fill();
+        }
+        return c;
     }
 
     function createClouds() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 400;
-        const ctx = canvas.getContext('2d');
-        // Add cloud drawing code here
-        return canvas;
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 400;
+        const g = c.getContext('2d');
+        for(let i=0;i<8;i++){
+            const x = Math.random()*800, y = 40 + Math.random()*80, w = 120+Math.random()*160, h = 30+Math.random()*30;
+            const grad = g.createLinearGradient(x,y,x+w,y+h);
+            grad.addColorStop(0,'rgba(255,255,255,0.06)');
+            grad.addColorStop(1,'rgba(255,255,255,0.0)');
+            g.fillStyle = grad;
+            g.beginPath();
+            g.ellipse(x,y,w,h,0,0,Math.PI*2);
+            g.fill();
+        }
+        return c;
     }
 
     // Modify the draw function
@@ -414,6 +463,7 @@
         resetGame();
     });
 
+    // Move BEST_RUN_KEY/bestEl/bestRun early so collision code can use them reliably
     const BEST_RUN_KEY = 'runner_best';
     const bestEl = document.getElementById('bestScore');
     let bestRun = Number(localStorage.getItem(BEST_RUN_KEY) || 0);

@@ -18,7 +18,7 @@ A modern collection of browser-based games built with vanilla JavaScript.
 - Local Storage for game saves
 - Custom physics engines
 
-## 📅 Recent Updates
+## 📅 Updates
 
 - Version 1.15.16 (November 25, 2025)
 - Version 1.14.15 (November 12, 2025)

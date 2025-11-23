@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini Roulette</title>
+<style>
+    body {
+        background: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: white;
+        font-family: Arial;
+    }
+
+    .wrapper {
+        text-align: center;
+    }
+
+    #wheel {
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        border: 8px solid #fff;
+        position: relative;
+        overflow: hidden;
+        transition: transform 4s cubic-bezier(.25,.1,.15,1);
+    }
+
+    .slice {
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        top: 50%;
+        left: 50%;
+        transform-origin: 0% 0%;
+        background: #f00;
+        clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+
+    #pointer {
+        width: 0;
+        height: 0;
+        border-left: 18px solid transparent;
+        border-right: 18px solid transparent;
+        border-bottom: 30px solid yellow;
+        margin: 0 auto 20px auto;
+    }
+
+    #spin {
+        padding: 10px 25px;
+        font-size: 18px;
+        border: none;
+        background: #28a745;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    #spin:active { transform: scale(0.97); }
+
+    #result {
+        margin-top: 20px;
+        font-size: 20px;
+    }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div id="pointer"></div>
+    <div id="wheel"></div>
+    <button id="spin">SPIN</button>
+    <div id="result"></div>
+</div>
+
+<script>
+const wheel = document.getElementById("wheel");
+const result = document.getElementById("result");
+
+// numbers → you can change these easily
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const sliceAngle = 360 / numbers.length;
+
+// create slices
+numbers.forEach((num, i) => {
+    const s = document.createElement("div");
+    s.className = "slice";
+    s.style.background = i % 2 === 0 ? "#d22" : "#222";
+    s.style.transform = `rotate(${i * sliceAngle}deg) skewY(${90 - sliceAngle}deg)`;
+    s.innerHTML = `<div style="
+        position:absolute; 
+        top:-35%; left:-10%;
+        transform: skewY(${sliceAngle - 90}deg) rotate(${sliceAngle/2}deg);
+        font-size:20px;">
+        ${num}
+    </div>`;
+    wheel.appendChild(s);
+});
+
+document.getElementById("spin").onclick = () => {
+    result.textContent = "";
+
+    const winningIndex = Math.floor(Math.random() * numbers.length);
+    const winningNumber = numbers[winningIndex];
+
+    const spinAmount = 360 * 6; 
+    const finalAngle = spinAmount + (360 - winningIndex * sliceAngle - sliceAngle/2);
+
+    wheel.style.transform = `rotate(${finalAngle}deg)`;
+
+    setTimeout(() => {
+        result.textContent = "Result: " + winningNumber;
+    }, 4000);
+};
+</script>
+
+</body>
+</html>

@@ -155,7 +155,12 @@ button:disabled { background:#333; cursor:not-allowed; opacity:0.6; }
   let mode="none",food=10,money=10,pop=0,level=1,defense=0,running=false,turn=0;
   const MINI_SAVE_KEY = 'mini_empire_save';
   function saveMiniState(){
-    const s = { food, money, pop, level, defense, turn };
+    const layout = [...document.querySelectorAll('.tile')].map(t => ({
+      terrain: t.dataset.terrain || 'plains',
+      built: t.dataset.built || null,
+      text: t.textContent
+    }));
+    const s = { food, money, pop, level, defense, turn, layout };
     localStorage.setItem(MINI_SAVE_KEY, JSON.stringify(s));
   }
   function loadMiniState(){
@@ -164,15 +169,43 @@ button:disabled { background:#333; cursor:not-allowed; opacity:0.6; }
     try{
       const obj = JSON.parse(s);
       food = obj.food||food; money = obj.money||money; pop = obj.pop||pop; level = obj.level||level; defense = obj.defense||defense; turn = obj.turn||turn;
-      updateStats(); return true;
+      updateStats();
+      if(obj.layout && obj.layout.length === 100){
+        const tiles = document.querySelectorAll('.tile');
+        obj.layout.forEach((d,i)=>{
+          const t = tiles[i];
+          if(!t) return;
+          t.dataset.terrain = d.terrain || 'plains';
+          t.dataset.built = d.built || '';
+          t.textContent = d.text || getTerrainEmoji(d.terrain);
+          // adjust class to match built or terrain
+          if(d.built === 'farm') t.className = 'tile farm';
+          else if(d.built === 'house') t.className = 'tile house';
+          else if(d.built === 'mine') t.className = 'tile mine';
+          else if(d.built === 'market') t.className = 'tile market';
+          else if(d.built === 'fort') t.className = 'tile fort';
+          else if(d.terrain === 'rock' || d.terrain === 'mountain') t.className = 'tile mountain';
+          else if(d.terrain === 'water') t.className = 'tile water';
+          else if(d.terrain === 'forest') t.className = 'tile forest';
+          else { t.className = 'tile grass'; }
+        });
+      }
+      return true;
     }catch(e){ return false; }
   }
   // attempt to load autosave on startup
   if(loadMiniState()){ alert('Autosave loaded'); }
   setInterval(()=>{ if(running) saveMiniState(); }, 5000);
 
+  // make terrains include mountain and water with adjustable rarity
+  const terrains = [
+    "plains","plains","plains","plains","plains", // 50% plains
+    "forest","forest", // 20% forest
+    "rock","mountain", // 20% rocks/mountain
+    "water" // 10% water
+  ];
+
   // -------- Terrain generation (random base) --------
-  const terrains=["plains","rock", "plains", "plains"]; // plains 75%, rock 25%
   for(let i=0;i<100;i++){
     const t=document.createElement("div");
     const terrain=terrains[Math.floor(Math.random()*terrains.length)];
@@ -186,6 +219,8 @@ button:disabled { background:#333; cursor:not-allowed; opacity:0.6; }
   function getTerrainEmoji(terrain){
     switch(terrain){
       case "rock": return "🪨";
+      case "mountain": return "⛰️";
+      case "water": return "🌊";
       default: return "🌱";
     }
   }
@@ -267,12 +302,19 @@ button:disabled { background:#333; cursor:not-allowed; opacity:0.6; }
   function resolveRaid(tile){
     if(defense>=5){
       defense-=5;
-      tile.className="tile grass";
-      tile.textContent="🔥";
-      alertBox.textContent="🛡️Forts repelled the enemy!";
+      // restore to original terrain emoji if there was one; assume grass if none
+      const terrain = tile.dataset.terrain || 'plains';
+      tile.className = 'tile ' + (terrain === 'mountain' ? 'mountain' : (terrain === 'water' ? 'water' : (terrain === 'forest' ? 'forest' : 'grass')));
+      tile.textContent = getTerrainEmoji(terrain);
+      tile.dataset.built = '';
+      alertBox.textContent="🛡️ Forts repelled the enemy!";
     } else {
       food=Math.max(0,food-5);
       money=Math.max(0,money-10);
+      // convert to ruined tile visual
+      tile.dataset.built = '';
+      tile.className = 'tile plains';
+      tile.textContent = '💀';
       alertBox.textContent="💀 You were raided! Lost food and money!";
     }
     updateStats();

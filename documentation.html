@@ -276,7 +276,15 @@
                 <ul>
                     <li>File: newgames/runner.html</li>
                     <li>Controls: Space to jump; keys 1/2/3 or automatic shape cycling</li>
-                    <li>Features: power-ups, parallax backgrounds, particle effects</li>
+                    <li>Features:
+                        <ul>
+                            <li>Parallax starfield / mountains / clouds background for improved depth.</li>
+                            <li>Pause on tab hide to avoid timing drift and accidental score inflation.</li>
+                            <li>Improved obstacle spawn spacing and cap to avoid memory growth.</li>
+                            <li>Particles, gradient player drawing and simple sound effects (jump/collect/die/shape).</li>
+                            <li>Best-run persistence (localStorage) and a visible restart button on death.</li>
+                        </ul>
+                    </li>
                 </ul>
                 <p><a class="content-link" href="newgames/runner.html" target="_blank">Play Geometric Dash</a></p>
             </div>
@@ -287,20 +295,26 @@
                 <ul>
                     <li>File: newgames/empire.html</li>
                     <li>Controls: mouse (click areas), shop interactions via prompts</li>
-                    <li>Features: region unlocks, bosses, simple shop & leveling</li>
+                    <li>Features:
+                        <ul>
+                            <li>Shop items now carry explicit type (weapon / armor) and purchases equip immediately.</li>
+                            <li>Unlock checks (areas/regions) consider equipped weapon/armor stats so progression is intuitive.</li>
+                            <li>Purchases and player state persist via localStorage; gold/loot animations and experience gain added.</li>
+                            <li>Improved battle flow and basic feedback (shake/flash/gold popups).</li>
+                        </ul>
+                    </li>
                 </ul>
                 <p><a class="content-link" href="newgames/empire.html" target="_blank">Play Empire BETA</a></p>
             </div>
 
             <div class="section">
-                <h2 id="pokemon">PokéRamble</h2>
-                <p>Mini Poké-style single-file game: overworld, wild encounters, simple battle system and inventory.</p>
+                <h2 id="casino">Casino</h2>
+                <p>Mini casino-style single-file game: slot, blackjack (coming soon)</p>
                 <ul>
-                    <li>File: newgames/pokemon.html</li>
-                    <li>Controls: Arrow keys / WASD to move; Space/Enter to interact; F/B/S/R in battle</li>
-                    <li>Features: save/load (localStorage), shop, party management</li>
+                    <li>File: casinogames/slot.html</li>
+                    <li>Try your luck with the slot machine!</li>
                 </ul>
-                <p><a class="content-link" href="newgames/pokemon.html" target="_blank">Play PokéRamble</a></p>
+                <p><a class="content-link" href="casinogames/slot.html" target="_blank">Play Slot Machine</a></p>
             </div>
 
             <div class="section">
@@ -309,42 +323,16 @@
                 <ul>
                     <li>File: newgames/mini.html</li>
                     <li>Controls: click tiles to build; UI buttons for build modes</li>
-                    <li>Features: farms/houses/mines/markets/forts, enemy raids, win condition</li>
+                    <li>Features:
+                        <ul>
+                            <li>Terrain variety: plains, forest, mountain/rock and water — builds restricted by terrain where sensible.</li>
+                            <li>Save/load stores full layout (terrain + built state + tile text) so reloading restores your map.</li>
+                            <li>Improved raid handling: fort defense reduces damage and restores tiles correctly; ruined tiles are shown visually.</li>
+                            <li>Tutorial overlay and tech unlocks that enable new buildings as you progress.</li>
+                        </ul>
+                    </li>
                 </ul>
                 <p><a class="content-link" href="newgames/mini.html" target="_blank">Play Mini Empire</a></p>
-            </div>
-
-            <div class="section">
-                <h2 id="lifegame">Wealth / Life Game</h2>
-                <p>Incremental life/economy sim with investments, passive income, markets and crafting.</p>
-                <ul>
-                    <li>File: lifegame/life.html</li>
-                    <li>Controls: buttons for tasks, invest, freelance; unlocks new features as money grows</li>
-                    <li>Features: continuous passive income, market volatility, crafting & buildings</li>
-                </ul>
-                <p><a class="content-link" href="lifegame/life.html" target="_blank">Play Wealth</a></p>
-            </div>
-
-            <div class="section">
-                <h2 id="citygame">City Builder</h2>
-                <p>City simulation with build/upgrade, cycles, energy and challenges.</p>
-                <ul>
-                    <li>File: citygame/citygame.html</li>
-                    <li>Controls: left click to build, right click to upgrade, keyboard: B cycle, D destroy, Space pause</li>
-                    <li>Features: buildings, upgrades, random events & disasters, challenge rewards</li>
-                </ul>
-                <p><a class="content-link" href="citygame/citygame.html" target="_blank">Play City Builder</a></p>
-            </div>
-
-            <div class="section">
-                <h2 id="platformer">Infinity Platformer</h2>
-                <p>Polished platformer demo with multiple enemy types, power-ups and mobile controls.</p>
-                <ul>
-                    <li>File: platformergame/platformergame.html</li>
-                    <li>Controls: arrows to move, ↑ to jump, F to shove, Shift to dash; mobile touch controls available</li>
-                    <li>Features: multilevel demo, particles, saveable checkpoints</li>
-                </ul>
-                <p><a class="content-link" href="platformergame/platformergame.html" target="_blank">Play Platformer</a></p>
             </div>
 
             <div class="section">
@@ -403,6 +391,20 @@
                 <ul>
                     <li>Look in directories: sandd/, box/, newgames/</li>
                 </ul>
+            </div>
+
+            <div class="section">
+                <h2 id="changelog">Last changes since last push</h2>
+                <p class="muted">
+                    This documentation was updated to reflect gameplay improvements, bug fixes and persistence changes across the runner, PokéRamble, Mini Empire and Empire demos:
+                </p>
+                <ul>
+                    <li>Runner: visuals, paused-on-hide, spawn spacing, particle & sound polish, best-run saved.</li>
+                    <li>PokéRamble: move/effect parsing fixes, catch formula tuned, autosave + inventory/bag improvements.</li>
+                    <li>Mini: terrain/save/load fixes, raid resolution correctness, tutorial & tech unlock flow.</li>
+                    <li>Empire: equipment-aware unlocks and persistent shop purchases; shop items carry types and equip on buy.</li>
+                </ul>
+                <p class="muted">If you maintain a changelog or release notes, please copy these bullets into it for the next release entry.</p>
             </div>
 
             <!-- end added sections -->
