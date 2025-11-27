@@ -3,8 +3,9 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Latest News & Updates — Littletree866</title>
+	<title>Latest News & Updates</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
 	<link rel="icon" href="check.png">
 	<meta name="description" content="Release notes, changelog and upcoming releases for Littletree866's game collection.">
 	<style>
@@ -15,9 +16,9 @@
 		}
 		
 		body {
-			font-family: 'ink free', cursive;
+			font-family: 'DM Sans', sans-serif;
 			line-height: 1.6;
-			color: #333;
+			color: #0b0b0b;
 			background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
 			min-height: 100vh;
 			display: flex;
@@ -86,7 +87,28 @@
 			border-radius: 10px;
 			padding: 18px;
 			box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+			transition: transform 0.25s ease, box-shadow 0.25s ease;
+			animation: cardFadeUp 0.5s ease forwards;
 		}
+
+		/* Hover lift */
+		.card:hover {
+			transform: translateY(-6px) scale(1.02);
+			box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+		}
+
+		/* Entrance animation */
+		@keyframes cardFadeUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+		}
+
 		
 		.card h3 {
 			margin: 0 0 8px 0;
@@ -125,10 +147,14 @@
 		
 		.badge {
 			background: #6e8efb;
-			color: white;
-			padding: 6px 10px;
-			border-radius: 999px;
-			font-weight: 700;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 150px;
+            font-size: 1em;
+			font-weight: bold;
+			font-family: 'DM Sans', sans-serif;
+            margin-left: 8px;
+			align-self: center;
 		}
 		
 		@media (max-width: 768px) {
@@ -167,17 +193,21 @@
 			<p style="color: #f1f0f0; font-weight: bold;" class="small">Release notes, changelogs and upcoming features for the game collection.</p>
 			<div style="margin-top:12px;" class="countdown" aria-live="polite">
 				<i class="fas fa-calendar-alt" aria-hidden="true" style="color: #faf2f2;"></i>
-				<div style="color: #f1f0f0; font-weight: bold;">Next release target: <strong style="color: #ece8e8;" id="next-release-date">December 10, 2025</strong></div>
+				<div style="color: #f1f0f0; font-weight: bold;">Next release target: <strong style="color: #ece8e8;" id="next-release-date">January 1, 2026</strong></div>
 			</div>
 		</header>
 
 		<section class="releases" aria-labelledby="releases-heading">
 			<h2 id="releases-heading" class="small" style="margin-top:12px">Release Timeline</h2>
 
+
+
+
 			<div class="card">
 				<div class="split">
 					<div>
-						<h3>v1.15.18 - Planned Dec 10, 2025</h3>
+						<h3>v1.16.19</h3>
+						<p>Planned January 1, 2026</p>
 						<div class="small">Planned release: <strong id="countdown-text">Loading…</strong></div>
 					</div>
 					<div class="badge" aria-hidden="true">Coming Soon!</div>
@@ -190,10 +220,27 @@
 			<div class="card" aria-labelledby="recent-title">
 				<div class="split">
 					<div>
+						<h3 id="recent-title">v1.15.18</h3>
+				<div class="small">Released on: <strong id="release-date">December 10, 2025</strong></div>
+					</div>
+				<div class="badge" aria-hidden="true">New!</div>
+				</div>
+				<ul class="changelog">
+					<li>Added new Tower Defense+ </li>
+					<li>Polished the homepage</li>
+					<li>Improvements and polish</li>
+					<li>Bug fixes</li>
+					<li>Remade entire site, full polish</li>
+
+				</ul>
+			</div>
+
+			<div class="card" aria-labelledby="recent-title">
+				<div class="split">
+					<div>
 						<h3 id="recent-title">v1.15.16</h3>
 				<div class="small">Released on: <strong id="release-date">November 25, 2025</strong></div>
 					</div>
-					<div class="badge" aria-hidden="true">New!</div>
 				</div>
 				<ul class="changelog">
 					<li>New Polish</li>
@@ -203,40 +250,6 @@
 				</ul>
 			</div>
 
-			<div class="card" aria-labelledby="recent-title">
-				<div class="split">
-					<div>
-						<h3 id="recent-title">v1.14.15</h3>
-				<div class="small">Released on: <strong id="release-date">November 12, 2025</strong></div>
-					</div>
-				</div>
-				<ul class="changelog">
-					<li>New games added: Geometry Runner, Empire demo</li>
-					<li>Refreshed documentation and update page</li>
-					<li>Performance improvements and many bug fixes</li>
-				</ul>
-			</div>
-
-
-			<div class="card">
-				<h3>Older Changes</h3>
-				<p class="small">Select highlights from earlier versions</p>
-				<ul class="changelog">
-					<li>Saved game formats introduced for many demos</li>
-					<li>New UI components, improved accessibility and keyboard shortcuts</li>
-				</ul>
-			</div>
-		</section>
-
-		<section style="margin-top:18px;">
-			<div class="card">
-				<h3>Planned Roadmap</h3>
-				<ul>
-					<li>Short term: polish cross-game UI, add leaderboards</li>
-					<li>Medium term: new levels & more procedural content</li>
-					<li>Long term: central shared library for UI and saves</li>
-				</ul>
-			</div>
 		</section>
 
 		<footer style="margin-top:18px" class="small" aria-label="copyright">
@@ -247,19 +260,16 @@
 	<script>
 		// Countdown to next release
 		(function(){
-			const target = new Date(2025,11-1,10); // 2025-11-10? previously Dec 10; keep Dec 10 if intended: use month 11 for December (0-based)
-			// Correction: month argument is 11 for December (0-based)
-			const targetDate = new Date(2025, 11, 10); // December 10, 2025
+			const target = new Date(2026, 0, 1); // January 1, 2026
+			const targetDate = new Date(2026, 0, 1); // January 1, 2026
 			const cdText = document.getElementById('countdown-text');
 			const footerYear = document.getElementById('footer-year');
 			function update(){
 				const now = new Date();
 				const diff = Math.max(0, targetDate - now);
 				const days = Math.floor(diff / (1000*60*60*24));
-				const hours = Math.floor((diff / (1000*60*60)) % 24);
-				const mins = Math.floor((diff / (1000*60)) % 60);
 				if(diff <= 0) cdText.textContent = 'Released';
-				else cdText.textContent = `${days}d ${hours}h ${mins}m`;
+				else cdText.textContent = `${days}d `;
 			}
 			update();
 			setInterval(update, 60*1000);

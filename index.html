@@ -3,283 +3,369 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Littletree866's Github page</title>
+	<title>Littletree866's GitHub site</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<link rel="icon" href="icon/icon.png">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
 	<style>
-
-        h1, h4, h5, h6 {
-            font-family: 'Ink Free', cursive;
-            font-size: 15px;
-            font-weight: lighter;
-            color: #1c1c1e;
-
-        }
-
-        a {
-            color: #924bcc;
-            font-family: ''Ink Free', cursive';
-            font-size: 15px;
-            text-decoration: none !important;
-            
-        }
-
-        .debug-button {
-			position: fixed;
-			right: 20px;
-			bottom: 20px;
-			z-index: 9999;
-			border-radius: 8px;
-			box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+		:root {
+			--primary: #6e8efb;
+			--secondary: #a777e3;
+			--dark: #2c3e50;
+			--light: #f8f9fa;
+			--text: #333333;
+			--border-radius: 12px;
+			--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 
-        p {
-            font-family: 'trebuchet ms', sans-serif;
-            text-align: center;
-            font-size: 14px;
-        }
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
 
-        :root {
-            --primary: #6e8efb;
-            --secondary: #a777e3;
-            --dark: #2c3e50;
-            --light: #f8f9fa;
-            --text: #333333;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Ink Free', cursive;
+		html, body {
+			height: 100%;
+		}
+
+		body {
+            font-family: 'DM Sans', sans-serif;
             line-height: 1.6;
             color: var(--text);
-            background: linear-gradient(-45deg, #ff3c00, #e7cb3c, #23a6d5, #32d523, orange, purple);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 500% 500%;
+            animation: gradientBG 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
-        
+
         @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .container {
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 60px 0;
-            text-align: center;
-            margin-bottom: 40px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Add shadow for depth */
-        }
-        
-        .main-content {
-            padding: 40px 0;
-            flex: 1;
-        }
-        
-        .links-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.8s forwards;
-        }
-        
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .content-link {
-            display: block;
-            background: rgb(246, 243, 243);
-            padding: 18px 25px;
-            border-radius: 8px;
-            color: var(--dark);
-            -webkit-text-fill-color: #141415;
-            text-decoration: none;
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgb(4, 4, 4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .content-link::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s;
-        }
-        
-        .content-link:hover {
-            background: #e1e1e5;
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
-        
-        .content-link:hover::after {
-            transform: translateX(100%);
-        }
+            0%   { background-position: 50% 100%; } /* start at bottom */
+			50%  { background-position: 50% 0%; }   /* move fully up */
+			100% { background-position: 50% 100%; } /* go back down */
+    	}
 
-        /* Add new category styles */
-        .category-header {
-            color: white;
-            margin: 20px 0 10px;
-            padding: 10px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            font-family: 'Ink Free', cursive;
-            font-size: 1.5em;
-        }
+		.container {
+			max-width: 900px;
+			width: 100%;
+			margin: 0 auto;
+			padding: 0 20px;
+		}
 
-        .new-badge {
-            background: #e74c3c;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 1em;
-            margin-left: 8px;
-        }
+		header {
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			color: white;
+			padding: 60px 0;
+			text-align: center;
+			margin-bottom: 40px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+		}
 
-        .new-badge2 {
-            background: #00ad34;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 1em;
-            margin-left: 8px;
-            text-emphasis-color: #e1e1e5;
+		header h1 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin-bottom: 15px;
+			letter-spacing: -0.5px;
+		}
 
-        }
+		header p {
+			font-size: 0.95rem;
+			opacity: 0.95;
+			margin: 8px 0;
+			font-weight: 500;
+		}
 
-        .new-badge3 {
-            background: #ff1900;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 1em;
-            margin-left: 8px;
-            text-emphasis-color: #e1e1e5;
-            color:white;
+		.main-content {
+			padding: 20px 0;
+			flex: 1;
+		}
 
-        }
+		.links-section {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+			opacity: 0;
+			animation: fadeInUp 0.8s forwards;
+		}
 
-        .content-link i {
-            margin-right: 10px;
-        }
-        
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 30px 0;
-            text-align: center;
-            margin-top: 60px;
-        }
+		@keyframes fadeInUp {
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+		}
 
-        .copyright {
-            margin-top: 15px;
-            opacity: 0.8;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-        } 
-    </style>
+		.content-link {
+			display: block;
+			background: rgb(255, 255, 255);
+			padding: 18px 25px;
+			border-radius: var(--border-radius);
+			color: var(--dark);
+			text-decoration: none;
+			font-weight: lighter;
+			font-size: 1rem;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+			transition: var(--transition);
+			position: relative;
+			overflow: hidden;
+			margin: 2px 1px;
+		}
+
+		.content-link::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -120%;
+			width: 120%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+			transition: left 0.6s ease;
+		}
+
+		.content-link:hover::before {
+			left: 120%;
+		}
+
+		.content-link:hover {
+			transform: translateY(-6px);
+			box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+			background: #f5f5f5;
+		}
+
+		.content-link:active {
+			transform: scale(0.98);
+		}
+
+		.content-link.disabled {
+			pointer-events: none;
+			opacity: 0.55;
+			cursor: default;
+		}
+
+		.content-link .hover-text {
+			display: none;
+		}
+
+		.content-link:hover .normal-text {
+			display: none;
+		}
+
+		.content-link:hover .hover-text {
+			display: inline;
+		}
+
+		.category-header {
+			color: white;
+			margin: 30px 0 15px 0;
+			padding: 12px 16px;
+			border-radius: var(--border-radius);
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(10px);
+			font-family: 'DM Sans', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 700;
+			letter-spacing: 0.5px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		}
+
+		footer {
+			background: var(--dark);
+			color: white;
+			padding: 40px 0;
+			text-align: center;
+			margin-top: 60px;
+		}
+
+		.copyright {
+			margin-top: 15px;
+			opacity: 0.85;
+			font-size: 0.9rem;
+		}
+
+		.coming-soon-badge {
+			background: linear-gradient(135deg, #ff4757, #ff6348);
+			color: white;
+			font-size: 0.7rem;
+			font-weight: 700;
+			padding: 4px 10px;
+			border-radius: 20px;
+			margin-left: 10px;
+			display: inline-block;
+			box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+		}
+
+		@media (max-width: 768px) {
+			header h1 {
+				font-size: 1.8rem;
+			}
+
+			.category-header {
+				font-size: 1.1rem;
+			}
+
+			.container {
+				padding: 0 15px;
+			}
+
+			header {
+				padding: 40px 0;
+			}
+		}
+	</style>
 </head>
 
 <body>
-	<a href="#main" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to content</a>
 	<header>
 		<div class="container">
-			<p style="font-weight: bold;">Welcome to Littletree866 V1.15.16!</p>
-			<p style="font-weight: bold;">Feel free to explore!</p>
-			<p style="font-weight: bold;">Founded March 22, 2025!</p>
-			<p style="font-weight: bold;">Last updated November 25, 2025!</p>
-			<p style="font-weight: bold;">Please be patient with bugs and performance issues</p>
+			<h1 style="font-family: DengXian, sans-serif;">Littletree866's GitHub site</h1>
+			<p>Welcome! This is an open-sourced project with any contributions welcome.</p>
+            <p>Feel free to explore.</p>
+			<p style="font-weight: bold;">December 10, 2025 • Version 1.15.18</p>
 		</div>
 	</header>
-	
+
 	<main class="main-content">
 		<div class="container" id="main">
-			
 			<div class="links-section">
-				<h2 class="category-header">🆕Featured</h2>
-                <a href="newgames/mini.html" class="content-link" style="font-weight: lighter;">💎Mini Empire Game</a>
-				   
-                <!-- Games Links -->
-				<h2 class="category-header">🕹️Games</h2>
-                <a href="platformergame/platformergame.html" class="content-link" style="font-weight: lighter;"> <span style="text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);">☠️</span>The Impossible Game</a>
-				<a href="spacegame/spacegame.html" class="content-link" style="font-weight: lighter;">🚀 Space Game </a>
-				<a href="clickergame/clickergame.html" class="content-link" style="font-weight: lighter;">👆 Clicker Quest+ </a>
-				<a href="puzzle/puzzle.html" class="content-link" style="font-weight: lighter;">🧩Puzzle Master</a>
-				<a href="wizardgame/wizardgame.html" class="content-link" style="font-weight: lighter;">🧙‍♂️ Wizard Battle</a>
-				<a href="newgames/runner.html" class="content-link" style="font-weight: lighter;">🏃‍♂️Geometry Runner</a>
+				<!--Work in Progress -->
+				<h2 class="category-header">⚒️ Work in Progress</h2>
+				<a href="null" class="content-link disabled">
+					<span class="normal-text">🎲 Cursed Dice</span>
+					<span class="hover-text">🔧 Coming Soon 🔧</span>
+					<span class="coming-soon-badge">Coming Soon</span>
+				</a>
+				<a href="null" class="content-link disabled">
+					<span class="normal-text">🧟 Zombie Survival</span>
+					<span class="hover-text">🔧 Coming Soon 🔧</span>
+					<span class="coming-soon-badge">Coming Soon</span>
+				</a>
+				<a href="casinogames/roulette.html" class="content-link disabled">
+					<span class="normal-text">🎡 Roulette</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="coming-soon-badge">Coming Soon</span>
+				</a>
 
-                <!-- Casino Links -->
-                <h2 class="category-header">♠️Casino <span class="new-badge3">New!</span></h2>
-                <a href="casinogames/slot.html" class="content-link" style="font-weight: lighter;">🎰 Slot Machine </a>
+				<!-- Featured Section -->
+				<h2 class="category-header">👍 Featured </h2>
+				<a href="games/pokemon/pokemon.html" class="content-link">
+					<span class="normal-text">⚔️ PokéRamble+</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="newgames/tower.html" class="content-link">
+					<span class="normal-text">🛡️ Tower Defense+</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="games/platformergame/platformergame.html" class="content-link">
+					<span class="normal-text">😵 The Impossible Game</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
 
-                <!-- Simulations Links -->
-                 <h2 class="category-header">💡Simulations</h2>
-                <a href="lifegame/life.html" class="content-link" style="font-weight: lighter;">💰 Wealth Builder </span></a>
-                <a href="citygame/citygame.html" class="content-link" style="font-weight: lighter;">🏙️ City Builder </a>
-                <a href="s&d/money.html" class="content-link" style="font-weight: lighter;">📊 Supply & Demand</a>
-                <a href="box/box.html" class="content-link" style="font-weight: lighter;">📦 The Box</a>
-                <a href="newgames/empire.html" class="content-link" style="font-weight: lighter;">👑Empire Game</a>
+				<a href="games/spacegame/spacegame.html" class="content-link">
+					<span class="normal-text">🚀 Space Game</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<!-- Games Section -->
+				<h2 class="category-header">❤️‍🔥 Play to your heart's content</h2>
+				
+				
+				
+				<a href="games/clickergame/clickergame.html" class="content-link">
+					<span class="normal-text">👆 Clicker Quest+</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="games/puzzle/puzzle.html" class="content-link">
+					<span class="normal-text">🧩 Puzzle Master</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="games/wizardgame/wizardgame.html" class="content-link">
+					<span class="normal-text">🧙‍♂️ Wizard Battle</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="games/runner.html" class="content-link">
+					<span class="normal-text">🏃 Geometry Runner</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
 
-                <!-- Info Links -->
-                <h2 class="category-header">ℹ️Information</h2>
-                <a href="documentation.html" class="content-link" style="font-weight: lighter;">📚 Documentation </a>
-                <a href="snapshots/snapshots.html" class="content-link" style="font-weight: lighter;">🖼️ Snapshots</a>
-                <a href="updateinfo/updateinfo.html" class="content-link" style="font-weight: lighter;">📝 Update Info</a>
-                <a href="https://github.com/littletree866/website" class="content-link" style="font-weight: lighter;">💻 Source Code</a>
-            </div>
-        </div>
-    </main>
-    
-    <footer>
-        <div class="container">
-            </div>
-            <p class="copyright">© <span id="copyright-year"></span> Littletree866.github.io </p>
-        </div>
-    </footer>
+				<!-- Casino Section -->
+				<h2 class="category-header">🍀 Test your luck</h2>
+				<a href="casinogames/slot.html" class="content-link">
+					<span class="normal-text">🎰 Slot Machine</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="casinogames/blackjack.html" class="content-link">
+					<span class="normal-text">🃏 Blackjack+</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('copyright-year').textContent = new Date().getFullYear();
-        });
-    </script>
+				<!-- Simulations Section -->
+				<h2 class="category-header">💡 Think & Strategize</h2>
+				<a href="sims/lifegame/life.html" class="content-link">
+					<span class="normal-text">💰 Wealth Builder</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="sims/citygame/citygame.html" class="content-link">
+					<span class="normal-text">🏙️ Metropolis Builder</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="sims/s&d/money.html" class="content-link">
+					<span class="normal-text">📊 Supply & Demand</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="sims/box/box.html" class="content-link">
+					<span class="normal-text">📦 The Box</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="sims/empire.html" class="content-link">
+					<span class="normal-text">👑 Empire Game</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="sims/mini.html" class="content-link">
+					<span class="normal-text">🏰 Mini Empire</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+
+				<!-- Info Section -->
+				<h2 class="category-header">📄 Information & Guides</h2>
+				<a href="info/documentation.html" class="content-link">
+					<span class="normal-text">📋 Game Documentation</span>
+					<span class="hover-text">➡️ Read Guides</span>
+				</a>
+				<a href="info/snapshots/snapshots.html" class="content-link">
+					<span class="normal-text">🖼️ Snapshots</span>
+					<span class="hover-text">➡️ View Gallery</span>
+				</a>
+				<a href="info/updateinfo/updateinfo.html" class="content-link">
+					<span class="normal-text">📝 Update Info</span>
+					<span class="hover-text">➡️ See Changes</span>
+				</a>
+				<a href="https://github.com/littletree866/website" class="content-link" target="_blank">
+					<span class="normal-text">💻 Source Code</span>
+					<span class="hover-text">➡️ GitHub</span>
+				</a>
+			</div>
+		</div>
+	</main>
+
+	<footer>
+		<div class="container">
+			<p class="copyright">© <span id="copyright-year"></span> Littletree866.github.io</p>
+			<p class="copyright" style="font-size: 0.85rem; margin-top: 8px;">Last updated: December 10, 2025</p>
+		</div>
+	</footer>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			document.getElementById('copyright-year').textContent = new Date().getFullYear();
+		});
+	</script>
 </body>
 </html>

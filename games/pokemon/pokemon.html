@@ -1,27 +1,16 @@
-<!--
-Improved single-file Pokémon-style mini-game.
-Features added:
-- Tile map with player movement (arrow keys / WASD)
-- Random wild encounters (ambushes) while walking
-- More Pokémon in the database
-- Simple overworld: grass, water, town, heal center
-- Inventory with Pokéballs and Potions (use in battle)
-- Basic shop to buy items
-- Party management + switching in-battle
-- Persistent save using localStorage
-- Visual HUD and simple animations
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PokéRamble — Overworld & Battles</title>
+<title>PokéRamble</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="../check.png" />
 <style>
   :root{
     --bg:#071228;--panel:#0d1724;--muted:#9fb2d0;--accent:#ffd36b;
   }
-  *{box-sizing:border-box;font-family:"Ink free", cursive} /* changed font to Ink free, cursive */
+  *{box-sizing:border-box;font-family:"DM Sans", sans-serif}
   body{margin:0;background:linear-gradient(#041028,#071427);color:#e6eef8;display:flex;justify-content:center;padding:12px 8px}
   #game{width:980px;max-width:calc(100% - 16px);display:grid;grid-template-columns:640px 320px;gap:12px}
   .mapwrap{background:linear-gradient(180deg,#082036,#061426);border-radius:10px;padding:10px}
@@ -31,7 +20,25 @@ Features added:
   .hud{display:flex;justify-content:space-between;align-items:center}
   .muted{color:var(--muted);font-size:13px}
   .controls{display:flex;gap:6px;flex-wrap:wrap}
-  .btn{background:linear-gradient(180deg,#10293b,#071424);padding:8px;border-radius:8px;border:0;color:#dff;font-weight:700;cursor:pointer}
+  .btn{
+      background:linear-gradient(180deg,#132f49,#091a2f);
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.08);
+      color:#dff;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .06s ease, filter .15s ease, box-shadow .15s ease;
+      box-shadow:0 3px 0 rgba(0,0,0,.3);
+    }
+    .btn:hover{filter:brightness(1.15)}
+    .btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .big{
+      background:linear-gradient(90deg,var(--accent),#ff9f55);
+      color:#072032;
+    }
+
   .big{background:linear-gradient(90deg,var(--accent),#ffb76e);color:#072032}
   .log{height:120px;overflow:auto;background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;font-size:13px}
   .inventory{display:flex;gap:8px;flex-wrap:wrap}
@@ -57,7 +64,7 @@ Features added:
         </div>
         <div style="text-align:right">
           <div class="muted">Steps: <span id="steps">0</span></div>
-          <div class="muted">Location: <span id="locName">Route</span></div>
+          <div class="muted">Location: <span id="locName">Route 1</span></div>
         </div>
       </div>
       <canvas id="map" width="640" height="480"></canvas>
@@ -123,18 +130,10 @@ Features added:
 
       /* ---------- Data ---------- */
       const POKEMON_DB = [
-        { id:'pikachu', name:'Pikachu', emoji:'⚡', base:{hp:35,atk:55,def:40,spd:90}, moves:['thundershock','quickattack','growl'], types:['electric']},
-        { id:'charmander', name:'Charmander', emoji:'🔥', base:{hp:39,atk:52,def:43,spd:65}, moves:['ember','scratch','smokescreen'], types:['fire']},
-        { id:'bulbasaur', name:'Bulbasaur', emoji:'🌿', base:{hp:45,atk:49,def:49,spd:45}, moves:['vinewhip','tackle','leechseed'], types:['grass']},
-        { id:'squirtle', name:'Squirtle', emoji:'💧', base:{hp:44,atk:48,def:65,spd:43}, moves:['watergun','tackle','withdraw'], types:['water']},
-        { id:'pidgey', name:'Pidgey', emoji:'🕊️', base:{hp:40,atk:45,def:40,spd:56}, moves:['tackle','quickattack','tailwhip'], types:['normal','flying']},
-        { id:'eevee', name:'Eevee', emoji:'🦊', base:{hp:55,atk:55,def:50,spd:55}, moves:['tackle','quickattack','growl'], types:['normal']},
-        { id:'oddish', name:'Oddish', emoji:'🌸', base:{hp:45,atk:50,def:55,spd:30}, moves:['absorb','poisonpowder','growth'], types:['grass','poison']},
-        { id:'magikarp', name:'Magikarp', emoji:'🐟', base:{hp:20,atk:10,def:55,spd:80}, moves:['splash','tackle'], types:['water']},
-        { id:'growlithe', name:'Growlithe', emoji:'🐕', base:{hp:55,atk:70,def:45,spd:60}, moves:['ember','bite','roar','flamewheel'], types:['fire']},
-        { id:'sandshrew', name:'Sandshrew', emoji:'🦔', base:{hp:50,atk:75,def:85,spd:40}, moves:['scratch','sandattack','poisonsting'], types:['ground']},
-        { id:'starly', name:'Starly', emoji:'🐦', base:{hp:40,atk:55,def:30,spd:60}, moves:['tackle','quickattack','wingattack'], types:['normal','flying']}
+        { id:'pidgey', name:'Pidgey', emoji:'🐓', base:{hp:40,atk:45,def:40,spd:55}, moves:['tackle','quickattack','tailwhip'], types:['normal','flying']},
+        { id:'rattata', name:'Rattata', emoji:'🐀', base:{hp:30,atk:25,def:30,spd:40}, moves:['tackle','quickattack','bite'], types:['normal']}
       ];
+
 
       const MOVE_DB = {
         thundershock:{name:'Thunder Shock',power:40,acc:100,type:'electric'},
@@ -185,15 +184,15 @@ Features added:
         gold:50,
         party: [],
         items: {pokeball:5,potion:3},
-        location:'route', // 'route' or 'town' etc
-        mapName:'Route',
+        location:'Route 1', // 'Route 1' or 'town' etc
+        mapName:'Route 1',
         encounterActive:false,
         wild:null,
       };
 
       /* create Pokémon instance from DB at level */
       function spawnPokemon(dbEntry, level=randint(3,7)){
-        const hp = Math.max(8, Math.floor(dbEntry.base.hp * (1 + level*0.07)));
+        const hp = dbEntry.base.hp + level * 5 + randint(0,level*2);
         return {
           id:dbEntry.id, name:dbEntry.name, emoji:dbEntry.emoji,
           level, baseHp:hp, hp:hp,
@@ -207,8 +206,8 @@ Features added:
 
       /* Give starter if none */
       if(!localStorage.getItem('pokeramble_save')) {
-        state.party.push(spawnPokemon(POKEMON_DB.find(p=>p.id==='charmander'),5));
         state.party.push(spawnPokemon(POKEMON_DB.find(p=>p.id==='pidgey'),4));
+
       }
 
       /* ---------- Map ---------- */
@@ -232,7 +231,7 @@ Features added:
       };
 
       function generateMap(){
-        // simple map layout: town at left, route grass elsewhere, water river
+        // simple map layout: town at left, Route 1 grass elsewhere, water river
         map = Array.from({length:MAP_H},(_,y)=>Array.from({length:MAP_W},(_,x)=>{
           // Create town area (3x5)
           if(x<4 && y>4 && y<10) return 'town';
@@ -320,7 +319,7 @@ Features added:
 
             // base gradient
             const g = ctx.createLinearGradient(px,py,px,TILE+py);
-            g.addColorStop(0, shade(tile.color, 12));
+           // g.addColorStop(0, shade(tile.color,20));
             g.addColorStop(1, tile.color);
             ctx.fillStyle = g;
             ctx.fillRect(px,py,TILE,TILE);
@@ -465,7 +464,7 @@ Features added:
          state.steps++;
          // spawn little grass/dust particles when stepping
          spawnStepParticles(state.pos.x * TILE + TILE/2, state.pos.y * TILE + TILE/2);
-         if(tile === 'town'){ state.mapName='Town'; } else if(tile==='heal'){ state.mapName='Heal Center'; } else if(tile==='shop'){ state.mapName='Shop'; } else state.mapName='Route';
+         if(tile === 'town'){ state.mapName='Town'; } else if(tile==='heal'){ state.mapName='Heal Center'; } else if(tile==='shop'){ state.mapName='Shop'; } else state.mapName='Route 1';
          draw();
          updateHUD();
          // check encounter on grass

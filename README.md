@@ -4,7 +4,7 @@ A modern collection of browser-based games built with vanilla JavaScript.
 
 ## ⚡ Key Features
 
-- Pure vanilla JavaScript - no dependencies
+- Pure vanilla JavaScript
 - Responsive design for all devices
 - Modern CSS effects and transitions
 - Local save system
@@ -18,18 +18,13 @@ A modern collection of browser-based games built with vanilla JavaScript.
 - Local Storage for game saves
 - Custom physics engines
 
-## 📅 Updates
+## 📅 Updates Log
 
+- Version 1.15.18 (December 10, 2025)
 - Version 1.15.16 (November 25, 2025)
 - Version 1.14.15 (November 12, 2025)
 - Version 1.13.15 (October 25, 2025)
 - Version 1.12.14 (October 10, 2025)
-
-## 🔗 Links
-
-- [Live Site](https://littletree866.github.io)
-- [Update Info](https://littletree866.github.io/updateinfo.html)
-- [Source Code](https://github.com/littletree866/website)
 
 ## 🤝 Contributing
 

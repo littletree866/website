@@ -8,8 +8,6 @@ let artUnlocked = false;
 let timeLeft = 15;
 let dayInterval;
 let activeCustomers = [];
-
-// Quest system variables
 let currentQuest = null;
 let questCompleted = false;
 let moneyEarnedSinceQuestStart = 0;

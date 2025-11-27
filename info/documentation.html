@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Documentation</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link rel="icon" href="../icon/icon.png">
+
+	<style>
+		:root {
+			--primary: #6e8efb;
+			--secondary: #a777e3;
+			--dark: #2c3e50;
+			--light: #f8f9fa;
+			--text: #333;
+			--border-radius: 12px;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'DM Sans', sans-serif;
+			line-height: 1.7;
+			color: var(--text);
+			background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
+			min-height: 100vh;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1100px;
+			margin: 0 auto;
+		}
+
+		header {
+			text-align: center;
+			padding: 50px 20px;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			color: white;
+			border-radius: var(--border-radius);
+			margin-bottom: 40px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+		}
+
+		header h1 {
+			font-size: 2.8rem;
+			margin-bottom: 10px;
+			font-weight: 700;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		}
+
+		header p {
+			font-size: 1.05rem;
+			opacity: 0.95;
+			font-weight: 500;
+		}
+
+		.section-header {
+			font-size: 2rem;
+			color: var(--dark);
+			margin: 50px 0 25px 0;
+			padding-bottom: 12px;
+			border-bottom: 3px solid var(--primary);
+			font-weight: 700;
+		}
+
+		.game-card {
+			background: white;
+			border-radius: var(--border-radius);
+			padding: 28px;
+			margin-bottom: 25px;
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			border-left: 4px solid var(--primary);
+		}
+
+		.game-card:hover {
+			transform: translateY(-6px);
+			box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+		}
+
+		.game-card h2 {
+			color: var(--primary);
+			margin-bottom: 12px;
+			font-size: 1.9rem;
+			font-weight: 700;
+		}
+
+		.game-card h3 {
+			color: var(--dark);
+			margin-top: 22px;
+			margin-bottom: 12px;
+			font-size: 1.2rem;
+			font-weight: 700;
+			border-left: 4px solid var(--secondary);
+			padding-left: 12px;
+		}
+
+		.description {
+			color: #555;
+			margin-bottom: 16px;
+			line-height: 1.8;
+			font-weight: 500;
+		}
+
+		.controls, .features, .tips {
+			background: #f8f9fa;
+			padding: 16px;
+			border-radius: 8px;
+			margin: 12px 0;
+			border-left: 3px solid var(--secondary);
+		}
+
+		.controls ul, .features ul, .tips ul {
+			margin-left: 24px;
+		}
+
+		.controls li, .features li, .tips li {
+			margin: 8px 0;
+			font-weight: 500;
+		}
+
+		.controls li strong, .features li strong, .tips li strong {
+			color: var(--primary);
+		}
+
+		.play-link {
+			display: inline-block;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			color: white;
+			padding: 12px 28px;
+			border-radius: 8px;
+			text-decoration: none;
+			margin-top: 18px;
+			transition: all 0.3s ease;
+			font-weight: 700;
+			box-shadow: 0 4px 12px rgba(110, 142, 251, 0.3);
+		}
+
+		.play-link:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 8px 20px rgba(110, 142, 251, 0.4);
+		}
+
+		.difficulty {
+			display: inline-block;
+			padding: 6px 14px;
+			border-radius: 20px;
+			font-size: 0.85rem;
+			font-weight: 700;
+			margin-top: 14px;
+			margin-right: 10px;
+		}
+
+		.difficulty.easy {
+			background: #90EE90;
+			color: #2d5016;
+		}
+
+		.difficulty.medium {
+			background: #FFD700;
+			color: #664d00;
+		}
+
+		.difficulty.hard {
+			background: #FF6B6B;
+			color: white;
+		}
+
+		footer {
+			text-align: center;
+			margin-top: 60px;
+			padding: 40px 0;
+			border-top: 2px solid #ddd;
+			color: #666;
+		}
+
+		footer p {
+			margin: 8px 0;
+			font-weight: 500;
+		}
+
+		@media (max-width: 768px) {
+			header h1 {
+				font-size: 2rem;
+			}
+
+			.section-header {
+				font-size: 1.6rem;
+			}
+
+			.game-card {
+				padding: 20px;
+			}
+
+			.game-card h2 {
+				font-size: 1.5rem;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<header>
+			<h1 style="font-family: DengXian, sans-serif;"> Game Documentation</h1>
+			<p>Complete guides, controls, and gameplay tips for all Littletree866 games</p>
+		</header>
+
+		<!-- Overview -->
+		<div class="game-card">
+			<h2>⚜️ Welcome to the Documentation</h2>
+			<p class="description">
+				This is your comprehensive guide to all games in the Littletree866 collection. 
+				Each game has detailed instructions, controls, features, and pro tips to help you master them.
+			</p>
+			<p class="description" style="color: #666; font-size: 0.95rem;">
+				<strong>Project Status:</strong> 🟢 Active | <strong>Duration:</strong> 9 months | 
+				<strong>Last Updated:</strong> December 10, 2025
+			</p>
+		</div>
+
+		<!-- GAMES SECTION -->
+		<h2 class="section-header">❤️‍🔥 Play to your heart's content</h2>
+
+		<!-- Clicker Quest+ -->
+		<div class="game-card">
+			<h2>👆 Clicker Quest+</h2>
+			<p class="description">A classic incremental clicker game where you earn money by clicking, then use it to purchase upgrades and passive income generators.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">Click the big button to earn money. Use your earnings to buy upgrades that increase your click power, unlock auto-earners for passive income, and activate temporary boosts for 2x damage.</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Left Click</strong> - Click the main button to earn $1 (or more with upgrades)</li>
+					<li><strong>Purchase Upgrades</strong> - Click buttons: Click Power, Auto Earner, or Boost</li>
+					<li><strong>Collect Coins</strong> - Random bonus coins spawn on screen for extra earnings</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Incremental progression with upgradeable click power</li>
+					<li>Passive income through auto-earners (generates $1/second)</li>
+					<li>Timed boosts that multiply your clicks for 30 seconds</li>
+					<li>Floating text animations showing earnings</li>
+					<li>Best score tracking via localStorage</li>
+					<li>Bonus coins that float up the screen for extra rewards</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Start by upgrading Click Power to $1, then buy an Auto Earner</li>
+					<li>Auto Earners provide steady income—prioritize them for passive earnings</li>
+					<li>Use Boosts during active play sessions for quick money bursts</li>
+					<li>Collect every floating bonus coin you can for quick earnings</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty easy">Easy</span>
+			<a href="../games/clickergame/clickergame.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Puzzle Master -->
+		<div class="game-card">
+			<h2>🧩 Puzzle Master</h2>
+			<p class="description">A sliding block puzzle game with two modes: Endless (no time limits) and Last Stand (timed challenges with progressive difficulty).</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">Click on tiles adjacent to the empty space to slide them. Arrange the numbered tiles in order (1-8) with the empty space in the bottom-right corner.</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Tiles</strong> - Click any tile adjacent to the empty space to slide it</li>
+					<li><strong>Mode Selection</strong> - Choose Endless or Last Stand before playing</li>
+					<li><strong>Restart</strong> - Shuffle the puzzle again</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Endless mode for relaxing, untimed solving</li>
+					<li>Last Stand mode with escalating difficulty</li>
+					<li>Move counter to track efficiency</li>
+					<li>Best times tracked for competitive play</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Solve the corners first, then work inward</li>
+					<li>Keep the empty space on the edge for quick adjustments</li>
+					<li>Last Stand requires planning—look ahead several moves</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty easy">Easy</span>
+			<a href="../games/puzzle/puzzle.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Wizard Battle -->
+		<div class="game-card">
+			<h2>🧙‍♂️ Wizard Battle</h2>
+			<p class="description">An arcane duel game where you cast spells, manage mana, gain XP, and shop for upgrades in a fantasy wizard battle.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Cast spells to damage your opponent while managing your mana pool. Defeat enemies to gain experience and gold, then visit the shop to buy spells and upgrades. Higher levels unlock more powerful abilities.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Spell Buttons</strong> - Cast spells (must have enough mana)</li>
+					<li><strong>Shop Buttons</strong> - Purchase new spells and upgrades</li>
+					<li><strong>Inventory</strong> - View your current spells and equipment</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Multiple spell types: fireball, ice bolt, lightning, healing</li>
+					<li>Mana management system (mana regenerates over time)</li>
+					<li>XP progression and leveling</li>
+					<li>In-battle shop for mid-combat upgrades</li>
+					<li>Enemy variety with different spell sets</li>
+					<li>Visual spell effects and animations</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Balance damage spells with healing to survive longer battles</li>
+					<li>Save mana for powerful spells when enemy HP is low</li>
+					<li>Buy mana regeneration upgrades for continuous casting</li>
+					<li>Prioritize spell variety over raw damage</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../games/wizardgame/wizardgame.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- PokéRamble+ -->
+		<div class="game-card">
+			<h2>⚔️ PokéRamble+</h2>
+			<p class="description">A Pokémon-inspired battle game where you catch, train, and battle creatures in strategic turn-based combat.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Catch Pokémon-like creatures in the wild, train them to increase their stats, and battle them against other trainers. Use type advantages and strategy to win battles and climb the ranks.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Buttons</strong> - Select attacks, catch Pokémon, or navigate menus</li>
+					<li><strong>Type Advantage</strong> - Fire beats Grass, Grass beats Water, Water beats Fire</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Creature collection and team building</li>
+					<li>Turn-based battle system</li>
+					<li>Type advantages and resistances</li>
+					<li>Experience and leveling system</li>
+					<li>Stat progression (HP, Attack, Defense, Speed)</li>
+					<li>Trainer battles with escalating difficulty</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Build a balanced team with different types</li>
+					<li>Exploit type advantages in battle</li>
+					<li>Train weaker Pokémon in easier battles first</li>
+					<li>Catch multiple creatures for type coverage</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../games/pokemon/pokemon.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Geometry Runner -->
+		<div class="game-card">
+			<h2>🏃 Geometry Runner</h2>
+			<p class="description">An endless runner where you jump over obstacles and match shapes. Features parallax scrolling backgrounds and progressive difficulty.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Press Space to jump and avoid obstacles. Your shape cycles automatically or you can press 1/2/3 to match incoming obstacles. Collect power-ups for temporary invincibility and aim for the highest score.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Space Bar</strong> - Jump</li>
+					<li><strong>1/2/3 Keys</strong> - Change shape (optional, auto-cycles)</li>
+					<li><strong>P Key</strong> - Pause/Resume</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Endless procedural obstacle generation</li>
+					<li>Shape-matching mechanic (circle, square, triangle)</li>
+					<li>Parallax starfield and mountain backgrounds for depth</li>
+					<li>Power-ups for temporary invincibility</li>
+					<li>Progressive speed increase</li>
+					<li>Best score tracking with localStorage</li>
+					<li>Particle effects and visual feedback</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Master timing your jumps to avoid obstacles</li>
+					<li>Use shape-cycling strategically for better matching</li>
+					<li>Collect power-ups early for longer runs</li>
+					<li>The game gets faster—stay alert!</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../games/runner.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Space Game -->
+		<div class="game-card">
+			<h2>🚀 Space Game</h2>
+			<p class="description">A fast-paced 2D space shooter where you battle waves of procedurally generated enemies, dodge projectiles, and defeat epic bosses.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Control your spaceship with arrow keys and shoot with space. Destroy enemies to earn points and avoid their fire. Collect power-ups for temporary advantages and face increasingly difficult boss battles.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Arrow Keys</strong> - Move your ship (up, down, left, right)</li>
+					<li><strong>Space Bar</strong> - Shoot projectiles</li>
+					<li><strong>ESC</strong> - Pause the game</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Procedurally generated starfield background</li>
+					<li>Multiple enemy types with varying behaviors</li>
+					<li>Power-ups: shield, rapid fire, and mega blast</li>
+					<li>Boss encounters with unique patterns</li>
+					<li>Chain reaction explosions for combos</li>
+					<li>Particle effects and visual feedback</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Keep moving to avoid enemy fire patterns</li>
+					<li>Collect power-ups immediately when they appear</li>
+					<li>Focus fire on one enemy at a time for efficiency</li>
+					<li>Learn boss patterns before committing your shield</li>
+					<li>Collect enemies that form straight lines for better target practice</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty hard">Hard</span>
+			<a href="../games/spacegame/spacegame.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Platformer -->
+		<div class="game-card">
+			<h2>😵 The Impossible Game</h2>
+			<p class="description">A fast-paced precision platformer with increasingly difficult boxed levels, pixel-perfect jumps, and checkpoint mechanics.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Navigate through challenging platformer levels by jumping over obstacles and gaps. Reach the exit door to complete each level. Master timing and precision to beat all stages. Checkpoints save your progress within levels.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Arrow Keys / WASD</strong> - Move left and right</li>
+					<li><strong>Space Bar</strong> - Jump</li>
+					<li><strong>Hold Jump</strong> - Jump higher (variable jump height)</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Progressive difficulty across multiple levels</li>
+					<li>Checkpoint system for level progression</li>
+					<li>Precision platforming with tight controls</li>
+					<li>Various obstacle types (spikes, platforms, gaps)</li>
+					<li>Best time tracking per level</li>
+					<li>Responsive movement and jump mechanics</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Master variable-height jumps for navigating obstacles</li>
+					<li>Each checkpoint is a safe zone—plan your next moves carefully</li>
+					<li>Practice the same difficult section repeatedly to memorize patterns</li>
+					<li>Use wall edges to adjust your trajectory mid-air</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty hard">Hard</span>
+			<a href="../games/platformergame/platformergame.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- CASINO SECTION -->
+		<h2 class="section-header">🍀 Test your luck!</h2>
+
+		<!-- Slot Machine -->
+		<div class="game-card">
+			<h2>🎰 Slot Machine</h2>
+			<p class="description">A classic 3x3 slot machine game with multiple betting levels, symbol payouts, and exciting winning animations.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Choose your bet level (1, 2, or 3 coins), then spin the reels. Match symbols across winning lines to earn coins. Higher bets unlock more winning lines but require more coins per spin.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Bet Buttons</strong> - Select bet amount (1, 2, or 3 coins)</li>
+					<li><strong>SPIN Button</strong> - Spin the reels</li>
+					<li><strong>View Payouts</strong> - Different symbols have different values</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>3x3 grid with 9 symbols</li>
+					<li>Multiple betting levels (1, 2, or 3 coins)</li>
+					<li>Different winning lines unlock with higher bets</li>
+					<li>Symbol payouts: 7 (30x), 💎 (16x), 🪙 (16x), 🍀 (18x)</li>
+					<li>Pulse animation for winning combinations</li>
+					<li>Shake animation for losing spins</li>
+					<li>Coin tracking</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Bet 1 coin to learn the game with low stakes</li>
+					<li>Betting 2 or 3 unlocks more winning lines but requires more coins</li>
+					<li>The 7 symbol is the rarest and most valuable</li>
+					<li>Focus on luck—there's no strategy in pure slots!</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty easy">Easy</span>
+			<a href="../casinogames/slot.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Roulette -->
+		<div class="game-card">
+			<h2>🎡 Roulette Improved</h2>
+			<p class="description">A spinning roulette wheel game where you pick a number and spin to see if you win.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Select a number from 1 to 12, then spin the roulette wheel. If the wheel lands on your chosen number, you win! Otherwise, try again.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Dropdown Menu</strong> - Select your lucky number (1-12)</li>
+					<li><strong>SPIN Button</strong> - Spin the wheel</li>
+					<li><strong>Wait for Result</strong> - The wheel spins for 4 seconds</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>12-number roulette wheel</li>
+					<li>Smooth spinning animation</li>
+					<li>Alternating red and black/white segments</li>
+					<li>Result message (Win or Lose)</li>
+					<li>Pointer indicator at the top</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Roulette is pure chance—pick your favorite number</li>
+					<li>Odds are 1 in 12 for each spin</li>
+					<li>Play for fun, not for guaranteed wins!</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty easy">Easy</span>
+			<a href="../casinogames/roulette.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Blackjack -->
+		<div class="game-card">
+			<h2>🃏 Blackjack+</h2>
+			<p class="description">A classic blackjack card game against the dealer. Hit or Stand strategically to reach 21 without busting.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Each round, you and the dealer receive 2 cards. Your goal is to get closer to 21 than the dealer without going over (busting). Hit to take another card or Stand to keep your total. Face cards (J, Q, K) are worth 10, Aces are 1 or 11.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Hit Button</strong> - Take another card (try to get closer to 21)</li>
+					<li><strong>Stand Button</strong> - Keep your current hand and let the dealer play</li>
+					<li><strong>Restart Button</strong> - Start a new round (shows after game ends)</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Full 52-card deck with shuffling</li>
+					<li>Dealer AI that follows standard blackjack rules (hits on 16, stands on 17+)</li>
+					<li>Chip counter (starts with 100 chips)</li>
+					<li>10-chip bet per hand</li>
+					<li>Win/Lose/Push outcomes</li>
+					<li>Visual card display</li>
+					<li>Automatic deck reshuffling when low</li>
+				</ul>
+			</div>
+			
+			<h3>Tips & Strategy</h3>
+			<div class="tips">
+				<ul>
+					<li>Always hit on 11 or lower</li>
+					<li>Always stand on 17 or higher</li>
+					<li>If the dealer shows 6 or lower, they're more likely to bust—be cautious</li>
+					<li>If the dealer shows 7 or higher, be aggressive and hit until you have 17+</li>
+					<li>Aces can be worth 1 or 11 automatically—use this to your advantage</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../casinogames/blackjack.html" class="play-link">▶ Play Now</a>
+		</div>
+	
+		<!-- SIMULATIONS SECTION -->
+		<h2 class="section-header">💡Think & Strategize</h2>
+
+		<!-- Mini Empire: Defenders -->
+		<div class="game-card">
+			<h2>🏰 Mini Empire: Defenders</h2>
+			<p class="description">A turn-based strategy builder where you construct farms, houses, mines, and forts to defend your empire from enemy raids.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Build various structures on your 10x10 grid to generate resources. Farms provide food, houses add population, mines generate gold, and forts provide defense. Balance your resources while defending against periodic enemy attacks.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Select Building</strong> - Click building buttons (Farm, House, Mine, etc.)</li>
+					<li><strong>Place Building</strong> - Click a valid terrain tile to place your building</li>
+					<li><strong>Upgrade Building</strong> - Right-click a building to level it up</li>
+					<li><strong>Destroy Building</strong> - Click Destroy mode, then click a building to remove it</li>
+				</ul>
+			</div>
+			
+			<h3>Building Types</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Farm</strong> ($5) - Generates food for population</li>
+					<li><strong>House</strong> ($5 food) - Adds population to your empire</li>
+					<li><strong>Mine</strong> ($8) - Generates gold (unlocks at Tech level 2)</li>
+					<li><strong>Market</strong> ($15) - Boosts income by 10% (unlocks at Tech level 3)</li>
+					<li><strong>Fort</strong> ($20) - Adds +5 defense vs. raids (unlocks at Tech level 4)</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>10x10 grid-based city building</li>
+					<li>Multiple terrain types (grass, forest, mountain, water)</li>
+					<li>Dynamic resource generation each turn</li>
+					<li>Tech tree with progressive unlocks</li>
+					<li>Enemy raids every 8 turns</li>
+					<li>Fort defense system to protect against attacks</li>
+					<li>Turn-based gameplay with adjustable speed</li>
+					<li>Save/Load system (localStorage)</li>
+				</ul>
+			</div>
+			
+			<h3>Tips & Strategy</h3>
+			<div class="tips">
+				<ul>
+					<li>Build farms and houses first to establish basic income and population</li>
+					<li>Ensure you have enough food for your population or they'll starve</li>
+					<li>Unlock mines to boost gold income for larger buildings</li>
+					<li>Build forts before raids to defend your empire</li>
+					<li>Balanced economy is key—don't overextend on one resource</li>
+					<li>Press P to save the game manually</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty easy">Easy</span>
+			<a href="../sims/mini.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Great Empire Game -->
+		 <div class="game-card">
+			<h2>👑 Great Empire Game</h2>
+			<p class="description">A turn-based strategy fighting game against rival AI empires.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Click the attack button and watch your empire battle rival AI empires. Each empire has unique stats and abilities. Defeat all rival empires to become the ultimate ruler.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Attack</strong> - Click the attack button to initiate combat against rival empires</li>
+					<li><strong>Shop</strong> - Buy powerful boosts to boost your chances</li>
+					<li><strong>Health</strong> - Don't run out of health or your empire will be defeated, then you'll have to start again.</li>
+				</ul>
+			</div>
+			
+			<h3>All encounters</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Siege Camp</strong> ($10 loot) - First level</li>
+					<li><strong>Siege Camp 2</strong> ($20 loot) - Second level</li>
+					<li><strong>Boss</strong> ($35 loot) - Boss 1</li>
+					<li><strong>Ice Kingdom</strong> ($45 loot) - New map level 1</li>
+					<li><strong>Boss</strong> ($55 loot) - Boss 2</li>
+					<li><strong>Ash Camp</strong> ($70 loot) - New map level 1</li>
+					<li><strong>Boss</strong> ($90 loot) - Final Battle</li>
+
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Multi-Scene Navigation</li>
+					<li>Progressive Region & Area Unlocking</li>
+					<li>RPG Character System</li>
+					<li>Turn-Based Combat</li>
+					<li>Persistent Save System</li>
+					<li>Shop with Purchasable Upgrades</li>
+					<li>Enemy & Loot System</li>
+					<li>EXP & Level Progression</li>
+				</ul>
+			</div>
+			
+			<h3>Tips & Strategy</h3>
+			<div class="tips">
+				<ul>
+					<li>Buy upgrades strategically to strengthen your empire.</li>
+					<li>Farm money for efficient upgrades.</li>
+					<li>Defend when necessary. </li>
+					<li>Raise all your stats, not just one.</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../sims/empire.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Wealth Builder -->
+		<div class="game-card">
+			<h2>💰 Wealth Builder</h2>
+			<p class="description">A personal finance simulator where you earn money through tasks, jobs, and investments to grow your wealth.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Start with $1 and complete tasks to earn money. As you accumulate wealth, unlock new job opportunities and investment options. Buy items in the market, craft valuable goods, build businesses, and invest in appreciating assets to reach your financial goals.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Do Task</strong> - Solve math or typing challenges for quick cash</li>
+					<li><strong>Free Money</strong> - Occasional payout (cooldown applies)</li>
+					<li><strong>Part-Time Job</strong> - Earn $10 per action (unlocks at $25+)</li>
+					<li><strong>Stock Market</strong> - Risky investment (unlocks at $25+)</li>
+					<li><strong>Consulting</strong> - Earn $30 (unlocks at $75+)</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Task system (math problems, word typing) for steady income</li>
+					<li>Freelance opportunities with cooldowns</li>
+					<li>Market system—buy low, sell high for profit</li>
+					<li>Crafting recipes to create valuable items</li>
+					<li>Business buildings for passive income</li>
+					<li>Long-term investments with growth rates</li>
+					<li>Passive income from multiple sources</li>
+					<li>Progressive unlocks based on wealth</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Complete tasks early for consistent income</li>
+					<li>Invest in Auto Earner early—passive income is crucial</li>
+					<li>Buy buildings that generate steady cash flow</li>
+					<li>Invest in appreciating assets for long-term growth</li>
+					<li>Use the market to flip items for quick profits</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../sims/lifegame/life.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- City Builder -->
+		<div class="game-card">
+			<h2>🏙️ Metropolis Builder</h2>
+			<p class="description">A city-building simulator where you zone residential, commercial, and industrial areas to develop a thriving metropolis.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Place residential zones to house citizens, commercial zones for income, and industrial zones for production. Build roads to connect areas, add parks for happiness, and manage power plants for energy. Balance growth with happiness and environmental factors.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Select Building</strong> - Click building category tabs (Build, Upgrades, Manage)</li>
+					<li><strong>Place Building</strong> - Left-click a grass tile to place the selected building</li>
+					<li><strong>Upgrade Building</strong> - Right-click a building to upgrade it (if possible)</li>
+					<li><strong>Destroy Building</strong> - Click Destroy mode, then right-click a building</li>
+					<li><strong>Pause/Resume</strong> - Space bar or Pause button</li>
+				</ul>
+			</div>
+			
+			<h3>Zone Types</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Residential</strong> ($100) - Houses citizens, population increases happiness</li>
+					<li><strong>Commercial</strong> ($150) - Generates income from consumers</li>
+					<li><strong>Industrial</strong> ($200) - Produces goods (high energy use, pollutes)</li>
+					<li><strong>Road</strong> ($50) - Connects zones for distribution</li>
+					<li><strong>Park</strong> ($80) - Increases happiness and environmental score</li>
+					<li><strong>Power Plant</strong> ($300) - Generates +30 energy for all buildings</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>27x16 grid-based city planning</li>
+					<li>Multiple zone types with different income/needs</li>
+					<li>Resource management (money, population, energy)</li>
+					<li>Happiness and environmental impact tracking</li>
+					<li>Building upgrades for increased efficiency</li>
+					<li>Random events (tourist booms, disasters)</li>
+					<li>Challenges and achievements</li>
+					<li>Time control (pause, normal, fast)</li>
+				</ul>
+			</div>
+			
+			<h3>Tips & Strategy</h3>
+			<div class="tips">
+				<ul>
+					<li>Start with residential zones to establish population</li>
+					<li>Connect zones with roads for efficient distribution</li>
+					<li>Commercial zones thrive near high-population areas</li>
+					<li>Industrial zones pollute—keep them away from residential areas</li>
+					<li>Build parks to maintain citizen happiness</li>
+					<li>Power plants are expensive but essential for growth</li>
+					<li>Balance expansion with infrastructure—don't overextend</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../sims/citygame/citygame.html" class="play-link">▶ Play Now</a>
+		</div>
+
+
+		<!-- Supply & Demand -->
+		<div class="game-card">
+			<h2>📊 Supply & Demand</h2>
+			<p class="description">A shop management game where you buy and sell items, manage inventory, and negotiate with customers while completing daily quests.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Run your own shop! Buy items from the shop, sell them to customers waiting in seats, and manage your inventory. Complete quests for extra rewards, craft valuable items, and grow your business over time.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Buy from Shop</strong> - Click "Buy" next to items you want</li>
+					<li><strong>Sell to Customers</strong> - Click "Sell" in your inventory when customers are waiting</li>
+					<li><strong>Quest Giver</strong> - Click bottom-right avatar for quest info and rewards</li>
+					<li><strong>Start Wave</strong> - Click to begin each day</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>Dynamic customer arrival system</li>
+					<li>Shop inventory with multiple item types</li>
+					<li>Crafting system to create valuable items</li>
+					<li>Quest system with specific objectives and rewards</li>
+					<li>Day-by-day progression with increasing difficulty</li>
+					<li>Reputation system affecting gameplay</li>
+					<li>Loan system for quick cash (with interest)</li>
+					<li>Art studio (unlockable) for painting valuable items</li>
+				</ul>
+			</div>
+			
+			<h3>Tips & Strategy</h3>
+			<div class="tips">
+				<ul>
+					<li>Buy low and sell high for maximum profit</li>
+					<li>Keep customers happy to maintain reputation</li>
+					<li>Prioritize completing quests for steady rewards</li>
+					<li>Unlock and use the Art Studio for high-value crafting</li>
+					<li>Balance your inventory—don't hoard unpopular items</li>
+					<li>Use the loan sparingly—pay it back to maintain reputation</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty medium">Medium</span>
+			<a href="../sims/s&d/money.html" class="play-link">▶ Play Now</a>
+		</div>
+
+
+		<!-- The Box -->
+		<div class="game-card">
+			<h2>📦 The Box</h2>
+			<p class="description">An interactive mystery puzzle game with 5 levels of increasing complexity. Solve cryptic puzzles and unlock secrets hidden within mysterious boxes.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Work through 5 challenging levels, each with unique puzzles and mechanics. Read notes, decipher symbols, light candles to reveal hidden messages, and make critical choices. Your decisions affect which ending you receive.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Options</strong> - Make story choices and interact with the environment</li>
+					<li><strong>Hint Button (?)</strong> - Get a helpful hint if stuck (one per scene)</li>
+					<li><strong>Inventory</strong> - Collect items that help solve puzzles</li>
+				</ul>
+			</div>
+			
+			<h3>Levels</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Level 1: The Chamber</strong> - Solve the ornate box with symbols and triangles (15 min)</li>
+					<li><strong>Level 2: The Library</strong> - Decipher ancient texts for three keys (12 min)</li>
+					<li><strong>Level 3: The Ascension</strong> - Face three identical boxes and choose wisely (10 min)</li>
+					<li><strong>Level 4: The Vault</strong> - Solve pedestal puzzles and decrypt sequences (8 min)</li>
+					<li><strong>Level 5: The Ascension (Final)</strong> - Ultimate test of knowledge and sacrifice (6 min)</li>
+				</ul>
+			</div>
+			
+			<h3>Features</h3>
+			<div class="features">
+				<ul>
+					<li>5 progressively complex levels with escalating time pressure</li>
+					<li>Inventory system for collecting puzzle items</li>
+					<li>Multiple ending paths based on your choices</li>
+					<li>Hint system (one per scene)</li>
+					<li>Atmospheric writing with cryptic clues</li>
+					<li>Symbol deciphering and code-breaking puzzles</li>
+					<li>Hidden messages revealed through special mechanics</li>
+				</ul>
+			</div>
+			
+			<h3>Tips & Strategy</h3>
+			<div class="tips">
+				<ul>
+					<li>Read all text carefully—clues are hidden in descriptions</li>
+					<li>Manage your time wisely—later levels have strict time limits</li>
+					<li>Use the hint system when truly stuck</li>
+					<li>Pay attention to repeated symbols and numbers</li>
+					<li>Try different choices to find multiple endings</li>
+					<li>The "middle" option often represents wisdom or balance</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty hard">Hard</span>
+			<a href="../sims/box/box.html" class="play-link">▶ Play Now</a>
+		</div>
+
+		<!-- Tower Defense -->
+		<div class="game-card">
+			<h2>🛡️ Tower Defense+</h2>
+			<p class="description">A strategic tower defense game where you build towers along a path to stop enemy waves from reaching the exit.</p>
+			
+			<h3>How to Play</h3>
+			<div class="description">
+				Click on grass tiles to place towers. Enemies follow a winding path and try to reach the exit. Defeat enemies to earn money, then spend it on new towers or upgrades.
+			</div>
+			
+			<h3>Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Tower Selection</strong> - Click tower buttons (Basic $25, Sniper $65, etc.)</li>
+					<li><strong>Place Tower</strong> - Click a grass tile to place the selected tower</li>
+					<li><strong>Upgrade Tower</strong> - Right-click to upgrade a selected tower</li>
+					<li><strong>Sell Tower</strong> - Click Sell button (60% refund)</li>
+				</ul>
+			</div>
+			
+			<h3>Tower Types</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Basic</strong> ($25) - Balanced damage and range</li>
+					<li><strong>Sniper</strong> ($65) - Long range, high damage</li>
+					<li><strong>Frost</strong> ($80) - Slows enemies, medium damage</li>
+					<li><strong>Bomb</strong> ($100) - Area of effect damage</li>
+					<li><strong>Flame</strong> ($125) - Damage over time</li>
+				</ul>
+			</div>
+			
+			<h3>Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Build Basic towers early for cash flow</li>
+					<li>Use Frost towers to slow enemies and give others time to shoot</li>
+					<li>Place Bomb towers at choke points for maximum AOE value</li>
+					<li>Upgrade strong towers instead of building many weak ones</li>
+				</ul>
+			</div>
+			
+			<span class="difficulty hard">Hard</span>
+			<a href="../newgames/tower.html" class="play-link">▶ Play Now</a>
+		</div>
+		
+
+		<footer>
+			<p>© <span id="year"></span> Littletree866 — All games are open-source</p>
+			<p style="font-size: 0.9rem; opacity: 0.8;">For more games, visit the <a href="../index.html" style="color: var(--primary); text-decoration: none; font-weight: 700;">Game Hub</a></p>
+		</footer>
+	</div>
+
+	<script>
+		document.getElementById('year').textContent = new Date().getFullYear();
+	</script>
+</body>
+</html>

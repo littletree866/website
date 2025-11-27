@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="check.png">
     <title>The Box</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #121212;
@@ -23,7 +24,7 @@
         }
         
         body {
-            font-family: 'Ink Free', cursive;
+            font-family: 'DM Sans', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             max-width: 900px;
@@ -107,7 +108,7 @@
             transition: all 0.3s;
             border-radius: 5px;
             font-size: 1rem;
-            font-family: "Ink Free", cursive;
+            font-family: "DM Sans", sans-serif;
         }
         
         .option-btn:hover {
@@ -244,7 +245,7 @@
         <h1>The Box <span id="level-indicator">Level 1: The Chamber</span></h1>
         <div id="game-info">
             <div id="timer">Time: 15:00</div>
-            <div id="level">Level: 1/3</div>
+            <div id="level">Level: 1/5</div> 
         </div>
     </header>
     
@@ -760,7 +761,7 @@
                 }
             },
             3: {
-                name: "The Final Test",
+                name: "The Main Chamber",
                 timer: 600, // 10 minutes
                 scenes: {
                     start: {
@@ -823,25 +824,290 @@
                         
                         <div class="ending">TRUE ENDING: Enlightenment Achieved</div>`,
                         options: [
+                            { text: "Continue", next: "startL4" } // will progress to level 4 via onEnter below
+                        ]
+                    },
+                    // ...other level 3 scenes...
+                    restartGame: {
+                        onEnter: () => {
+                            resetGame();
+                            loadLevel(1);
+                            return levels[1].scenes.start;
+                        }
+                    },
+                    // transition scene to level 4
+                    startL4: {
+                        onEnter: () => {
+                            loadLevel(4);
+                            return levels[4].scenes.start;
+                        }
+                    }
+                }
+            },
+            /* NEW LEVEL 4 - The Vault (harder) */
+            4: {
+                name: "The Vault",
+                timer: 480, // 8 minutes
+                scenes: {
+                    start: {
+                        text: `You arrive in a metal-lined vault. Dozens of tumblers and pressure plates line the floor and ceiling.
+                        In the center rests an obsidian box covered in shifting runes. A projection on the wall cycles strange glyphs.`,
+                        options: [
+                            { text: "Examine the obsidian box", next: "examineVault" },
+                            { text: "Study the wall projection", next: "studyProjection" },
+                            { text: "Carefully walk the marked path on the floor", next: "walkPath" }
+                        ]
+                    },
+                    examineVault: {
+                        text: `The obsidian box's runes shift when you look directly at them. There are four small pedestals around it,
+                        each with a socket that seems to accept a small item. A warning plaque reads: "Balance is required."`,
+                        options: [
+                            { text: "Inspect the pedestals", next: "inspectPedestals" },
+                            { text: "Return to projection", next: "studyProjection" },
+                            { text: "Try to open the box directly", next: "forceVault" }
+                        ]
+                    },
+                    studyProjection: {
+                        text: `The projection cycles patterns that correspond to pedestal states: filled, empty, inverted. 
+                        You realize it's a ternary puzzle: pedestals must be set to a pattern (0,1,2) matching the sequence on the wall.`,
+                        options: [
+                            { text: "Attempt to set pedestals to 0-1-2-1", next: "solvePedestals" },
+                            { text: "Search the vault for objects", next: "searchVault" }
+                        ]
+                    },
+                    inspectPedestals: {
+                        text: `Each pedestal accepts either a key-like token or a pressure tap. There's a small etched riddle: 
+                        "Not all openings are taken; invert the middle to reveal the truth."`,
+                        options: [
+                            { text: "Invert the middle pedestal", next: "invertMiddle" },
+                            { text: "Return to the box", next: "examineVault" }
+                        ]
+                    },
+                    invertMiddle: {
+                        text: `You flip the middle pedestal. The runes flicker. You hear a distant clunk — something in the vault shifted.`,
+                        options: [
+                            { text: "Try the pedestal pattern shown earlier", next: "solvePedestals" },
+                            { text: "Search the floor for loose tiles", next: "searchVault" }
+                        ]
+                    },
+                    searchVault: {
+                        text: `You find a set of four metallic chips hidden beneath tiles — each chip is numbered and worn.
+                        Their shapes hint how they might orient in the pedestal sockets.`,
+                        onEnter: () => {
+                            gameState.inventory.push('Set of Vault Chips');
+                            updateInventory();
+                        },
+                        options: [
+                            { text: "Place the chips according to the projection (0-1-2-1)", next: "solvePedestals" },
+                            { text: "Keep the chips and examine the box", next: "examineVault" }
+                        ]
+                    },
+                    solvePedestals: {
+                        text: `You set the pedestals to the sequence. The runes go still; a seam opens in the obsidian and reveals a small crystalline key.
+                        As you take it, the vault's timer accelerates — it seems the box allowed you access but at a cost.`,
+                        onEnter: () => {
+                            gameState.inventory.push('Crystalline Key');
+                            updateInventory();
+                        },
+                        options: [
+                            { text: "Try the crystalline key on the box", next: "useCrystallineKey" },
+                            { text: "Leave the key and search for other exits", next: "lookForExit" }
+                        ]
+                    },
+                    useCrystallineKey: {
+                        text: `The crystalline key turns smoothly. Inside is an hourglass sealed with a lock and a note: 
+                        "Two minutes remain to choose: pass the test of light or the test of silence."`,
+                        options: [
+                            { text: "Choose the Test of Light", next: "testLight" },
+                            { text: "Choose the Test of Silence", next: "testSilence" }
+                        ]
+                    },
+                    testLight: {
+                        text: `Light refracts inside the hourglass to reveal a micro-etching: a sequence of symbols. You must reproduce it on the box's face.
+                        Reproducing it correctly opens the north gate. The box sings as the gate slides open.`,
+                        options: [
+                            { text: "Replicate the sequence (careful)", next: "vaultSuccess" },
+                            { text: "Fail purposely", next: "vaultFail" }
+                        ]
+                    },
+                    testSilence: {
+                        text: `A pressure-sensitive plate demands absolute stillness. You barely breathe and the plate accepts you. A section of the wall glides open revealing a corridor.`,
+                        options: [
+                            { text: "Proceed through the corridor", next: "vaultSuccess" },
+                            { text: "Step back", next: "examineVault" }
+                        ]
+                    },
+                    vaultSuccess: {
+                        text: `A heavy iron gate opens and a stairwell descends into a deeper, colder chamber.
+                        <div class="ending">LEVEL COMPLETE: The Gate Opens</div>`,
+                        options: [
+                            { text: "Descend to the Deeper Chamber", next: "startL5" }
+                        ]
+                    },
+                    vaultFail: {
+                        text: `An alarm erupts and sharp needles release from the ceiling. You stumble backward as the room fills with smoke.
+                        <div class="ending">BAD ENDING: Vault's Retribution</div>`,
+                        options: [
+                            { text: "Restart Vault", next: "start" }
+                        ]
+                    },
+                    startL5: {
+                        onEnter: () => {
+                            loadLevel(5);
+                            return levels[5].scenes.start;
+                        }
+                    }
+                }
+            },
+            /* NEW LEVEL 5 - The Ascension (most difficult, final) */
+            5: {
+                name: "The Ascension",
+                timer: 360, // 6 minutes
+                scenes: {
+                    start: {
+                        text: `You arrive in a vertical chamber with rotating rings and suspended platforms. At the apex sits a final box, small and featureless.
+                        An inscription reads: "To ascend, relinquish what anchors you."`,
+                        options: [
+                            { text: "Examine the rotating rings", next: "examineRings" },
+                            { text: "Survey the platforms below", next: "surveyPlatforms" },
+                            { text: "Approach the apex box", next: "apexBox" }
+                        ]
+                    },
+                    examineRings: {
+                        text: `The rings rotate in relation to each other. Each ring accepts a token that changes its rotation speed and direction.
+                        The right configuration aligns a bridge of light to the apex.`,
+                        options: [
+                            { text: "Attempt to align the rings", next: "alignRings" },
+                            { text: "Look for tokens around the chamber", next: "searchAscension" }
+                        ]
+                    },
+                    searchAscension: {
+                        text: `You find three unique tokens: a Weight, a Mirror shard, and a Whisper-stone. The tokens interact differently with the rings.`,
+                        onEnter: () => {
+                            gameState.inventory.push('Weight Token', 'Mirror Shard', 'Whisper-stone');
+                            updateInventory();
+                        },
+                        options: [
+                            { text: "Use Weight + Mirror to slow and reflect", next: "alignRings" },
+                            { text: "Use Whisper-stone to stabilize", next: "stabilize" }
+                        ]
+                    },
+                    alignRings: {
+                        text: `After delicate adjustments the rings click into a harmonic rhythm. The platforms form a ladder of light but you must decide what to sacrifice: an item, a memory, or time.`,
+                        options: [
+                            { text: "Sacrifice an item from inventory", next: "sacrificeItem" },
+                            { text: "Sacrifice time (reduce timer by 60s)", next: "sacrificeTime" },
+                            { text: "Sacrifice nothing", next: "refuseSacrifice" }
+                        ]
+                    },
+                    sacrificeItem: {
+                        text: `You drop an item into a slot. The rings flare and a path of light blooms to the apex.`,
+                        onEnter: () => {
+                            // remove one item if exists
+                            if (gameState.inventory.length > 0) gameState.inventory.pop();
+                            updateInventory();
+                        },
+                        options: [
+                            { text: "Climb the ladder of light", next: "climbToApex" }
+                        ]
+                    },
+                    sacrificeTime: {
+                        text: `You turn an hourglass and let go of a minute of your life. The chamber hums; you feel slightly older but the ladder forms.`,
+                        onEnter: () => {
+                            gameState.timeLeft = Math.max(0, gameState.timeLeft - 60);
+                            updateTimerDisplay();
+                        },
+                        options: [
+                            { text: "Climb to the apex", next: "climbToApex" }
+                        ]
+                    },
+                    refuseSacrifice: {
+                        text: `The rings shudder and a gust blows you back. Without sacrifice the ladder cannot fully form.`,
+                        options: [
+                            { text: "Try sacrificing something else", next: "alignRings" },
+                            { text: "Wait and observe the rings", next: "examineRings" }
+                        ]
+                    },
+                    stabilize: {
+                        text: `The Whisper-stone calms the mechanism and temporarily grants a moment of clarity. A sequence of glyphs flashes: left-right-center-left.`,
+                        options: [
+                            { text: "Replicate the glyph sequence on the apex box", next: "apexUnlock" },
+                            { text: "Ignore and climb manually", next: "climbToApex" }
+                        ]
+                    },
+                    climbToApex: {
+                        text: `You climb the ladder of light and stand before the final box. Its surface feels warm and alive.`,
+                        options: [
+                            { text: "Open the box", next: "openFinalBox" },
+                            { text: "Examine the box for traps", next: "trapCheck" }
+                        ]
+                    },
+                    apexBox: {
+                        text: `The apex box is deceptively plain. Tiny markings become visible only when you align the rings correctly.`,
+                        options: [
+                            { text: "Align rings first", next: "examineRings" },
+                            { text: "Try to open the box directly", next: "openFinalBox" }
+                        ]
+                    },
+                    apexUnlock: {
+                        text: `You trace the glyph sequence. The box hums and a lid pops open revealing an ornate key and a mirror shard that fits your previous piece.`,
+                        onEnter: () => {
+                            gameState.inventory.push('Apex Key');
+                            updateInventory();
+                        },
+                        options: [
+                            { text: "Take the key and use it", next: "useApexKey" },
+                            { text: "Combine mirror shards first", next: "combineMirror" }
+                        ]
+                    },
+                    combineMirror: {
+                        text: `You fit the mirror shard to the shard you found earlier; together they form a small looking-glass. The box reacts to the reflection.`,
+                        onEnter: () => {
+                            // optional state set, no strict dependency
+                        },
+                        options: [
+                            { text: "Open the box now", next: "openFinalBox" }
+                        ]
+                    },
+                    useApexKey: {
+                        text: `The key opens an inner compartment. Light pours out and you feel weightless as a doorway appears above you.`,
+                        options: [
+                            { text: "Step through the doorway", next: "trueAscension" },
+                            { text: "Step back", next: "climbToApex" }
+                        ]
+                    },
+                    openFinalBox: {
+                        text: `You open the final box. The chamber dissolves into a stairway of stars. A single message: 
+                        "You rose by letting go."`,
+                        options: [
+                            { text: "Embrace the Ascension", next: "trueAscension" },
+                            { text: "Refuse and stay", next: "finalRefuse" }
+                        ]
+                    },
+                    finalRefuse: {
+                        text: `You refuse. The chamber locks you in a loop of the same trials.`,
+                        options: [
+                            { text: "Try again", next: "start" }
+                        ]
+                    },
+                    trueAscension: {
+                        text: `You step into the stairway and feel everything fall away. A brilliant peace surrounds you.
+                        <div class="ending">TRUE ENDING: Ascension Achieved</div>`,
+                        options: [
                             { text: "Play Again", next: "restartGame" }
                         ]
                     },
-                    useKeyLeftBox: {
-                        text: `The key turns easily in the left box. It opens to reveal... nothingness. A vortex pulls you in, 
-                        and you find yourself falling endlessly through darkness.
-                        
-                        <div class="ending">BAD ENDING: Eternal Falling</div>`,
+                    trapCheck: {
+                        text: `You detect a faint pressure lattice under the box. Disarming it reveals a hidden compartment with a final inscription.`,
                         options: [
-                            { text: "Try Again", next: "start" }
+                            { text: "Read the inscription", next: "readInscription" },
+                            { text: "Open the box carefully", next: "openFinalBox" }
                         ]
                     },
-                    useKeyRightBox: {
-                        text: `As you turn the key in the right box, the room begins to flood with water. Before you can react, 
-                        you're completely submerged, the water oddly thick and impossible to swim through.
-                        
-                        <div class="ending">BAD ENDING: Drowning in Knowledge</div>`,
+                    readInscription: {
+                        text: `"Those who climb must sometimes leave parts of themselves behind. The key is within."`,
                         options: [
-                            { text: "Try Again", next: "start" }
+                            { text: "Open the box", next: "openFinalBox" }
                         ]
                     },
                     restartGame: {
@@ -877,7 +1143,8 @@
             gameState.currentScene = 'start';
             gameState.timeLeft = levels[levelNum].timer;
             updateTimerDisplay();
-            levelDisplay.textContent = `Level: ${levelNum}/3`;
+            const totalLevels = Object.keys(levels).length; // dynamic total
+            levelDisplay.textContent = `Level: ${levelNum}/${totalLevels}`; // changed from hardcoded /3
             levelIndicator.textContent = `Level ${levelNum}: ${levels[levelNum].name}`;
             displayScene('start');
         }
@@ -989,7 +1256,8 @@
                 textDisplay.appendChild(endingElement);
 
                 if (ending.includes("ENDING")) {
-                    if (gameState.currentLevel < 3 && (ending.includes("TRUE") || ending.includes("SECRET") || ending.includes("COMPLETE"))) {
+                    const totalLevels = Object.keys(levels).length; // dynamic total
+                    if (gameState.currentLevel < totalLevels && (ending.includes("TRUE") || ending.includes("SECRET") || ending.includes("COMPLETE"))) {
                         const nextLevelBtn = document.createElement('button');
                         nextLevelBtn.className = 'option-btn';
                         nextLevelBtn.textContent = 'Continue to Next Level';
