@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Empire: Defenders</title>
+  <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+  <style>
+    body {
+      background: radial-gradient(circle at top, #1a1a1a, #0c0c0c);
+      color: #eee;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      letter-spacing: 2px;
+    }
+
+    /* ==== GRID ==== */
+    #game {
+      display: grid;
+      grid-template-columns: repeat(10, 45px);
+      grid-template-rows: repeat(10, 45px);
+      gap: 3px;
+      margin-top: 20px;
+    }
+
+    .tile {
+      width: 45px;
+      height: 45px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .tile:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 6px #aaa;
+    }
+
+    .grass {
+      background: #357a38;
+    }
+
+    .forest {
+      background: #2b542c;
+    }
+
+    .mountain {
+      background: #555;
+    }
+
+    .water {
+      background: #003366;
+    }
+
+    .farm {
+      background: #e3a93b;
+    }
+
+    .house {
+      background: #4d7cff;
+    }
+
+    .mine {
+      background: #8e8e8e;
+    }
+
+    .market {
+      background: #c2462f;
+    }
+
+    .fort {
+      background: #6666aa;
+    }
+
+    .enemy {
+      background: #9b1d1d;
+    }
+
+    /* ==== INFO ==== */
+    #info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    button {
+      margin: 4px;
+      padding: 6px 12px;
+      background: #555;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #777;
+    }
+
+    button:disabled {
+      background: #333;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    #alert {
+      margin-top: 10px;
+      color: #f44;
+      font-weight: bold;
+    }
+
+    /* ==== TECH TREE ==== */
+    #techTree {
+      margin-top: 15px;
+      border: 1px solid #444;
+      padding: 10px;
+      width: 340px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    #techTree h3 {
+      margin: 5px 0;
+    }
+
+    #techTree p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    /* ==== TUTORIAL ==== */
+    #tutorial {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.92);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 16px;
+      padding: 20px;
+    }
+
+    #tutorial button {
+      margin-top: 20px;
+      background: #4caf50;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Mini Empire 🏰</h1>
+
+  <div id="info">
+    <div>
+      🍞 Food: <span id="food">10</span> |
+      💰 Money: <span id="money">10</span> |
+      👥 Population: <span id="pop">0</span> |
+      🏅 Level: <span id="levelNum">1</span> |
+      🛡 Defense: <span id="defense">0</span>
+    </div>
+    <div>
+      <button id="buildFarm">Farm (💰5)</button>
+      <button id="buildHouse">House (-5🍞)</button>
+      <button id="buildMine" disabled>Mine (💰8)</button>
+      <button id="buildMarket" disabled>Market (💰15)</button>
+      <button id="buildFort" disabled>Fort (💰20)</button>
+    </div>
+    <div id="alert"></div>
+  </div>
+
+  <div id="game"></div>
+
+  <div id="techTree">
+    <h3>🔬 Tech Tree</h3>
+    <p id="techFarm">✔ Farms: unlocked</p>
+    <p id="techMine">❌ Unlock Mines (💰50)</p>
+    <p id="techMarket">❌ Unlock Markets (💰150)</p>
+    <p id="techFort">❌ Unlock Forts (💰250)</p>
+    <p id="techVictory">❌ Reach 💰600 to win!</p>
+  </div>
+
+  <div id="tutorial">
+    <h2>Welcome to Mini Empire: Defenders</h2>
+    <p>
+      Build your empire 🌆 and defend it from enemy raids!<br><br>
+      🌾 Farm = +Food<br>
+      🏠 House = +Population<br>
+      ⛏ Mine = +Money<br>
+      🏬 Market = Boost income<br>
+      🛡 Fort = Adds defense, protects from enemies<br><br>
+      Beware of 🐉 enemy attacks every few turns!<br>
+      Earn 💰 to unlock more buildings.
+    </p>
+    <button id="startGame">Start Game</button>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const foodDisplay = document.getElementById("food");
+    const moneyDisplay = document.getElementById("money");
+    const popDisplay = document.getElementById("pop");
+    const levelDisplay = document.getElementById("levelNum");
+    const defenseDisplay = document.getElementById("defense");
+    const alertBox = document.getElementById("alert");
+
+    const buildFarmBtn = document.getElementById("buildFarm");
+    const buildHouseBtn = document.getElementById("buildHouse");
+    const buildMineBtn = document.getElementById("buildMine");
+    const buildMarketBtn = document.getElementById("buildMarket");
+    const buildFortBtn = document.getElementById("buildFort");
+
+    const techMine = document.getElementById("techMine");
+    const techMarket = document.getElementById("techMarket");
+    const techFort = document.getElementById("techFort");
+    const techVictory = document.getElementById("techVictory");
+
+    const tutorial = document.getElementById("tutorial");
+    const startBtn = document.getElementById("startGame");
+
+    let mode = "none", food = 10, money = 10, pop = 0, level = 1, defense = 0, running = false, turn = 0;
+    const MINI_SAVE_KEY = 'mini_empire_save';
+    function saveMiniState() {
+      const layout = [...document.querySelectorAll('.tile')].map(t => ({
+        terrain: t.dataset.terrain || 'plains',
+        built: t.dataset.built || null,
+        text: t.textContent
+      }));
+      const s = { food, money, pop, level, defense, turn, layout };
+      localStorage.setItem(MINI_SAVE_KEY, JSON.stringify(s));
+    }
+    function loadMiniState() {
+      const s = localStorage.getItem(MINI_SAVE_KEY);
+      if (!s) return false;
+      try {
+        const obj = JSON.parse(s);
+        food = obj.food || food; money = obj.money || money; pop = obj.pop || pop; level = obj.level || level; defense = obj.defense || defense; turn = obj.turn || turn;
+        updateStats();
+        if (obj.layout && obj.layout.length === 100) {
+          const tiles = document.querySelectorAll('.tile');
+          obj.layout.forEach((d, i) => {
+            const t = tiles[i];
+            if (!t) return;
+            t.dataset.terrain = d.terrain || 'plains';
+            t.dataset.built = d.built || '';
+            t.textContent = d.text || getTerrainEmoji(d.terrain);
+
+            if (d.built === 'farm') t.className = 'tile farm';
+            else if (d.built === 'house') t.className = 'tile house';
+            else if (d.built === 'mine') t.className = 'tile mine';
+            else if (d.built === 'market') t.className = 'tile market';
+            else if (d.built === 'fort') t.className = 'tile fort';
+            else if (d.terrain === 'rock' || d.terrain === 'mountain') t.className = 'tile mountain';
+            else if (d.terrain === 'water') t.className = 'tile water';
+            else if (d.terrain === 'forest') t.className = 'tile forest';
+            else { t.className = 'tile grass'; }
+          });
+        }
+        return true;
+      } catch (e) { return false; }
+    }
+
+    if (loadMiniState()) { alert('Autosave loaded'); }
+    setInterval(() => { if (running) saveMiniState(); }, 5000);
+
+
+    const terrains = [
+      "plains", "plains", "plains", "plains", "plains",
+      "forest", "forest",
+      "rock", "mountain",
+      "water"
+    ];
+
+
+    for (let i = 0; i < 100; i++) {
+      const t = document.createElement("div");
+      const terrain = terrains[Math.floor(Math.random() * terrains.length)];
+      t.classList.add("tile", terrain);
+      t.dataset.terrain = terrain;
+      t.textContent = getTerrainEmoji(terrain);
+      t.addEventListener("click", () => build(t));
+      game.appendChild(t);
+    }
+
+    function getTerrainEmoji(terrain) {
+      switch (terrain) {
+        case "rock": return "🪨";
+        case "mountain": return "⛰️";
+        case "water": return "🌊";
+        default: return "🌱";
+      }
+    }
+
+
+    buildFarmBtn.onclick = () => mode = "farm";
+    buildHouseBtn.onclick = () => mode = "house";
+    buildMineBtn.onclick = () => mode = "mine";
+    buildMarketBtn.onclick = () => mode = "market";
+    buildFortBtn.onclick = () => mode = "fort";
+
+
+    function build(tile) {
+      if (!running || tile.classList.contains("enemy")) return;
+      const terrain = tile.dataset.terrain;
+      if (tile.dataset.built) return;
+      switch (mode) {
+        case "farm":
+          if (terrain === "water" || terrain === "mountain") return;
+          if (money >= 5) { money -= 5; tile.dataset.built = "farm"; tile.textContent = "🌾"; tile.className = "tile farm"; }
+          break;
+        case "house":
+          if (food >= 5) { food -= 5; pop += 2; tile.dataset.built = "house"; tile.textContent = "🏠"; tile.className = "tile house"; }
+          break;
+        case "mine":
+          if (level >= 2 && money >= 8 && terrain === "mountain") { money -= 8; tile.dataset.built = "mine"; tile.textContent = "⛏️"; tile.className = "tile mine"; }
+          break;
+        case "market":
+          if (level >= 3 && money >= 15) { money -= 15; tile.dataset.built = "market"; tile.textContent = "🏬"; tile.className = "tile market"; }
+          break;
+        case "fort":
+          if (level >= 4 && money >= 20) { money -= 20; defense += 5; tile.dataset.built = "fort"; tile.textContent = "🛡"; tile.className = "tile fort"; }
+          break;
+      }
+
+
+      if (window.badgeSystem) {
+        const farmCount = document.querySelectorAll(".farm").length;
+        const houseCount = document.querySelectorAll(".house").length;
+
+        if (mode === "farm" && !window.badgeSystem.isBadgeUnlocked('city-start')) {
+          window.badgeSystem.unlockBadge('city-start');
+        }
+      }
+
+      updateStats();
+    }
+
+
+    function gameLoop() {
+      if (!running) return;
+      turn++;
+
+      const farms = document.querySelectorAll(".farm").length;
+      const houses = document.querySelectorAll(".house").length;
+      const mines = document.querySelectorAll(".mine").length;
+      const markets = document.querySelectorAll(".market").length;
+      const forts = document.querySelectorAll(".fort").length;
+
+      const boost = 1 + markets * 0.1;
+      food += (farms * 2 - pop * 0.4) * boost;
+      money += (houses * 1 + mines * 3) * boost;
+
+      if (food > pop * 2) pop += 0.1;
+
+
+      if (money >= 50 && level < 2) unlockTech(2, "Mines unlocked!", buildMineBtn, techMine);
+      if (money >= 150 && level < 3) unlockTech(3, "Markets unlocked!", buildMarketBtn, techMarket);
+      if (money >= 250 && level < 4) unlockTech(4, "Forts unlocked!", buildFortBtn, techFort);
+      if (money >= 600) { running = false; alertBox.textContent = "🏆 Victory! Your empire dominates!"; techVictory.textContent = "✔ Victory achieved!"; }
+
+
+      if (turn % 8 === 0 && running) enemyRaid();
+
+      if (food <= 0) { running = false; food = 0; alertBox.textContent = "☠ Your people starved! Game Over."; }
+      updateStats();
+    }
+
+
+    function enemyRaid() {
+      alertBox.textContent = "⚔️ Enemies are attacking!";
+      const enemyTiles = [...document.querySelectorAll(".tile")].filter(t => !t.dataset.built && t.dataset.terrain !== "water");
+      if (enemyTiles.length === 0) return;
+      const target = enemyTiles[Math.floor(Math.random() * enemyTiles.length)];
+      target.className = "tile enemy";
+      target.textContent = "💀";
+      setTimeout(() => resolveRaid(target), 2000);
+    }
+
+    function resolveRaid(tile) {
+      if (defense >= 5) {
+        defense -= 5;
+
+        const terrain = tile.dataset.terrain || 'plains';
+        tile.className = 'tile ' + (terrain === 'mountain' ? 'mountain' : (terrain === 'water' ? 'water' : (terrain === 'forest' ? 'forest' : 'grass')));
+        tile.textContent = getTerrainEmoji(terrain);
+        tile.dataset.built = '';
+        alertBox.textContent = "🛡️ Forts repelled the enemy!";
+      } else {
+        food = Math.max(0, food - 5);
+        money = Math.max(0, money - 10);
+
+        tile.dataset.built = '';
+        tile.className = 'tile plains';
+        tile.textContent = '💀';
+        alertBox.textContent = "💀 You were raided! Lost food and money!";
+      }
+      updateStats();
+    }
+
+
+    function unlockTech(lvl, msg, btn, txt) {
+      level = lvl;
+      btn.disabled = false;
+      txt.textContent = txt.textContent.replace("❌", "✔");
+      alertBox.textContent = msg;
+    }
+
+
+    function updateStats() {
+      foodDisplay.textContent = Math.floor(food);
+      moneyDisplay.textContent = Math.floor(money);
+      popDisplay.textContent = Math.floor(pop);
+      levelDisplay.textContent = level;
+      defenseDisplay.textContent = defense;
+    }
+
+
+    startBtn.onclick = () => {
+      tutorial.style.display = "none";
+      running = true;
+      setInterval(gameLoop, 1500);
+    };
+
+    document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'p') { saveMiniState(); alert('Game saved'); } });
+  </script>
+</body>
+
+</html>

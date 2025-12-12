@@ -1,429 +1,1384 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<title>Platformer</title>
-<link rel="icon" href="check.png">
-<style>
-    body { 
-        margin: 0; 
-        overflow: hidden; 
-        background: #222; 
-        font-family: "Ink Free", cursive;
-    }
-    canvas { 
-        background: #87CEEB; /* sky base for parallax */
-        display: block; 
-        margin: 0 auto; 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Impossible Game</title>
+      <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-    #ui {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        color: white;
-        font-size: 24px;
-        text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
-        font-family: "Ink Free", cursive;
-    }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: "DM Sans", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
 
-    #levelText { font-size: 28px; margin-bottom: 5px; }
+        #gameContainer {
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #4a4a6d;
+        }
 
-    #healthBar {
-        width: 220px;
-        height: 22px;
-        background: linear-gradient(90deg,#440000,#330000);
-        border-radius: 12px;
-        margin-top: 5px;
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
-    }
+        canvas {
+            background: linear-gradient(to bottom, #87CEEB 0%, #98d4f0 100%);
+            display: block;
+            border-radius: 10px;
+        }
 
-    #healthFill {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg,#ff6b6b,#ff2f2f);
-        border-radius: 12px;
-        transition: width 0.2s linear;
-    }
+        /* UI Improvements */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 22px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            font-family: "DM Sans", sans-serif;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    #pauseBtn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: #555;
-        color: white;
-        padding: 10px 15px;
-        font-size: 22px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-family: "Ink Free", cursive;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    }
+        #levelText {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffdd00;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .screen {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.85);
-        color: white;
-        padding: 40px 70px;
-        font-size: 40px;
-        border-radius: 20px;
-        text-align: center;
-        display: none;
-        font-family: "Ink Free", cursive;
-    }
+        #scoreContainer {
+            font-size: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .screen button {
-        margin-top: 25px;
-        padding: 10px 25px;
-        font-size: 28px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-family: "Ink Free", cursive;
-    }
-</style>
+        #healthContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #healthLabel {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #healthBar {
+            width: 240px;
+            height: 24px;
+            background: linear-gradient(90deg, #2a0a0a, #1a0505);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8), 0 3px 6px rgba(0, 0, 0, 0.3);
+            border: 2px solid #4a1a1a;
+        }
+
+        #healthFill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ff2f2f, #ff6b6b);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: healthPulse 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #healthFill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes healthPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Controls Display */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .key {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            min-width: 30px;
+            text-align: center;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Pause Button */
+        #pauseBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #555, #333);
+            color: white;
+            padding: 12px 24px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: "DM Sans", sans-serif;
+            font-weight: 500;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+            border: 2px solid #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #pauseBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, #666, #444);
+        }
+
+        #pauseBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(30, 30, 60, 0.95));
+            color: white;
+            padding: 50px 80px;
+            font-size: 44px;
+            border-radius: 24px;
+            text-align: center;
+            display: none;
+            font-family: "DM Sans", sans-serif;
+            font-weight: 700;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 3px solid #4a4a6d;
+            min-width: 500px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .screen h2 {
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffdd00, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .screen p {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #ccc;
+            font-weight: 400;
+        }
+
+        .screen button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: "DM Sans", sans-serif;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .screen button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #66BB6A, #4CAF50);
+        }
+
+        .screen button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Double Jump Indicator */
+        #doubleJumpIndicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 200, 255, 0.2);
+            color: #00ffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 18px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 200, 255, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Particle Effects Container */
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Instructions Screen */
+        #instructionsScreen {
+            z-index: 1001;
+        }
+
+        .instructions {
+            font-size: 18px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        /* Mobile Controls */
+        #mobileControls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            gap: 20px;
+        }
+
+        .mobile-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            backdrop-filter: blur(5px);
+            transition: all 0.1s;
+        }
+
+        .mobile-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 950px) {
+            canvas {
+                width: 100vw;
+                height: auto;
+                max-height: 100vh;
+            }
+
+            #gameContainer {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .screen {
+                min-width: 90vw;
+                padding: 30px;
+                font-size: 36px;
+            }
+
+            #ui,
+            #controls,
+            #pauseBtn {
+                transform: scale(0.9);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #mobileControls {
+                display: flex;
+            }
+
+            #controls {
+                display: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
+    <div id="gameContainer">
+        <canvas id="game" width="900" height="900"></canvas>
 
-<div id="ui">
-    <div id="levelText">Level: 1</div>
-    Score: <span id="scoreText">0</span>
-    <div id="healthBar"><div id="healthFill"></div></div>
-</div>
+        <div id="ui">
+            <div id="levelText">🎯 Level: 1</div>
+            <div id="scoreContainer">⭐ Score: <span id="scoreText">0</span></div>
+            <div id="healthContainer">
+                <div id="healthLabel">❤️ Health</div>
+                <div id="healthBar">
+                    <div id="healthFill"></div>
+                </div>
+            </div>
+        </div>
 
-<button id="pauseBtn">Pause</button>
+        <div id="doubleJumpIndicator">✨ Double Jump Active</div>
 
-<div id="gameOverScreen" class="screen">
-    Game Over<br><br>
-    <button onclick="resetGame()">Try Again</button>
-</div>
+        <div id="mobileControls">
+            <div class="mobile-btn" id="leftBtn">←</div>
+            <div class="mobile-btn" id="rightBtn">→</div>
+            <div class="mobile-btn" id="jumpBtn">↑</div>
+        </div>
 
-<div id="winScreen" class="screen">
-    You Win!<br><br>
-    <button onclick="resetGame()">Play Again</button>
-</div>
+        <button id="pauseBtn">⏸️ Pause</button>
 
-<canvas id="game" width="900" height="500"></canvas>
+        <div id="particles"></div>
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+        <div id="gameOverScreen" class="screen">
+            <h2>Game Over</h2>
+            <p>Score: <span id="finalScore">0</span></p>
+            <p>Level: <span id="finalLevel">1</span></p>
+            <button onclick="resetGame()">Try Again</button>
+        </div>
 
-const keys = { left: false, right: false, up: false };
-let paused = false;
-let score = 0;
-let health = 100;
-let level = 1;
+        <div id="winScreen" class="screen">
+            <h2>You Win! 🎉</h2>
+            <p>Final Score: <span id="winScore">0</span></p>
+            <button onclick="resetGame()">Play Again</button>
+        </div>
 
-const scoreText = document.getElementById("scoreText");
-const healthFill = document.getElementById("healthFill");
-const gameOverScreen = document.getElementById("gameOverScreen");
-const winScreen = document.getElementById("winScreen");
-const levelText = document.getElementById("levelText");
+        <div id="instructionsScreen" class="screen">
+            <h2>The Impossible Game</h2>
+            <p class="instructions">Reach the goal while avoiding enemies and traps!</p>
+            <p class="instructions">Collect coins for points and power-ups for special abilities.</p>
+            <p class="instructions">Complete all 4 levels to win!</p>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+    </div>
 
-const world = { width: 2400, height: canvas.height };
-let camera = { x: 0, width: canvas.width, smooth: 0.08 };
+    <script>
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const particlesContainer = document.getElementById("particles");
 
-let player = { x:50, y:50, w:36, h:44, vx:0, vy:0, speed:4.2, jumping:false, onGround:false, coyote:0, canDoubleJump:false };
-const gravity = 0.7;
-const jumpForce = -13;
-const COYOTE_TIME = 0.12;
-let lastTime = performance.now();
 
-let platforms = [];
-let enemies = [];
-let coins = [];
-let powerUps = [];
-let goal = null;
+        const keys = { left: false, right: false, up: false };
+        let paused = false;
+        let score = 0;
+        let health = 100;
+        let level = 1;
+        let gameStarted = false;
+        let particles = [];
+        let screenShake = 0;
 
-/* ---------------- LEVEL DATA ---------------- */
-function loadLevel(n) {
-    level = n;
-    levelText.textContent = "Level: " + level;
-    enemies = []; platforms = []; coins = []; powerUps = []; goal = null;
 
-    function staticPlat(x,y,w,h){ return {x,y,w,h,type:'static'}; }
-    function movingPlat(x,y,w,h,minX,maxX,speed){ return {x,y,w,h,type:'moving',vx:speed,minX,maxX}; }
-    function fallPlat(x,y,w,h,delay){ return {x,y,w,h,type:'fall',fallDelay:delay,falling:false}; }
-    function spike(x,y,w,h){ return {x,y,w,h,type:'spike'}; }
-    function lava(x,y,w,h){ return {x,y,w,h,type:'lava'}; }
-    
-    function makeEnemy(x, y, minX, maxX, speed=1.2){ return {x,y,w:36,h:36,vx:speed,minX,maxX}; }
-    function makeCoin(x,y){ return {x,y,w:16,h:16,collected:false}; }
-    function makePowerUp(x,y){ return {x,y,w:20,h:20,type:'doubleJump',collected:false}; }
+        const scoreText = document.getElementById("scoreText");
+        const healthFill = document.getElementById("healthFill");
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        const winScreen = document.getElementById("winScreen");
+        const instructionsScreen = document.getElementById("instructionsScreen");
+        const finalScore = document.getElementById("finalScore");
+        const finalLevel = document.getElementById("finalLevel");
+        const winScore = document.getElementById("winScore");
+        const doubleJumpIndicator = document.getElementById("doubleJumpIndicator");
 
-    if(level===1){
-        world.width=1600;
-        platforms = [
-            staticPlat(0,460,world.width,40),
-            staticPlat(180,380,160,20),
-            movingPlat(420,330,140,20,380,580,1.2),
-            fallPlat(700,300,120,20,600),
-            staticPlat(920,260,180,20),
-            staticPlat(1250,340,200,20),
-            spike(560,456,80,8)
-        ];
-        enemies.push(makeEnemy(220,348,180,320,1.2));
-        enemies.push(makeEnemy(980,238,920,1100,1));
-        goal = {x:1450,y:300,w:44,h:64,anim:0};
-        coins.push(makeCoin(300,340), makeCoin(700,260));
-        powerUps.push(makePowerUp(1250,300));
-    }
 
-    if(level===2){
-        world.width=2000;
-        platforms = [
-            staticPlat(0,460,world.width,40),
-            staticPlat(160,400,140,20),
-            movingPlat(360,340,160,20,320,620,1.5),
-            fallPlat(620,290,130,20,450),
-            staticPlat(900,240,140,20),
-            movingPlat(1140,320,160,20,1060,1320,1),
-            staticPlat(1500,300,260,20),
-            spike(820,456,120,8),
-            lava(200,476,120,24)
-        ];
-        enemies.push(makeEnemy(380,318,360,520,1.3));
-        enemies.push(makeEnemy(1180,298,1140,1320,0.9));
-        goal = {x:1840,y:240,w:44,h:64,anim:0};
-        coins.push(makeCoin(400,300), makeCoin(1100,280));
-        powerUps.push(makePowerUp(1500,270));
-    }
+        const world = { width: 2400, height: canvas.height };
+        let camera = { x: 0, width: canvas.width, smooth: 0.08 };
 
-    if(level===3){
-        world.width=2400;
-        platforms = [
-            staticPlat(0,460,world.width,40),
-            staticPlat(240,400,160,20),
-            movingPlat(480,340,160,20,420,700,1.6),
-            fallPlat(760,300,140,20,400),
-            movingPlat(980,260,120,20,940,1150,1.8),
-            staticPlat(1260,200,160,20),
-            movingPlat(1500,320,180,20,1420,1680,1.2),
-            staticPlat(1820,280,200,20),
-            staticPlat(2080,220,220,20),
-            spike(1380,456,100,8),
-            lava(1700,476,240,24)
-        ];
-        enemies.push(makeEnemy(520,318,480,700,1.4));
-        enemies.push(makeEnemy(1000,238,980,1150,1.1));
-        enemies.push(makeEnemy(1580,298,1500,1680,1.3));
-        goal = {x:2260,y:160,w:44,h:64,anim:0};
-        coins.push(makeCoin(500,260), makeCoin(1580,280), makeCoin(2080,180));
-        powerUps.push(makePowerUp(1820,250));
-    }
 
-    resetPlayer();
-}
+        let player = {
+            x: 50, y: 50, w: 36, h: 44,
+            vx: 0, vy: 0,
+            speed: 4.8,
+            jumping: false,
+            onGround: false,
+            coyote: 0,
+            canDoubleJump: false,
+            facing: 1,
+            dashCooldown: 0,
+            invincible: 0
+        };
 
-document.addEventListener("keydown", e => {
-    if(e.key==="ArrowLeft"||e.key==="a") keys.left=true;
-    if(e.key==="ArrowRight"||e.key==="d") keys.right=true;
-    if(e.key==="ArrowUp"||e.key==="w"||e.key===" ") keys.up=true;
-});
-document.addEventListener("keyup", e => {
-    if(e.key==="ArrowLeft"||e.key==="a") keys.left=false;
-    if(e.key==="ArrowRight"||e.key==="d") keys.right=false;
-    if(e.key==="ArrowUp"||e.key==="w"||e.key===" ") keys.up=false;
-});
 
-document.getElementById("pauseBtn").onclick = ()=>{
-    paused = !paused;
-    document.getElementById("pauseBtn").textContent = paused?"Resume":"Pause";
-};
+        const gravity = 0.7;
+        const jumpForce = -13;
+        const COYOTE_TIME = 0.15;
 
-function rectCollision(a,b){
-    return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;
-}
 
-function damage(amount){
-    health-=amount;
-    if(health<0) health=0;
-    healthFill.style.width = Math.max(0,health)+"%";
-    if(health<=0){
-        gameOverScreen.style.display="block";
-        paused=true;
-    }
-}
+        let platforms = [];
+        let enemies = [];
+        let coins = [];
+        let powerUps = [];
+        let goal = null;
+        let decorations = [];
+        let lastTime = performance.now();
 
-function resetPlayer(){
-    player.x=50; player.y=50; player.vx=0; player.vy=0;
-    player.jumping=false; player.onGround=false; player.coyote=0; player.canDoubleJump=false;
-    camera.x=0;
-}
 
-function resetGame(){
-    paused=false;
-    gameOverScreen.style.display="none";
-    winScreen.style.display="none";
-    score=0; health=100; healthFill.style.width="100%";
-    loadLevel(1);
-}
 
-/* ---------------- UPDATE ---------------- */
-function update(dt){
-    if(paused) return;
-    scoreText.textContent=score;
-    
-    player.vx=0;
-    if(keys.left) player.vx=-player.speed;
-    if(keys.right) player.vx=player.speed;
+        function loadLevel(n) {
+            level = n;
+            document.getElementById("levelText").textContent = `🎯 Level: ${level}`;
+            enemies = []; platforms = []; coins = []; powerUps = []; goal = null; decorations = [];
 
-    if(player.onGround) player.coyote=COYOTE_TIME;
-    else player.coyote-=dt;
 
-    if(keys.up && (player.onGround || player.coyote>0 || (player.canDoubleJump && !player.jumping))){
-        player.vy=jumpForce;
-        if(!player.onGround) player.canDoubleJump=false;
-        player.jumping=true;
-        player.onGround=false;
-        player.coyote=0;
-    }
+            function staticPlat(x, y, w, h) { return { x, y, w, h, type: 'static' }; }
+            function movingPlat(x, y, w, h, minX, maxX, speed) { return { x, y, w, h, type: 'moving', vx: speed, minX, maxX }; }
+            function fallPlat(x, y, w, h, delay) { return { x, y, w, h, type: 'fall', fallDelay: delay, falling: false, vy: 0 }; }
+            function spike(x, y, w, h) { return { x, y, w, h, type: 'spike' }; }
+            function lava(x, y, w, h) { return { x, y, w, h, type: 'lava' }; }
+            function bouncyPlat(x, y, w, h) { return { x, y, w, h, type: 'bouncy', bounce: 18 }; }
+            function conveyor(x, y, w, h, dir) { return { x, y, w, h, type: 'conveyor', dir: dir, speed: 2 }; }
 
-    player.vy+=gravity;
-    player.x+=player.vx;
-    player.y+=player.vy;
+            function makeEnemy(x, y, minX, maxX, speed = 1.2) { return { x, y, w: 36, h: 36, vx: speed, minX, maxX, anim: 0 }; }
+            function makeFlyingEnemy(x, y, minX, maxX, minY, maxY, speed = 1) { return { x, y, w: 40, h: 30, vx: speed, vy: 0, minX, maxX, minY, maxY, anim: 0, type: 'flying' }; }
+            function makeCoin(x, y) { return { x, y, w: 16, h: 16, collected: false, anim: 0 }; }
+            function makePowerUp(x, y) { return { x, y, w: 24, h: 24, type: 'doubleJump', collected: false, anim: 0 }; }
+            function makeDecoration(x, y, w, h, type) { return { x, y, w, h, type }; }
 
-    if(player.x<0) player.x=0;
-    if(player.x+player.w>world.width) player.x=world.width-player.w;
 
-    let onGround=false;
-    for(let p of platforms){
-        if(p.type==='fall' && p.falling) continue;
-        if(p.type==='spike'||p.type==='lava') continue;
+            if (level === 1) {
+                world.width = 1800;
+                platforms = [
 
-        if(rectCollision(player,p)){
-            if(player.vy>0 && (player.y+player.h)-player.vy <= p.y+6){
-                player.y=p.y-player.h;
-                player.vy=0; player.jumping=false;
-                onGround=true;
-                if(p.type==='fall' && !p.falling){ setTimeout(()=>{p.falling=true;}, p.fallDelay||500); }
-            } else {
-                if(player.x+player.w>p.x && player.x<p.x) player.x=p.x-player.w;
-                else if(player.x<p.x+p.w && player.x+player.w>p.x+p.w) player.x=p.x+p.w;
+                    staticPlat(0, 860, 400, 40),
+                    staticPlat(550, 860, 300, 40),
+                    staticPlat(950, 860, 400, 40),
+                    staticPlat(1450, 860, 350, 40),
+
+
+                    staticPlat(200, 750, 120, 20),
+                    staticPlat(400, 700, 120, 20),
+                    movingPlat(620, 650, 140, 20, 600, 850, 1.5),
+
+
+                    fallPlat(900, 600, 120, 20, 400),
+                    staticPlat(1100, 550, 120, 20),
+
+
+                    staticPlat(1300, 500, 80, 20),
+                    staticPlat(1400, 450, 80, 20),
+                    staticPlat(1500, 400, 80, 20),
+
+
+                    spike(300, 820, 100, 8),
+                    spike(800, 820, 100, 8),
+                    spike(1200, 820, 100, 8)
+                ];
+
+
+                enemies.push(makeEnemy(250, 730, 200, 300, 1.0));
+                enemies.push(makeEnemy(1120, 530, 1100, 1200, 1.2));
+                enemies.push(makeEnemy(1520, 380, 1500, 1600, 0.8));
+
+
+                goal = { x: 1700, y: 360, w: 44, h: 64, anim: 0 };
+
+
+                coins.push(
+                    makeCoin(250, 710),
+                    makeCoin(670, 610),
+                    makeCoin(950, 560),
+                    makeCoin(1350, 450),
+                    makeCoin(1550, 350)
+                );
+                powerUps.push(makePowerUp(1450, 350));
+
+
+                decorations.push(makeDecoration(100, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(600, 800, 25, 35, 'tree'));
+                decorations.push(makeDecoration(1000, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(1400, 800, 25, 35, 'tree'));
+            }
+
+
+            if (level === 2) {
+                world.width = 2200;
+                platforms = [
+
+                    staticPlat(0, 860, 200, 40),
+                    staticPlat(300, 860, 150, 40),
+                    staticPlat(550, 860, 200, 40),
+                    staticPlat(850, 860, 150, 40),
+                    staticPlat(1100, 860, 250, 40),
+                    staticPlat(1450, 860, 200, 40),
+                    staticPlat(1750, 860, 250, 40),
+                    staticPlat(2050, 860, 150, 40),
+
+
+                    spike(200, 856, 100, 8),
+                    spike(450, 856, 100, 8),
+                    spike(750, 856, 100, 8),
+                    spike(1000, 856, 100, 8),
+                    spike(1400, 856, 50, 8),
+                    spike(1700, 856, 50, 8),
+
+
+                    staticPlat(250, 750, 80, 20),
+
+                    staticPlat(450, 700, 80, 20),
+
+                    movingPlat(650, 650, 100, 20, 630, 800, 2.0),
+
+
+                    movingPlat(900, 600, 120, 20, 880, 920, 1.5),
+                    movingPlat(1100, 550, 120, 20, 1080, 1120, 1.5),
+                    movingPlat(1300, 500, 120, 20, 1280, 1320, 1.5),
+
+
+                    staticPlat(1500, 400, 60, 20),
+                    staticPlat(1580, 350, 60, 20),
+                    staticPlat(1660, 300, 60, 20),
+                    lava(1500, 870, 220, 30)
+                ];
+
+
+                enemies.push(makeEnemy(270, 730, 250, 300, 1.5));
+                enemies.push(makeEnemy(470, 680, 450, 500, 1.3));
+                enemies.push(makeEnemy(1150, 530, 1100, 1200, 1.8));
+                enemies.push(makeEnemy(1520, 380, 1500, 1600, 1.0));
+
+
+                goal = { x: 2100, y: 300, w: 44, h: 64, anim: 0 };
+
+
+                coins.push(
+                    makeCoin(280, 700),
+                    makeCoin(480, 650),
+                    makeCoin(700, 610),
+                    makeCoin(1150, 510),
+                    makeCoin(1600, 310),
+                    makeCoin(2120, 260)
+                );
+                powerUps.push(makePowerUp(1350, 450));
+
+
+                decorations.push(makeDecoration(50, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(350, 800, 25, 35, 'tree'));
+                decorations.push(makeDecoration(1000, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(1800, 800, 25, 35, 'tree'));
+            }
+
+
+            if (level === 3) {
+                world.width = 2600;
+                platforms = [
+
+                    staticPlat(0, 860, 150, 40),
+                    lava(150, 876, 100, 24),
+                    staticPlat(250, 860, 150, 40),
+                    lava(400, 876, 120, 24),
+                    staticPlat(520, 860, 180, 40),
+                    lava(700, 876, 150, 24),
+
+
+                    movingPlat(300, 750, 120, 20, 280, 500, 1.8),
+                    movingPlat(600, 700, 120, 20, 550, 750, 2.0),
+
+
+                    fallPlat(850, 650, 100, 20, 300),
+                    fallPlat(1000, 600, 100, 20, 400),
+                    fallPlat(1150, 550, 100, 20, 500),
+
+
+                    conveyor(1300, 500, 200, 20, 1),
+                    conveyor(1520, 450, 200, 20, -1),
+
+
+                    staticPlat(1350, 400, 60, 20),
+                    spike(1350, 396, 60, 8),
+                    staticPlat(1430, 350, 60, 20),
+                    spike(1430, 346, 60, 8),
+                    staticPlat(1510, 300, 60, 20),
+                    spike(1510, 296, 60, 8),
+
+
+                    movingPlat(1650, 400, 140, 20, 1600, 1850, 1.5),
+                    staticPlat(1800, 350, 120, 20),
+                    movingPlat(1950, 300, 140, 20, 1900, 2100, 1.7),
+
+
+                    lava(900, 876, 400, 24),
+                    lava(1400, 876, 300, 24),
+                    lava(1850, 876, 250, 24)
+                ];
+
+
+                enemies.push(makeEnemy(320, 730, 300, 500, 1.4));
+                enemies.push(makeEnemy(620, 680, 600, 750, 1.6));
+                enemies.push(makeEnemy(1020, 530, 1000, 1150, 1.2));
+                enemies.push(makeEnemy(1450, 330, 1430, 1530, 1.8));
+                enemies.push(makeEnemy(1970, 280, 1950, 2100, 1.3));
+
+
+                goal = { x: 2500, y: 250, w: 44, h: 64, anim: 0 };
+
+
+                coins.push(
+                    makeCoin(350, 710),
+                    makeCoin(650, 660),
+                    makeCoin(900, 610),
+                    makeCoin(1050, 560),
+                    makeCoin(1400, 460),
+                    makeCoin(1480, 310),
+                    makeCoin(2000, 260),
+                    makeCoin(2520, 210)
+                );
+                powerUps.push(makePowerUp(1700, 350));
+
+
+                decorations.push(makeDecoration(100, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(550, 800, 25, 35, 'tree'));
+                decorations.push(makeDecoration(1250, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(2000, 800, 25, 35, 'tree'));
+            }
+
+
+            if (level === 4) {
+                world.width = 3000;
+                platforms = [
+
+                    staticPlat(0, 860, 200, 40),
+
+
+                    movingPlat(250, 800, 100, 20, 240, 400, 2.5),
+                    movingPlat(450, 750, 100, 20, 430, 600, 2.2),
+                    movingPlat(650, 700, 100, 20, 630, 800, 2.8),
+
+
+                    staticPlat(800, 650, 60, 20),
+                    spike(800, 646, 60, 12),
+                    staticPlat(880, 600, 60, 20),
+                    spike(880, 596, 60, 12),
+                    staticPlat(960, 550, 60, 20),
+                    spike(960, 546, 60, 12),
+
+
+                    bouncyPlat(1100, 500, 100, 20),
+                    bouncyPlat(1250, 450, 100, 20),
+                    bouncyPlat(1400, 400, 100, 20),
+                    bouncyPlat(1250, 350, 100, 20),
+                    bouncyPlat(1100, 300, 100, 20),
+
+
+                    conveyor(1500, 600, 200, 20, 1),
+                    conveyor(1720, 550, 200, 20, -1),
+                    conveyor(1500, 450, 200, 20, 1),
+                    conveyor(1720, 400, 200, 20, -1),
+
+
+                    fallPlat(1950, 500, 80, 20, 200),
+                    fallPlat(2050, 450, 80, 20, 250),
+                    fallPlat(2150, 400, 80, 20, 300),
+                    fallPlat(2250, 350, 80, 20, 350),
+
+
+                    movingPlat(2400, 300, 120, 20, 2380, 2550, 3.0),
+                    movingPlat(2600, 250, 120, 20, 2580, 2750, 2.8),
+                    movingPlat(2800, 200, 120, 20, 2780, 2950, 3.2),
+
+
+                    lava(200, 876, 600, 24),
+                    lava(850, 876, 300, 24),
+                    lava(1450, 876, 500, 24),
+                    lava(1900, 876, 400, 24),
+                    lava(2400, 876, 600, 24)
+                ];
+
+
+                enemies.push(makeEnemy(270, 780, 250, 400, 2.0));
+                enemies.push(makeEnemy(470, 730, 450, 600, 1.8));
+                enemies.push(makeEnemy(670, 680, 650, 800, 2.2));
+                enemies.push(makeEnemy(820, 630, 800, 960, 1.6));
+                enemies.push(makeEnemy(980, 530, 960, 1100, 1.9));
+                enemies.push(makeEnemy(1520, 580, 1500, 1700, 2.1));
+                enemies.push(makeEnemy(1730, 530, 1720, 1920, 1.7));
+                enemies.push(makeEnemy(2420, 280, 2400, 2550, 2.3));
+                enemies.push(makeEnemy(2620, 230, 2600, 2750, 2.0));
+
+
+                goal = { x: 2900, y: 150, w: 44, h: 64, anim: 0 };
+
+
+                coins.push(
+                    makeCoin(300, 760),
+                    makeCoin(500, 710),
+                    makeCoin(700, 660),
+                    makeCoin(850, 610),
+                    makeCoin(900, 560),
+                    makeCoin(1150, 460),
+                    makeCoin(1350, 410),
+                    makeCoin(1550, 560),
+                    makeCoin(1770, 510),
+                    makeCoin(2000, 460),
+                    makeCoin(2200, 310),
+                    makeCoin(2450, 260),
+                    makeCoin(2650, 210),
+                    makeCoin(2920, 110)
+                );
+
+                powerUps.push(makePowerUp(1300, 400));
+                powerUps.push(makePowerUp(2700, 200));
+
+
+                decorations.push(makeDecoration(50, 800, 30, 40, 'tree'));
+                decorations.push(makeDecoration(1200, 800, 25, 35, 'tree'));
+                decorations.push(makeDecoration(2500, 800, 30, 40, 'tree'));
+            }
+
+            resetPlayer();
+        }
+
+
+
+        document.addEventListener("keydown", e => {
+            if (!gameStarted) return;
+
+            if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
+            if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
+            if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") {
+                e.preventDefault();
+                keys.up = true;
+            }
+
+
+            if (e.key === "h") health = Math.min(100, health + 20);
+            if (e.key === "n" && level < 4) loadLevel(level + 1);
+        });
+
+        document.addEventListener("keyup", e => {
+            if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
+            if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
+            if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") keys.up = false;
+        });
+
+
+        const leftBtn = document.getElementById("leftBtn");
+        const rightBtn = document.getElementById("rightBtn");
+        const jumpBtn = document.getElementById("jumpBtn");
+
+        leftBtn.addEventListener("touchstart", () => keys.left = true);
+        leftBtn.addEventListener("touchend", () => keys.left = false);
+        leftBtn.addEventListener("mousedown", () => keys.left = true);
+        leftBtn.addEventListener("mouseup", () => keys.left = false);
+        leftBtn.addEventListener("mouseleave", () => keys.left = false);
+
+        rightBtn.addEventListener("touchstart", () => keys.right = true);
+        rightBtn.addEventListener("touchend", () => keys.right = false);
+        rightBtn.addEventListener("mousedown", () => keys.right = true);
+        rightBtn.addEventListener("mouseup", () => keys.right = false);
+        rightBtn.addEventListener("mouseleave", () => keys.right = false);
+
+        jumpBtn.addEventListener("touchstart", () => { keys.up = true; setTimeout(() => keys.up = false, 200); });
+        jumpBtn.addEventListener("mousedown", () => { keys.up = true; setTimeout(() => keys.up = false, 200); });
+
+
+        document.getElementById("pauseBtn").onclick = () => {
+            if (!gameStarted) return;
+            paused = !paused;
+            document.getElementById("pauseBtn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
+        };
+
+
+        function rectCollision(a, b) {
+            return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+        }
+
+        function damage(amount) {
+            if (player.invincible > 0) return;
+
+            health -= amount;
+            if (health < 0) health = 0;
+            healthFill.style.width = Math.max(0, health) + "%";
+
+
+            screenShake = 10;
+
+
+            canvas.style.filter = "brightness(1.5) saturate(2)";
+            setTimeout(() => canvas.style.filter = "", 100);
+
+
+            player.invincible = 60;
+
+            if (health <= 0) {
+                finalScore.textContent = score;
+                finalLevel.textContent = level;
+                gameOverScreen.style.display = "block";
+                paused = true;
             }
         }
-    }
-    player.onGround=onGround;
 
-    for(let e of enemies){
-        e.x+=e.vx;
-        if(e.x<e.minX) e.vx=Math.abs(e.vx);
-        if(e.x>e.maxX) e.vx=-Math.abs(e.vx);
+        function resetPlayer() {
+            player.x = 50;
+            player.y = 50;
+            player.vx = 0;
+            player.vy = 0;
+            player.jumping = false;
+            player.onGround = false;
+            player.coyote = 0;
+            player.canDoubleJump = false;
+            player.invincible = 0;
+            camera.x = 0;
+            doubleJumpIndicator.style.display = "none";
+        }
 
-        if(rectCollision(player,e)){
-            if(player.vy>0 && player.y+player.h<e.y+20){
-                enemies.splice(enemies.indexOf(e),1);
-                score+=200;
-                player.vy=-9;
-                continue;
+        function resetGame() {
+            paused = false;
+            gameStarted = true;
+            gameOverScreen.style.display = "none";
+            winScreen.style.display = "none";
+            score = 0;
+            health = 100;
+            healthFill.style.width = "100%";
+            loadLevel(1);
+            document.getElementById("pauseBtn").textContent = "⏸️ Pause";
+        }
+
+        function startGame() {
+            instructionsScreen.style.display = "none";
+            resetGame();
+        }
+
+        function createParticles(x, y, count, color, speed = 2) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * speed,
+                    vy: (Math.random() - 0.5) * speed,
+                    life: 1,
+                    color,
+                    size: Math.random() * 4 + 2
+                });
             }
-            damage(20);
-            player.vx=e.vx>0?-4:4;
         }
-    }
 
-    for(let h of platforms){
-        if(h.type==='spike'||h.type==='lava'){
-            if(rectCollision(player,h)){
-                if(h.type==='spike') damage(40);
-                if(h.type==='lava') damage(999);
+
+        function update(dt) {
+            if (paused || !gameStarted) return;
+
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].x += particles[i].vx;
+                particles[i].y += particles[i].vy;
+                particles[i].life -= 0.02;
+
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+
+            if (screenShake > 0) screenShake -= 1;
+
+
+            if (player.invincible > 0) {
+                player.invincible--;
+            }
+
+
+            player.vx = 0;
+            if (keys.left) { player.vx = -player.speed; player.facing = -1; }
+            if (keys.right) { player.vx = player.speed; player.facing = 1; }
+
+
+            if (player.onGround) player.coyote = COYOTE_TIME;
+            else player.coyote -= dt;
+
+
+            if (keys.up && (player.onGround || player.coyote > 0 || (player.canDoubleJump && !player.jumping))) {
+                player.vy = jumpForce;
+                if (!player.onGround) {
+                    player.canDoubleJump = false;
+                    doubleJumpIndicator.style.display = "none";
+                    createParticles(player.x + player.w / 2, player.y + player.h / 2, 15, "#00ffff", 3);
+                }
+                player.jumping = true;
+                player.onGround = false;
+                player.coyote = 0;
+                createParticles(player.x + player.w / 2, player.y + player.h, 10, "#ffffff", 2);
+            }
+
+
+            player.vy += gravity;
+            player.x += player.vx;
+            player.y += player.vy;
+
+
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.w > world.width) player.x = world.width - player.w;
+
+
+            let onGround = false;
+            for (let p of platforms) {
+                if (p.type === 'fall' && p.falling) continue;
+                if (p.type === 'spike' || p.type === 'lava') continue;
+
+                if (rectCollision(player, p)) {
+                    if (player.vy > 0 && (player.y + player.h) - player.vy <= p.y + 6) {
+                        player.y = p.y - player.h;
+                        player.vy = 0;
+                        player.jumping = false;
+                        onGround = true;
+
+                        if (p.type === 'fall' && !p.falling) {
+                            setTimeout(() => {
+                                p.falling = true;
+                                createParticles(p.x + p.w / 2, p.y + p.h / 2, 20, "#A0522D", 1);
+                            }, p.fallDelay || 500);
+                        }
+                    } else {
+
+                        if (player.x + player.w > p.x && player.x < p.x) player.x = p.x - player.w;
+                        else if (player.x < p.x + p.w && player.x + player.w > p.x + p.w) player.x = p.x + p.w;
+                    }
+                }
+            }
+            player.onGround = onGround;
+
+
+            for (let e of enemies) {
+                e.x += e.vx;
+                e.anim += 0.1;
+                if (e.x < e.minX) e.vx = Math.abs(e.vx);
+                if (e.x > e.maxX) e.vx = -Math.abs(e.vx);
+
+                if (rectCollision(player, e) && player.invincible <= 0) {
+                    if (player.vy > 0 && player.y + player.h < e.y + 20) {
+
+                        enemies.splice(enemies.indexOf(e), 1);
+                        score += 200;
+                        player.vy = -10;
+                        createParticles(e.x + e.w / 2, e.y + e.h / 2, 25, "#ff0000", 3);
+                        continue;
+                    }
+                    damage(20);
+                    player.vx = e.vx > 0 ? -6 : 6;
+                    player.vy = -4;
+                }
+            }
+
+
+            for (let h of platforms) {
+                if (h.type === 'spike' || h.type === 'lava') {
+                    if (rectCollision(player, h) && player.invincible <= 0) {
+                        if (h.type === 'spike') damage(40);
+                        if (h.type === 'lava') damage(999);
+                    }
+                }
+
+                if (h.type === 'moving') {
+                    h.x += h.vx;
+                    if (h.x < h.minX) h.vx = Math.abs(h.vx);
+                    if (h.x + h.w > h.maxX) h.vx = -Math.abs(h.vx);
+                }
+
+                if (h.type === 'fall' && h.falling) {
+                    h.vy += gravity * 0.5;
+                    h.y += h.vy;
+                }
+            }
+
+
+            for (let c of coins) {
+                if (!c.collected) {
+                    c.anim += 0.1;
+                    if (rectCollision(player, c)) {
+                        c.collected = true;
+                        score += 50;
+                        createParticles(c.x + 8, c.y + 8, 12, "#ffdd00", 2);
+                    }
+                }
+            }
+
+
+            for (let p of powerUps) {
+                if (!p.collected) {
+                    p.anim += 0.1;
+                    if (rectCollision(player, p)) {
+                        p.collected = true;
+                        if (p.type === 'doubleJump') {
+                            player.canDoubleJump = true;
+                            doubleJumpIndicator.style.display = "flex";
+                            createParticles(p.x + 12, p.y + 12, 20, "#00ffff", 3);
+                        }
+                    }
+                }
+            }
+
+
+            if (goal && rectCollision(player, goal)) {
+                goal.anim += 0.05;
+                if (level < 4) {
+                    loadLevel(level + 1);
+                    score += 500;
+                    createParticles(goal.x + 22, goal.y + 32, 30, "#FFD700", 4);
+                } else {
+                    winScore.textContent = score;
+                    winScreen.style.display = "block";
+                    paused = true;
+                }
+            }
+
+
+            if (player.y > canvas.height + 600) damage(200);
+
+
+            let targetX = player.x + player.w / 2 - canvas.width / 2;
+            camera.x += (targetX - camera.x) * camera.smooth;
+            camera.x = Math.max(0, Math.min(camera.x, world.width - canvas.width));
+
+
+            scoreText.textContent = score;
+        }
+
+
+        function drawParallax() {
+
+
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            let cloudOffset = camera.x * 0.1;
+            for (let i = 0; i < 5; i++) {
+                let x = (i * 300 + cloudOffset) % (canvas.width + 400) - 200;
+                let y = 100 + Math.sin(i * 0.5) * 30;
+                drawCloud(x, y, 80 + Math.sin(i) * 20);
             }
         }
-        if(h.type==='moving') { h.x+=h.vx; if(h.x<h.minX) h.vx=Math.abs(h.vx); if(h.x+h.w>h.maxX) h.vx=-Math.abs(h.vx); }
-        if(h.type==='fall' && h.falling){ h.vy+=gravity; h.y+=h.vy; }
-    }
 
-    // collect coins & power-ups
-    for(let c of coins) if(!c.collected && rectCollision(player,c)) { c.collected=true; score+=50; }
-    for(let p of powerUps) if(!p.collected && rectCollision(player,p)) { p.collected=true; if(p.type==='doubleJump') player.canDoubleJump=true; }
-
-    if(goal && rectCollision(player,goal)){
-        if(level<3) loadLevel(level+1);
-        else { winScreen.style.display="block"; paused=true; }
-    }
-
-    if(player.y>canvas.height+600) damage(200);
-
-    let targetX = player.x+player.w/2-canvas.width/2;
-    camera.x += (targetX - camera.x)*camera.smooth;
-    camera.x=Math.max(0,Math.min(camera.x, world.width-canvas.width));
-}
-
-/* ---------------- DRAW ---------------- */
-function drawParallax(){
-    ctx.fillStyle="#3C6E71"; let mx=camera.x*0.2;
-    ctx.beginPath(); ctx.moveTo(-100-mx,380);
-    for(let i=-100;i<canvas.width+200;i+=220){ let peak=320+40*Math.sin((i+mx)*0.008); ctx.lineTo(i+60-mx*0.05,peak); ctx.lineTo(i+140-mx*0.02,380); }
-    ctx.lineTo(canvas.width,500); ctx.lineTo(0,500); ctx.fill();
-
-    ctx.fillStyle="#67B26F"; let hx=camera.x*0.45; ctx.beginPath(); ctx.moveTo(0,430);
-    for(let i=-200;i<canvas.width+200;i+=150){ let peak=380+26*Math.sin((i+hx)*0.012); ctx.quadraticCurveTo(i-hx*0.04+70,peak,i+140-hx*0.02,430); }
-    ctx.fill();
-
-    ctx.fillStyle="#2E8B57"; ctx.fillRect(0,460,canvas.width,40);
-}
-
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    drawParallax();
-
-    for(let p of platforms){
-        let sx=p.x-camera.x;
-        if(p.type==='spike'){
-            ctx.fillStyle="#222"; ctx.fillRect(sx,p.y,p.w,p.h); ctx.fillStyle="#ffdd55";
-            for(let s=0;s<p.w;s+=12){ ctx.beginPath(); ctx.moveTo(sx+s,p.y+p.h); ctx.lineTo(sx+s+6,p.y); ctx.lineTo(sx+s+12,p.y+p.h); ctx.fill(); }
-            continue;
+        function drawCloud(x, y, size) {
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.3, y - size * 0.1, size * 0.4, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.6, y, size * 0.35, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.3, y + size * 0.1, size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
         }
-        if(p.type==='lava'){
-            ctx.fillStyle="#b22222"; ctx.fillRect(sx,p.y,p.w,p.h); ctx.fillStyle="#ff6a00";
-            for(let f=0;f<p.w;f+=14){ let h=6+6*Math.sin((f+performance.now()*0.01)/40); ctx.beginPath(); ctx.ellipse(sx+f+6,p.y+6,8,h,0,0,Math.PI*2); ctx.fill(); }
-            continue;
+
+        function draw() {
+
+            let shakeX = screenShake > 0 ? (Math.random() - 0.5) * screenShake : 0;
+            let shakeY = screenShake > 0 ? (Math.random() - 0.5) * screenShake : 0;
+            ctx.setTransform(1, 0, 0, 1, shakeX, shakeY);
+
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+            drawParallax();
+
+
+            for (let p of platforms) {
+                let sx = p.x - camera.x;
+
+                if (p.type === 'spike') {
+                    ctx.fillStyle = "#222";
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.fillStyle = "#ff5555";
+                    for (let s = 0; s < p.w; s += 12) {
+                        ctx.beginPath();
+                        ctx.moveTo(sx + s, p.y + p.h);
+                        ctx.lineTo(sx + s + 6, p.y);
+                        ctx.lineTo(sx + s + 12, p.y + p.h);
+                        ctx.fill();
+                    }
+                    continue;
+                }
+
+                if (p.type === 'lava') {
+
+                    ctx.fillStyle = "#b22222";
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+
+                    continue;
+                }
+
+
+                if (p.type === 'moving') {
+                    ctx.fillStyle = "#7FB069";
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = "#5A8C4A";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+                } else if (p.type === 'fall') {
+                    ctx.fillStyle = p.falling ? "#A0522D" : "#9DC183";
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = p.falling ? "#8B4513" : "#7CA56C";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+
+
+                    if (!p.falling) {
+                        ctx.strokeStyle = "#8B4513";
+                        ctx.lineWidth = 1;
+                        for (let i = 0; i < 3; i++) {
+                            let crackX = sx + (i + 1) * (p.w / 4) + Math.sin(i) * 5;
+                            ctx.beginPath();
+                            ctx.moveTo(crackX, p.y + 2);
+                            ctx.lineTo(crackX + Math.sin(i) * 3, p.y + p.h - 2);
+                            ctx.stroke();
+                        }
+                    }
+                } else {
+                    ctx.fillStyle = "#4ECC88";
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = "#3DAF70";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+                }
+            }
+
+
+            for (let e of enemies) {
+                let ex = e.x - camera.x;
+                ctx.fillStyle = "#d9534f";
+                ctx.fillRect(ex, e.y, e.w, e.h);
+
+
+                ctx.fillStyle = "#fff";
+                let eyeOffset = Math.sin(e.anim) * 2;
+                ctx.fillRect(ex + 6, e.y + 8 + eyeOffset, 6, 6);
+                ctx.fillRect(ex + 24, e.y + 8 + eyeOffset, 6, 6);
+
+
+                ctx.strokeStyle = "#a94442";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(ex, e.y, e.w, e.h);
+            }
+
+
+            for (let c of coins) {
+                if (!c.collected) {
+                    let cx = c.x - camera.x;
+                    let cy = c.y + Math.sin(c.anim) * 3;
+                    ctx.fillStyle = "#ffdd00";
+                    ctx.beginPath();
+                    ctx.arc(cx + 8, cy + 8, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = "#ffaa00";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+                    ctx.beginPath();
+                    ctx.arc(cx + 5, cy + 5, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+
+            for (let p of powerUps) {
+                if (!p.collected) {
+                    let px = p.x - camera.x;
+                    let py = p.y + Math.sin(p.anim) * 4;
+
+                    if (p.type === 'doubleJump') {
+
+                        ctx.fillStyle = "#00ffff";
+                        ctx.fillRect(px, py, p.w, p.h);
+
+
+                        ctx.fillStyle = "#00aaff";
+                        ctx.beginPath();
+                        ctx.ellipse(px - 4, py + p.h / 2, 6, 10, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.ellipse(px + p.w + 4, py + p.h / 2, 6, 10, 0, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.strokeStyle = "#0088cc";
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(px, py, p.w, p.h);
+                    }
+                }
+            }
+
+
+            if (goal) {
+                let gx = goal.x - camera.x;
+                let gy = goal.y;
+
+
+                ctx.fillStyle = "#6a4c32";
+                ctx.fillRect(gx + 10, gy, 6, goal.h);
+
+
+                goal.anim += 0.08;
+                let sway = Math.sin(goal.anim) * 8;
+
+
+                ctx.fillStyle = "#FFD700";
+                ctx.beginPath();
+                ctx.moveTo(gx + 16, gy + 8);
+                ctx.quadraticCurveTo(gx + 40 + sway, gy + 14, gx + 16, gy + 28);
+                ctx.closePath();
+                ctx.fill();
+
+
+                ctx.strokeStyle = "#DAA520";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+
+                ctx.fillStyle = "#333";
+                ctx.fillRect(gx, gy + goal.h, 60, 8);
+            }
+
+
+            let px = player.x - camera.x;
+            let py = player.y;
+
+
+            let vy = player.vy;
+            let scaleY = player.onGround ? 1.08 : Math.max(0.85, 1 - vy * 0.015);
+            let drawW = player.w;
+            let drawH = player.h * scaleY;
+            let drawX = px;
+            let drawY = py + (player.h - drawH);
+
+
+            let alpha = player.invincible > 0 && Math.floor(player.invincible / 3) % 2 === 0 ? 0.5 : 1;
+
+
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillRect(drawX, drawY, drawW, drawH);
+
+
+            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(drawX, drawY, drawW, drawH);
+
+
+            ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+            let eyeY = drawY + drawH * 0.3;
+            let eyeOffset = Math.sin(performance.now() * 0.005) * 2;
+            let eyeSpacing = 8 * player.facing;
+            ctx.fillRect(drawX + drawW / 2 - 4 + eyeSpacing, eyeY + eyeOffset, 4, 4);
+            ctx.fillRect(drawX + drawW / 2 + 4 + eyeSpacing, eyeY + eyeOffset, 4, 4);
+
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            for (let p of particles) {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x - camera.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
-        if(p.type==='moving') ctx.fillStyle="#7FB069";
-        else if(p.type==='fall') ctx.fillStyle=p.falling?"#A0522D":"#9DC183";
-        else ctx.fillStyle="#4ECC88";
-        ctx.fillRect(sx,p.y,p.w,p.h);
-    }
 
-    for(let e of enemies){
-        ctx.fillStyle="#d9534f"; ctx.fillRect(e.x-camera.x,e.y,e.w,e.h);
-        ctx.fillStyle="#fff"; ctx.fillRect(e.x+6-camera.x,e.y+8,6,6); ctx.fillRect(e.x+20-camera.x,e.y+8,6,6);
-    }
 
-    // draw coins
-    for(let c of coins) if(!c.collected){ ctx.fillStyle="#ffdd00"; ctx.beginPath(); ctx.arc(c.x+8-camera.x,c.y+8,8,0,Math.PI*2); ctx.fill(); }
+        function loop(now) {
+            let dt = (now - lastTime) / 1000;
+            lastTime = now;
 
-    // draw power-ups
-    for(let p of powerUps) if(!p.collected){ ctx.fillStyle="#00ffff"; ctx.fillRect(p.x-camera.x,p.y,p.w,p.h); ctx.strokeStyle="#000"; ctx.strokeRect(p.x-camera.x,p.y,p.w,p.h); }
+            update(dt);
+            draw();
 
-    // draw goal
-    if(goal){
-        let gx=goal.x-camera.x, gy=goal.y;
-        ctx.fillStyle="#6a4c32"; ctx.fillRect(gx+10,gy,6,goal.h);
-        goal.anim=(goal.anim||0)+0.08; let sway=Math.sin(goal.anim)*8;
-        ctx.fillStyle="#FFD700"; ctx.beginPath(); ctx.moveTo(gx+16,gy+8); ctx.quadraticCurveTo(gx+40+sway,gy+14,gx+16,gy+28); ctx.closePath(); ctx.fill();
-        ctx.fillStyle="#333"; ctx.fillRect(gx,gy+goal.h,60,8);
-    }
+            requestAnimationFrame(loop);
+        }
 
-    // draw player
-    let vy=player.vy, scaleY=player.onGround?1.08:Math.max(0.85,1-vy*0.015);
-    let drawW=player.w, drawH=player.h*scaleY, drawX=player.x-camera.x, drawY=player.y+(player.h-drawH);
-    ctx.fillStyle="#fff"; ctx.fillRect(drawX,drawY,drawW,drawH); ctx.strokeStyle="#111"; ctx.lineWidth=2; ctx.strokeRect(drawX,drawY,drawW,drawH);
-}
 
-/* ---------------- GAME LOOP ---------------- */
-function loop(now){
-    let dt=(now-lastTime)/1000; lastTime=now;
-    update(dt); draw();
-    requestAnimationFrame(loop);
-}
 
-loadLevel(1);
-loop(performance.now());
-</script>
+        instructionsScreen.style.display = "block";
+
+
+        loop(performance.now());
+    </script>
 </body>
+
 </html>

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>January Challenge</title>
+  <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #070b1e 0%, #0f152e 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+    }
+
+    #wrap {
+      position: relative;
+      box-shadow: 0 0 40px rgba(0, 150, 255, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    canvas {
+      background: #0b102a;
+      display: block;
+      border-radius: 10px;
+    }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-weight: bold;
+      background: rgba(10, 15, 40, 0.7);
+      padding: 8px 15px;
+      border-radius: 5px;
+      font-size: 16px;
+      z-index: 10;
+    }
+
+    #win {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 42px;
+      text-align: center;
+      z-index: 20;
+      border-radius: 10px;
+    }
+
+    #win h1 {
+      margin: 0;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+      margin-bottom: 20px;
+    }
+
+    #win p {
+      font-size: 24px;
+      margin: 10px 0 30px 0;
+      color: #a0e0ff;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 18px;
+      cursor: pointer;
+      background: linear-gradient(to bottom, #2a7fff, #0050d5);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(0, 80, 213, 0.4);
+      transition: all 0.2s;
+      margin: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 80, 213, 0.6);
+      background: linear-gradient(to bottom, #3a8fff, #0060e5);
+    }
+
+    #controls {
+      position: absolute;
+      bottom: 15px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      z-index: 10;
+    }
+
+    #death-count {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      background: rgba(10, 15, 40, 0.7);
+      padding: 8px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 10;
+      color: #ff6b6b;
+    }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="wrap">
+    <canvas id="game" width="800" height="500"></canvas>
+    <div id="ui"></div>
+    <div id="death-count">Deaths: 0</div>
+    <div id="win">
+      <h1> VICTORY! </h1>
+      <p>You completed all levels!</p>
+      <p id="finalScore">Final Score: 0</p>
+      <div>
+        <button onclick="restart()">Play Again</button>
+      </div>
+    </div>
+    <div id="controls">
+      Use <b>Arrow Keys</b> to move | <b>UP</b> to jump | <b>ESC</b> to pause
+    </div>
+  </div>
+
+  <script>
+    const c = document.getElementById("game");
+    const x = c.getContext("2d");
+    const ui = document.getElementById("ui");
+    const win = document.getElementById("win");
+    const finalScoreElement = document.getElementById("finalScore");
+    const deathCountElement = document.getElementById("death-count");
+    // World / camera
+    let cameraX = 0,
+      cameraY = 0;
+    let gameCompleted = false;
+
+    const GRAVITY = 0.6;
+    const JUMP_FORCE = -13;
+    const DOUBLE_JUMP_FORCE = -11;
+    const MOVE_SPEED = 5;
+
+    let level = 0;
+    let score = 0;
+    let deaths = 0;
+    let particles = [];
+    let gameTime = 0;
+    let isPaused = false;
+
+    const keys = {};
+    onkeydown = e => {
+      if (e.code === "Escape") {
+        isPaused = !isPaused;
+        return;
+      }
+
+      // SECRET BETA KEY: Press the uncommon "Shift" key to auto-beat the current level
+   /*   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
+        if (!gameCompleted) {
+          const L = levels[level];
+          // collect remaining coins and award their score
+          L.coins.forEach(c => {
+            if (!c.collected) {
+              c.collected = true;
+              score += 10;
+              createParticles(c.x, c.y, "#ff0", 20);
+            }
+          });
+        
+
+          // simulate reaching the goal
+          createParticles(L.goal.x + L.goal.w / 2, L.goal.y + L.goal.h / 2, "#0f0", 30);
+          const allCoinsCollected = L.coins.every(c => c.collected);
+          if (allCoinsCollected) {
+            score += 50;
+            createParticles(L.goal.x + L.goal.w / 2, L.goal.y + L.goal.h / 2, "#ff0", 40);
+          }
+
+          level++;
+          if (level >= levels.length) {
+            finalScoreElement.textContent = `Final Score: ${score}`;
+            win.style.display = "flex";
+            level = levels.length - 1;
+            gameCompleted = true;
+          } else {
+            reset();
+          }
+          updateUI();
+        }
+        return;
+      }  */
+
+      keys[e.code] = true;
+    };
+    onkeyup = e => keys[e.code] = false;
+
+    const player = {
+      x: 50,
+      y: 300,
+      w: 30,
+      h: 45,
+      dx: 0,
+      dy: 0,
+      onGround: false,
+      canDoubleJump: true,
+      color: "red",
+      facing: 1
+    };
+
+    // Levels with per-level worldWidth (ground widths and goal.x computed per level)
+    const levels = [
+      // Level 1
+      {
+        worldWidth: 2100,
+        name: "Level 1",
+        plats: [
+          { x: 0, y: 430, w: 2100, h: 20, color: "#666" },
+          { x: 130, y: 360, w: 160, h: 15, color: "#8a6" },
+          { x: 360, y: 320, w: 140, h: 15, color: "#8a6" },
+          { x: 620, y: 280, w: 160, h: 15, color: "#8a6" },
+          { x: 900, y: 240, w: 140, h: 15, color: "#8a6" },
+          { x: 1180, y: 200, w: 130, h: 15, color: "#8a6" },
+          { x: 1400, y: 160, w: 160, h: 15, color: "#8a6" },
+          { x: 1700, y: 130, w: 30, h: 15, color: "#8a6" },
+          { x: 1870, y: 100, w: 40, h: 15, color: "#8a6" },
+          { x: 2050, y: 200, w: 30, h: 15, color: "#8a6" }
+
+        ],
+        spikes: [
+          { x: 280, y: 420, w: 80, h: 10, color: "#f44" },
+          { x: 760, y: 420, w: 80, h: 10, color: "#f44" },
+          { x: 1120, y: 420, w: 80, h: 10, color: "#f44" },
+          // this spike sits on the moving platform at plats[6] so attach it
+          { x: 1430, y: 150, w: 60, h: 10, color: "#f44", platform: 6 }
+        ],
+        coins: [
+          { x: 180, y: 330, collected: false },
+          { x: 420, y: 290, collected: false },
+          { x: 700, y: 250, collected: false },
+          { x: 980, y: 210, collected: false },
+          { x: 1150, y: 170, collected: false }
+        ],
+        goal: { x: 2100 - 50, y: 140, w: 40, h: 60, color: "#0f0" }
+      },
+      // Level 2
+      {
+        worldWidth: 2100,
+        name: "Level 2",
+        plats: [
+          { x: 0, y: 430, w: 2100, h: 20, color: "#666" },
+          { x: 180, y: 370, w: 140, h: 15, color: "#68a" },
+          { x: 380, y: 330, w: 120, h: 15, color: "#68a", move: 1.5, min: 320, max: 780 },
+          { x: 840, y: 250, w: 120, h: 15, color: "#68a", move: -1.8, min: 720, max: 1080 },
+          { x: 1080, y: 210, w: 120, h: 15, color: "#68a" },
+          { x: 1360, y: 180, w: 140, h: 15, color: "#68a" },
+          { x: 1600, y: 150, w: 20, h: 15, color: "#68a" },
+          { x: 1700, y: 120, w: 40, h: 15, color: "#68a", move: 1.4, min: 1700, max: 1900 },
+          { x: 1920, y: 90, w: 20, h: 15, color: "#68a" },
+          { x: 2000, y: 160, w: 60, h: 15, color: "#68a" }
+        ],
+        spikes: [
+          { x: 420, y: 420, w: 80, h: 10, color: "#f44" },
+          { x: 920, y: 420, w: 100, h: 10, color: "#f44" },
+          { x: 1280, y: 420, w: 80, h: 10, color: "#f44" }
+        ],
+        coins: [
+          { x: 240, y: 340, collected: false },
+          { x: 420, y: 300, collected: false },
+          { x: 700, y: 260, collected: false },
+          { x: 980, y: 220, collected: false },
+          { x: 1300, y: 190, collected: false }
+        ],
+        goal: { x: 2100 - 50, y: 130, w: 40, h: 60, color: "#0f0" }
+      },
+      // Level 3
+      {
+        worldWidth: 2100,
+        name: "Level 3",
+        plats: [
+          { x: 0, y: 430, w: 2100, h: 20, color: "#666" },
+          { x: 140, y: 390, w: 120, h: 15, color: "#a68", move: -1.5, min: 140, max: 400 },
+          { x: 340, y: 350, w: 140, h: 15, color: "#a68", move: 2, min: 300, max: 650 },
+          { x: 640, y: 310, w: 120, h: 15, color: "#a68", move: -1.8, min: 540, max: 850 },
+          { x: 880, y: 270, w: 120, h: 15, color: "#a68", move: 2.2, min: 800, max: 1100 },
+          { x: 1120, y: 230, w: 140, h: 15, color: "#a68", move: -2, min: 940, max: 1400 },
+          { x: 1480, y: 190, w: 120, h: 15, color: "#a68", move: 1.6, min: 1400, max: 1800 },
+          { x: 1720, y: 160, w: 160, h: 15, color: "#a68", move: -1.4, min: 1600, max: 2000 },
+          { x: 2050, y: 140, w: 40, h: 15, color: "#a68" }
+        ],
+        spikes: [
+          { x: 420, y: 420, w: 100, h: 10, color: "#f44" },
+          { x: 980, y: 420, w: 120, h: 10, color: "#f44" },
+          { x: 1720, y: 150, w: 20, h: 10, color: "#f44", platform: 7 }
+
+        ],
+        coins: [
+          { x: 160, y: 360, collected: false },
+          { x: 380, y: 320, collected: false },
+          { x: 700, y: 280, collected: false },
+          { x: 1060, y: 240, collected: false },
+          { x: 1420, y: 200, collected: false }
+        ],
+        goal: { x: 2100 - 50, y: 80, w: 40, h: 60, color: "#0f0" }
+      },
+      // Level 4
+      {
+        worldWidth: 1900,
+        name: "Level 4",
+        plats: [
+          { x: 0, y: 430, w: 1900, h: 20, color: "#666" },
+          { x: 140, y: 400, w: 100, h: 15, color: "#6aa" },
+          { x: 300, y: 360, w: 140, h: 15, color: "#6aa", move: 1.8, min: 300, max: 600 },
+          { x: 580, y: 320, w: 120, h: 15, color: "#6aa", move: -2, min: 480, max: 800 },
+          { x: 820, y: 280, w: 140, h: 15, color: "#6aa", move: 2.2, min: 800, max: 1200 },
+          { x: 1180, y: 240, w: 120, h: 15, color: "#6aa", move: -1.6, min: 1000, max: 1400 },
+          { x: 1420, y: 200, w: 140, h: 15, color: "#6aa", move: 1.5, min: 1400, max: 1800 },
+          { x: 1700, y: 170, w: 100, h: 15, color: "#6aa", move: -1.4, min: 1600, max: 2000 },
+        ],
+        spikes: [
+
+          { x: 560, y: 420, w: 80, h: 10, color: "#f44" },
+          { x: 920, y: 420, w: 100, h: 10, color: "#f44" },
+          { x: 1240, y: 420, w: 100, h: 10, color: "#f44" },
+          // spike sitting on the moving plat at plats[7]
+          { x: 1700, y: 160, w: 80, h: 10, color: "#f44", platform: 7 }
+        ],
+        coins: [
+          { x: 140, y: 370, collected: false },
+          { x: 380, y: 335, collected: false },
+          { x: 620, y: 300, collected: false },
+          { x: 920, y: 260, collected: false },
+          { x: 1180, y: 220, collected: false },
+          { x: 1480, y: 180, collected: false }
+        ],
+        goal: { x: 1900 - 50, y: 85, w: 40, h: 60, color: "#0f0" }
+      }
+    ];
+
+    function createParticles(x, y, color, count) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          dx: (Math.random() - 0.5) * 4,
+          dy: (Math.random() - 0.5) * 4,
+          size: Math.random() * 4 + 2,
+          color: color,
+          life: 30
+        });
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+        p.dy += 0.1;
+        p.life--;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        x.globalAlpha = p.life / 30;
+        x.fillStyle = p.color;
+        x.beginPath();
+        x.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        x.fill();
+      }
+      x.globalAlpha = 1;
+    }
+
+    function reset() {
+      player.x = 50;
+      player.y = 300;
+      player.dx = 0;
+      player.dy = 0;
+      player.onGround = false;
+      player.canDoubleJump = true;
+    }
+
+    function restart() {
+      level = 0;
+      score = 0;
+      deaths = 0;
+      levels.forEach(L => L.coins.forEach(c => c.collected = false));
+      win.style.display = "none";
+      gameCompleted = false;
+      reset();
+      updateUI();
+    }
+
+    function hit(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x &&
+        a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
+    function update() {
+      if (isPaused || gameCompleted) return;
+
+      gameTime++;
+
+      player.dx = 0;
+      if (keys.ArrowLeft) {
+        player.dx = -MOVE_SPEED;
+        player.facing = -1;
+      }
+      if (keys.ArrowRight) {
+        player.dx = MOVE_SPEED;
+        player.facing = 1;
+      }
+
+      if (keys.ArrowUp) {
+        if (player.onGround) {
+          player.dy = JUMP_FORCE;
+          player.onGround = false;
+          player.canDoubleJump = true;
+          createParticles(player.x + player.w / 2, player.y + player.h, "#0ff", 8);
+        } else if (player.canDoubleJump) {
+          player.dy = DOUBLE_JUMP_FORCE;
+          player.canDoubleJump = false;
+          createParticles(player.x + player.w / 2, player.y + player.h, "#0af", 12);
+        }
+      }
+
+      player.dy += GRAVITY;
+      player.x += player.dx;
+      player.y += player.dy;
+
+      const L = levels[level];
+      // World boundaries (prevent leaving horizontally and top) - use current level worldWidth
+      player.x = Math.max(0, Math.min(player.x, L.worldWidth - player.w));
+      player.y = Math.max(-50, player.y); // allow some headroom but not infinite upward travel
+      player.onGround = false;
+
+      // move platforms (use index so we can attach spikes to specific plats)
+      for (let pi = 0; pi < L.plats.length; pi++) {
+        const p = L.plats[pi];
+        if (p.move) {
+          p.x += p.move;
+          if (p.x < p.min || p.x + p.w > p.max) p.move *= -1;
+        }
+
+        // reposition any spikes attached to this platform
+        for (const s of L.spikes) {
+          if (s.platform === pi) {
+            if (s._offsetX === undefined) { // compute offsets once
+              s._offsetX = s.x - p.x;
+              s._offsetY = s.y - p.y;
+            }
+            s.x = p.x + s._offsetX;
+            s.y = p.y + s._offsetY;
+          }
+        }
+
+        // platform collision with player
+        if (player.x < p.x + p.w && player.x + player.w > p.x &&
+          player.y < p.y + p.h && player.y + player.h > p.y) {
+          if (player.dy > 0 && player.y + player.h - player.dy <= p.y) {
+            player.y = p.y - player.h;
+            player.dy = 0;
+            player.onGround = true;
+            player.canDoubleJump = true;
+          }
+        }
+      }
+
+      for (const s of L.spikes) {
+        if (player.x < s.x + s.w && player.x + player.w > s.x &&
+          player.y < s.y + s.h && player.y + player.h > s.y) {
+          deaths++;
+          createParticles(player.x + player.w / 2, player.y + player.h / 2, "#f44", 20);
+          reset();
+          updateUI();
+        }
+      }
+
+      for (const coin of L.coins) {
+        if (!coin.collected &&
+          player.x < coin.x + 16 && player.x + player.w > coin.x - 16 &&
+          player.y < coin.y + 16 && player.y + player.h > coin.y - 16) {
+          coin.collected = true;
+          score += 10;
+          createParticles(coin.x, coin.y, "#ff0", 15);
+          updateUI();
+        }
+      }
+
+      const goal = L.goal;
+      if (player.x < goal.x + goal.w && player.x + player.w > goal.x &&
+        player.y < goal.y + goal.h && player.y + player.h > goal.y) {
+        createParticles(goal.x + goal.w / 2, goal.y + goal.h / 2, "#0f0", 30);
+
+        // Check if all coins collected for bonus
+        const allCoinsCollected = L.coins.every(c => c.collected);
+        if (allCoinsCollected) {
+          score += 50;
+          createParticles(goal.x + goal.w / 2, goal.y + goal.h / 2, "#ff0", 40);
+        }
+
+        level++;
+        if (level >= levels.length) {
+          finalScoreElement.textContent = `Final Score: ${score}`;
+          win.style.display = "flex";
+          level = levels.length - 1;
+          gameCompleted = true; // freeze movement and scoring after win
+        } else {
+          reset();
+        }
+        updateUI();
+      }
+
+      if (player.y > 600) {
+        deaths++;
+        reset();
+        updateUI();
+      }
+
+      // Camera follow (center player horizontally, clamp to world)
+      cameraX = Math.round(player.x + player.w / 2 - c.width / 2);
+      cameraX = Math.max(0, Math.min(cameraX, L.worldWidth - c.width));
+      cameraY = 0; // world is single-screen vertical for now
+
+      updateParticles();
+    }
+
+    function draw() {
+      // Cameraed world rendering
+      const gradient = x.createLinearGradient(0, 0, 0, c.height);
+      gradient.addColorStop(0, "#0b102a");
+      gradient.addColorStop(1, "#050915");
+
+      x.save();
+      x.translate(-cameraX, -cameraY);
+
+      // Background for viewport
+      x.fillStyle = gradient;
+      x.fillRect(cameraX, 0, c.width, c.height);
+
+      const L = levels[level];
+
+      // Platforms
+      for (const p of L.plats) {
+        x.fillStyle = "rgba(0, 0, 0, 0.3)";
+        x.fillRect(p.x + 3, p.y + 3, p.w, p.h);
+        x.fillStyle = p.color;
+        x.fillRect(p.x, p.y, p.w, p.h);
+        x.fillStyle = "rgba(255,255,255,0.2)";
+        x.fillRect(p.x, p.y, p.w, 3);
+      }
+
+      // Spikes
+      for (const s of L.spikes) {
+        x.fillStyle = "rgba(200,0,0,0.5)";
+        x.fillRect(s.x + 2, s.y + 2, s.w, s.h);
+        x.fillStyle = s.color;
+        x.fillRect(s.x, s.y, s.w, s.h);
+        x.fillStyle = "#f88";
+        const teethCount = Math.floor(s.w / 10);
+        for (let i = 0; i < teethCount; i++) {
+          x.beginPath();
+          x.moveTo(s.x + i * 10, s.y);
+          x.lineTo(s.x + i * 10 + 5, s.y - 8);
+          x.lineTo(s.x + i * 10 + 10, s.y);
+          x.closePath();
+          x.fill();
+        }
+
+      }
+
+      // Coins
+      for (const coin of L.coins) {
+        if (!coin.collected) {
+          const bounce = Math.sin(gameTime * 0.1 + coin.x * 0.01) * 5;
+          const rotation = gameTime * 0.05;
+          x.save();
+          x.translate(coin.x, coin.y + bounce);
+          x.rotate(rotation);
+          x.fillStyle = "#ffd700";
+          x.beginPath();
+          x.arc(0, 0, 10, 0, Math.PI * 2);
+          x.fill();
+
+          x.fillStyle = "#ffed4e";
+          x.beginPath();
+          x.arc(0, 0, 8, 0, Math.PI * 2);
+          x.fill();
+
+          x.fillStyle = "#ffd700";
+          x.beginPath();
+          x.arc(0, 0, 5, 0, Math.PI * 2);
+          x.fill();
+          x.restore();
+        }
+      }
+
+      // Goal
+      const goal = L.goal;
+      const pulse = Math.sin(gameTime * 0.05) * 0.2 + 0.8;
+      x.fillStyle = `rgba(0,255,0,${0.3 * pulse})`;
+      x.beginPath();
+      x.arc(goal.x + goal.w / 2, goal.y + goal.h / 2, 40, 0, Math.PI * 2);
+      x.fill();
+      x.fillStyle = goal.color;
+      x.fillRect(goal.x, goal.y, goal.w, goal.h);
+      x.fillStyle = "#0c0";
+      x.fillRect(goal.x + 5, goal.y + 10, goal.w - 10, 8);
+      x.fillRect(goal.x + 5, goal.y + 25, goal.w - 10, 8);
+      x.fillRect(goal.x + 5, goal.y + 40, goal.w - 10, 8);
+
+      // Particles (world-space)
+      drawParticles();
+
+      // Player
+      x.save();
+      x.translate(player.x + player.w / 2, player.y + player.h / 2);
+      if (player.facing === -1) x.scale(-1, 1);
+      x.fillStyle = player.color;
+      x.fillRect(-player.w / 2, -player.h / 2, player.w, player.h);
+      x.fillStyle = "#0af";
+      x.fillRect(-player.w / 2 + 5, -player.h / 2 + 5, player.w - 10, 10);
+      x.fillStyle = "white";
+      x.beginPath();
+      x.arc(player.w / 2 - 10, -player.h / 2 + 15, 4, 0, Math.PI * 2);
+      x.fill();
+
+      x.fillStyle = "#00f";
+      x.beginPath();
+      x.arc(player.w / 2 - 10, -player.h / 2 + 15, 2, 0, Math.PI * 2);
+      x.fill();
+      x.restore();
+
+      // Player shadow
+      x.fillStyle = "rgba(0,0,0,0.3)";
+      x.fillRect(player.x + 3, player.y + 3, player.w, player.h);
+
+      x.restore(); // restore camera transform
+    }
+
+    function updateUI() {
+      const L = levels[level];
+      const coinsCollected = L.coins.filter(c => c.collected).length;
+      const totalCoins = L.coins.length;
+
+      ui.innerHTML = `
+        Level: <span style="color:#ffd700">${level + 1}</span> 
+        | Score: <span style="color:#ffd700">${score}</span>
+        | Coins: <span style="color:#ffd700">${coinsCollected}/${totalCoins}</span>
+    `;
+
+      deathCountElement.textContent = `Deaths: ${deaths}`;
+
+      if (isPaused) {
+        x.fillStyle = "rgba(0, 0, 0, 0.7)";
+        x.fillRect(0, 0, c.width, c.height);
+
+        x.fillStyle = "white";
+        x.font = "bold 48px sans-serif";
+        x.textAlign = "center";
+        x.fillText("PAUSED", c.width / 2, c.height / 2);
+
+        x.font = "24px sans-serif";
+        x.fillText("Press ESC to resume", c.width / 2, c.height / 2 + 50);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      updateUI();
+      requestAnimationFrame(loop);
+    }
+
+    function nextChallenge() {
+      alert("More levels coming soon! Try to beat your high score in the meantime.");
+    }
+
+    // Initialize coins and compute spike offsets for attached spikes (if any)
+    levels.forEach(L => {
+      L.coins.forEach(c => c.collected = false);
+      // ensure worldWidth exists (fallback)
+      if (!L.worldWidth && L.plats && L.plats[0]) L.worldWidth = L.plats[0].w;
+      // precompute offsets for spikes that reference a platform index
+      L.spikes.forEach(s => {
+        if (typeof s.platform === "number") {
+          const p = L.plats[s.platform];
+          if (p) {
+            s._offsetX = s.x - p.x;
+            s._offsetY = s.y - p.y;
+          }
+        }
+      });
+    });
+    loop();
+  </script>
+</body>
+
+</html>

@@ -49,7 +49,7 @@ const quests = [
     }
 ];
 
-// Shop items with image paths
+
 const shopItems = [
     { id: 1, name: "Coffee", cost: 5, sellPrice: 10, img: "img/coffee.png" },
     { id: 2, name: "Sandwich", cost: 8, sellPrice: 15, img: "img/sandwich.png" },
@@ -57,7 +57,7 @@ const shopItems = [
     { id: 4, name: "Painting Supplies", cost: 50, sellPrice: 0, unlocksArt: true, img: "img/paint-supplies.png" }
 ];
 
-// Customer messages
+
 const customerMessages = [
     ":|",
     "This place is great!",
@@ -65,7 +65,7 @@ const customerMessages = [
     "I've been waiting too long..."
 ];
 
-// Customer images
+
 const customerImages = [
     "img/customer1.png",
     "img/customer2.png",
@@ -79,7 +79,7 @@ function initGame() {
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
 
-    // Create seating area
+    
     const seatingArea = document.createElement('div');
     seatingArea.id = 'seating-area';
     seatingArea.style.position = 'fixed';
@@ -97,7 +97,7 @@ function initGame() {
     seatingArea.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
     document.body.appendChild(seatingArea);
     
-    // Create quest giver
+    
     const questGiver = document.createElement('div');
     questGiver.id = 'quest-giver';
     questGiver.style.position = 'fixed';
@@ -124,7 +124,7 @@ function initGame() {
 
 function interactWithQuestGiver() {
     if (!currentQuest) {
-        // Assign a new random quest
+        
         const availableQuests = quests.filter(q => 
             (q.targetItem !== "Painting" || artUnlocked)
         );
@@ -137,7 +137,7 @@ function interactWithQuestGiver() {
             alert("No quests available right now. Come back later!");
         }
     } else if (questCompleted) {
-        // Claim reward
+        
         money += currentQuest.reward;
         alert(`Quest completed! You received $${currentQuest.reward}`);
         currentQuest = null;
@@ -145,7 +145,7 @@ function interactWithQuestGiver() {
         moneyEarnedSinceQuestStart = 0;
         updateUI();
     } else {
-        // Show current quest progress
+        
         alert(`Current Quest: ${currentQuest.description}\nProgress: ${currentQuest.progress}/${currentQuest.targetCount}`);
     }
 }
@@ -307,10 +307,10 @@ function sellItem(itemIndex) {
         reputation += 2;
         customersWaiting--;
         
-        // Update quest progress
+        
         updateQuestProgress(item.name, amountEarned);
         
-        // Remove one customer
+        
         if (activeCustomers.length > 0) {
             const servedCustomer = activeCustomers[0];
             removeCustomer(servedCustomer.id);
@@ -338,7 +338,7 @@ function createArt() {
     });
     alert(`Created a painting worth $${artValue}!`);
     
-    // Update quest progress for painting
+    
     updateQuestProgress("Painting");
     
     updateUI();
@@ -392,11 +392,11 @@ function nextDay() {
     alert("A new day has begun!");
     day++;
     
-    // Clear existing customers
+    
     activeCustomers.forEach(c => clearTimeout(c.timeout));
     activeCustomers = [];
     
-    // Add new customers
+    
     const newCustomers = Math.floor(Math.random() * 3) + 1;
     customersWaiting = newCustomers;
     
@@ -427,7 +427,7 @@ function updateUI() {
     document.getElementById("customers").textContent = `Customers waiting: ${customersWaiting}`;
     document.getElementById("day-timer").textContent = `Next day in: ${timeLeft}s`;
     
-    // Update quest display
+    
     const questInfo = document.getElementById("quest-info");
     if (!questInfo) {
         const statsElement = document.getElementById("stats");
@@ -486,3 +486,4 @@ function renderArtGallery() {
 
 
 window.onload = initGame;
+

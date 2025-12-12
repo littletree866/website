@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Data</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <style>
+        :root {
+            --bg: #0b0b0d;
+            --panel: #151518;
+            --muted: #9aa0a6;
+            --accent: #ffd86b;
+            --btn: #232325;
+            --btnHover: #2f2f31;
+            --danger: #ff6b6b;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(180deg, #050507, #0c0c0e);
+            color: #dfe6e9;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 8px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--accent)
+        }
+
+        #game-info {
+            display: flex;
+            gap: 14px;
+            align-items: center
+        }
+
+        #timer,
+        #level {
+            background: var(--panel);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            color: var(--muted)
+        }
+
+        #game-container {
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 520px;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6)
+        }
+
+        #text-display {
+            min-height: 300px;
+            max-height: 60vh;
+            overflow: auto;
+            padding-right: 8px;
+            line-height: 1.5
+        }
+
+        #options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px;
+            margin-top: 18px
+        }
+
+        .option-btn {
+            background: var(--btn);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            color: #e8eef2
+        }
+
+        .option-btn:hover {
+            background: var(--btnHover);
+            transform: translateY(-3px)
+        }
+
+        .inventory {
+            margin-top: 18px;
+            padding: 12px;
+            background: #101012;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.03)
+        }
+
+        .hidden {
+            display: none
+        }
+
+        .inventory-item {
+            display: inline-block;
+            margin: 6px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            background: #1d1d1f;
+        }
+
+        .puzzle {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            margin: 10px 0
+        }
+
+        .ending {
+            margin-top: 18px;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.35);
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        #hint-button {
+            position: fixed;
+            right: 20px;
+            bottom: 22px;
+            background: var(--btn);
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer
+        }
+
+        .small-input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: #0b0b0d;
+            color: #fff
+        }
+
+        .mem-pad {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .mem-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 8px;
+            border: none;
+            background: #19191b;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer
+        }
+
+        .mem-btn.active {
+            box-shadow: 0 0 18px rgba(255, 216, 107, 0.25);
+            background: linear-gradient(180deg, #2e2a1f, #1a1713)
+        }
+
+        .flash {
+            animation: flash .5s
+        }
+
+        @keyframes flash {
+            0% {
+                transform: scale(1.03)
+            }
+
+            100% {
+                transform: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1><span id="level-indicator">Level 1: Ocean</span></h1>
+        <div id="game-info">
+            <div id="timer">Time: 10:00</div>
+            <div id="level">Level: 1/5</div>
+        </div>
+    </header>
+
+    <div id="game-container" class="fade-in">
+        <div id="text-display"></div>
+        <div id="options-container"></div>
+        <div id="inventory-display" class="inventory hidden"><strong>Inventory:</strong> <span
+                id="inventory-items"></span></div>
+    </div>
+
+    <button id="hint-button" title="Get a hint (costs 30s)">?</button>
+
+    <script>
+    
+        const textDisplay = document.getElementById('text-display');
+        const optionsContainer = document.getElementById('options-container');
+        const inventoryItems = document.getElementById('inventory-items');
+        const timerDisplay = document.getElementById('timer');
+        const levelDisplay = document.getElementById('level');
+        const levelIndicator = document.getElementById('level-indicator');
+        const hintButton = document.getElementById('hint-button');
+
+        const gameState = {
+            currentLevel: 1,
+            currentScene: 'start',
+            timeLeft: 600,
+            timerInterval: null,
+            inventory: [],
+            usedHints: 0,
+            hintsThisLevel: 0,
+            memorySeq: [],
+            memProgress: [],
+            memStrict: false
+        };
+        const hints = {
+            start: "Search tools first — some puzzles need specific items.",
+            hubInspect: "Numbers appear shifted; think of classic ciphers.",
+            codeEntry: "Try shifting letters by a consistent offset (Caesar).",
+            memIntro: "Observe the sequence; you can replay once but commits time.",
+            vaultStart: "Some switches invert others: test one then observe.",
+            final: "Combining items in the right order is required — item names matter."
+        };
+
+        const levels = {
+            1: {
+                name: "Ocean", timer: 600, scenes: {
+                    start: {
+                        text: `You awaken in a derelict maintenance hub. Flickering panels, a sealed console and a broken datapad lie nearby.
+				The console requires authorization; the datapad has a note: "SHIFT BY THE FALLEN".`,
+                        options: [
+                            { text: "Inspect the datapad", next: "inspectPad" },
+                            { text: "Open the console", next: "consoleLocked" },
+                            { text: "Search the room", next: "searchHub" }
+                        ]
+                    },
+                    inspectPad: {
+                        text: `The datapad's note contains a line of scrambled letters: <span class="puzzle">URYYB JBEYQ</span> and a scribble "ROT?"`,
+                        options: [
+                            { text: "Try to decode it (input)", next: "codeEntry" },
+                            { text: "Search room for tools", next: "searchHub" }
+                        ]
+                    },
+                    codeEntry: {
+                        text: `Enter the decoded message (use uppercase letters, spaces allowed).`,
+                        type: 'code', placeholder: 'Decoded text', verify: (input) => {
+                            const normalized = (input || '').trim().toUpperCase();
+                            return normalized === "HELLO WORLD";
+                        },
+                        onSuccess: () => ({
+                            text: `The decoded note reads "HELLO WORLD". After entering it into the console a compartment opens with a worn key and a small module.`,
+                            options: [
+                                { text: "Take key and module", next: "takeStartItems" }
+                            ]
+                        }),
+                        onFail: () => ({
+                            text: `The console flashes red — incorrect. Try again or search for a hint.`,
+                            options: [
+                                { text: "Try decoding again", next: "codeEntry" },
+                                { text: "Search the room", next: "searchHub" }
+                            ]
+                        })
+                    },
+                    searchHub: {
+                        text: `You find a magnetic wrench and a fractured lens under debris.`,
+                        onEnter: () => {
+                            if (!gameState.inventory.includes('Wrench')) gameState.inventory.push('Wrench');
+                            if (!gameState.inventory.includes('Fractured Lens')) gameState.inventory.push('Fractured Lens');
+                            updateInventory();
+                        },
+                        options: [
+                            { text: "Return to console", next: "consoleLocked" },
+                            { text: "Examine the console", next: "consoleLocked" }
+                        ]
+                    },
+                    takeStartItems: {
+                        onEnter: () => {
+                            if (!gameState.inventory.includes('Starter Key')) gameState.inventory.push('Starter Key');
+                            if (!gameState.inventory.includes('Data Module')) gameState.inventory.push('Data Module');
+                            updateInventory();
+                        },
+                        text: `You take the key and module. The console now unlocks an inner port labeled "Sequence Test".`,
+                        options: [
+                            { text: "Proceed to Sequence Test", next: "memoryIntro" }
+                        ]
+                    },
+                    consoleLocked: {
+                        text: `The console requests a login phrase or module insertion. There is a slot labeled "SEQ".`,
+                        options: [
+                            { text: "Insert Data Module", next: () => gameState.inventory.includes('Data Module') ? 'memoryIntro' : 'needModule' },
+                            { text: "Try to force open", next: 'forceConsole' }
+                        ]
+                    },
+                    needModule: { text: 'You do not have the required module.', options: [{ text: 'Search room', next: 'searchHub' }] },
+                    forceConsole: { text: 'You pry at the casing; an alarm triggers. Smoke fills the room.', ending: 'BAD ENDING: Alarmed' },
+
+                    
+                    memoryIntro: {
+                        text: `The module boots a test: a sequence of four colored nodes will flash. Repeat the sequence to proceed. You may replay the demonstration once (cost: 15s).`,
+                        options: [
+                            { text: "Watch demonstration", next: "memoryDemo" },
+                            { text: "Attempt repetition now", next: "memoryPlay" }
+                        ]
+                    },
+                    memoryDemo: {
+                        onEnter: () => { startMemoryDemo(4); return { text: 'Watching demonstration...' } },
+                        onRender: () => {  },
+                        options: [{ text: 'Ready to play', next: 'memoryPlay' }]
+                    },
+                    memoryPlay: {
+                        text: `Repeat the sequence by tapping the nodes in order.`,
+                        type: 'memory',
+                        length: 4,
+                        onSuccess: () => ({
+                            text: `You reproduce the sequence. The port opens, revealing a transit key and a coded map fragment.`,
+                            onEnter: () => {
+                                if (!gameState.inventory.includes('Transit Key')) gameState.inventory.push('Transit Key');
+                                if (!gameState.inventory.includes('Map Fragment')) gameState.inventory.push('Map Fragment');
+                                updateInventory();
+                            },
+                            options: [{ text: 'Proceed to Level 2', next: 'startL2' }]
+                        }),
+                        onFail: () => ({
+                            text: `You fumble the sequence; the module locks you out briefly (penalty: 30s).`,
+                            onEnter: () => {
+                                gameState.timeLeft = Math.max(0, gameState.timeLeft - 30);
+                                updateTimerDisplay();
+                            },
+                            options: [{ text: 'Try again', next: 'memoryIntro' }, { text: 'Search the hub', next: 'searchHub' }]
+                        })
+                    },
+                    startL2: { onEnter: () => { loadLevel(2); return levels[2].scenes.start } }
+                }
+            },
+            2: {
+                name: "Clockwork Vault", timer: 540, scenes: {
+                    start: {
+                        text: `A vault of cogs and levers. A panel reads: "Phase alignment required."`, options: [
+                            { text: 'Inspect alignment panel', next: 'alignmentIntro' },
+                            { text: 'Search for token', next: 'findToken' }
+                        ]
+                    },
+                    findToken: { onEnter: () => { if (!gameState.inventory.includes('Phase Token')) gameState.inventory.push('Phase Token'); updateInventory(); }, text: 'You find a phase token tucked behind a gear.', options: [{ text: 'Return', next: 'start' }] },
+                    alignmentIntro: { text: 'You must reproduce a 5-step phase pattern shown briefly. Mistakes cost time and may break the token.', options: [{ text: 'Begin pattern test', next: 'patternTest' }] },
+                    patternTest: { type: 'memory', length: 5, text: 'Recreate the phase pattern.', onSuccess: () => ({ text: 'Mechanical access granted. A heavy axle is revealed (useful later).', onEnter: () => { if (!gameState.inventory.includes('Axle')) gameState.inventory.push('Axle'); updateInventory(); }, options: [{ text: 'Proceed to Level 3', next: 'startL3' }] }), onFail: () => ({ text: 'Pattern failed; cogs jam (penalty:45s and token damage).', onEnter: () => { gameState.timeLeft = Math.max(0, gameState.timeLeft - 45); if (gameState.inventory.includes('Phase Token')) { const i = gameState.inventory.indexOf('Phase Token'); gameState.inventory.splice(i, 1); } updateInventory(); }, options: [{ text: 'Try again', next: 'alignmentIntro' }] }) },
+                    startL3: { onEnter: () => { loadLevel(3); return levels[3].scenes.start } }
+                }
+            },
+            3: {
+                name: "Mirror Archives", timer: 480, scenes: {
+                    start: {
+                        text: `Shelves of mirrored plates. Reflections hide and reveal glyphs when combined. A pedestal requires two mirror halves.`, options: [
+                            { text: 'Search shelves', next: 'searchShelves' },
+                            { text: 'Examine pedestal', next: 'pedestal' }
+                        ]
+                    },
+                    searchShelves: { onEnter: () => { if (!gameState.inventory.includes('Mirror Half A')) gameState.inventory.push('Mirror Half A'); if (!gameState.inventory.includes('Mirror Half B')) gameState.inventory.push('Mirror Half B'); updateInventory(); }, text: 'You retrieve two mirror shards.', options: [{ text: 'Try combining them', next: 'combineMirrors' }] },
+                    combineMirrors: {
+                        text: 'Combine mirror halves? (Combining reveals hidden glyphs but consumes both pieces)', options: [
+                            { text: 'Combine', next: () => { if (gameState.inventory.includes('Mirror Half A') && gameState.inventory.includes('Mirror Half B')) return 'mirrorCombined'; else return 'noMirrors' } },
+                            { text: 'Leave them', next: 'start' }
+                        ]
+                    },
+                    noMirrors: { text: 'You do not have both mirror halves.', options: [{ text: 'Search shelves', next: 'searchShelves' }] },
+                    mirrorCombined: {
+                        onEnter: () => { 
+                            removeFromInventory('Mirror Half A'); removeFromInventory('Mirror Half B');
+                            gameState.inventory.push('Combined Mirror'); updateInventory();
+                        }, text: 'The combined mirror reveals a 3-symbol glyph sequence (△ ● ▢). Use it to decode the archive lock.', options: [{ text: 'Decode archives (input)', next: 'archiveDecode' }]
+                    },
+                    archiveDecode: { type: 'code', placeholder: 'Enter glyph words (e.g. TRUTH KNOWS ...)', verify: (input) => { return (input || '').toUpperCase().includes('TRUTH'); }, onSuccess: () => ({ text: 'The archives release a "Vault Sigil". A stairwell opens downward.', onEnter: () => { if (!gameState.inventory.includes('Vault Sigil')) gameState.inventory.push('Vault Sigil'); updateInventory(); }, options: [{ text: 'Proceed to Level 4', next: 'startL4' }] }), onFail: () => ({ text: 'Decoding failed; the archive resets. (Try again)', options: [{ text: 'Try again', next: 'archiveDecode' }] }) },
+                    startL4: { onEnter: () => { loadLevel(4); return levels[4].scenes.start } }
+                }
+            },
+            4: {
+                name: "Entropy Engine", timer: 420, scenes: {
+                    start: {
+                        text: `A room with twelve switches. An inscription: "Balance or burn." Two minutes will tick faster when you err.`, options: [
+                            { text: 'Examine switches', next: 'switchPanel' },
+                            { text: 'Search for clue', next: 'searchEntropy' }
+                        ]
+                    },
+            searchEntropy: {
+                onEnter: () => { if (!gameState.inventory.includes('Calibrator')) gameState.inventory.push('Calibrator'); updateInventory(); }, text: 'You find a calibrator tool; it helps but doesn\'t solve the puzzle.', options: [{text: 'Use calibrator on panel', next: 'switchPanel'}]
+            },
+            switchPanel: {
+                text: 'Toggle switches to match the pattern hinted in the Vault Sigil. Wrong final state triggers accelerated timer.', options: [
+                    { text: 'Attempt solve (opens interactive grid)', next: 'switchSolve' }
+                ]
+            },
+            switchSolve: {
+                type: 'switches', hintPattern: [1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0],
+                onSuccess: () => ({ text: 'Entropy balances. A core key slides free.', onEnter: () => { if (!gameState.inventory.includes('Core Key')) gameState.inventory.push('Core Key'); updateInventory(); }, options: [{ text: 'Proceed to Level 5', next: 'startL5' }] }),
+                onFail: () => ({ text: 'The engine shudders; time accelerates (penalty:90s).', onEnter: () => { gameState.timeLeft = Math.max(0, gameState.timeLeft - 90); updateTimerDisplay(); }, options: [{ text: 'Try again', next: 'switchPanel' }] })
+            },
+            startL5: { onEnter: () => { loadLevel(5); return levels[5].scenes.start } }
+        }
+	},
+            5: {
+            name: "Convergence", timer: 300, scenes: {
+                start: {
+                    text: `The final chamber accepts three artifacts into a receptacle in order. A small inscription: "Order births exit."`, options: [
+                        { text: 'Attempt to place items', next: 'finalPlace' },
+                        { text: 'Study your inventory', next: 'checkFinalInv' }
+                    ]
+                },
+                checkFinalInv: { text: `Inventory: ${gameState.inventory.join(', ')}`, options: [{ text: 'Back', next: 'start' }] },
+                finalPlace: {
+                    text: 'Select three items in order to place into the receptacle.', type: 'chooser', choices: () => gameState.inventory.slice(), verify: (chosen) => {
+                        
+                        const correct = ['Transit Key', 'Core Key', 'Vault Sigil']; 
+                        if (correct.every((c, i) => chosen[i] === c)) return true;
+                        return false;
+                    }, onSuccess: () => ({ text: 'Artifacts align. A gateway opens — you step through.', options: [{ text: 'Embrace the end', next: 'trueEnd' }] }), onFail: () => ({ text: 'The alignment collapses; a pulse injures you (penalty:60s).', onEnter: () => { gameState.timeLeft = Math.max(0, gameState.timeLeft - 60); updateTimerDisplay(); }, options: [{ text: 'Retry alignment', next: 'finalPlace' }] })
+                },
+                trueEnd: { text: `Light floods your vision. You have converged paths and passed the test. <div class="ending">TRUE ENDING: Convergence Achieved</div>`, options: [{ text: 'Play Again', next: 'restartGame' }] },
+                restartGame: { onEnter: () => { resetGame(); loadLevel(1); return levels[1].scenes.start } }
+            }
+        }
+};
+
+        
+        function removeFromInventory(name) { const idx = gameState.inventory.indexOf(name); if (idx > -1) gameState.inventory.splice(idx, 1); updateInventory(); }
+
+        
+        function initGame() { loadLevel(1); startTimer(); hintButton.addEventListener('click', showHint); }
+        function loadLevel(n) {
+            gameState.currentLevel = n; gameState.currentScene = 'start'; gameState.timeLeft = levels[n].timer; gameState.hintsThisLevel = 0;
+            updateTimerDisplay();
+            levelDisplay.textContent = `Level: ${n}/${Object.keys(levels).length}`;
+            levelIndicator.textContent = `Level ${n}: ${levels[n].name}`;
+            displayScene('start');
+        }
+        function startTimer() { clearInterval(gameState.timerInterval); gameState.timerInterval = setInterval(() => { gameState.timeLeft--; updateTimerDisplay(); if (gameState.timeLeft <= 0) timeUp(); }, 1000); }
+        function updateTimerDisplay() { const m = Math.floor(gameState.timeLeft / 60); const s = gameState.timeLeft % 60; timerDisplay.textContent = `Time: ${m}:${s.toString().padStart(2, '0')}`; if (gameState.timeLeft <= 60) timerDisplay.style.color = '#ff6b6b'; else timerDisplay.style.color = ''; }
+        function timeUp() { clearInterval(gameState.timerInterval); textDisplay.innerHTML += `<div class="ending">TIME'S UP — you failed to converge.</div>`; optionsContainer.innerHTML = ''; const btn = document.createElement('button'); btn.className = 'option-btn'; btn.textContent = 'Restart'; btn.addEventListener('click', () => { resetGame(); loadLevel(1); }); optionsContainer.appendChild(btn); }
+
+        
+        function showHint() {
+            const sceneKey = gameState.currentScene || 'start';
+            if (!hints[sceneKey]) { 
+                if (gameState.hintsThisLevel >= 3) return;
+            }
+            if (gameState.hintsThisLevel >= 3) { const el = document.createElement('div'); el.className = 'puzzle'; el.textContent = 'No more hints this level.'; textDisplay.appendChild(el); return; }
+            if (!hints[sceneKey]) return;
+            gameState.usedHints++; gameState.hintsThisLevel++;
+            gameState.timeLeft = Math.max(0, gameState.timeLeft - 30); updateTimerDisplay();
+            const hintEl = document.createElement('div'); hintEl.className = 'puzzle'; hintEl.innerHTML = `<strong>HINT (cost 30s):</strong> ${hints[sceneKey]}`; textDisplay.appendChild(hintEl); hintButton.classList.add('flash'); setTimeout(() => hintButton.classList.remove('flash'), 600);
+        }
+
+        
+        function displayScene(sceneId) {
+            const lvl = levels[gameState.currentLevel];
+            const scene = lvl.scenes[sceneId];
+            if (!scene) { console.error('Scene not found', sceneId); return; }
+            gameState.currentScene = sceneId;
+            
+            if (scene.onEnter) { const r = scene.onEnter(); if (r) {  } }
+            
+            hintButton.disabled = false;
+            
+            textDisplay.innerHTML = scene.text || '';
+            optionsContainer.innerHTML = '';
+            
+            if (scene.type === 'code') {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'puzzle';
+                const input = document.createElement('input'); input.className = 'small-input'; input.placeholder = scene.placeholder || '';
+                const ok = document.createElement('button'); ok.className = 'option-btn'; ok.textContent = 'Submit';
+                ok.addEventListener('click', () => {
+                    const val = input.value || '';
+                    const okRes = scene.verify(val);
+                    if (okRes) {
+                        const out = scene.onSuccess ? scene.onSuccess() : { text: 'Success', options: [] };
+                        if (out.onEnter) out.onEnter();
+                        textDisplay.innerHTML = out.text;
+                        renderOptions(out.options || []);
+                    } else {
+                        const out = scene.onFail ? scene.onFail() : { text: 'Incorrect', options: [] };
+                        if (out.onEnter) out.onEnter();
+                        textDisplay.innerHTML = out.text;
+                        renderOptions(out.options || []);
+                    }
+                });
+                wrapper.appendChild(document.createTextNode('> ')); wrapper.appendChild(input); wrapper.appendChild(ok);
+                textDisplay.appendChild(wrapper);
+                return;
+            }
+            if (scene.type === 'memory') {
+                
+                const length = scene.length || 4;
+                if (!gameState.memorySeq || gameState.memorySeq.length !== length) makeMemorySequence(length);
+                renderMemoryUI(scene, length);
+                return;
+            }
+            if (scene.type === 'switches') {
+                renderSwitches(scene);
+                return;
+            }
+            if (scene.type === 'chooser') {
+                renderChooser(scene);
+                return;
+            }
+            
+            renderOptions(scene.options || []);
+        }
+
+        
+        function renderOptions(options) {
+            optionsContainer.innerHTML = '';
+            (options || []).forEach(opt => {
+                const btn = document.createElement('button'); btn.className = 'option-btn';
+                btn.textContent = (typeof opt.text === 'function') ? opt.text() : opt.text;
+                btn.addEventListener('click', () => {
+                    let next = opt.next;
+                    if (typeof next === 'function') next = next();
+                    if (typeof next === 'string') displayScene(next);
+                    else if (typeof next === 'object' && next.onEnter) { const res = next.onEnter(); if (res) displayScene(res); }
+                });
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        
+        function makeMemorySequence(len) {
+            const seq = [];
+            for (let i = 0; i < len; i++) seq.push(Math.floor(Math.random() * 4)); 
+            gameState.memorySeq = seq; gameState.memProgress = [];
+        }
+        function startMemoryDemo(len) {
+            makeMemorySequence(len);
+            showDemoSequence(0);
+        }
+        function showDemoSequence(i) {
+            const pad = createMemoryPad();
+            if (i >= gameState.memorySeq.length) { return; }
+            const idx = gameState.memorySeq[i];
+            const btn = document.querySelectorAll('.mem-btn')[idx];
+            btn.classList.add('active');
+            setTimeout(() => { btn.classList.remove('active'); setTimeout(() => showDemoSequence(i + 1), 350); }, 600);
+        }
+        function renderMemoryUI(scene, length) {
+            textDisplay.innerHTML += `<div class="puzzle">Tap the nodes in sequence.</div>`;
+            const pad = createMemoryPad();
+            optionsContainer.innerHTML = '';
+            
+            const submit = document.createElement('button'); submit.className = 'option-btn'; submit.textContent = 'Submit Sequence';
+            submit.addEventListener('click', () => {
+                
+                if (gameState.memProgress.length !== gameState.memorySeq.length) { textDisplay.innerHTML += '<div class="puzzle">Incomplete sequence.</div>'; return; }
+                const ok = gameState.memProgress.every((v, i) => v === gameState.memorySeq[i]);
+                if (ok) {
+                    const out = scene.onSuccess ? scene.onSuccess() : { text: 'Success', options: [] }; if (out.onEnter) out.onEnter(); textDisplay.innerHTML = out.text; renderOptions(out.options || []);
+                } else {
+                    const out = scene.onFail ? scene.onFail() : { text: 'Fail', options: [] }; if (out.onEnter) out.onEnter(); textDisplay.innerHTML = out.text; renderOptions(out.options || []);
+                }
+            });
+            const replay = document.createElement('button'); replay.className = 'option-btn'; replay.textContent = 'Replay Demo (cost 15s)';
+            replay.addEventListener('click', () => {
+                if (gameState.hintsThisLevel >= 5) return;
+                gameState.timeLeft = Math.max(0, gameState.timeLeft - 15); updateTimerDisplay(); startMemoryDemo(length);
+            });
+            optionsContainer.appendChild(submit); optionsContainer.appendChild(replay);
+        }
+        function createMemoryPad() {
+            optionsContainer.innerHTML = '';
+            const pad = document.createElement('div'); pad.className = 'mem-pad';
+            for (let i = 0; i < 4; i++) {
+                const b = document.createElement('button'); b.className = 'mem-btn'; b.textContent = (i + 1);
+                b.addEventListener('click', () => { gameState.memProgress.push(i); b.classList.add('active'); setTimeout(() => b.classList.remove('active'), 220); });
+                pad.appendChild(b);
+            }
+            textDisplay.appendChild(pad);
+            return pad;
+        }
+
+        
+        function renderSwitches(scene) {
+            optionsContainer.innerHTML = '';
+            
+            const container = document.createElement('div'); container.style.display = 'grid'; container.style.gridTemplateColumns = 'repeat(4,1fr)'; container.style.gap = '8px';
+            const state = new Array(12).fill(0);
+            for (let i = 0; i < 12; i++) {
+                const sw = document.createElement('button'); sw.className = 'option-btn'; sw.textContent = state[i] ? '1' : '0';
+                sw.addEventListener('click', () => { state[i] = state[i] ? 0 : 1; sw.textContent = state[i] ? '1' : '0'; });
+                container.appendChild(sw);
+            }
+            const submit = document.createElement('button'); submit.className = 'option-btn'; submit.textContent = 'Submit Configuration';
+            submit.addEventListener('click', () => {
+                const pattern = scene.hintPattern; const ok = pattern.every((v, i) => v === state[i]);
+                if (ok) { const out = scene.onSuccess ? scene.onSuccess() : { text: 'OK', options: [] }; if (out.onEnter) out.onEnter(); textDisplay.innerHTML = out.text; renderOptions(out.options || []); }
+                else { const out = scene.onFail ? scene.onFail() : { text: 'Fail', options: [] }; if (out.onEnter) out.onEnter(); textDisplay.innerHTML = out.text; renderOptions(out.options || []); }
+            });
+            optionsContainer.appendChild(container); optionsContainer.appendChild(submit);
+        }
+
+        
+        function renderChooser(scene) {
+            optionsContainer.innerHTML = '';
+            const available = (typeof scene.choices === 'function') ? scene.choices() : (scene.choices || []);
+            if (available.length < 3) { textDisplay.innerHTML += '<div class="puzzle">Not enough items to attempt the final receptacle.</div>'; renderOptions([{ text: 'Back', next: 'start' }]); return; }
+            
+            const chosen = [];
+            available.forEach(it => {
+                const btn = document.createElement('button'); btn.className = 'option-btn'; btn.textContent = it;
+                btn.addEventListener('click', () => { if (chosen.length < 3) { chosen.push(it); btn.disabled = true; btn.style.opacity = 0.6; } });
+                optionsContainer.appendChild(btn);
+            });
+            const submit = document.createElement('button'); submit.className = 'option-btn'; submit.textContent = 'Place Selected';
+            submit.addEventListener('click', () => {
+                if (chosen.length !== 3) { textDisplay.innerHTML += '<div class="puzzle">Select exactly three items.</div>'; return; }
+                const ok = scene.verify(chosen);
+                if (ok) { const out = scene.onSuccess ? scene.onSuccess() : { text: 'Success', options: [] }; if (out.onEnter) out.onEnter(); textDisplay.innerHTML = out.text; renderOptions(out.options || []); }
+                else { const out = scene.onFail ? scene.onFail() : { text: 'Fail', options: [] }; if (out.onEnter) out.onEnter(); textDisplay.innerHTML = out.text; renderOptions(out.options || []); }
+            });
+            optionsContainer.appendChild(submit);
+        }
+
+        
+        function updateInventory() {
+            inventoryItems.innerHTML = '';
+            if (gameState.inventory.length === 0) { inventoryItems.textContent = 'Nothing'; document.getElementById('inventory-display').classList.add('hidden'); }
+            else {
+                gameState.inventory.forEach(it => {
+                    const s = document.createElement('span'); s.className = 'inventory-item'; s.textContent = it; inventoryItems.appendChild(s);
+                });
+                document.getElementById('inventory-display').classList.remove('hidden');
+            }
+        }
+
+        
+        function resetGame() {
+            clearInterval(gameState.timerInterval);
+            gameState.currentLevel = 1; gameState.currentScene = 'start'; gameState.inventory = []; gameState.usedHints = 0; gameState.hintsThisLevel = 0; gameState.memorySeq = []; gameState.memProgress = [];
+            updateInventory(); timerDisplay.style.color = ''; gameState.timeLeft = levels[1].timer;
+        }
+
+        
+        initGame();
+    </script>
+</body>
+
+</html>
+
+
+

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>Clicker Quest+</title>
-  <link rel="icon" href="check.png">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
+  <title>Clicker Quest+ Pro</title>
+  <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #6e8efb;
@@ -13,7 +14,16 @@
       --light: #fafafa;
       --money: #27ae60;
       --bonus: #f1c40f;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --ui-bg: rgba(255, 255, 255, 0.97);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'DM Sans', sans-serif;
@@ -23,229 +33,1179 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
+
     #game {
-      background: rgba(255,255,255,0.95);
-      border-radius: 20px;
+      background: var(--ui-bg);
+      border-radius: 24px;
       padding: 30px;
       text-align: center;
-      width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
+      z-index: 10;
+      transition: transform 0.3s ease;
     }
-    h1 {margin:0 0 15px;color:var(--dark);}
-    #money {font-size:2em;color:var(--money);margin:10px 0;transition:0.3s;}
-    button {
-      border: none;
-      cursor: pointer;
-      border-radius: 8px;
-      font-weight: bold;
-      transition: 0.2s;
-      font-family: "Ink Free", cursive;
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(110, 142, 251, 0.1);
     }
+
+    .header-info {
+      text-align: left;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: var(--dark);
+      font-size: 2.2rem;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0;
+    }
+
+    .save-indicator {
+      font-size: 0.8rem;
+      color: var(--success);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .save-indicator.show {
+      opacity: 1;
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(110, 142, 251, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      transition: transform 0.2s;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .money-primary {
+      color: var(--money);
+    }
+
+    .money-secondary {
+      color: var(--bonus);
+    }
+
+    #money {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--money);
+      margin: 10px 0;
+      transition: all 0.3s;
+      text-shadow: 0 2px 10px rgba(39, 174, 96, 0.2);
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .click-animation {
+      animation: pulse 0.2s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
     #click {
-      font-size: 20px;
+      font-size: 1.4rem;
       background: linear-gradient(to right, var(--primary), var(--secondary));
       color: white;
-      padding: 18px 40px;
+      padding: 22px 50px;
       border-radius: 50px;
-      margin: 15px 0;
+      margin: 20px 0 30px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4);
+      position: relative;
+      overflow: hidden;
+      touch-action: manipulation;
     }
-    #click:hover {transform: scale(1.05);}
-    #click:active {transform: scale(0.95);}
+
+    #click:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 9px 0 rgba(110, 142, 251, 0.4);
+    }
+
+    #click:active {
+      transform: translateY(2px) scale(0.98);
+      box-shadow: 0 4px 0 rgba(110, 142, 251, 0.4);
+    }
+
+    #click:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    #click:hover:before {
+      left: 100%;
+    }
+
+    .upgrades-container {
+      margin-top: 25px;
+    }
+
+    .upgrade-section-title {
+      text-align: left;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .keyboard-hint {
+      font-size: 0.8rem;
+      color: #666;
+      font-weight: normal;
+    }
+
     .upgrade {
       display: flex;
       justify-content: space-between;
-      background: var(--light);
-      border-left: 5px solid var(--primary);
-      margin: 6px 0;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 15px;
       align-items: center;
+      background: var(--light);
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.2s;
+      border-left: 5px solid var(--primary);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
     }
-    .upgrade button {
-      background: var(--primary);
+
+    .upgrade:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .upgrade-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .upgrade-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .upgrade-key {
+      background: var(--dark);
       color: white;
-      padding: 6px 14px;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
     }
-    .upgrade button:disabled {background: #ccc;cursor:not-allowed;}
-    .floating {
+
+    .upgrade-desc {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .upgrade-stats {
+      display: flex;
+      gap: 15px;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    .upgrade button {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .upgrade button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(110, 142, 251, 0.3);
+    }
+
+    .upgrade button:disabled {
+      background: #ddd;
+      color: #999;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .upgrade button:disabled:after {
+      content: '';
       position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+    }
+
+    .upgrade-cost {
+      font-weight: 700;
+      color: var(--money);
+    }
+
+    .floating {
+      position: fixed;
       color: var(--money);
       font-weight: bold;
       pointer-events: none;
+      z-index: 1000;
+      font-size: 1.2rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       animation: floatUp 1s ease-out forwards;
     }
+
     @keyframes floatUp {
-      from {opacity:1; transform:translateY(0);}
-      to {opacity:0; transform:translateY(-50px);}
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1.2);
+      }
     }
+
     .bonus-coin {
-      position: absolute;
-      width: 40px; height: 40px;
+      position: fixed;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: radial-gradient(circle, #f9d71c 0%, #f1b80a 80%);
-      border: 2px solid #f5c400;
+      border: 3px solid #f5c400;
       cursor: pointer;
-      box-shadow: 0 0 15px #f1c40f;
+      box-shadow: 0 0 20px #f1c40f;
       animation: floatCoin 5s linear;
+      z-index: 5;
+      transition: transform 0.2s;
     }
+
+    .bonus-coin:hover {
+      transform: scale(1.1);
+    }
+
     @keyframes floatCoin {
-      from {opacity:1; transform:translateY(0);}
-      to {opacity:0; transform:translateY(-200px);}
+      from {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-200px) rotate(360deg);
+      }
     }
+
     .boost {
       animation: glow 1s infinite alternate;
     }
+
     @keyframes glow {
-      from {box-shadow:0 0 10px var(--bonus);}
-      to {box-shadow:0 0 25px var(--bonus);}
+      from {
+        box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4), 0 0 15px var(--bonus);
+      }
+      to {
+        box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4), 0 0 30px var(--bonus);
+      }
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--success);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      z-index: 10000;
+      font-weight: 600;
+      transform: translateX(150%);
+      transition: transform 0.3s ease-out;
+      max-width: 300px;
+      word-break: break-word;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .background-coins {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .background-coin {
+      position: absolute;
+      opacity: 0.03;
+      font-size: 2rem;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(110, 142, 251, 0.2);
+      border-radius: 3px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .prestige-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(110, 142, 251, 0.1), rgba(167, 119, 227, 0.1));
+      border-radius: 15px;
+      border: 2px dashed var(--primary);
+    }
+
+    .prestige-button {
+      background: linear-gradient(to right, #e74c3c, #c0392b);
+      color: white;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 15px;
+    }
+
+    .prestige-button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    .prestige-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: var(--bonus);
+      opacity: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    @media (max-width: 550px) {
+      #game {
+        padding: 20px;
+      }
+
+      .stats-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .upgrade {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .upgrade button {
+        margin-top: 10px;
+        align-self: flex-end;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      #click {
+        padding: 18px 30px;
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (hover: none) {
+      .upgrade:hover {
+        transform: none;
+      }
+      
+      #click:hover {
+        transform: none;
+        box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4);
+      }
     }
   </style>
 </head>
+
 <body>
-<div id="game">
-  <h1>Clicker Quest+</h1>
-  <div id="money">$0</div>
-  <div id="best" style="font-size:0.9em;color:#555;margin-bottom:6px;">Best: $0</div>
-  <button id="click">Click!</button>
 
-  <div class="upgrade">
-    <span>Upgrade Click (+$1) — <span id="clickCost">$10</span></span>
-    <button id="buyClick">Buy</button>
+  <div class="background-coins" id="backgroundCoins"></div>
+  <div class="notification" id="notification"></div>
+
+  <div id="game">
+    <div class="game-header">
+      <div class="header-info">
+        <h1>Clicker Quest+ Pro</h1>
+        <p class="subtitle">Click your way to wealth and glory!</p>
+      </div>
+      <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat">
+        <div class="stat-value money-primary" id="money">$0</div>
+        <div class="stat-label">Current Balance</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="best">$0</div>
+        <div class="stat-label">Best Score</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value money-secondary" id="perSecond">$0/s</div>
+        <div class="stat-label">Passive Income</div>
+      </div>
+    </div>
+
+    <button id="click">CLICK ME!</button>
+
+    <div class="upgrades-container">
+      <div class="upgrade-section-title">
+        Upgrades
+        <span class="keyboard-hint">Press 1-4 to buy</span>
+      </div>
+
+      <div class="upgrade">
+        <div class="upgrade-info">
+          <div class="upgrade-title">
+            <span class="upgrade-key">1</span>
+            Better Clicks
+          </div>
+          <div class="upgrade-desc">Increase cash per click</div>
+          <div class="upgrade-stats">
+            <span>Current: +$<span id="currentPerClick">1</span>/click</span>
+            <span>Owned: <span id="clickUpgrades">0</span></span>
+          </div>
+        </div>
+        <button id="buyClick">Buy (<span id="clickCost">$10</span>)</button>
+      </div>
+
+      <div class="upgrade">
+        <div class="upgrade-info">
+          <div class="upgrade-title">
+            <span class="upgrade-key">2</span>
+            Auto-Earner
+          </div>
+          <div class="upgrade-desc">Earn cash automatically every second</div>
+          <div class="upgrade-stats">
+            <span>Current: +$<span id="currentPerSec">0</span>/s</span>
+            <span>Owned: <span id="autoUpgrades">0</span></span>
+          </div>
+        </div>
+        <button id="buyAuto">Buy (<span id="autoCost">$25</span>)</button>
+      </div>
+
+      <div class="upgrade">
+        <div class="upgrade-info">
+          <div class="upgrade-title">
+            <span class="upgrade-key">3</span>
+            Power Boost
+          </div>
+          <div class="upgrade-desc">Double your clicking power for 30 seconds</div>
+          <div class="upgrade-stats">
+            <span id="boostStatus">Status: Ready</span>
+            <span id="boostTimer" style="display:none">Time left: 30s</span>
+          </div>
+          <div class="progress-bar" id="boostProgress" style="display:none">
+            <div class="progress-fill" id="boostProgressFill"></div>
+          </div>
+        </div>
+        <button id="buyBoost">Buy (<span id="boostCost">$500</span>)</button>
+      </div>
+
+      <div class="upgrade">
+        <div class="upgrade-info">
+          <div class="upgrade-title">
+            <span class="upgrade-key">4</span>
+            Mega Click
+          </div>
+          <div class="upgrade-desc">10% chance for 10x cash on click</div>
+          <div class="upgrade-stats">
+            <span>Chance: <span id="megaChance">10</span>%</span>
+            <span>Owned: <span id="megaUpgrades">0</span></span>
+          </div>
+        </div>
+        <button id="buyMega">Buy (<span id="megaCost">$7500</span>)</button>
+      </div>
+    </div>
+
+    <div class="prestige-section">
+      <h3>Prestige</h3>
+      <p>Reset your progress for permanent bonuses! You need at least $10,000 to prestige.</p>
+      <p>You will earn: <span id="prestigeBonus">0</span>% bonus per prestige</p>
+      <button class="prestige-button" id="prestigeButton" disabled>PRESTIGE (Resets Progress)</button>
+    </div>
   </div>
-  <div class="upgrade">
-    <span>Auto Earner (+$1/s) — <span id="autoCost">$50</span></span>
-    <button id="buyAuto">Buy</button>
-  </div>
-  <div class="upgrade">
-    <span>Boost (x2 clicks for 30s) — <span id="boostCost">$200</span></span>
-    <button id="buyBoost">Buy</button>
-  </div>
-</div>
 
-<audio id="clickSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c2b7b.mp3"></audio>
-<audio id="bonusSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_1e44983d06.mp3"></audio>
+  <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
+  <audio id="bonusSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+  <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
 
-<script>
-let money = 0, perClick = 1, perSec = 0;
-let clickCost = 10, autoCost = 50, boostCost = 200;
-let boostActive = false, boostTimer = null;
+  <script>
+    // Game state
+    let money = 0;
+    let perClick = 1;
+    let perSec = 0;
+    let clickCost = 10;
+    let autoCost = 25;
+    let boostCost = 500;
+    let megaCost = 7500;
+    let clickUpgrades = 0;
+    let autoUpgrades = 0;
+    let megaUpgrades = 0;
+    let boostActive = false;
+    let boostTimeLeft = 0;
+    let boostTimer = null;
+    let prestigeCount = 0;
+    let lastSaveTime = 0;
 
-// persisted best
-const BEST_KEY = 'clicker_best';
-function loadBest(){ return Number(localStorage.getItem(BEST_KEY) || 0); }
-function saveBest(v){ localStorage.setItem(BEST_KEY, String(Math.floor(v))); }
-const moneyEl = document.getElementById('money');
-const clickBtn = document.getElementById('click');
-const clickSound = document.getElementById('clickSound');
-const bonusSound = document.getElementById('bonusSound');
-const clickCostEl = document.getElementById('clickCost');
-const autoCostEl = document.getElementById('autoCost');
-const boostCostEl = document.getElementById('boostCost');
-const bestEl = document.getElementById('best');
-let best = loadBest();
+    // Storage keys
+    const MONEY_KEY = 'clicker_money';
+    const PER_CLICK_KEY = 'clicker_perClick';
+    const PER_SEC_KEY = 'clicker_perSec';
+    const UPGRADES_KEY = 'clicker_upgrades';
+    const BEST_KEY = 'clicker_best';
+    const PRESTIGE_KEY = 'clicker_prestige';
 
-function fmt(n){return '$' + Math.floor(n).toLocaleString();}
+    // Load game from localStorage
+    function loadGame() {
+      try {
+        const savedMoney = localStorage.getItem(MONEY_KEY);
+        const savedPerClick = localStorage.getItem(PER_CLICK_KEY);
+        const savedPerSec = localStorage.getItem(PER_SEC_KEY);
+        const savedUpgrades = localStorage.getItem(UPGRADES_KEY);
+        const savedPrestige = localStorage.getItem(PRESTIGE_KEY);
+        const savedBest = localStorage.getItem(BEST_KEY);
 
-function updateUI(){
-  moneyEl.textContent = fmt(money);
-  bestEl.textContent = 'Best: ' + fmt(best);
-  clickCostEl.textContent = fmt(clickCost);
-  autoCostEl.textContent = fmt(autoCost);
-  boostCostEl.textContent = fmt(boostCost);
-  document.getElementById('buyClick').disabled = money < clickCost;
-  document.getElementById('buyAuto').disabled = money < autoCost;
-  document.getElementById('buyBoost').disabled = money < boostCost || boostActive;
-}
+        if (savedMoney) money = parseFloat(savedMoney);
+        if (savedPerClick) perClick = parseFloat(savedPerClick);
+        if (savedPerSec) perSec = parseFloat(savedPerSec);
+        if (savedPrestige) prestigeCount = parseInt(savedPrestige);
 
-function addFloatingText(value, x, y){
-  const t = document.createElement('div');
-  t.className = 'floating';
-  t.textContent = '+' + fmt(value);
-  t.style.left = x + 'px';
-  t.style.top = y + 'px';
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),1000);
-}
+        if (savedUpgrades) {
+          const upgrades = JSON.parse(savedUpgrades);
+          clickUpgrades = upgrades.click || 0;
+          autoUpgrades = upgrades.auto || 0;
+          megaUpgrades = upgrades.mega || 0;
 
-function clickGain(e){
-  const value = boostActive ? perClick * 2 : perClick;
-  money += value;
-  addFloatingText(value, e.clientX, e.clientY);
-  try { clickSound.currentTime = 0; clickSound.play(); } catch(e) { /* ignore */ }
-  if (money > best) { best = money; saveBest(best); }
-  updateUI();
-}
+          // Recalculate costs based on owned upgrades
+          clickCost = Math.floor(10 * Math.pow(1.3, clickUpgrades));
+          autoCost = Math.floor(25 * Math.pow(1.4, autoUpgrades));
+          megaCost = Math.floor(750 * Math.pow(1.5, megaUpgrades));
+        }
+      } catch (e) {
+        console.error('Error loading game:', e);
+        showNotification('Error loading save data', 'danger');
+      }
+    }
 
-function buyClick(){
-  if(money >= clickCost){
-    money -= clickCost;
-    perClick++;
-    clickCost = Math.floor(clickCost * 1.3);
-    updateUI();
-  }
-}
-function buyAuto(){
-  if(money >= autoCost){
-    money -= autoCost;
-    perSec++;
-    autoCost = Math.floor(autoCost * 1.4);
-    updateUI();
-  }
-}
-function buyBoost(){
-  if(money >= boostCost && !boostActive){
-    money -= boostCost;
-    boostActive = true;
-    clickBtn.classList.add('boost');
-    updateUI();
-    clearTimeout(boostTimer);
-    boostTimer = setTimeout(()=>{
-      boostActive = false;
-      clickBtn.classList.remove('boost');
+    // Save game to localStorage
+    function saveGame() {
+      try {
+        localStorage.setItem(MONEY_KEY, money.toString());
+        localStorage.setItem(PER_CLICK_KEY, perClick.toString());
+        localStorage.setItem(PER_SEC_KEY, perSec.toString());
+        localStorage.setItem(PRESTIGE_KEY, prestigeCount.toString());
+
+        const upgrades = {
+          click: clickUpgrades,
+          auto: autoUpgrades,
+          mega: megaUpgrades
+        };
+        localStorage.setItem(UPGRADES_KEY, JSON.stringify(upgrades));
+
+        if (money > loadBest()) {
+          saveBest(money);
+        }
+
+        // Show save indicator
+        const saveIndicator = document.getElementById('saveIndicator');
+        saveIndicator.classList.add('show');
+        setTimeout(() => saveIndicator.classList.remove('show'), 1000);
+        
+        lastSaveTime = Date.now();
+      } catch (e) {
+        console.error('Error saving game:', e);
+      }
+    }
+
+    // Load best score
+    function loadBest() {
+      try {
+        const best = localStorage.getItem(BEST_KEY);
+        return best ? parseFloat(best) : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    // Save best score
+    function saveBest(value) {
+      try {
+        localStorage.setItem(BEST_KEY, Math.floor(value).toString());
+      } catch (e) {
+        console.error('Error saving best score:', e);
+      }
+    }
+
+    // DOM elements
+    const moneyEl = document.getElementById('money');
+    const bestEl = document.getElementById('best');
+    const perSecondEl = document.getElementById('perSecond');
+    const clickBtn = document.getElementById('click');
+    const notificationEl = document.getElementById('notification');
+
+    // Sound elements
+    const clickSound = document.getElementById('clickSound');
+    const bonusSound = document.getElementById('bonusSound');
+    const upgradeSound = document.getElementById('upgradeSound');
+
+    // Show notification
+    let notificationTimeout = null;
+    function showNotification(message, type = 'success') {
+      clearTimeout(notificationTimeout);
+      
+      notificationEl.textContent = message;
+      notificationEl.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+      notificationEl.classList.remove('show');
+      
+      // Force reflow
+      void notificationEl.offsetWidth;
+      
+      notificationEl.classList.add('show');
+      
+      notificationTimeout = setTimeout(() => {
+        notificationEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // Format numbers
+    function fmt(value) {
+      if (value >= 1e9) return (value / 1e9).toFixed(2).replace(/\.00$/, '') + 'B';
+      if (value >= 1e6) return (value / 1e6).toFixed(2).replace(/\.00$/, '') + 'M';
+      if (value >= 1e3) return (value / 1e3).toFixed(2).replace(/\.00$/, '') + 'K';
+      return Math.floor(value).toString();
+    }
+
+    // Update UI
+    function updateUI() {
+      // Update money display
+      moneyEl.textContent = '$' + fmt(money);
+      
+      // Add animation for money change
+      moneyEl.classList.add('click-animation');
+      setTimeout(() => moneyEl.classList.remove('click-animation'), 200);
+      
+      // Update best score
+      const best = loadBest();
+      bestEl.textContent = '$' + fmt(best);
+      
+      // Update passive income
+      const passiveIncome = perSec * (1 + prestigeCount * 0.1);
+      perSecondEl.textContent = '$' + fmt(passiveIncome) + '/s';
+      
+      // Update upgrade info
+      document.getElementById('currentPerClick').textContent = (perClick * (1 + prestigeCount * 0.1)).toFixed(1);
+      document.getElementById('currentPerSec').textContent = (perSec * (1 + prestigeCount * 0.1)).toFixed(1);
+      document.getElementById('clickUpgrades').textContent = clickUpgrades;
+      document.getElementById('autoUpgrades').textContent = autoUpgrades;
+      document.getElementById('megaUpgrades').textContent = megaUpgrades;
+      document.getElementById('megaChance').textContent = 10 + megaUpgrades * 5;
+      
+      // Update costs
+      document.getElementById('clickCost').textContent = '$' + fmt(clickCost);
+      document.getElementById('autoCost').textContent = '$' + fmt(autoCost);
+      document.getElementById('boostCost').textContent = '$' + fmt(boostCost);
+      document.getElementById('megaCost').textContent = '$' + fmt(megaCost);
+      
+      // Update button states
+      document.getElementById('buyClick').disabled = money < clickCost;
+      document.getElementById('buyAuto').disabled = money < autoCost;
+      document.getElementById('buyBoost').disabled = money < boostCost || boostActive;
+      document.getElementById('buyMega').disabled = money < megaCost;
+      
+      // Update prestige
+      const prestigeBonus = prestigeCount * 10;
+      document.getElementById('prestigeBonus').textContent = prestigeBonus;
+      document.getElementById('prestigeButton').disabled = money < 10000;
+      
+      // Update boost status
+      if (boostActive) {
+        document.getElementById('boostStatus').textContent = 'Status: Active';
+        document.getElementById('boostTimer').style.display = 'inline';
+        document.getElementById('boostProgress').style.display = 'block';
+        document.getElementById('boostTimer').textContent = `Time left: ${Math.max(0, boostTimeLeft)}s`;
+        const progressPercent = (Math.max(0, boostTimeLeft) / 30) * 100;
+        document.getElementById('boostProgressFill').style.width = `${progressPercent}%`;
+      } else {
+        document.getElementById('boostStatus').textContent = 'Status: Ready';
+        document.getElementById('boostTimer').style.display = 'none';
+        document.getElementById('boostProgress').style.display = 'none';
+      }
+      
+      // Auto-save every 10 seconds
+      if (Date.now() - lastSaveTime > 10000) {
+        saveGame();
+      }
+    }
+
+    // Add floating text
+    function addFloatingText(value, x, y, color = 'var(--money)') {
+      const t = document.createElement('div');
+      t.className = 'floating';
+      t.textContent = '+$' + fmt(value);
+      t.style.color = color;
+      t.style.left = x + 'px';
+      t.style.top = y + 'px';
+      document.body.appendChild(t);
+      setTimeout(() => {
+        if (t.parentNode) {
+          t.remove();
+        }
+      }, 1000);
+    }
+
+    // Handle click
+    function clickGain(e) {
+      // Calculate base value
+      let value = perClick * (1 + prestigeCount * 0.1);
+      
+      // Apply boost
+      if (boostActive) value *= 2;
+      
+      // Check for mega click
+      const megaChance = 10 + megaUpgrades * 5;
+      let isMega = false;
+      if (Math.random() * 100 < megaChance) {
+        value *= 10;
+        isMega = true;
+        showNotification('MEGA CLICK! 10x Cash!', 'success');
+        
+        // Visual effect for mega click
+        clickBtn.style.animation = 'none';
+        setTimeout(() => {
+          clickBtn.style.animation = 'glow 0.5s infinite alternate';
+        }, 10);
+        
+        setTimeout(() => {
+          clickBtn.style.animation = '';
+        }, 500);
+      }
+      
+      // Add money
+      money += value;
+      
+      // Add floating text
+      const color = isMega ? 'var(--bonus)' : (value > perClick * 5 ? 'var(--bonus)' : 'var(--money)');
+      addFloatingText(value, e.clientX, e.clientY - 50, color);
+      
+      // Play sound
+      try {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {});
+      } catch (e) {}
+      
+      // Update UI
       updateUI();
-    },30000);
-  }
-}
-function autoEarnings(){
-  money += perSec;
-  if(perSec>0){
-    const rect = moneyEl.getBoundingClientRect();
-    addFloatingText(perSec, rect.x+rect.width/2, rect.y);
-  }
-  // check best
-  if (money > best) { best = money; saveBest(best); }
-  updateUI();
-}
-function spawnBonus(){
-  const coin = document.createElement('div');
-  coin.className='bonus-coin';
-  coin.style.left = Math.random()*80 + 10 + '%';
-  coin.style.bottom='20px';
-  document.body.appendChild(coin);
-  // pass the click event object through to handler so addFloatingText has coordinates
-  coin.addEventListener('click',(evt)=>{
-    const bonus = Math.floor(Math.random()*200)+100;
-    money+=bonus;
-    try { bonusSound.currentTime=0; bonusSound.play(); } catch(e){ /* ignore autoplay restrictions */ }
-    addFloatingText(bonus, evt.clientX, evt.clientY);
-    coin.remove();
-    updateUI();
-  });
-  setTimeout(()=>coin.remove(),5000);
-}
+      
+      // Create confetti for big clicks
+      if (value > perClick * 20) {
+        createConfetti(e.clientX, e.clientY);
+      }
+    }
 
-clickBtn.onclick = clickGain;
-document.getElementById('buyClick').onclick = buyClick;
-document.getElementById('buyAuto').onclick = buyAuto;
-document.getElementById('buyBoost').onclick = buyBoost;
+    // Create confetti effect
+    function createConfetti(x, y) {
+      for (let i = 0; i < 20; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = x + 'px';
+        confetti.style.top = y + 'px';
+        confetti.style.background = ['var(--money)', 'var(--bonus)', 'var(--primary)', 'var(--secondary)'][i % 4];
+        document.body.appendChild(confetti);
+        
+        // Animate confetti
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 2 + Math.random() * 3;
+        const rotation = Math.random() * 360;
+        
+        let posX = x;
+        let posY = y;
+        let opacity = 1;
+        
+        const animate = () => {
+          posX += Math.cos(angle) * velocity;
+          posY += Math.sin(angle) * velocity - 0.1; // Gravity
+          opacity -= 0.02;
+          
+          confetti.style.left = posX + 'px';
+          confetti.style.top = posY + 'px';
+          confetti.style.opacity = opacity;
+          confetti.style.transform = `rotate(${rotation}deg)`;
+          
+          if (opacity > 0) {
+            requestAnimationFrame(animate);
+          } else {
+            confetti.remove();
+          }
+        };
+        
+        requestAnimationFrame(animate);
+      }
+    }
 
-setInterval(autoEarnings,1000);
-setInterval(()=>{ if(Math.random()<0.15) spawnBonus(); },8000);
-updateUI();
-</script>
+    // Buy click upgrade
+    function buyClick() {
+      if (money >= clickCost) {
+        money -= clickCost;
+        perClick += 1;
+        clickUpgrades++;
+        clickCost = Math.floor(clickCost * 1.3);
+        
+        try {
+          upgradeSound.currentTime = 0;
+          upgradeSound.play().catch(() => {});
+        } catch (e) {}
+        
+        showNotification('Click Power Increased!');
+        updateUI();
+      }
+    }
+
+    // Buy auto upgrade
+    function buyAuto() {
+      if (money >= autoCost) {
+        money -= autoCost;
+        perSec += 1;
+        autoUpgrades++;
+        autoCost = Math.floor(autoCost * 1.4);
+        
+        try {
+          upgradeSound.currentTime = 0;
+          upgradeSound.play().catch(() => {});
+        } catch (e) {}
+        
+        showNotification('Auto-Earner Purchased!');
+        updateUI();
+      }
+    }
+
+    // Buy boost
+    function buyBoost() {
+      if (money >= boostCost && !boostActive) {
+        money -= boostCost;
+        boostActive = true;
+        boostTimeLeft = 30;
+        clickBtn.classList.add('boost');
+        
+        // Clear existing timer
+        if (boostTimer) {
+          clearInterval(boostTimer);
+        }
+        
+        // Start new timer
+        boostTimer = setInterval(() => {
+          boostTimeLeft--;
+          updateUI();
+          
+          if (boostTimeLeft <= 0) {
+            clearInterval(boostTimer);
+            boostActive = false;
+            clickBtn.classList.remove('boost');
+            showNotification('Boost expired!');
+            updateUI();
+          }
+        }, 1000);
+        
+        showNotification('Power Boost Activated for 30s!');
+        updateUI();
+      }
+    }
+
+    // Buy mega upgrade
+    function buyMega() {
+      if (money >= megaCost) {
+        money -= megaCost;
+        megaUpgrades++;
+        megaCost = Math.floor(megaCost * 1.5);
+        
+        try {
+          upgradeSound.currentTime = 0;
+          upgradeSound.play().catch(() => {});
+        } catch (e) {}
+        
+        showNotification('Mega Click Chance Increased!');
+        updateUI();
+      }
+    }
+
+    // Auto earnings
+    function autoEarnings() {
+      if (perSec > 0) {
+        const earnings = perSec * (1 + prestigeCount * 0.1);
+        money += earnings;
+        
+        // Add floating text near money display
+        const rect = moneyEl.getBoundingClientRect();
+        addFloatingText(earnings, rect.x + rect.width / 2, rect.y, 'var(--secondary)');
+        
+        updateUI();
+      }
+    }
+
+    // Spawn bonus coin
+    function spawnBonus() {
+      const coin = document.createElement('div');
+      coin.className = 'bonus-coin';
+      coin.style.left = Math.random() * 80 + 10 + '%';
+      coin.style.bottom = '20px';
+      document.body.appendChild(coin);
+      
+      coin.addEventListener('click', (evt) => {
+        const bonus = Math.floor(Math.random() * 300) + 200;
+        money += bonus;
+        
+        try {
+          bonusSound.currentTime = 0;
+          bonusSound.play().catch(() => {});
+        } catch (e) {}
+        
+        addFloatingText(bonus, evt.clientX, evt.clientY - 50, 'var(--bonus)');
+        showNotification(`Bonus Coin: +$${fmt(bonus)}!`);
+        
+        // Remove coin with animation
+        coin.style.transform = 'scale(0)';
+        setTimeout(() => {
+          if (coin.parentNode) coin.remove();
+        }, 200);
+        
+        updateUI();
+      });
+      
+      setTimeout(() => {
+        if (coin.parentNode) {
+          coin.style.opacity = '0';
+          setTimeout(() => {
+            if (coin.parentNode) coin.remove();
+          }, 500);
+        }
+      }, 5000);
+    }
+
+    // Create background coins
+    function createBackgroundCoins() {
+      const coins = ['💰', '💎', '💵', '🪙', '💸'];
+      
+      for (let i = 0; i < 20; i++) {
+        const coin = document.createElement('div');
+        coin.className = 'background-coin';
+        coin.textContent = coins[Math.floor(Math.random() * coins.length)];
+        coin.style.left = Math.random() * 100 + '%';
+        coin.style.top = Math.random() * 100 + '%';
+        coin.style.transform = `scale(${0.5 + Math.random() * 1.5})`;
+        coin.style.animation = `floatCoin ${10 + Math.random() * 20}s linear infinite`;
+        document.getElementById('backgroundCoins').appendChild(coin);
+      }
+    }
+
+    // Prestige function
+    function prestige() {
+      if (money >= 10000) {
+        prestigeCount++;
+        money = 0;
+        perClick = 1;
+        perSec = 0;
+        clickUpgrades = 0;
+        autoUpgrades = 0;
+        megaUpgrades = 0;
+        clickCost = 10;
+        autoCost = 25; // Fixed: Consistent base cost
+        megaCost = 750;
+        
+        // Clear boost if active
+        if (boostActive) {
+          clearInterval(boostTimer);
+          boostActive = false;
+          clickBtn.classList.remove('boost');
+        }
+        
+        // Save immediately
+        saveGame();
+        
+        showNotification(`Prestige ${prestigeCount} achieved! You now have a ${prestigeCount * 10}% bonus!`, 'success');
+        updateUI();
+      }
+    }
+
+    // Keyboard shortcuts
+    function handleKeyPress(e) {
+      // Prevent default for game keys
+      if (e.key === ' ' || (e.key >= '1' && e.key <= '4')) {
+        e.preventDefault();
+      }
+      
+      // Spacebar to click
+      if (e.key === ' ') {
+        // Simulate click at center of button
+        const rect = clickBtn.getBoundingClientRect();
+        const fakeEvent = {
+          clientX: rect.x + rect.width / 2,
+          clientY: rect.y + rect.height / 2
+        };
+        clickGain(fakeEvent);
+        return;
+      }
+      
+      // Number keys for upgrades
+      switch(e.key) {
+        case '1':
+          document.getElementById('buyClick').click();
+          break;
+        case '2':
+          document.getElementById('buyAuto').click();
+          break;
+        case '3':
+          document.getElementById('buyBoost').click();
+          break;
+        case '4':
+          document.getElementById('buyMega').click();
+          break;
+      }
+    }
+
+    // Initialize game
+    function init() {
+      loadGame();
+      createBackgroundCoins();
+      updateUI();
+      
+      // Event listeners
+      clickBtn.onclick = clickGain;
+      document.getElementById('buyClick').onclick = buyClick;
+      document.getElementById('buyAuto').onclick = buyAuto;
+      document.getElementById('buyBoost').onclick = buyBoost;
+      document.getElementById('buyMega').onclick = buyMega;
+      document.getElementById('prestigeButton').onclick = prestige;
+      
+      // Keyboard support
+      document.addEventListener('keydown', handleKeyPress);
+      
+      // Auto-save on page unload
+      window.addEventListener('beforeunload', saveGame);
+      
+      // Auto-save periodically
+      setInterval(saveGame, 30000); // Every 30 seconds
+      
+      // Game loops
+      setInterval(autoEarnings, 1000);
+      setInterval(() => {
+        if (Math.random() < 0.15) spawnBonus();
+      }, 8000);
+      
+      // Welcome message
+      setTimeout(() => {
+        if (money === 0 && perClick === 1) {
+          showNotification('Welcome to Clicker Quest+ Pro! Click the button or press Spacebar to earn money!');
+        }
+      }, 1000);
+      
+      // Initial save
+      saveGame();
+    }
+
+    // Start the game
+    init();
+  </script>
 </body>
+
 </html>

@@ -1,30 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wizard Battle</title>
     <link rel="stylesheet" href="wizardgame.css">
-    <link rel="icon" href="check.png">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --darker: #1a1a2e;
+            --light: #f8f9fa;
+            --text: #333333;
+            --accent: #f72585;
+            --health: #4cc9f0;
+            --mana: #a777e3;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background-color: rgba(46, 41, 78, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 0 30px rgba(110, 142, 251, 0.3);
+            width: 850px;
+            max-width: 95%;
+            border: 2px solid var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(167, 119, 227, 0.1) 0%, transparent 70%);
+            animation: rotate 60s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 2.8em;
+            text-shadow: 0 0 10px rgba(110, 142, 251, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 15px rgba(167, 119, 227, 0.2);
+        }
+
+        .player-stats,
+        .enemy-stats {
+            width: 48%;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: rgba(30, 30, 60, 0.5);
+        }
+
+        .player-stats {
+            border: 1px solid var(--primary);
+        }
+
+        .enemy-stats {
+            border: 1px solid var(--accent);
+        }
+
+        .health-bar {
+            background-color: rgba(0, 0, 0, 0.3);
+            height: 25px;
+            border-radius: 12px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--health), #4cc9f0);
+            width: 100%;
+            transition: width 0.3s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0.1) 0%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    rgba(255, 255, 255, 0.1) 100%);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .enemy-stats .health-fill {
+            background: linear-gradient(90deg, var(--accent), #f72585);
+        }
+
+        .mana-bar {
+            background-color: rgba(0, 0, 0, 0.3);
+            height: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .mana-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mana), #a777e3);
+            width: 100%;
+            transition: width 0.3s ease-out;
+        }
+
+        .game-area {
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 15px rgba(167, 119, 227, 0.2);
+        }
+
+        .battle-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 180px;
+            margin-bottom: 25px;
+            position: relative;
+            background: rgba(30, 30, 60, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .player,
+        .enemy {
+            font-size: 80px;
+            text-align: center;
+            transition: all 0.3s;
+            filter: drop-shadow(0 0 10px currentColor);
+            position: relative;
+            z-index: 2;
+        }
+
+        .player {
+            color: var(--primary);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .enemy {
+            color: var(--accent);
+            animation: float 3s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .spell-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .spell-btn,
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spell-btn {
+            background: linear-gradient(135deg, var(--primary), #6e8efb);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .spell-btn:hover {
+            background: linear-gradient(135deg, #5d7df0, #6e8efb);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .spell-btn:active {
+            transform: translateY(1px);
+        }
+
+        .spell-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent);
+            transition: all 0.5s;
+        }
+
+        .spell-btn:hover::before {
+            left: 100%;
+        }
+
+        .mana-cost {
+            font-size: 0.9em;
+            opacity: 0.8;
+            color: #4cc9f0;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--secondary), #a777e3);
+            color: white;
+            width: 100%;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #9666d6, #a777e3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #next-enemy {
+            background: linear-gradient(135deg, var(--accent), #f72585);
+            color: white;
+        }
+
+        #next-enemy:hover {
+            background: linear-gradient(135deg, #e5177b, #f72585);
+        }
+
+        .game-log {
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            height: 180px;
+            overflow-y: auto;
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 15px rgba(167, 119, 227, 0.2);
+        }
+
+        .game-log p {
+            margin: 8px 0;
+            line-height: 1.5;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: rgba(30, 30, 60, 0.3);
+            border-left: 3px solid var(--primary);
+        }
+
+        .game-log p.enemy-turn {
+            border-left-color: var(--accent);
+        }
+
+        .game-log p.special {
+            border-left-color: var(--secondary);
+            background-color: rgba(167, 119, 227, 0.1);
+        }
+
+        @keyframes playerAttack {
+            0% {
+                transform: translateX(0) scale(1);
+            }
+
+            50% {
+                transform: translateX(100px) scale(1.2);
+            }
+
+            100% {
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes enemyAttack {
+            0% {
+                transform: translateX(0) scale(1);
+            }
+
+            50% {
+                transform: translateX(-100px) scale(1.2);
+            }
+
+            100% {
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes spellEffect {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.5) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(360deg);
+            }
+        }
+
+        .spell-effect {
+            position: absolute;
+            font-size: 2em;
+            animation: spellEffect 0.7s forwards;
+            pointer-events: none;
+            z-index: 10;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        /* Powerful spell buttons */
+        .powerful-spell {
+            background: linear-gradient(135deg, var(--accent), #f72585);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .powerful-spell:hover {
+            background: linear-gradient(135deg, #e5177b, #f72585);
+        }
+
+        /* Spell level indicators */
+        .spell-btn::after {
+            content: 'Lv' attr(data-level);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Map styles */
+        .map-container {
+            background-color: rgba(46, 41, 78, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 0 30px rgba(110, 142, 251, 0.3);
+            width: 850px;
+            max-width: 95%;
+            margin: 0 auto;
+            border: 2px solid var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(167, 119, 227, 0.1) 0%, transparent 70%);
+            animation: rotate 60s linear infinite;
+            z-index: -1;
+        }
+
+        .map {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 3px;
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            height: 500px;
+            margin-bottom: 20px;
+            position: relative;
+            border: 1px solid var(--secondary);
+        }
+
+        .map-tile {
+            background-color: rgba(30, 30, 60, 0.5);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.5em;
+        }
+
+        .map-tile:hover {
+            background-color: rgba(110, 142, 251, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(110, 142, 251, 0.5);
+        }
+
+        .map-tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                    rgba(110, 142, 251, 0.1) 0%,
+                    rgba(167, 119, 227, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .map-tile:hover::before {
+            opacity: 1;
+        }
+
+        .map-tile.enemy {
+            background-color: rgba(247, 37, 133, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(247, 37, 133, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(247, 37, 133, 0.6);
+            }
+        }
+
+        .map-tile.enemy::after {
+            content: "👹";
+            filter: drop-shadow(0 0 5px rgba(247, 37, 133, 0.8));
+        }
+
+        .map-tile.player {
+            background-color: rgba(110, 142, 251, 0.2);
+            box-shadow: 0 0 15px rgba(110, 142, 251, 0.5);
+        }
+
+        .map-tile.player::after {
+            content: "🧙‍♂️";
+            filter: drop-shadow(0 0 5px rgba(110, 142, 251, 0.8));
+        }
+
+        .map-log {
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            height: 120px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid var(--secondary);
+        }
+
+        .map-log p {
+            margin: 8px 0;
+            line-height: 1.5;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: rgba(30, 30, 60, 0.3);
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Inventory and Shop styles */
+        .inventory-shop {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .inventory,
+        .shop {
+            width: 48%;
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--secondary);
+        }
+
+        .inventory h3,
+        .shop h3 {
+            color: var(--primary);
+            margin-top: 0;
+            border-bottom: 1px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background-color: rgba(30, 30, 60, 0.3);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .item:hover {
+            background-color: rgba(110, 142, 251, 0.2);
+        }
+
+        .item button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .item button:hover {
+            background: var(--accent);
+        }
+
+        /* XP bar */
+        .xp-bar {
+            height: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), #a777e3);
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+
+        /* Transition effects */
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .game-info {
+                flex-direction: column;
+            }
+
+            .player-stats,
+            .enemy-stats {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            .battle-area {
+                height: 150px;
+            }
+
+            .player,
+            .enemy {
+                font-size: 60px;
+            }
+
+            .spell-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .powerful-spell {
+                grid-column: span 1;
+            }
+        }
+
         @media (max-width: 768px) {
             .game-container {
                 padding: 10px;
             }
-            
+
             .spell-buttons {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 5px;
             }
-            
+
             .spell-btn {
                 font-size: 0.9rem;
                 padding: 8px;
             }
         }
-        
+
         .preload-overlay {
             position: fixed;
             top: 0;
@@ -46,9 +712,20 @@
         }
 
         @keyframes spellFade {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 0; }
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
         }
 
         .spell-btn {
@@ -63,7 +740,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transform: translateX(-100%);
             transition: transform 0.5s;
         }
@@ -81,32 +758,57 @@
         }
 
         @keyframes damage {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
 
         .spell-emoji {
             text-shadow: 0 0 10px #ffd700,
-                         0 0 20px #ffd700,
-                         0 0 30px #ff8c00;
+                0 0 20px #ffd700,
+                0 0 30px #ff8c00;
             font-size: 1.5em;
             animation: spellGlow 0.8s forwards;
         }
 
         @keyframes spellGlow {
-            0% { opacity: 0; transform: scale(0.5); filter: brightness(1.5); }
-            50% { opacity: 1; transform: scale(1.2); filter: brightness(2); }
-            100% { opacity: 0; transform: scale(1); filter: brightness(1.5); }
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+                filter: brightness(1.5);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+                filter: brightness(2);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1);
+                filter: brightness(1.5);
+            }
         }
     </style>
 </head>
+
 <body>
     <div id="preload" class="preload-overlay">Loading game resources...</div>
     <div class="map-container" id="map-container">
         <h1>World Map</h1>
         <div class="map" id="map">
-            <!-- Map will be generated here -->
+
         </div>
         <div class="map-log" id="map-log">
             <p>Explore the mystical world to find enemies and treasures!</p>
@@ -114,11 +816,11 @@
         <div class="inventory-shop">
             <div class="inventory" id="inventory">
                 <h3>Inventory</h3>
-                <!-- Inventory items will be added -->
+
             </div>
             <div class="shop" id="shop">
                 <h3>Magic Shop</h3>
-                <!-- Shop items will be added here -->
+
             </div>
         </div>
         <button class="action-btn" id="return-to-battle" style="display: none;">Return to Battle</button>
@@ -167,7 +869,7 @@
                 <button class="spell-btn" id="frostbolt">Frostbolt (7 mana)</button>
                 <button class="spell-btn" id="lightning">Lightning (15 mana)</button>
                 <button class="spell-btn" id="heal">Heal (20 mana)</button>
-                <!-- Powerful spells will be added here by JavaScript -->
+
             </div>
             <button class="action-btn" id="next-enemy">Next Enemy</button>
             <button class="action-btn" id="rest">Meditate</button>
@@ -177,25 +879,24 @@
             <p class="special">Welcome to Duel! Defeat enemies to gain XP and unlock powerful spells.</p>
         </div>
     </div>
-    <script src="wizardgame.js"></script>
     <script>
         window.addEventListener('load', () => {
             document.getElementById('preload').style.display = 'none';
         });
-        
-        // Add touch event support
+
+
         document.addEventListener('touchstart', (e) => {
             if (e.target.classList.contains('spell-btn')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        // Helper: create a non-blocking spell visual effect and remove it after animation.
+
         function createSpellEffect(type, targetEl) {
             try {
                 const effect = document.createElement('div');
                 effect.className = 'spell-effect';
-                // position in center of target element if present, otherwise center of screen
+
                 const rect = targetEl ? targetEl.getBoundingClientRect() : null;
                 effect.style.left = rect ? `${rect.left + rect.width / 2}px` : '50%';
                 effect.style.top = rect ? `${rect.top + rect.height / 2}px` : '50%';
@@ -216,27 +917,27 @@
                     effect.style.background = 'radial-gradient(circle, rgba(255,255,255,0.2), transparent)';
                 }
                 document.body.appendChild(effect);
-                setTimeout(()=> effect.remove(), 800);
+                setTimeout(() => effect.remove(), 800);
             } catch (err) {
-                // fail silently to avoid breaking game logic
+
                 console.warn('createSpellEffect failed', err);
             }
         }
 
-        // Helper: animate enemy damaged state safely
+
         function flashEnemyDamaged(enemyEl) {
             if (!enemyEl) return;
             enemyEl.classList.add('damaged');
-            setTimeout(()=> enemyEl.classList.remove('damaged'), 300);
+            setTimeout(() => enemyEl.classList.remove('damaged'), 300);
         }
 
-        // Expose helpers to global scope so existing game code can call them if desired
+
         window.createSpellEffect = createSpellEffect;
         window.flashEnemyDamaged = flashEnemyDamaged;
 
-        // Simple wizard save/load
+
         const WIZARD_SAVE_KEY = 'wizard_save_v1';
-        document.getElementById('save-wizard').addEventListener('click', ()=>{
+        document.getElementById('save-wizard').addEventListener('click', () => {
             const data = {
                 level: Number(document.getElementById('player-level').textContent) || 1,
                 xp: Number(document.getElementById('player-xp').textContent) || 0,
@@ -245,7 +946,7 @@
             localStorage.setItem(WIZARD_SAVE_KEY, JSON.stringify(data));
             alert('Wizard saved');
         });
-        document.getElementById('load-wizard').addEventListener('click', ()=>{
+        document.getElementById('load-wizard').addEventListener('click', () => {
             const s = localStorage.getItem(WIZARD_SAVE_KEY);
             if (!s) { alert('No save found'); return; }
             try {
@@ -254,8 +955,824 @@
                 document.getElementById('player-xp').textContent = obj.xp || 0;
                 document.getElementById('player-gold').textContent = obj.gold || 0;
                 alert('Wizard loaded');
-            } catch(e){ alert('Load failed'); }
+            } catch (e) { alert('Load failed'); }
         });
+        const gameState = {
+            player: {
+                name: "Mage",
+                health: 100,
+                maxHealth: 100,
+                mana: 100,
+                maxMana: 100,
+                level: 1,
+                xp: 0,
+                xpNeeded: 100,
+                gold: 0,
+                spells: {
+                    fireball: { damage: 20, manaCost: 15, level: 1, maxLevel: 3 },
+                    frostbolt: { damage: 15, manaCost: 7, slow: true, level: 1, maxLevel: 3 },
+                    lightning: { damage: 25, manaCost: 15, level: 1, maxLevel: 3 },
+                    heal: { amount: 30, manaCost: 20, level: 1, maxLevel: 3 },
+                    meteor: { damage: 50, manaCost: 30, level: 0, maxLevel: 2, unlocked: false },
+                    blizzard: { damage: 45, manaCost: 30, slow: true, level: 0, maxLevel: 2, unlocked: false }
+                },
+                inventory: {
+                    healthPotions: 0,
+                    manaPotions: 0,
+                    scrolls: []
+                }
+            },
+            enemy: null,
+            enemiesDefeated: 0,
+            gameLog: [],
+            map: {
+                size: 10,
+                playerPosition: { x: 5, y: 5 },
+                enemyPositions: [],
+                treasurePositions: []
+            },
+            inBattle: false,
+            shopItems: [
+                { name: "Health Potion", cost: 20, effect: "Restores 50 health", type: "potion" },
+                { name: "Mana Potion", cost: 25, effect: "Restores 40 mana", type: "potion" },
+                { name: "Fire Scroll", cost: 50, effect: "Deals 40 fire damage", type: "scroll", spell: "fireball" },
+                { name: "Lightning Scroll", cost: 60, effect: "Deals 50 lightning damage", type: "scroll", spell: "lightning" }
+            ]
+        };
+
+
+        const enemyTypes = [
+            { name: "Arcane Zombie", health: 50, damage: 8, xp: 20, gold: 10, emoji: "🧟", color: "#4cc9f0" },
+            { name: "Mystic Goblin", health: 70, damage: 12, xp: 30, gold: 15, emoji: "👺", color: "#a777e3" },
+            { name: "Spellbound Orc", health: 100, damage: 15, xp: 50, gold: 25, emoji: "👹", color: "#f72585" },
+            { name: "Enchanted Troll", health: 150, damage: 20, xp: 80, gold: 40, emoji: "🧌", color: "#6e8efb" },
+            { name: "Elder Dragon", health: 250, damage: 30, xp: 150, gold: 75, emoji: "🐲", color: "#ff9e00" },
+            { name: "Shadow Wraith", health: 120, damage: 25, xp: 100, gold: 50, emoji: "👻", color: "#333333" }
+        ];
+
+
+        const playerHealthEl = document.getElementById('player-health');
+        const playerHealthTextEl = document.getElementById('player-health-text');
+        const playerMaxHealthEl = document.getElementById('player-max-health');
+        const playerManaEl = document.getElementById('player-mana');
+        const playerManaTextEl = document.getElementById('player-mana-text');
+        const playerMaxManaEl = document.getElementById('player-max-mana');
+        const playerLevelEl = document.getElementById('player-level');
+        const playerXpEl = document.getElementById('player-xp');
+        const playerXpNeededEl = document.getElementById('player-xp-needed');
+        const playerGoldEl = document.getElementById('player-gold');
+        const xpFillEl = document.getElementById('xp-fill');
+
+        const enemyNameEl = document.getElementById('enemy-name');
+        const enemyHealthEl = document.getElementById('enemy-health');
+        const enemyHealthTextEl = document.getElementById('enemy-health-text');
+        const enemyMaxHealthEl = document.getElementById('enemy-max-health');
+        const enemyStatusEl = document.getElementById('enemy-status');
+        const enemyEmojiEl = document.getElementById('enemy');
+
+        const gameLogEl = document.getElementById('game-log');
+        const mapContainerEl = document.getElementById('map-container');
+        const mapEl = document.getElementById('map');
+        const mapLogEl = document.getElementById('map-log');
+        const returnToBattleBtn = document.getElementById('return-to-battle');
+        const inventoryEl = document.getElementById('inventory');
+        const shopEl = document.getElementById('shop');
+        const usePotionBtn = document.getElementById('use-potion');
+
+        const spellButtons = {
+            fireball: document.querySelector('#fireball'),
+            frostbolt: document.querySelector('#frostbolt'),
+            lightning: document.querySelector('#lightning'),
+            heal: document.querySelector('#heal'),
+            meteor: null,
+            blizzard: null
+        };
+
+        const nextEnemyBtn = document.querySelector('#next-enemy');
+        const restBtn = document.querySelector('#rest');
+
+
+        function initGame() {
+            createPowerfulSpellButtons();
+            setupEventListeners();
+            updateInventoryDisplay();
+            updateShopDisplay();
+
+
+            mapContainerEl.style.display = 'block';
+            document.getElementById('game-container').style.display = 'none';
+
+            generateMap();
+            addToMapLog("Welcome to Arcane Duel! Move around the map to find enemies and treasures.", "special");
+        }
+
+
+        function createPowerfulSpellButtons() {
+            const spellButtonsContainer = document.querySelector('.spell-buttons');
+
+
+            const meteorBtn = document.createElement('button');
+            meteorBtn.className = 'spell-btn powerful-spell';
+            meteorBtn.id = 'meteor';
+            meteorBtn.innerHTML = '☄️ Meteor <span class="mana-cost">(30 mana)</span>';
+            meteorBtn.style.display = 'none';
+            meteorBtn.setAttribute('data-level', '0');
+            meteorBtn.addEventListener('click', () => castSpell('meteor'));
+            spellButtonsContainer.appendChild(meteorBtn);
+            spellButtons.meteor = meteorBtn;
+
+
+            const blizzardBtn = document.createElement('button');
+            blizzardBtn.className = 'spell-btn powerful-spell';
+            blizzardBtn.id = 'blizzard';
+            blizzardBtn.innerHTML = '🌨️ Blizzard <span class="mana-cost">(30 mana)</span>';
+            blizzardBtn.style.display = 'none';
+            blizzardBtn.setAttribute('data-level', '0');
+            blizzardBtn.addEventListener('click', () => castSpell('blizzard'));
+            spellButtonsContainer.appendChild(blizzardBtn);
+            spellButtons.blizzard = blizzardBtn;
+        }
+
+
+        function generateMap() {
+            mapEl.innerHTML = '';
+            gameState.map.enemyPositions = [];
+            gameState.map.treasurePositions = [];
+
+
+            const enemyCount = 3 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < enemyCount; i++) {
+                let x, y;
+                do {
+                    x = Math.floor(Math.random() * gameState.map.size);
+                    y = Math.floor(Math.random() * gameState.map.size);
+                } while (
+                    (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) ||
+                    gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)
+                );
+
+                gameState.map.enemyPositions.push({ x, y });
+            }
+
+
+            const treasureCount = 1 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < treasureCount; i++) {
+                let x, y;
+                do {
+                    x = Math.floor(Math.random() * gameState.map.size);
+                    y = Math.floor(Math.random() * gameState.map.size);
+                } while (
+                    (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) ||
+                    gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y) ||
+                    gameState.map.treasurePositions.some(pos => pos.x === x && pos.y === y)
+                );
+
+                gameState.map.treasurePositions.push({ x, y });
+            }
+
+
+            for (let y = 0; y < gameState.map.size; y++) {
+                for (let x = 0; x < gameState.map.size; x++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'map-tile';
+                    tile.dataset.x = x;
+                    tile.dataset.y = y;
+
+
+                    if (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) {
+                        tile.classList.add('player');
+                    }
+
+                    else if (gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)) {
+                        tile.classList.add('enemy');
+                    }
+
+                    else if (gameState.map.treasurePositions.some(pos => pos.x === x && pos.y === y)) {
+                        tile.classList.add('treasure');
+                        tile.innerHTML = '💎';
+                    }
+
+                    tile.addEventListener('click', () => movePlayer(x, y));
+                    mapEl.appendChild(tile);
+                }
+            }
+
+            addToMapLog("Explore the mystical world to find enemies and treasures!", "special");
+        }
+
+        function movePlayer(x, y) {
+            const dx = Math.abs(x - gameState.map.playerPosition.x);
+            const dy = Math.abs(y - gameState.map.playerPosition.y);
+
+            if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
+                gameState.map.playerPosition = { x, y };
+
+
+                const enemyIndex = gameState.map.enemyPositions.findIndex(
+                    pos => pos.x === x && pos.y === y
+                );
+
+
+                const treasureIndex = gameState.map.treasurePositions.findIndex(
+                    pos => pos.x === x && pos.y === y
+                );
+
+                if (enemyIndex !== -1) {
+
+                    gameState.map.enemyPositions.splice(enemyIndex, 1);
+                    startBattle();
+                } else if (treasureIndex !== -1) {
+
+                    gameState.map.treasurePositions.splice(treasureIndex, 1);
+                    const goldFound = 10 + Math.floor(Math.random() * 40);
+                    gameState.player.gold += goldFound;
+                    addToMapLog(`You found a treasure chest containing ${goldFound} gold!`, "special");
+                    updateMapVisuals();
+                    updateUI();
+                } else {
+                    updateMapVisuals();
+                    addToMapLog(`Moved to (${x}, ${y})`);
+                }
+            } else {
+                addToMapLog("Can only move to adjacent tiles!");
+            }
+        }
+
+        function updateMapVisuals() {
+            mapEl.innerHTML = '';
+
+            for (let y = 0; y < gameState.map.size; y++) {
+                for (let x = 0; x < gameState.map.size; x++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'map-tile';
+                    tile.dataset.x = x;
+                    tile.dataset.y = y;
+
+                    if (x === gameState.map.playerPosition.x && y === gameState.map.playerPosition.y) {
+                        tile.classList.add('player');
+                    } else if (gameState.map.enemyPositions.some(pos => pos.x === x && pos.y === y)) {
+                        tile.classList.add('enemy');
+                    } else if (gameState.map.treasurePositions.some(pos => pos.x === x && pos.y === y)) {
+                        tile.classList.add('treasure');
+                        tile.innerHTML = '💎';
+                    }
+
+                    tile.addEventListener('click', () => movePlayer(x, y));
+                    mapEl.appendChild(tile);
+                }
+            }
+        }
+
+        function startBattle() {
+            gameState.inBattle = true;
+            spawnEnemy();
+
+            mapContainerEl.classList.add('fade-out');
+            setTimeout(() => {
+                mapContainerEl.style.display = 'none';
+                document.querySelector('.game-container').style.display = 'block';
+                document.querySelector('.game-container').classList.add('fade-in');
+            }, 500);
+        }
+
+        function endBattle() {
+            gameState.inBattle = false;
+
+
+            const goldGained = gameState.enemy.gold;
+            gameState.player.gold += goldGained;
+
+            document.querySelector('.game-container').classList.add('fade-out');
+            setTimeout(() => {
+                document.querySelector('.game-container').style.display = 'none';
+                mapContainerEl.style.display = 'block';
+                mapContainerEl.classList.add('fade-in');
+
+                generateMap();
+                addToMapLog(`You gained ${goldGained} gold from defeating the ${gameState.enemy.name}!`, "special");
+                updateUI();
+            }, 500);
+        }
+
+        function addToMapLog(message, type = "") {
+            const p = document.createElement('p');
+            p.textContent = message;
+            if (type) p.classList.add(type);
+            mapLogEl.appendChild(p);
+
+            if (mapLogEl.children.length > 10) {
+                mapLogEl.removeChild(mapLogEl.children[0]);
+            }
+
+            mapLogEl.scrollTop = mapLogEl.scrollHeight;
+        }
+
+        function spawnEnemy() {
+            const enemyLevel = Math.min(Math.floor(gameState.player.level / 2), enemyTypes.length - 1);
+            const baseEnemy = enemyTypes[enemyLevel];
+
+            const healthVariation = Math.floor(baseEnemy.health * 0.2);
+            const damageVariation = Math.floor(baseEnemy.damage * 0.2);
+
+            gameState.enemy = {
+                ...baseEnemy,
+                health: baseEnemy.health + Math.floor(Math.random() * healthVariation),
+                maxHealth: baseEnemy.health + Math.floor(Math.random() * healthVariation),
+                damage: baseEnemy.damage + Math.floor(Math.random() * damageVariation),
+                isSlowed: false,
+                isFrozen: false
+            };
+
+            addToLog(`A wild ${gameState.enemy.name} appears!`, "enemy-turn");
+            updateCharacterEmojis();
+            updateUI();
+        }
+
+        function updateCharacterEmojis() {
+            const playerElement = document.getElementById('player');
+            const enemyElement = document.getElementById('enemy');
+
+            playerElement.textContent = gameState.player.health <= 0 ? '💀' : '🧙‍♂️';
+
+            if (gameState.enemy) {
+                enemyElement.textContent = gameState.enemy.health <= 0 ? '💀' : gameState.enemy.emoji;
+                enemyElement.style.color = gameState.enemy.color;
+            }
+        }
+
+        function updateUI() {
+
+            playerHealthEl.style.width = `${(gameState.player.health / gameState.player.maxHealth) * 100}%`;
+            playerHealthTextEl.textContent = gameState.player.health;
+            playerMaxHealthEl.textContent = gameState.player.maxHealth;
+            playerManaEl.style.width = `${(gameState.player.mana / gameState.player.maxMana) * 100}%`;
+            playerManaTextEl.textContent = gameState.player.mana;
+            playerMaxManaEl.textContent = gameState.player.maxMana;
+            playerLevelEl.textContent = gameState.player.level;
+            playerXpEl.textContent = gameState.player.xp;
+            playerXpNeededEl.textContent = gameState.player.xpNeeded;
+            playerGoldEl.textContent = gameState.player.gold;
+            xpFillEl.style.width = `${(gameState.player.xp / gameState.player.xpNeeded) * 100}%`;
+
+
+            if (gameState.enemy) {
+                enemyNameEl.textContent = gameState.enemy.name;
+                enemyHealthEl.style.width = `${(gameState.enemy.health / gameState.enemy.maxHealth) * 100}%`;
+                enemyHealthTextEl.textContent = gameState.enemy.health;
+                enemyMaxHealthEl.textContent = gameState.enemy.maxHealth;
+
+                let status = "Normal";
+                if (gameState.enemy.isFrozen) status = "Frozen ❄️";
+                else if (gameState.enemy.isSlowed) status = "Slowed 🐌";
+
+                enemyStatusEl.textContent = `Status: ${status}`;
+            }
+
+
+            spellButtons.fireball.innerHTML = `🔥 Fireball <span class="mana-cost">(${gameState.player.spells.fireball.manaCost} mana)</span>`;
+            spellButtons.frostbolt.innerHTML = `❄️ Frostbolt <span class="mana-cost">(${gameState.player.spells.frostbolt.manaCost} mana)</span>`;
+            spellButtons.lightning.innerHTML = `⚡ Lightning <span class="mana-cost">(${gameState.player.spells.lightning.manaCost} mana)</span>`;
+            spellButtons.heal.innerHTML = `💚 Heal <span class="mana-cost">(${gameState.player.spells.heal.manaCost} mana)</span>`;
+
+
+            if (gameState.player.spells.meteor.unlocked) {
+                spellButtons.meteor.style.display = 'inline-block';
+                spellButtons.meteor.innerHTML = `☄️ Meteor <span class="mana-cost">(${gameState.player.spells.meteor.manaCost} mana)</span>`;
+            } else {
+                spellButtons.meteor.style.display = 'none';
+            }
+
+            if (gameState.player.spells.blizzard.unlocked) {
+                spellButtons.blizzard.style.display = 'inline-block';
+                spellButtons.blizzard.innerHTML = `🌨️ Blizzard <span class="mana-cost">(${gameState.player.spells.blizzard.manaCost} mana)</span>`;
+            } else {
+                spellButtons.blizzard.style.display = 'none';
+            }
+
+            nextEnemyBtn.disabled = !gameState.enemy || (gameState.enemy.health > 0);
+            restBtn.disabled = gameState.player.health <= 0;
+            usePotionBtn.disabled = gameState.player.inventory.healthPotions <= 0 || gameState.player.health <= 0;
+
+            updateCharacterEmojis();
+        }
+
+        function addToLog(message, type = "") {
+            const p = document.createElement('p');
+            p.textContent = message;
+            if (type) p.classList.add(type);
+            gameLogEl.appendChild(p);
+
+            if (gameLogEl.children.length > 10) {
+                gameLogEl.removeChild(gameLogEl.children[0]);
+            }
+
+            gameLogEl.scrollTop = gameLogEl.scrollHeight;
+        }
+
+        function castSpell(spell) {
+            if (!gameState.enemy || gameState.player.health <= 0) {
+                addToLog("Cannot cast spells right now!", "enemy-turn");
+                return;
+            }
+
+            const spellInfo = gameState.player.spells[spell];
+            if (!spellInfo) {
+                addToLog("Spell not found!", "enemy-turn");
+                return;
+            }
+
+            if (gameState.player.mana < spellInfo.manaCost) {
+                addToLog("Not enough mana!", "enemy-turn");
+                return;
+            }
+
+            gameState.player.mana -= spellInfo.manaCost;
+
+            switch (spell) {
+                case 'fireball':
+                    dealDamage(spellInfo.damage, 'fireball', '🔥'.repeat(spellInfo.level));
+                    break;
+                case 'frostbolt':
+                    dealDamage(spellInfo.damage, 'frostbolt', '❄️'.repeat(spellInfo.level));
+                    gameState.enemy.isSlowed = true;
+                    addToLog(`The ${gameState.enemy.name} is slowed! ❄️`, "special");
+                    break;
+                case 'lightning':
+                    dealDamage(spellInfo.damage, 'lightning', '⚡'.repeat(spellInfo.level));
+                    break;
+                case 'heal':
+                    const healAmount = Math.min(spellInfo.amount, gameState.player.maxHealth - gameState.player.health);
+                    gameState.player.health += healAmount;
+                    createSpellEffect('💚'.repeat(spellInfo.level), document.getElementById('player'));
+                    addToLog(`You heal for ${healAmount} health. 💚`, "special");
+                    break;
+                case 'meteor':
+                    dealDamage(spellInfo.damage, 'meteor', '☄️'.repeat(spellInfo.level));
+                    break;
+                case 'blizzard':
+                    dealDamage(spellInfo.damage, 'blizzard', '🌨️'.repeat(spellInfo.level));
+                    gameState.enemy.isSlowed = true;
+                    gameState.enemy.isFrozen = true;
+                    addToLog(`The ${gameState.enemy.name} is frozen solid! ❄️`, "special");
+                    break;
+            }
+
+            if (gameState.enemy && gameState.enemy.health > 0) {
+                setTimeout(enemyAttack, 1000);
+            }
+
+            updateUI();
+        }
+
+        function createSpellEffect(emoji, targetElement) {
+            const effect = document.createElement('div');
+            effect.className = 'spell-effect';
+            effect.innerHTML = `<span class="spell-emoji">${emoji}</span>`;
+
+            const rect = targetElement.getBoundingClientRect();
+            effect.style.position = 'absolute';
+            effect.style.left = `${rect.left + rect.width / 2}px`;
+            effect.style.top = `${rect.top + rect.height / 2}px`;
+            effect.style.transform = 'translate(-50%, -50%)';
+
+            document.body.appendChild(effect);
+
+
+            if (targetElement.id === 'enemy') {
+                targetElement.classList.add('damaged');
+                setTimeout(() => targetElement.classList.remove('damaged'), 300);
+            }
+
+            setTimeout(() => effect.remove(), 800);
+        }
+
+        function dealDamage(damage, spellName, emoji) {
+            if (!gameState.enemy || gameState.enemy.health <= 0) return;
+
+            const playerElement = document.getElementById('player');
+            const enemyElement = document.getElementById('enemy');
+
+            playerElement.style.animation = 'playerAttack 0.5s';
+            setTimeout(() => {
+                playerElement.style.animation = '';
+            }, 500);
+
+            setTimeout(() => {
+                createSpellEffect(emoji, enemyElement);
+
+                const previousHealth = gameState.enemy.health;
+                gameState.enemy.health = Math.max(0, gameState.enemy.health - damage);
+
+                addToLog(`You hit the ${gameState.enemy.name} with ${spellName} for ${damage} damage!`);
+
+                if (gameState.enemy.health <= 0) {
+                    enemyDefeated();
+                }
+
+                updateUI();
+            }, 300);
+        }
+
+        function enemyAttack() {
+            if (!gameState.enemy || gameState.enemy.health <= 0 || gameState.player.health <= 0) return;
+
+            const enemyElement = document.getElementById('enemy');
+            enemyElement.style.animation = 'enemyAttack 0.5s';
+            setTimeout(() => {
+                enemyElement.style.animation = '';
+            }, 500);
+
+            setTimeout(() => {
+                let damage = gameState.enemy.damage;
+
+                if (gameState.enemy.isSlowed) {
+                    damage = Math.floor(damage * 0.7);
+                    gameState.enemy.isSlowed = false;
+                }
+
+                if (gameState.enemy.isFrozen) {
+                    damage = Math.floor(damage * 0.5);
+                    gameState.enemy.isFrozen = false;
+                    addToLog(`The ${gameState.enemy.name} breaks free from the ice!`);
+                }
+
+                gameState.player.health = Math.max(0, gameState.player.health - damage);
+                addToLog(`The ${gameState.enemy.name} attacks you for ${damage} damage!`, "enemy-turn");
+
+                if (gameState.player.health <= 0) {
+                    addToLog("You have been defeated! Game over.", "enemy-turn");
+                    for (const button of Object.values(spellButtons)) {
+                        if (button) button.disabled = true;
+                    }
+                    nextEnemyBtn.disabled = true;
+                    restBtn.disabled = true;
+                    usePotionBtn.disabled = true;
+                }
+
+                updateUI();
+            }, 300);
+        }
+
+        function enemyDefeated() {
+            gameState.enemiesDefeated++;
+            const xpGained = gameState.enemy.xp;
+            gameState.player.xp += xpGained;
+            addToLog(`You defeated the ${gameState.enemy.name} and gained ${xpGained} XP!`, "special");
+
+            if (gameState.player.xp >= gameState.player.xpNeeded) {
+                levelUp();
+            }
+
+            setTimeout(endBattle, 1500);
+        }
+
+        function levelUp() {
+            gameState.player.level++;
+            gameState.player.xp -= gameState.player.xpNeeded;
+            gameState.player.xpNeeded = Math.floor(gameState.player.xpNeeded * 1.5);
+
+
+            gameState.player.maxHealth += 20;
+            gameState.player.health = gameState.player.maxHealth;
+            gameState.player.maxMana += 15;
+            gameState.player.mana = gameState.player.maxMana;
+
+
+            if (gameState.player.level === 5) {
+                gameState.player.spells.meteor.unlocked = true;
+                gameState.player.spells.blizzard.unlocked = true;
+                addToLog("You unlocked powerful spells: Meteor and Blizzard!", "special");
+            }
+
+            showUpgradeOptions();
+            addToLog(`Level up! You are now level ${gameState.player.level}!`, "special");
+        }
+
+        function getFireballEmoji(level) {
+            return level >= 3 ? '🔥🔥🔥' : level >= 2 ? '🔥🔥' : '🔥';
+        }
+
+        function getFrostboltEmoji(level) {
+            return level >= 3 ? '❄️❄️❄️' : level >= 2 ? '❄️❄️' : '❄️';
+        }
+
+        function getLightningEmoji(level) {
+            return level >= 3 ? '⚡⚡⚡' : level >= 2 ? '⚡⚡' : '⚡';
+        }
+
+        function getHealEmoji(level) {
+            return level >= 3 ? '💖' : level >= 2 ? '💕' : '💓';
+        }
+
+        function getMeteorEmoji(level) {
+            return level >= 2 ? '☄️☄️' : '☄️';
+        }
+
+        function getBlizzardEmoji(level) {
+            return level >= 2 ? '🌨️🌨️' : '🌨️';
+        }
+
+        function showUpgradeOptions() {
+            const availableSpells = Object.entries(gameState.player.spells)
+                .filter(([_, spell]) => spell.level > 0 && spell.level < spell.maxLevel);
+
+            if (availableSpells.length === 0) return;
+
+            const spellToUpgrade = availableSpells[Math.floor(Math.random() * availableSpells.length)];
+            const [spellName, spell] = spellToUpgrade;
+
+            spell.level++;
+
+            switch (spellName) {
+                case 'fireball':
+                    spell.damage += 10;
+                    break;
+                case 'frostbolt':
+                    spell.damage += 8;
+                    break;
+                case 'lightning':
+                    spell.damage += 12;
+                    break;
+                case 'heal':
+                    spell.amount += 12;
+                    break;
+                case 'meteor':
+                    spell.damage += 20;
+                    break;
+                case 'blizzard':
+                    spell.damage += 15;
+                    break;
+            }
+
+            addToLog(`Your ${spellName} spell upgraded to level ${spell.level}!`, "special");
+        }
+
+        function rest() {
+            const healthRecovered = Math.min(30, gameState.player.maxHealth - gameState.player.health);
+            const manaRecovered = Math.min(40, gameState.player.maxMana - gameState.player.mana);
+
+            gameState.player.health += healthRecovered;
+            gameState.player.mana += manaRecovered;
+
+            addToLog(`You meditate and recover ${healthRecovered} health and ${manaRecovered} mana.`, "special");
+
+            if (gameState.enemy && gameState.enemy.health > 0 && Math.random() > 0.5) {
+                setTimeout(enemyAttack, 1000);
+            }
+
+            updateUI();
+        }
+
+        function usePotion() {
+            if (gameState.player.inventory.healthPotions <= 0) return;
+
+            gameState.player.inventory.healthPotions--;
+            const healAmount = Math.min(50, gameState.player.maxHealth - gameState.player.health);
+            gameState.player.health += healAmount;
+
+            createSpellEffect("❤️", document.getElementById('player'));
+            addToLog(`You used a health potion and recovered ${healAmount} health!`, "special");
+
+            updateInventoryDisplay();
+            updateUI();
+        }
+
+        function buyItem(itemName) {
+            const item = gameState.shopItems.find(i => i.name === itemName);
+            if (!item) return;
+
+            if (gameState.player.gold >= item.cost) {
+                gameState.player.gold -= item.cost;
+
+                if (item.type === 'potion') {
+                    if (item.name === "Health Potion") {
+                        gameState.player.inventory.healthPotions++;
+                    } else if (item.name === "Mana Potion") {
+                        gameState.player.inventory.manaPotions++;
+                    }
+                } else if (item.type === 'scroll') {
+                    gameState.player.inventory.scrolls.push(item);
+                }
+
+                addToMapLog(`You bought a ${item.name} for ${item.cost} gold.`, "special");
+                updateInventoryDisplay();
+                updateShopDisplay();
+                updateUI();
+            } else {
+                addToMapLog("Not enough gold!", "enemy-turn");
+            }
+        }
+
+        function updateInventoryDisplay() {
+            inventoryEl.innerHTML = '<h3>Inventory</h3>';
+
+
+            const healthPotionItem = document.createElement('div');
+            healthPotionItem.className = 'item';
+            healthPotionItem.innerHTML = `
+                <span>Health Potion (${gameState.player.inventory.healthPotions})</span>
+                <button onclick="usePotion()">Use</button>
+            `;
+            inventoryEl.appendChild(healthPotionItem);
+
+
+            const manaPotionItem = document.createElement('div');
+            manaPotionItem.className = 'item';
+            manaPotionItem.innerHTML = `
+                <span>Mana Potion (${gameState.player.inventory.manaPotions})</span>
+            `;
+            inventoryEl.appendChild(manaPotionItem);
+
+
+            if (gameState.player.inventory.scrolls.length > 0) {
+                const scrollsHeader = document.createElement('h4');
+                scrollsHeader.textContent = 'Scrolls:';
+                inventoryEl.appendChild(scrollsHeader);
+
+                gameState.player.inventory.scrolls.forEach((scroll, index) => {
+                    const scrollItem = document.createElement('div');
+                    scrollItem.className = 'item';
+                    scrollItem.innerHTML = `
+                        <span>${scroll.name}</span>
+                        <button onclick="castScroll(${index})">Use</button>
+                    `;
+                    inventoryEl.appendChild(scrollItem);
+                });
+            }
+        }
+
+        function updateShopDisplay() {
+            shopEl.innerHTML = '<h3>Magic Shop</h3>';
+
+            gameState.shopItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                itemElement.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small>${item.effect}</small>
+                    </div>
+                    <button onclick="buyItem('${item.name}')">${item.cost} Gold</button>
+                `;
+                shopEl.appendChild(itemElement);
+            });
+        }
+
+        function setupEventListeners() {
+            if (spellButtons.fireball) {
+                spellButtons.fireball.addEventListener('click', () => castSpell('fireball'));
+            }
+            if (spellButtons.frostbolt) {
+                spellButtons.frostbolt.addEventListener('click', () => castSpell('frostbolt'));
+            }
+            if (spellButtons.lightning) {
+                spellButtons.lightning.addEventListener('click', () => castSpell('lightning'));
+            }
+            if (spellButtons.heal) {
+                spellButtons.heal.addEventListener('click', () => castSpell('heal'));
+            }
+            if (spellButtons.meteor) {
+                spellButtons.meteor.addEventListener('click', () => castSpell('meteor'));
+            }
+            if (spellButtons.blizzard) {
+                spellButtons.blizzard.addEventListener('click', () => castSpell('blizzard'));
+            }
+
+            if (nextEnemyBtn) nextEnemyBtn.addEventListener('click', spawnEnemy);
+            if (restBtn) restBtn.addEventListener('click', rest);
+            if (returnToBattleBtn) returnToBattleBtn.addEventListener('click', startBattle);
+            if (usePotionBtn) usePotionBtn.addEventListener('click', usePotion);
+        }
+
+
+        window.onload = function () {
+            initGame();
+        };
+
+        window.castSpell = castSpell;
+        window.buyItem = buyItem;
+        window.usePotion = usePotion;
+        window.castScroll = function (index) {
+
+            const scroll = gameState.player.inventory.scrolls[index];
+            if (!scroll) return;
+
+            if (scroll.spell === 'fireball') {
+                dealDamage(40, 'fire scroll', '🔥');
+            } else if (scroll.spell === 'lightning') {
+                dealDamage(50, 'lightning scroll', '⚡');
+            }
+
+            gameState.player.inventory.scrolls.splice(index, 1);
+            updateInventoryDisplay();
+            updateUI();
+
+            if (gameState.enemy && gameState.enemy.health > 0) {
+                setTimeout(enemyAttack, 1000);
+            }
+        };
+
     </script>
 </body>
+
 </html>

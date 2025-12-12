@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Puzzle Master</title>
-<link rel="icon" href="check.png">
+<link rel="icon" href="../../icon.jpg" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
 <style>
     body {
-        font-family: "Ink Free", sans-serif;
+        font-family: "DM Sans", sans-serif;
         background: linear-gradient(135deg, #6e8efb, #a777e3);
         display: flex;
         justify-content: center;
@@ -122,7 +123,7 @@ const state = {
     solved: false,
     timer: 0,
     timerInterval: null,
-    mode: null, // "endless" or "laststand"
+    mode: null, 
     level: 1,
     moveLimit: null,
     timeLimit: null,
@@ -139,9 +140,9 @@ const PUZZLE_BEST_KEY = 'puzzle_best_laststand';
 let bestLevel = Number(localStorage.getItem(PUZZLE_BEST_KEY) || 1);
 document.getElementById('bestLevel').textContent = bestLevel;
 
-// =============================
-// MODE SELECT
-// =============================
+
+
+
 document.getElementById('endlessModeBtn').onclick = () => { startMode('endless'); setupModeUI(); };
 document.getElementById('lastStandBtn').onclick = () => { startMode('laststand'); setupModeUI(); };
 
@@ -154,9 +155,9 @@ function startMode(mode) {
     initializePuzzle();
 }
 
-// =============================
-// PUZZLE INITIALIZATION
-// =============================
+
+
+
 function initializePuzzle() {
     state.tiles = Array.from({length: 8}, (_, i) => i + 1);
     state.tiles.push(null);
@@ -169,9 +170,9 @@ function initializePuzzle() {
     updateUI();
 }
 
-// =============================
-// TIMER & LIMIT LOGIC
-// =============================
+
+
+
 function setupTimerAndLimits() {
     stopAllTimers();
     if (state.mode === 'endless') {
@@ -181,12 +182,12 @@ function setupTimerAndLimits() {
             timerDisplay.textContent = state.timer;
         }, 1000);
     } else if (state.mode === 'laststand') {
-        // Time decreases per level: 180s → 165s → ... → 30s minimum
+        
         const baseTime = Math.max(180 - (state.level - 1) * 15, 30);
         state.timeLimit = baseTime;
         state.timer = baseTime;
 
-        // Move limit decreases per level (example: 100 - 10*(level-1))
+        
         state.moveLimit = Math.max(100 - (state.level - 1) * 10, 20);
 
         levelDisplay.textContent = `Level: ${state.level}`;
@@ -207,9 +208,9 @@ function stopAllTimers() {
     clearInterval(state.countdownInterval);
 }
 
-// =============================
-// PUZZLE SHUFFLE + UI
-// =============================
+
+
+
 function shufflePuzzle() {
     let attempts = 0;
     do {
@@ -249,9 +250,9 @@ function updateUI() {
     moveDisplay.textContent = state.moves;
 }
 
-// =============================
-// TILE MOVEMENT
-// =============================
+
+
+
 function canMove(index) {
     if (state.tiles[index] === null) return false;
     const row = Math.floor(index / 3);
@@ -277,9 +278,9 @@ function moveTile(index) {
     updateUI();
 }
 
-// =============================
-// WIN & GAME OVER HANDLING
-// =============================
+
+
+
 function checkWin() {
     return state.tiles.slice(0, -1).every((t, i) => t === i + 1);
 }
@@ -292,7 +293,7 @@ function handleWin() {
     if (state.mode === 'laststand') {
         setTimeout(() => {
             state.level++;
-            // persist best
+            
             if (state.level > bestLevel) { bestLevel = state.level; localStorage.setItem(PUZZLE_BEST_KEY, String(bestLevel)); document.getElementById('bestLevel').textContent = bestLevel; }
             winMessage.style.display = "none";
             initializePuzzle();
@@ -306,9 +307,9 @@ function gameOver(msg) {
     resetToMenu();
 }
 
-// =============================
-// RESET
-// =============================
+
+
+
 function resetToMenu() {
     grid.style.display = 'none';
     document.getElementById('controls').style.display = 'none';
@@ -318,7 +319,7 @@ function resetToMenu() {
 
 document.getElementById('newGameBtn').onclick = initializePuzzle;
 
-// show best record for laststand mode toggle
+
 function setupModeUI() {
     if (state.mode === 'laststand') {
         document.getElementById('bestRecord').style.display = 'block';
@@ -329,3 +330,4 @@ function setupModeUI() {
 </script>
 </body>
 </html>
+

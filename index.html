@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Littletree866's GitHub site</title>
+	<title>Infinity Nexus</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	<link rel="icon" href="icon/icon.png">
+	<link rel="icon" href="icon.jpg" type="image/x-icon">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed:wght@400;500;700&display=swap"
+		rel="stylesheet">
 
 	<style>
 		:root {
@@ -16,9 +19,68 @@
 			--secondary: #a777e3;
 			--dark: #2c3e50;
 			--light: #f8f9fa;
-			--text: #333333;
+			--text: #000000;
 			--border-radius: 12px;
 			--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.main-title{
+			font-family: 'DM Sans', sans-serif;
+			font-size: clamp(3rem, 7vw, 6rem);
+			font-weight: 900;
+			letter-spacing: 0.08em;
+			text-align: center;
+
+			background: linear-gradient(120deg,#00f0ff,#7b5cff,#ff3cac);
+			background-clip: text;
+			-webkit-background-clip: text;
+			color: transparent;
+
+
+			text-shadow:
+				0 0 15px rgba(0,240,255,.45),
+				0 0 30px rgba(123,92,255,.35),
+				0 0 60px rgba(255,60,172,.25);
+
+			animation: shimmer 6s infinite linear;
+		}
+
+			@keyframes shimmer{
+			0%{ background-position:0% 50%; }
+			100%{ background-position:200% 50%; }
+		}
+
+
+		.snow {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+			z-index: 9999;
+			background-image:
+				radial-gradient(2px 2px at 20px 30px, white 98%, transparent),
+				radial-gradient(3px 3px at 100px 150px, white 98%, transparent),
+				radial-gradient(2px 2px at 200px 80px, white 98%, transparent),
+				radial-gradient(1.5px 1.5px at 300px 200px, white 98%, transparent),
+				radial-gradient(2.5px 2.5px at 400px 100px, white 98%, transparent),
+				radial-gradient(1.8px 1.8px at 500px 250px, white 98%, transparent);
+			background-repeat: repeat;
+			background-size: 600px 600px;
+			animation: snowFall 6s linear infinite;
+			opacity: 0.8;
+			filter: drop-shadow(0 0 6px white);
+		}
+
+		@keyframes snowFall {
+			from {
+				background-position: 0 -600px;
+			}
+
+			to {
+				background-position: 0 600px;
+			}
 		}
 
 		* {
@@ -27,27 +89,50 @@
 			box-sizing: border-box;
 		}
 
-		html, body {
+		html,
+		body {
 			height: 100%;
 		}
 
 		body {
-            font-family: 'DM Sans', sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 500% 500%;
-            animation: gradientBG 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+			font-family: 'Fira Sans Extra Condensed', sans-serif;
+			line-height: 1.6;
+			color: #000000;
+			background: linear-gradient(-45deg,
+					#f7fcff,
+					#d9f1ff,
+					#b7e3ff,
+					#a3d6ff,
+					#eaf7ff);
+			background-size: 600% 600%;
+			animation: gradientBG 26s ease infinite;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
 
-        @keyframes gradientBG {
-            0%   { background-position: 50% 100%; } /* start at bottom */
-			50%  { background-position: 50% 0%; }   /* move fully up */
-			100% { background-position: 50% 100%; } /* go back down */
-    	}
+
+		@keyframes gradientBG {
+			0% {
+				background-position: 0% 50%;
+			}
+
+			25% {
+				background-position: 100% 50%;
+			}
+
+			50% {
+				background-position: 100% 100%;
+			}
+
+			75% {
+				background-position: 0% 100%;
+			}
+
+			100% {
+				background-position: 0% 50%;
+			}
+		}
 
 		.container {
 			max-width: 900px;
@@ -57,13 +142,17 @@
 		}
 
 		header {
-			background: linear-gradient(135deg, var(--primary), var(--secondary));
-			color: white;
-			padding: 60px 0;
+			background: linear-gradient(135deg, #dff6ff, #a8dcff, #6bbcff);
+			color: #08324f;
+			padding: 70px 0;
 			text-align: center;
 			margin-bottom: 40px;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+			box-shadow: 0 12px 40px rgba(160, 220, 255, 0.45);
+			backdrop-filter: blur(6px);
+			border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+			text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
 		}
+
 
 		header h1 {
 			font-size: 2.5rem;
@@ -71,6 +160,22 @@
 			margin-bottom: 15px;
 			letter-spacing: -0.5px;
 		}
+
+		.description {
+			color: #000000;
+			margin: 30px 0 15px;
+			padding: 14px 18px;
+			border-radius: var(--border-radius);
+			background: rgba(255, 255, 255, 0.12);
+			backdrop-filter: blur(14px);
+			font-family: 'DM Sans', sans-serif;
+			font-size: 10px;
+			font-weight: 500;
+			letter-spacing: 0.6px;
+			line-height: 1.6;
+			box-shadow: 0 10px 36px rgba(0, 0, 0, 0.15);
+		}
+
 
 		header p {
 			font-size: 0.95rem;
@@ -92,11 +197,85 @@
 			animation: fadeInUp 0.8s forwards;
 		}
 
+		/* Chain container */
+		.link-chain {
+			position: relative;
+			margin: 14px 0 26px;
+		}
+
+		/* Floating chain badge */
+		.link-chain::before {
+			content: "🔗 " attr(data-chain);
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			padding: 6px 16px;
+			background: linear-gradient(135deg, #1e88ff, #6a9cff);
+			color: #fff;
+			font-size: .7rem;
+			font-weight: 600;
+			letter-spacing: .18em;
+			border-radius: 999px;
+			box-shadow: 0 10px 24px rgba(30, 136, 255, .45);
+			z-index: 2;
+		}
+
+
+		/* Reset default card look inside chain */
+		.link-chain .content-link {
+			margin: 0;
+			border-radius: 0;
+			box-shadow: none;
+			background: linear-gradient(180deg, #fff, #f7faff);
+		}
+
+		/* Outer rounded corners only */
+		.link-chain .content-link:first-child {
+			border-radius: 18px 18px 0 0;
+			padding-top: 26px;
+		}
+
+		.link-chain .content-link:last-child {
+			border-radius: 0 0 18px 18px;
+		}
+
+		/* Divider bar */
+		.link-chain .content-link+.content-link {
+			border-top: 1px solid rgba(0, 0, 0, .08);
+			position: relative;
+		}
+
+		/* Chain glyph between links */
+		.link-chain .content-link+.content-link::before {
+			content: "🔗";
+			position: absolute;
+			top: -12px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: #f7faff;
+			padding: 0 10px;
+			font-size: .9rem;
+		}
+
+		/* Whole chain hover glow */
+		.link-chain:hover .content-link {
+			box-shadow: 0 12px 28px rgba(30, 136, 255, .15);
+		}
+
+		/* Fix text clipping */
+		.link-chain .content-link * {
+			position: relative;
+			z-index: 1;
+		}
+
+
 		@keyframes fadeInUp {
 			to {
 				opacity: 1;
 				transform: translateY(0);
 			}
+
 			from {
 				opacity: 0;
 				transform: translateY(20px);
@@ -146,8 +325,33 @@
 
 		.content-link.disabled {
 			pointer-events: none;
-			opacity: 0.55;
-			cursor: default;
+			cursor: not-allowed;
+			position: relative;
+			overflow: hidden;
+			opacity: 0.65;
+		}
+
+		@keyframes dust {
+			0% {
+				background-position:
+					0 0,
+					0 0,
+					0 0;
+			}
+
+			50% {
+				background-position:
+					60px 40px,
+					-40px 60px,
+					30px -50px;
+			}
+
+			100% {
+				background-position:
+					120px 80px,
+					-80px 120px,
+					60px -100px;
+			}
 		}
 
 		.content-link .hover-text {
@@ -163,15 +367,15 @@
 		}
 
 		.category-header {
-			color: white;
+			color: rgb(3, 0, 0);
 			margin: 30px 0 15px 0;
 			padding: 12px 16px;
 			border-radius: var(--border-radius);
 			background: rgba(255, 255, 255, 0.15);
 			backdrop-filter: blur(10px);
-			font-family: 'DM Sans', sans-serif;
+			font-family: 'Fira Sans Extra Condensed', sans-serif;
 			font-size: 1.4rem;
-			font-weight: 700;
+			font-weight: lighter;
 			letter-spacing: 0.5px;
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 		}
@@ -223,43 +427,81 @@
 </head>
 
 <body>
+	<div class="snow"></div>
 	<header>
 		<div class="container">
-			<h1 style="font-family: DengXian, sans-serif;">Littletree866's GitHub site</h1>
-			<p>Welcome! This is an open-sourced project with any contributions welcome.</p>
-            <p>Feel free to explore.</p>
-			<p style="font-weight: bold;">December 10, 2025 • Version 1.15.18</p>
+			<h1 style="font-family: DM Sans;  font-size: 35px;" class="main-title">Infinity Nexus</h1>
+			<p style="font-weight: 200;">Winter 2026</p>
+			<p style="font-weight: 200;">Welcome! This is an open-sourced personal project with any contributions
+				welcome.</p>
+			<p style="font-weight: 200;">Updates will now come approximately every 2 weeks and in
+				a new format.</p>
+			<p style="font-weight: 200;">For complete release notes click <a href="info/updateinfo/updateinfo.html"
+					style="font-weight: bold; color:#0a0a0a">here</a>.</p>
+			<p style="font-weight: 200;">Feel free to explore.</p>
+
+			<p style="font-weight: bold; font-family: 'DM Sans';">January 1, 2026 • Version 1.16.19</p>
 		</div>
 	</header>
 
 	<main class="main-content">
 		<div class="container" id="main">
+
 			<div class="links-section">
-				<!--Work in Progress -->
-				<h2 class="category-header">⚒️ Work in Progress</h2>
-				<a href="null" class="content-link disabled">
-					<span class="normal-text">🎲 Cursed Dice</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
+				<h2 class="category-header" style="margin-bottom: 0;">The Monthly Challenge<span
+						class="coming-soon-badge" style=" font-weight: lighter;">Beta</span></h2>
+				<p class="description" style="margin-top: 0;">🏅See if you can beat the challenge</p>
+				<a href="newgames/jan2026/Jan2026Challenge.html" class="content-link">
+					<span class="normal-text">🏆 January Challenge</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="null" class="content-link disabled">
+
+
+				<!-- Work in Progress Section -->
+				<h2 class="category-header" style="margin-bottom: 0;">⚒️ Work in Progress</h2>
+				<p class="description" style="margin-top: 0;">👀 A sneak peek of what I'm working on</p>
+
+				<a href="TBD" class="content-link disabled">
+					<span class="normal-text">🏜️ Pyramid</span>
+					<span class="hover-text">🔧 Coming Soon 🔧</span>
+					<span class="coming-soon-badge" style="font-weight: lighter;">Coming Soon</span>
+				</a>
+				<a href=null class="content-link disabled">
+					<span class="normal-text">⚔️ Pokemon Wizard Duel</span>
+					<span class="hover-text">🔧 Coming Soon 🔧</span>
+					<span class="coming-soon-badge" style="font-weight: lighter;">Coming Soon</span>
+				</a>
+
+				<!--New Games Section-->
+				<h2 class="category-header" style="margin-bottom: 0;">🆕 New Releases</h2>
+				<p class="description" style="margin-top: 0;">🙂 Recently Added </p>
+				
+				<a href="games/tower2/tower2.html" class="content-link">
+					<span class="normal-text">🛡️ Tower Defense 2+</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="coming-soon-badge" style="font-weight: lighter;">New</span>
+				</a>
+				<a href="newgames/zombiegame/zombie.html" class="content-link ">
 					<span class="normal-text">🧟 Zombie Survival</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="coming-soon-badge" style="font-weight: lighter;">New</span>
 				</a>
-				<a href="casinogames/roulette.html" class="content-link disabled">
+				<a href="casinogames/roulette.html" class="content-link">
 					<span class="normal-text">🎡 Roulette</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="coming-soon-badge">Coming Soon</span>
+					<span class="coming-soon-badge" style="font-weight: lighter;">New</span>
+				</a>
+				<a href="casinogames/curseddice.html" class="content-link">
+					<span class="normal-text">🎲 Cursed Dice</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="coming-soon-badge" style="font-weight: lighter;">New</span>
 				</a>
 
 				<!-- Featured Section -->
-				<h2 class="category-header">👍 Featured </h2>
-				<a href="games/pokemon/pokemon.html" class="content-link">
-					<span class="normal-text">⚔️ PokéRamble+</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="newgames/tower.html" class="content-link">
+				<h2 class="category-header" style="margin-bottom: 0;">👍 Featured </h2>
+				<p class="description" style="margin-top: 0;">🔥 My Picks</p>
+
+				<a href="games/tower/tower.html" class="content-link">
 					<span class="normal-text">🛡️ Tower Defense+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
@@ -268,15 +510,18 @@
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
 
+				<!-- Games Section -->
+				<h2 class="category-header" style="margin-bottom: 0;">🎮 Game Corner</h2>
+				<p class="description" style="margin-top: 0;">❤️‍🔥 Play to your heart's content</p>
+
+				<a href="games/georunner/runner.html" class="content-link">
+					<span class="normal-text">🏃 Geometry Runner</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
 				<a href="games/spacegame/spacegame.html" class="content-link">
 					<span class="normal-text">🚀 Space Game</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<!-- Games Section -->
-				<h2 class="category-header">❤️‍🔥 Play to your heart's content</h2>
-				
-				
-				
 				<a href="games/clickergame/clickergame.html" class="content-link">
 					<span class="normal-text">👆 Clicker Quest+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
@@ -285,17 +530,21 @@
 					<span class="normal-text">🧩 Puzzle Master</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="games/wizardgame/wizardgame.html" class="content-link">
-					<span class="normal-text">🧙‍♂️ Wizard Battle</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="games/runner.html" class="content-link">
-					<span class="normal-text">🏃 Geometry Runner</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
 
-				<!-- Casino Section -->
-				<h2 class="category-header">🍀 Test your luck</h2>
+				<div class="link-chain" data-chain="CHAINED SOON">
+					<a href="games/wizardgame/wizardgame.html" class="content-link">
+						<span class="normal-text">🧙‍♂️ Wizard Battle</span>
+						<span class="hover-text">⚡ Play Now ⚡</span>
+					</a> <!--Will be chained into one game soon-->
+					<a href="games/pokemon/pokemon.html" class="content-link">
+						<span class="normal-text">⚔️ Pokémon Great Rock</span>
+						<span class="hover-text">⚡ Play Now ⚡</span>
+					</a>
+				</div class="link-chain">
+
+				<!-- Casino Games Section -->
+				<h2 class="category-header" style="margin-bottom: 0;">🎲 Chance Games</h2>
+				<p class="description" style="margin-top: 0;">🍀 Test your luck</p>
 				<a href="casinogames/slot.html" class="content-link">
 					<span class="normal-text">🎰 Slot Machine</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
@@ -304,10 +553,14 @@
 					<span class="normal-text">🃏 Blackjack+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				
+				<a href="casinogames/poker.html" class="content-link">
+					<span class="normal-text">♠️ Poker</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
 
 				<!-- Simulations Section -->
-				<h2 class="category-header">💡 Think & Strategize</h2>
+				<h2 class="category-header" style="margin-bottom: 0;">💡 Simulations</h2>
+				<p class="description" style="margin-top: 0;">💭 Think & Strategize</p>
 				<a href="sims/lifegame/life.html" class="content-link">
 					<span class="normal-text">💰 Wealth Builder</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
@@ -324,18 +577,22 @@
 					<span class="normal-text">📦 The Box</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="sims/empire.html" class="content-link">
+				<a href="sims/empiregame/empire.html" class="content-link">
 					<span class="normal-text">👑 Empire Game</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="sims/mini.html" class="content-link">
+				<a href="sims/miniempire/mini.html" class="content-link">
 					<span class="normal-text">🏰 Mini Empire</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
 
-				<!-- Info Section -->
+				<!-- Information & Guides Section -->
 				<h2 class="category-header">📄 Information & Guides</h2>
-				<a href="info/documentation.html" class="content-link">
+				<a href="info/challengebadge/challenge.html" class="content-link">
+					<span class="normal-text">🏅 Challenges & Badges <span class="coming-soon-badge">Beta</span></span>
+					<span class="hover-text">➡️ View Badges</span>
+				</a>
+				<a href="info/docs/documentation.html" class="content-link">
 					<span class="normal-text">📋 Game Documentation</span>
 					<span class="hover-text">➡️ Read Guides</span>
 				</a>
@@ -358,14 +615,15 @@
 	<footer>
 		<div class="container">
 			<p class="copyright">© <span id="copyright-year"></span> Littletree866.github.io</p>
-			<p class="copyright" style="font-size: 0.85rem; margin-top: 8px;">Last updated: December 10, 2025</p>
+			<p class="copyright" style="font-size: 0.85rem; margin-top: 8px;">Last updated: January 1, 2026</p>
 		</div>
 	</footer>
 
 	<script>
-		document.addEventListener('DOMContentLoaded', function() {
+		document.addEventListener('DOMContentLoaded', function () {
 			document.getElementById('copyright-year').textContent = new Date().getFullYear();
 		});
 	</script>
 </body>
+
 </html>

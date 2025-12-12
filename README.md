@@ -1,30 +1,32 @@
-# Littletree866's Game Collection
+# Littletree866's Game Hub
 
-A modern collection of browser-based games built with vanilla JavaScript.
+A modern collection of **browser-based games** built with vanilla JavaScript, HTML5, and CSS3. All games feature responsive design, smooth animations, and persistent save systems.
+
 
 ## ⚡ Key Features
 
-- Pure vanilla JavaScript
-- Responsive design for all devices
-- Modern CSS effects and transitions
-- Local save system
-- Regular content updates
+- **Pure Vanilla JavaScript** - No frameworks, lightweight and fast
+- **Responsive Design** - Works on all device sizes
+- **Local Storage** - Games save automatically to browser storage
+- **Smooth Animations** - CSS3 transitions and particle effects
+- **Accessible UI** - Clear controls and intuitive gameplay
+- **No Dependencies** - Standalone HTML files, no build process
 
-## 🔧 Technical Stack
+## 🛠️ Technical Stack
 
-- HTML5 Canvas for game rendering
-- CSS3 with Grid/Flexbox layouts
-- ES6+ JavaScript
-- Local Storage for game saves
-- Custom physics engines
+- **HTML5** - Semantic markup and Canvas for graphics
+- **CSS3** - Grid/Flexbox layouts, gradients, animations
+- **ES6+ JavaScript** - Modern syntax with efficient game loops
+- **localStorage API** - Persistent save system per game
 
 ## 📅 Updates Log
 
-- Version 1.15.18 (December 10, 2025)
-- Version 1.15.16 (November 25, 2025)
-- Version 1.14.15 (November 12, 2025)
-- Version 1.13.15 (October 25, 2025)
-- Version 1.12.14 (October 10, 2025)
+- **Version 1.16.19** (January 1, 2026)
+- **Version 1.15.18** (December 10, 2025)
+- **Version 1.15.16** (November 25, 2025)
+- **Version 1.14.15** (November 12, 2025)
+- **Version 1.13.15** (October 25, 2025)
+- **Version 1.12.14** (October 10, 2025)
 
 ## 🤝 Contributing
 

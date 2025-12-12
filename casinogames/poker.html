@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Poker</title>
+<link rel="icon" type="image/x-icon" href="../icon.jpg">
+<style>
+body{margin:0;background:rgb(24, 224, 124);font-family:arial;color:white;text-align:center}
+button{padding:10px 20px;margin:5px;font-size:16px}
+.card{display:inline-block;width:70px;height:100px;background:white;color:black;border-radius:8px;
+margin:4px;font-size:22px;font-weight:bold;line-height:100px}
+.hidden{background:#222}
+#table{padding:20px}
+</style>
+</head>
+<body>
+
+<h1>Poker</h1>
+<div id="bank">Your Chips: 1000</div>
+
+<h3>Dealer</h3>
+<div id="dealer"></div>
+
+<h3>Table</h3>
+<div id="table"></div>
+
+<h3>You</h3>
+<div id="player"></div>
+
+<div id="controls">
+<button onclick="bet()">Bet 100</button>
+<button onclick="call()">Call</button>
+<button onclick="fold()">Fold</button>
+</div>
+
+<script>
+let deck,player,dealer,table,bank=1000,pot=0;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+
+function newDeck(){
+const s=["♠","♥","♦","♣"],v=["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+let d=[]; for(let x of s) for(let y of v) d.push(y+x); shuffle(d); return d;
+}
+
+function draw(n){return deck.splice(0,n);}
+
+function render(){
+playerDiv.innerHTML=player.map(c=>`<div class="card">${c}</div>`).join("");
+dealerDiv.innerHTML=dealer.map((c,i)=>`<div class="card ${stage<4?"hidden":""}">${stage<4?"":c}</div>`).join("");
+tableDiv.innerHTML=table.map(c=>`<div class="card">${c}</div>`).join("");
+bankDiv.innerText="Your Chips: "+bank+" | Pot: "+pot;
+}
+
+let stage=0;
+const playerDiv=document.getElementById("player");
+const dealerDiv=document.getElementById("dealer");
+const tableDiv=document.getElementById("table");
+const bankDiv=document.getElementById("bank");
+
+function start(){
+deck=newDeck(); pot=0; stage=0;
+player=draw(2); dealer=draw(2); table=[];
+render();
+}
+start();
+
+function bet(){
+if(bank<100)return;
+bank-=100; pot+=200; next();
+}
+
+function call(){next();}
+function fold(){alert("You folded."); start();}
+
+function next(){
+stage++;
+if(stage==1)table=draw(3);
+if(stage==2)table.push(...draw(1));
+if(stage==3)table.push(...draw(1));
+if(stage==4) showdown();
+render();
+}
+
+function score(hand){
+let vals="23456789TJQKA", nums=hand.map(c=>vals.indexOf(c[0]));
+nums.sort((a,b)=>a-b);
+let pairs=0; for(let i=1;i<nums.length;i++) if(nums[i]==nums[i-1]) pairs++;
+return Math.max(...nums)+pairs*2;
+}
+
+function showdown(){
+let pscore=score(player.concat(table));
+let dscore=score(dealer.concat(table));
+if(pscore>dscore){alert("You win!"); bank+=pot;}
+else if(pscore<dscore){alert("Dealer wins.");}
+else {alert("Tie."); bank+=pot/2;}
+start();
+}
+</script>
+</body>
+</html>

@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Latest News & Updates</title>
+	<title>News & Updates</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
-	<link rel="icon" href="check.png">
-	<meta name="description" content="Release notes, changelog and upcoming releases for Littletree866's game collection.">
+	<link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+	<link rel="icon" href="../../icon.jpg" type="image/x-icon">
+	<meta name="description"
+		content="Release notes, changelog and upcoming releases for Littletree866's game collection.">
 	<style>
 		* {
 			margin: 0;
 			padding: 0;
 			box-sizing: border-box;
 		}
-		
+
 		body {
-			font-family: 'DM Sans', sans-serif;
+			font-family: "Fira Sans", sans-serif;
 			line-height: 1.6;
 			color: #0b0b0b;
 			background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
@@ -25,13 +28,13 @@
 			flex-direction: column;
 			padding: 20px;
 		}
-		
+
 		.container {
 			max-width: 1000px;
 			width: 100%;
 			margin: 0 auto;
 		}
-		
+
 		header {
 			text-align: center;
 			padding: 50px 20px;
@@ -39,12 +42,12 @@
 			color: white;
 			border-radius: 12px;
 			margin: 20px 0 30px;
-			box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+			box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 			position: relative;
 			overflow: hidden;
 			width: 100%;
 		}
-		
+
 		header::before {
 			content: "";
 			position: absolute;
@@ -52,19 +55,19 @@
 			left: -50%;
 			width: 200%;
 			height: 200%;
-			background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
 			transform: rotate(30deg);
 		}
-		
+
 		h1 {
 			margin: 0;
 			font-size: 2.8rem;
 			position: relative;
 			z-index: 2;
-			text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 			margin-bottom: 15px;
 		}
-		
+
 		header p {
 			position: relative;
 			z-index: 2;
@@ -74,19 +77,19 @@
 			margin: 0 auto;
 			opacity: 0.9;
 		}
-		
+
 		.releases {
 			display: flex;
 			flex-direction: column;
 			gap: 16px;
 			margin-top: 18px;
 		}
-		
+
 		.card {
 			background: white;
 			border-radius: 10px;
 			padding: 18px;
-			box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 			transition: transform 0.25s ease, box-shadow 0.25s ease;
 			animation: cardFadeUp 0.5s ease forwards;
 		}
@@ -94,31 +97,32 @@
 		/* Hover lift */
 		.card:hover {
 			transform: translateY(-6px) scale(1.02);
-			box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+			box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
 		}
 
 		/* Entrance animation */
 		@keyframes cardFadeUp {
-		from {
-			opacity: 0;
-			transform: translateY(20px) scale(0.98);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0) scale(1);
-		}
+			from {
+				opacity: 0;
+				transform: translateY(20px) scale(0.98);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
 		}
 
-		
+
 		.card h3 {
 			margin: 0 0 8px 0;
 		}
-		
+
 		.changelog {
 			margin-top: 8px;
 			padding-left: 18px;
 		}
-		
+
 		.countdown {
 			display: flex;
 			gap: 10px;
@@ -126,94 +130,169 @@
 			font-size: 1.05rem;
 			color: #444;
 		}
-		
+
 		.upcoming {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			gap: 12px;
 		}
-		
+
 		.small {
 			font-size: 0.9rem;
 			color: #666;
 		}
-		
+
 		.split {
 			display: flex;
 			gap: 12px;
 			flex-wrap: wrap;
 		}
-		
+
 		.badge {
 			background: #6e8efb;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 150px;
-            font-size: 1em;
+			color: white;
+			padding: 2px 8px;
+			border-radius: 150px;
+			font-size: 1em;
 			font-weight: bold;
 			font-family: 'DM Sans', sans-serif;
-            margin-left: 8px;
+			margin-left: 8px;
 			align-self: center;
 		}
-		
+
 		@media (max-width: 768px) {
 			.container {
 				padding: 0 15px;
 			}
-			
+
 			header {
 				padding: 40px 20px;
 				margin: 10px 0 25px;
 			}
-			
+
 			h1 {
 				font-size: 2.2rem;
 			}
-			
+
 			.card {
 				padding: 25px 20px;
 			}
-			
+
 			.update-header {
 				flex-direction: column;
 				align-items: flex-start;
 			}
-			
+
 			.update-header h2 {
 				font-size: 1.6rem;
 			}
 		}
+
+		.snow {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+			z-index: 9999;
+			background-image:
+				radial-gradient(2px 2px at 20px 30px, white 98%, transparent),
+				radial-gradient(3px 3px at 100px 150px, white 98%, transparent),
+				radial-gradient(2px 2px at 200px 80px, white 98%, transparent),
+				radial-gradient(1.5px 1.5px at 300px 200px, white 98%, transparent),
+				radial-gradient(2.5px 2.5px at 400px 100px, white 98%, transparent),
+				radial-gradient(1.8px 1.8px at 500px 250px, white 98%, transparent);
+			background-repeat: repeat;
+			background-size: 600px 600px;
+			animation: snowFall 6s linear infinite;
+			opacity: 0.8;
+			filter: drop-shadow(0 0 6px white);
+		}
+
+		@keyframes snowFall {
+			from {
+				background-position: 0 -600px;
+			}
+
+			to {
+				background-position: 0 600px;
+			}
+		}
 	</style>
 </head>
+
 <body>
+
 	<main class="container" id="main">
 		<header role="banner" aria-labelledby="page-title">
-			<h1 id="page-title">Latest News & Updates</h1>
-			<p style="color: #f1f0f0; font-weight: bold;" class="small">Release notes, changelogs and upcoming features for the game collection.</p>
+			<h1 id="page-title">News & Updates</h1>
+			<p style="color: #f1f0f0; font-weight: bold;" class="small">Release notes, changelogs and upcoming features
+				for the game collection.</p>
+			<p style="margin-top:8px; color: #f1f0f0;" class="small">Dates are subject to change any time. Check
+				regularly for updates. Stay tuned!</p>
 			<div style="margin-top:12px;" class="countdown" aria-live="polite">
 				<i class="fas fa-calendar-alt" aria-hidden="true" style="color: #faf2f2;"></i>
-				<div style="color: #f1f0f0; font-weight: bold;">Next release target: <strong style="color: #ece8e8;" id="next-release-date">January 1, 2026</strong></div>
+				<div style="color: #f1f0f0; font-weight: bold;">Next release target: <strong style="color: #ece8e8;"
+						id="next-release-date">January 15, 2026</strong></div>
 			</div>
 		</header>
 
 		<section class="releases" aria-labelledby="releases-heading">
 			<h2 id="releases-heading" class="small" style="margin-top:12px">Release Timeline</h2>
 
+			<div class="card">
+				<div class="split">
+					<div>
+						<h3>v1.18.22</h3>
+						<p>Planned February 2, 2026*</p>
 
+					</div>
+				</div>
+				<ul class="changelog" aria-hidden="false">
+					<p style="font-weight: 800;">*Date subject to change</p>
+				</ul>
+			</div>
+
+
+			<div class="card">
+				<div class="split">
+					<div>
+						<h3>v1.17.20</h3>
+						<p>Planned January 15, 2026</p>
+						<div class="small"><strong id="countdown-text">Loading…</strong></div>
+					</div>
+					<div class="badge" aria-hidden="true">Coming Soon!</div>
+				</div>
+				<ul class="changelog" aria-hidden="false">
+					<li>A new game, some exciting features, and more!</li>
+				</ul>
+			</div>
 
 
 			<div class="card">
 				<div class="split">
 					<div>
 						<h3>v1.16.19</h3>
-						<p>Planned January 1, 2026</p>
-						<div class="small">Planned release: <strong id="countdown-text">Loading…</strong></div>
+						<h5>Winter 2026 Update</h5>
+						<div class="small">Released on: <strong id="release-date">January 1, 2026</strong></div>
 					</div>
-					<div class="badge" aria-hidden="true">Coming Soon!</div>
+					<div class="badge" aria-hidden="true">New!</div>
 				</div>
 				<ul class="changelog" aria-hidden="false">
-					<li>What could it be?</li>
+					<li>New Tower Defense 2 game</li>
+					<li>Bonus level in the Impossible game</li>
+					<li>Improved Geometric Dash</li>
+					<li>New badge system</li>
+					<li>Improved Clicker Quest+</li>
+					<li>General improvements and bug fixes</li>
+					<li>In slot machine starting coins changed from $25 to $100</li>
+					<li>Space game self-destruct rates changed from 7.5% to 3.5%</li>
+					<li>Winter theme</li>
+					<li>General improvements and bug fixes</li>
+					<li>New Zombie survival game</li>
+					<li>New Monthly Challenge</li>
 				</ul>
 			</div>
 
@@ -221,9 +300,8 @@
 				<div class="split">
 					<div>
 						<h3 id="recent-title">v1.15.18</h3>
-				<div class="small">Released on: <strong id="release-date">December 10, 2025</strong></div>
+						<div class="small">Released on: <strong id="release-date">December 10, 2025</strong></div>
 					</div>
-				<div class="badge" aria-hidden="true">New!</div>
 				</div>
 				<ul class="changelog">
 					<li>Added new Tower Defense+ </li>
@@ -239,7 +317,7 @@
 				<div class="split">
 					<div>
 						<h3 id="recent-title">v1.15.16</h3>
-				<div class="small">Released on: <strong id="release-date">November 25, 2025</strong></div>
+						<div class="small">Released on: <strong id="release-date">November 25, 2025</strong></div>
 					</div>
 				</div>
 				<ul class="changelog">
@@ -258,58 +336,24 @@
 	</main>
 
 	<script>
-		// Countdown to next release
-		(function(){
-			const target = new Date(2026, 0, 1); // January 1, 2026
-			const targetDate = new Date(2026, 0, 1); // January 1, 2026
+
+		(function () {
+			const targetDate = new Date(2026, 0, 15); // January 15, 2026
 			const cdText = document.getElementById('countdown-text');
 			const footerYear = document.getElementById('footer-year');
-			function update(){
+
+			function update() {
 				const now = new Date();
 				const diff = Math.max(0, targetDate - now);
-				const days = Math.floor(diff / (1000*60*60*24));
-				if(diff <= 0) cdText.textContent = 'Released';
-				else cdText.textContent = `${days}d `;
+				const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+				cdText.textContent = diff <= 0 ? 'Released' : `${days + 1}d remaining`;
 			}
+
 			update();
-			setInterval(update, 60*1000);
-			if(footerYear) footerYear.textContent = new Date().getFullYear();
+			setInterval(update, 60 * 1000);
+			if (footerYear) footerYear.textContent = new Date().getFullYear();
 		})();
 	</script>
 </body>
-</html>
-    
-    <footer>
-        <div class="container">
-            </div>
-        </div>
-    </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set copyright year
-            const year = new Date().getFullYear();
-            const cy = document.getElementById('copyright-year');
-            if (cy) cy.textContent = year;
-            const fy = document.getElementById('footer-year');
-            if (fy) fy.textContent = year;
-            
-            const cards = document.querySelectorAll('.update-card');
-            cards.forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            });
-            
-            setTimeout(() => {
-                cards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 200 * index);
-                });
-            }, 300);
-        });
-    </script>
-</body>
 </html>
