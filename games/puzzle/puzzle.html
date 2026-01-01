@@ -1,333 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Puzzle Master</title>
-<link rel="icon" href="../../icon.jpg" type="image/x-icon">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
-<style>
-    body {
-        font-family: "DM Sans", sans-serif;
-        background: linear-gradient(135deg, #6e8efb, #a777e3);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
+    <meta charset="UTF-8">
+    <title>Puzzle Master</title>
+    <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    .game-container {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-        text-align: center;
-        width: 380px;
-    }
+        .game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 380px;
+        }
 
-    .puzzle-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 100px);
-        gap: 5px;
-        margin: 20px auto;
-    }
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px auto;
+        }
 
-    .puzzle-tile {
-        height: 100px;
-        background: #0e0f0f;
-        border: none;
-        border-radius: 8px;
-        font-size: 28px;
-        cursor: pointer;
-        color: white;
-        transition: transform 0.25s, background 0.25s;
-    }
+        .puzzle-tile {
+            height: 100px;
+            background: #0e0f0f;
+            border: none;
+            border-radius: 8px;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.25s, background 0.25s;
+        }
 
-    .puzzle-tile.movable {
-        box-shadow: 0 0 8px #6e8efb;
-    }
+        .puzzle-tile.movable {
+            box-shadow: 0 0 8px #6e8efb;
+        }
 
-    .puzzle-tile:hover.movable {
-        background: #4a56d6;
-        transform: scale(0.95);
-    }
+        .puzzle-tile:hover.movable {
+            background: #4a56d6;
+            transform: scale(0.95);
+        }
 
-    .puzzle-tile.empty {
-        background: #ddd;
-        cursor: default;
-    }
+        .puzzle-tile.empty {
+            background: #ddd;
+            cursor: default;
+        }
 
-    .controls {
-        margin-top: 20px;
-    }
+        .controls {
+            margin-top: 20px;
+        }
 
-    button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        background: #6e8efb;
-        color: white;
-        cursor: pointer;
-        margin: 5px;
-    }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #6e8efb;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            font-family: inherit;
+            font-weight: 700;
+        }
 
-    button:hover {
-        background: #5669d8;
-    }
+        button:hover {
+            background: #5669d8;
+        }
 
-    .moves, .timer, .level {
-        margin-top: 10px;
-        font-weight: bold;
-        color: #444;
-    }
+        .moves,
+        .timer,
+        .level {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #444;
+        }
 
-    .win-message {
-        font-size: 20px;
-        font-weight: bold;
-        color: green;
-        margin-top: 15px;
-        display: none;
-    }
+        .win-message {
+            font-size: 20px;
+            font-weight: bold;
+            color: green;
+            margin-top: 15px;
+            display: none;
+        }
 
-    #modeSelect {
-        margin-bottom: 15px;
-    }
-</style>
+        #modeSelect {
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
+
 <body>
-<div class="game-container">
-    <h1>🧩 Puzzle Master</h1>
-    
-    <div id="modeSelect">
-        <button id="endlessModeBtn">Endless Mode</button>
-        <button id="lastStandBtn">Last Stand Mode</button>
+    <div class="game-container">
+        <h1>🧩 Puzzle Master</h1>
+
+        <div id="modeSelect">
+            <button id="endlessModeBtn">Endless Mode</button>
+            <button id="lastStandBtn">Last Stand Mode</button>
+        </div>
+
+        <div class="puzzle-grid" id="puzzleGrid" style="display:none;"></div>
+
+        <div class="controls" id="controls" style="display:none;">
+            <button id="newGameBtn">Restart</button>
+        </div>
+
+        <div class="level" id="levelDisplay" style="display:none;">Level: 1</div>
+        <div class="level" id="bestRecord" style="margin-top:6px;display:none;">Best Level: <span
+                id="bestLevel">1</span></div>
+        <div class="moves">Moves: <span id="moveCount">0</span></div>
+        <div class="timer">Time: <span id="timer">0</span>s</div>
+        <div class="win-message" id="winMessage">🎉 You solved it!</div>
     </div>
 
-    <div class="puzzle-grid" id="puzzleGrid" style="display:none;"></div>
+    <script>
+        const state = {
+            tiles: [],
+            moves: 0,
+            solved: false,
+            timer: 0,
+            timerInterval: null,
+            mode: null,
+            level: 1,
+            moveLimit: null,
+            timeLimit: null,
+            countdownInterval: null
+        };
 
-    <div class="controls" id="controls" style="display:none;">
-        <button id="newGameBtn">Restart</button>
-    </div>
+        const grid = document.getElementById('puzzleGrid');
+        const winMessage = document.getElementById('winMessage');
+        const moveDisplay = document.getElementById('moveCount');
+        const timerDisplay = document.getElementById('timer');
+        const levelDisplay = document.getElementById('levelDisplay');
 
-    <div class="level" id="levelDisplay" style="display:none;">Level: 1</div>
-    <div class="level" id="bestRecord" style="margin-top:6px;display:none;">Best Level: <span id="bestLevel">1</span></div>
-    <div class="moves">Moves: <span id="moveCount">0</span></div>
-    <div class="timer">Time: <span id="timer">0</span>s</div>
-    <div class="win-message" id="winMessage">🎉 You solved it!</div>
-</div>
-
-<script>
-const state = {
-    tiles: [],
-    moves: 0,
-    solved: false,
-    timer: 0,
-    timerInterval: null,
-    mode: null, 
-    level: 1,
-    moveLimit: null,
-    timeLimit: null,
-    countdownInterval: null
-};
-
-const grid = document.getElementById('puzzleGrid');
-const winMessage = document.getElementById('winMessage');
-const moveDisplay = document.getElementById('moveCount');
-const timerDisplay = document.getElementById('timer');
-const levelDisplay = document.getElementById('levelDisplay');
-
-const PUZZLE_BEST_KEY = 'puzzle_best_laststand';
-let bestLevel = Number(localStorage.getItem(PUZZLE_BEST_KEY) || 1);
-document.getElementById('bestLevel').textContent = bestLevel;
+        const PUZZLE_BEST_KEY = 'puzzle_best_laststand';
+        let bestLevel = Number(localStorage.getItem(PUZZLE_BEST_KEY) || 1);
+        document.getElementById('bestLevel').textContent = bestLevel;
 
 
 
 
-document.getElementById('endlessModeBtn').onclick = () => { startMode('endless'); setupModeUI(); };
-document.getElementById('lastStandBtn').onclick = () => { startMode('laststand'); setupModeUI(); };
+        document.getElementById('endlessModeBtn').onclick = () => { startMode('endless'); setupModeUI(); };
+        document.getElementById('lastStandBtn').onclick = () => { startMode('laststand'); setupModeUI(); };
 
-function startMode(mode) {
-    state.mode = mode;
-    document.getElementById('modeSelect').style.display = 'none';
-    grid.style.display = 'grid';
-    document.getElementById('controls').style.display = 'block';
-    if (mode === 'laststand') levelDisplay.style.display = 'block';
-    initializePuzzle();
-}
-
-
-
-
-function initializePuzzle() {
-    state.tiles = Array.from({length: 8}, (_, i) => i + 1);
-    state.tiles.push(null);
-    state.moves = 0;
-    state.solved = false;
-    winMessage.style.display = "none";
-
-    shufflePuzzle();
-    setupTimerAndLimits();
-    updateUI();
-}
-
-
-
-
-function setupTimerAndLimits() {
-    stopAllTimers();
-    if (state.mode === 'endless') {
-        state.timer = 0;
-        state.timerInterval = setInterval(() => {
-            state.timer++;
-            timerDisplay.textContent = state.timer;
-        }, 1000);
-    } else if (state.mode === 'laststand') {
-        
-        const baseTime = Math.max(180 - (state.level - 1) * 15, 30);
-        state.timeLimit = baseTime;
-        state.timer = baseTime;
-
-        
-        state.moveLimit = Math.max(100 - (state.level - 1) * 10, 20);
-
-        levelDisplay.textContent = `Level: ${state.level}`;
-        timerDisplay.textContent = state.timer;
-
-        state.countdownInterval = setInterval(() => {
-            state.timer--;
-            timerDisplay.textContent = state.timer;
-            if (state.timer <= 0) {
-                gameOver("⏰ Time's up! You reached Level " + state.level);
-            }
-        }, 1000);
-    }
-}
-
-function stopAllTimers() {
-    clearInterval(state.timerInterval);
-    clearInterval(state.countdownInterval);
-}
-
-
-
-
-function shufflePuzzle() {
-    let attempts = 0;
-    do {
-        for (let i = state.tiles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [state.tiles[i], state.tiles[j]] = [state.tiles[j], state.tiles[i]];
-        }
-        attempts++;
-    } while (!isSolvable() && attempts < 50);
-}
-
-function isSolvable() {
-    let inversions = 0;
-    const tiles = state.tiles.filter(t => t !== null);
-    for (let i = 0; i < tiles.length - 1; i++) {
-        for (let j = i + 1; j < tiles.length; j++) {
-            if (tiles[i] > tiles[j]) inversions++;
-        }
-    }
-    return inversions % 2 === 0;
-}
-
-function updateUI() {
-    grid.innerHTML = '';
-    state.tiles.forEach((tile, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'puzzle-tile';
-        if (tile === null) {
-            btn.classList.add('empty');
-        } else {
-            btn.textContent = tile;
-            if (canMove(index)) btn.classList.add('movable');
-            btn.onclick = () => moveTile(index);
-        }
-        grid.appendChild(btn);
-    });
-    moveDisplay.textContent = state.moves;
-}
-
-
-
-
-function canMove(index) {
-    if (state.tiles[index] === null) return false;
-    const row = Math.floor(index / 3);
-    const col = index % 3;
-    const emptyIndex = state.tiles.indexOf(null);
-    const emptyRow = Math.floor(emptyIndex / 3);
-    const emptyCol = emptyIndex % 3;
-    return (Math.abs(row - emptyRow) + Math.abs(col - emptyCol)) === 1;
-}
-
-function moveTile(index) {
-    if (!canMove(index) || state.solved) return;
-    const emptyIndex = state.tiles.indexOf(null);
-    [state.tiles[index], state.tiles[emptyIndex]] = [state.tiles[emptyIndex], state.tiles[index]];
-    state.moves++;
-    moveDisplay.textContent = state.moves;
-
-    if (state.mode === 'laststand' && state.moves > state.moveLimit) {
-        return gameOver("🚫 Move limit reached! You made it to Level " + state.level);
-    }
-
-    if (checkWin()) handleWin();
-    updateUI();
-}
-
-
-
-
-function checkWin() {
-    return state.tiles.slice(0, -1).every((t, i) => t === i + 1);
-}
-
-function handleWin() {
-    state.solved = true;
-    stopAllTimers();
-    winMessage.style.display = "block";
-
-    if (state.mode === 'laststand') {
-        setTimeout(() => {
-            state.level++;
-            
-            if (state.level > bestLevel) { bestLevel = state.level; localStorage.setItem(PUZZLE_BEST_KEY, String(bestLevel)); document.getElementById('bestLevel').textContent = bestLevel; }
-            winMessage.style.display = "none";
+        function startMode(mode) {
+            state.mode = mode;
+            document.getElementById('modeSelect').style.display = 'none';
+            grid.style.display = 'grid';
+            document.getElementById('controls').style.display = 'block';
+            if (mode === 'laststand') levelDisplay.style.display = 'block';
             initializePuzzle();
-        }, 1500);
-    }
-}
-
-function gameOver(msg) {
-    stopAllTimers();
-    alert(msg);
-    resetToMenu();
-}
+        }
 
 
 
 
-function resetToMenu() {
-    grid.style.display = 'none';
-    document.getElementById('controls').style.display = 'none';
-    levelDisplay.style.display = 'none';
-    document.getElementById('modeSelect').style.display = 'block';
-}
+        function initializePuzzle() {
+            state.tiles = Array.from({ length: 8 }, (_, i) => i + 1);
+            state.tiles.push(null);
+            state.moves = 0;
+            state.solved = false;
+            winMessage.style.display = "none";
 
-document.getElementById('newGameBtn').onclick = initializePuzzle;
+            shufflePuzzle();
+            setupTimerAndLimits();
+            updateUI();
+        }
 
 
-function setupModeUI() {
-    if (state.mode === 'laststand') {
-        document.getElementById('bestRecord').style.display = 'block';
-    } else {
-        document.getElementById('bestRecord').style.display = 'none';
-    }
-}
-</script>
+
+
+        function setupTimerAndLimits() {
+            stopAllTimers();
+            if (state.mode === 'endless') {
+                state.timer = 0;
+                state.timerInterval = setInterval(() => {
+                    state.timer++;
+                    timerDisplay.textContent = state.timer;
+                }, 1000);
+            } else if (state.mode === 'laststand') {
+
+                const baseTime = Math.max(180 - (state.level - 1) * 15, 30);
+                state.timeLimit = baseTime;
+                state.timer = baseTime;
+
+
+                state.moveLimit = Math.max(100 - (state.level - 1) * 10, 20);
+
+                levelDisplay.textContent = `Level: ${state.level}`;
+                timerDisplay.textContent = state.timer;
+
+                state.countdownInterval = setInterval(() => {
+                    state.timer--;
+                    timerDisplay.textContent = state.timer;
+                    if (state.timer <= 0) {
+                        gameOver("⏰ Time's up! You reached Level " + state.level);
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopAllTimers() {
+            clearInterval(state.timerInterval);
+            clearInterval(state.countdownInterval);
+        }
+
+
+
+
+        function shufflePuzzle() {
+            let attempts = 0;
+            do {
+                for (let i = state.tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [state.tiles[i], state.tiles[j]] = [state.tiles[j], state.tiles[i]];
+                }
+                attempts++;
+            } while (!isSolvable() && attempts < 50);
+        }
+
+        function isSolvable() {
+            let inversions = 0;
+            const tiles = state.tiles.filter(t => t !== null);
+            for (let i = 0; i < tiles.length - 1; i++) {
+                for (let j = i + 1; j < tiles.length; j++) {
+                    if (tiles[i] > tiles[j]) inversions++;
+                }
+            }
+            return inversions % 2 === 0;
+        }
+
+        function updateUI() {
+            grid.innerHTML = '';
+            state.tiles.forEach((tile, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'puzzle-tile';
+                if (tile === null) {
+                    btn.classList.add('empty');
+                } else {
+                    btn.textContent = tile;
+                    if (canMove(index)) btn.classList.add('movable');
+                    btn.onclick = () => moveTile(index);
+                }
+                grid.appendChild(btn);
+            });
+            moveDisplay.textContent = state.moves;
+        }
+
+
+
+
+        function canMove(index) {
+            if (state.tiles[index] === null) return false;
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const emptyIndex = state.tiles.indexOf(null);
+            const emptyRow = Math.floor(emptyIndex / 3);
+            const emptyCol = emptyIndex % 3;
+            return (Math.abs(row - emptyRow) + Math.abs(col - emptyCol)) === 1;
+        }
+
+        function moveTile(index) {
+            if (!canMove(index) || state.solved) return;
+            const emptyIndex = state.tiles.indexOf(null);
+            [state.tiles[index], state.tiles[emptyIndex]] = [state.tiles[emptyIndex], state.tiles[index]];
+            state.moves++;
+            moveDisplay.textContent = state.moves;
+
+            if (state.mode === 'laststand' && state.moves > state.moveLimit) {
+                return gameOver("🚫 Move limit reached! You made it to Level " + state.level);
+            }
+
+            if (checkWin()) handleWin();
+            updateUI();
+        }
+
+
+
+
+        function checkWin() {
+            return state.tiles.slice(0, -1).every((t, i) => t === i + 1);
+        }
+
+        function handleWin() {
+            state.solved = true;
+            stopAllTimers();
+            winMessage.style.display = "block";
+
+            if (state.mode === 'laststand') {
+                setTimeout(() => {
+                    state.level++;
+
+                    if (state.level > bestLevel) { bestLevel = state.level; localStorage.setItem(PUZZLE_BEST_KEY, String(bestLevel)); document.getElementById('bestLevel').textContent = bestLevel; }
+                    winMessage.style.display = "none";
+                    initializePuzzle();
+                }, 1500);
+            }
+        }
+
+        function gameOver(msg) {
+            stopAllTimers();
+            alert(msg);
+            resetToMenu();
+        }
+
+
+
+
+        function resetToMenu() {
+            grid.style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            levelDisplay.style.display = 'none';
+            document.getElementById('modeSelect').style.display = 'block';
+        }
+
+        document.getElementById('newGameBtn').onclick = initializePuzzle;
+
+
+        function setupModeUI() {
+            if (state.mode === 'laststand') {
+                document.getElementById('bestRecord').style.display = 'block';
+            } else {
+                document.getElementById('bestRecord').style.display = 'none';
+            }
+        }
+    </script>
 </body>
-</html>
 
+</html>

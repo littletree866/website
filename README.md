@@ -1,16 +1,15 @@
-# Littletree866's Game Hub
-
-A modern collection of **browser-based games** built with vanilla JavaScript, HTML5, and CSS3. All games feature responsive design, smooth animations, and persistent save systems.
+# Infinity Nexus
 
 
 ## ⚡ Key Features
 
 - **Pure Vanilla JavaScript** - No frameworks, lightweight and fast
 - **Responsive Design** - Works on all device sizes
-- **Local Storage** - Games save automatically to browser storage
+- **Local Storage** - Most games save automatically to browser storage
 - **Smooth Animations** - CSS3 transitions and particle effects
 - **Accessible UI** - Clear controls and intuitive gameplay
 - **No Dependencies** - Standalone HTML files, no build process
+- **Has games for everyone**- All different types of games, play what you want.
 
 ## 🛠️ Technical Stack
 
@@ -21,6 +20,7 @@ A modern collection of **browser-based games** built with vanilla JavaScript, HT
 
 ## 📅 Updates Log
 
+- **Version 1.17.20** (January 15, 2026)
 - **Version 1.16.19** (January 1, 2026)
 - **Version 1.15.18** (December 10, 2025)
 - **Version 1.15.16** (November 25, 2025)
@@ -37,4 +37,4 @@ Feel free to contribute by:
 
 ## 📜 License
 
-All rights reserved © 2025 Littletree866
+All rights reserved © 2026 Littletree866 under MIT license

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>CLICK ME.</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+      font-family: monospace;
+      user-select: none;
+    }
+
+    #world {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #btn {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .eye {
+      position: absolute;
+      width: 40px;
+      height: 20px;
+      border: 2px solid #0f0;
+      border-radius: 50%;
+    }
+
+    .eye::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #0f0;
+      border-radius: 50%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .fall {
+      position: fixed;
+      top: -50px;
+      color: #0f0;
+      pointer-events: none;
+      font-size: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="world">
+    <button id="btn" onclick="clickMe()">CLICK ME</button>
+  </div>
+
+  <script>
+    let clicks = 0, entropy = 0, silent = false, mirror = false;
+
+    function clickMe() {
+      clicks++;
+      entropy = Math.floor(clicks / 10);
+      document.title = "CLICK " + clicks;
+      realityShift();
+    }
+
+    function realityShift() {
+      if (entropy >= 1) pulse();
+      if (entropy >= 2) fakeCrash();
+      if (entropy >= 3 && Math.random() < 0.6) fallingText();
+      if (entropy >= 4 && Math.random() < 0.3) shake();
+      if (entropy >= 5 && Math.random() < 0.3) spawnEye();
+      if (entropy >= 6 && Math.random() < 0.2) fakeAd();
+      if (entropy >= 7) fakeAd();
+      if (entropy >= 8 && Math.random() < 0.2) flip();
+      if (entropy >= 10 && Math.random() < 0.2) fakeCrash();
+      if (entropy >= 12 && Math.random() < 0.15) portal();
+      if (entropy >= 15 && Math.random() < 0.15) rewind();
+      if (entropy >= 18 && Math.random() < 0.1) toggleMirror();
+      if (entropy >= 25) finalForm();
+    }
+
+    function pulse() {
+      document.body.style.background = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`;
+    }
+
+    function shake() {
+      world.style.transform = `translate(${Math.random() * 20 - 10}px,${Math.random() * 20 - 10}px)`;
+      setTimeout(() => world.style.transform = "", 200);
+    }
+
+    function drift() {
+      btn().style.left = Math.random() * 80 + "%";
+      btn().style.top = Math.random() * 80 + "%";
+    }
+
+    function fallingText() {
+      const t = document.createElement("div");
+      t.className = "fall";
+      t.innerText = ["ERROR", "STOP", "RUN", "HELP", "HELLO", "WHY", "NO"][Math.random() * 7 | 0];
+      t.style.left = Math.random() * 100 + "%";
+      world.appendChild(t);
+      let y = -50;
+      const i = setInterval(() => {
+        y += 3;
+        t.style.top = y + "px";
+        if (y > window.innerHeight) { clearInterval(i); t.remove(); }
+      }, 16);
+    }
+
+    function spawnEye() { /* placeholder safe implementation */ console.log('spawnEye called'); }
+
+    function fakeAd() {
+      const a = document.createElement("div");
+      a.innerText = "FREE RAM DOWNLOAD";
+      a.style = `position:absolute;left:${Math.random() * 80}%;top:${Math.random() * 80}%;background:red;color:white;padding:10px;cursor:pointer;`;
+      a.onclick = () => a.remove();
+      world.appendChild(a);
+    }
+
+    function dodge() {
+      btn().onmouseenter = () => drift();
+    }
+
+    function flip() {
+      world.style.transform = "rotate(180deg)";
+      setTimeout(() => world.style.transform = "", 2000);
+    }
+
+    function fakeCrash() {
+      alert("SYSTEM FAILURE");
+    }
+
+    function portal() {
+      const p = document.createElement("div");
+      p.innerText = "DOOR";
+      p.style = `position:absolute;left:${Math.random() * 80}%;top:${Math.random() * 80}%;border:2px solid black;padding:20px;cursor:pointer;`;
+      p.onclick = () => location.reload();
+      world.appendChild(p);
+    }
+
+    function rewind() {
+      clicks = Math.max(0, clicks - 20);
+    }
+
+    function toggleMirror() {
+      mirror = !mirror;
+      world.style.transform = mirror ? "scaleX(-1)" : "";
+    }
+
+    function finalForm() {
+      btn().innerText = "WHY DID YOU KEEP CLICKING";
+      btn().style.background = "black";
+      btn().style.color = "red";
+    }
+
+    function btn() { return document.getElementById("btn"); }
+    const world = document.getElementById("world");
+  </script>
+
+
+</body>
+
+</html>

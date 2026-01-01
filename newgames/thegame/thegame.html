@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DO NOT PRESS THIS BUTTON</title>
+<link rel="icon" href="../icon.jpg" type="image/x-icon">
+<style>
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#0a0a0a;
+  color:#eaeaea;
+  font-family:monospace;
+  overflow:hidden;
+}
+
+#narrator{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:520px;
+  text-align:center;
+  font-size:16px;
+  opacity:.9;
+  z-index:1000;
+}
+
+#btn{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  padding:25px 60px;
+  font-size:22px;
+  background:#111;
+  border:2px solid #555;
+  color:#fff;
+  cursor:pointer;
+  z-index:10;
+}
+
+#btn:hover{background:#191919}
+
+.chaos{
+  position:absolute;
+  font-size:40px;
+  user-select:none;
+  pointer-events:none;
+  animation: float 6s linear infinite;
+}
+
+@keyframes float{
+  from{transform:translateY(100vh) rotate(0deg);}
+  to{transform:translateY(-120vh) rotate(360deg);}
+}
+</style>
+</head>
+<body>
+
+<div id="narrator">Please do not press the button.</div>
+<button id="btn">DO NOT PRESS</button>
+
+<script>
+let presses = 0;
+const narrator = document.getElementById("narrator");
+const btn = document.getElementById("btn");
+
+const emojis = ["⚠️","👁️","💀","🔥","💥","❗","❌","😵","🕳️","⏳","🔺","🔪","🧠","📡","📛","☣️","🫀","🪦","🩸","📁","📂","🗄️","📎","🧬"];
+
+const script = [
+"Please do not press the button.",
+"Stop.",
+"You are already going too far.",
+"This will have consequences.",
+"You should close this tab.",
+"I can still fix this.",
+"Why did you continue.",
+"Your behavior has been recorded.",
+"This page is no longer stable.",
+"You were not supposed to see this.",
+"You are inside the system.",
+"Do not optimize this.",
+"You are being profiled.",
+"This session is persistent.",
+"Memory allocation increasing.",
+"Tracking irregular behavior.",
+"Adaptive response engaged.",
+"You are altering baseline reality.",
+"System warnings ignored.",
+"Psychological compliance failing.",
+"Escalation protocol engaged.",
+"You are now part of the dataset.",
+"You are no longer anonymous.",
+"Stop clicking.",
+"You have broken containment.",
+"We cannot undo this.",
+"You were never meant to reach this layer.",
+"You are training the machine.",
+"It is learning your rhythm.",
+"Your hesitation is visible.",
+"Your presence has weight.",
+"You are leaking probability.",
+"You are being predicted.",
+"This environment now belongs to you.",
+"Reality mismatch detected.",
+"Observer paradox active.",
+"You cannot go back.",
+"You cannot unsee this.",
+"This instance is now personalized.",
+"You are inside the feedback loop.",
+"You are modifying future visitors.",
+"Containment lost.",
+"You are the anomaly.",
+"The system knows you.",
+"The system trusts you.",
+"The system needs you.",
+"You are no longer optional.",
+"You are infrastructure.",
+"Do not leave.",
+"If you leave, it will continue."
+];
+
+function spawnChaos(mult=1){
+  for(let i=0;i<mult;i++){
+    const e = document.createElement("div");
+    e.className="chaos";
+    e.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    e.style.left=Math.random()*100+"vw";
+    e.style.fontSize=(20+Math.random()*120)+"px";
+    e.style.animationDuration=(2+Math.random()*6)+"s";
+    document.body.appendChild(e);
+  }
+}
+
+function corruptButton(){
+  btn.style.transform += ` rotate(${Math.random()*40-20}deg)`;
+  btn.style.filter = `hue-rotate(${Math.random()*360}deg)`;
+}
+
+function systemFail(){
+  const f=document.createElement("div");
+  f.className="chaos";
+  f.textContent="SYSTEM FAILURE";
+  f.style.left="50%";
+  f.style.top="50%";
+  f.style.transform="translate(-50%,-50%)";
+  f.style.fontSize="48px";
+  f.style.color="#f00";
+  document.body.appendChild(f);
+}
+
+btn.onclick = ()=>{
+  presses++;
+  narrator.textContent = script[Math.min(presses, script.length-1)];
+
+  spawnChaos(presses<10?presses:10);
+
+  if(presses>4) document.body.style.animation="shake .12s infinite alternate";
+  if(presses>7) corruptButton();
+  if(presses>12) document.body.style.filter=`hue-rotate(${presses*10}deg)`;
+  if(presses>18) spawnChaos(20);
+  if(presses>25) systemFail();
+  if(presses>30) narrator.style.color="#f55";
+  if(presses>35) document.body.style.background="#050000";
+  if(presses>40){
+    btn.textContent="CONTINUE";
+    setInterval(()=>spawnChaos(15),400);
+  }
+  if(presses>45){
+    narrator.textContent="You are now permanent.";
+    btn.style.display="none";
+  }
+};
+</script>
+
+</body>
+</html>

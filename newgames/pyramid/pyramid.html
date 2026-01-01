@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <title>Pyramid Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a1929;
+            --container-bg: #112240;
+            --border-color: #2a4a6e;
+            --text-color: #e0e0e0;
+            --highlight-color: #d4af37;
+            --button-bg: #1a3a5f;
+            --button-hover: #2a4a6e;
+            --inventory-bg: #1e3a5f;
+            --success-color: #5f5;
+            --danger-color: #f55;
+            --puzzle-bg: #1a3a5f;
+            --timer-color: #a777e3;
+            --level-color: #4a90e2;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-image: radial-gradient(circle at 20% 30%, #1a3a5f 0%, #0a1929 70%);
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.4rem;
+            color: var(--highlight-color);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        #game-info {
+            display: flex;
+            gap: 20px;
+        }
+
+        #timer,
+        #level {
+            background-color: var(--container-bg);
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+        }
+
+        #timer {
+            color: var(--timer-color);
+        }
+
+        #level {
+            color: var(--level-color);
+        }
+
+        #game-container {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            min-height: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        #text-display {
+            min-height: 300px;
+            font-size: 1.1rem;
+            overflow-y: auto;
+            max-height: 60vh;
+            padding-right: 10px;
+        }
+
+        #text-display::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #text-display::-webkit-scrollbar-thumb {
+            background-color: var(--button-bg);
+            border-radius: 4px;
+        }
+
+        #options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            padding: 12px 18px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: "DM Sans", sans-serif;
+        }
+
+        .option-btn:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .inventory {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: var(--inventory-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .ending {
+            color: var(--highlight-color);
+            font-weight: bold;
+            margin-top: 25px;
+            font-size: 1.3rem;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.3);
+            text-align: center;
+            border: 1px solid var(--highlight-color);
+        }
+
+        .inventory-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: var(--button-bg);
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .inventory-item:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.05);
+        }
+
+        .important {
+            color: var(--highlight-color);
+            font-weight: bold;
+        }
+
+        .puzzle {
+            border-left: 3px solid var(--highlight-color);
+            padding: 10px 15px;
+            margin: 15px 0;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0 5px 5px 0;
+        }
+
+        .danger {
+            color: var(--danger-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .success {
+            color: var(--success-color);
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .puzzle-section {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .totem-piece {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--puzzle-bg);
+            border-radius: 8px;
+            font-size: 2.5rem;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .totem-piece:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.05);
+        }
+
+        .totem-piece.selected {
+            border-color: var(--highlight-color);
+            background-color: var(--button-hover);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .puzzle-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--button-hover);
+        }
+
+        .btn-primary {
+            background-color: var(--highlight-color);
+            color: var(--bg-color);
+            border-color: #ffd700;
+        }
+
+        .btn-primary:hover {
+            background-color: #ffd700;
+        }
+
+        .fade-in {
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .level-progress {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: var(--inventory-bg);
+            border-radius: 8px;
+        }
+
+        .level-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .level-circle.current {
+            border-color: var(--highlight-color);
+            background-color: rgba(212, 175, 55, 0.2);
+            transform: scale(1.2);
+        }
+
+        .level-circle.completed {
+            border-color: var(--success-color);
+            background-color: rgba(95, 255, 95, 0.1);
+        }
+
+        .section-title {
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.4rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Pyramid Explorer</h1>
+        <div id="game-info">
+            <div id="timer">Time: 20:00</div>
+            <div id="level">Level: 1/5</div>
+        </div>
+    </header>
+
+    <div id="game-container" class="fade-in">
+        <div class="level-progress" id="level-progress">
+            <!-- Level indicators will be generated here -->
+        </div>
+        <div id="text-display"></div>
+        <div id="options-container"></div>
+
+        <div id="puzzle-section" class="puzzle-section hidden">
+            <h3 class="section-title">Totem Puzzle</h3>
+            <div id="puzzle-description"></div>
+            <div class="puzzle-grid" id="puzzle-grid">
+                <!-- Totem puzzle pieces will be generated here -->
+            </div>
+            <div class="puzzle-controls">
+                <button class="btn" id="shuffle-totems">Shuffle Totems</button>
+                <button class="btn btn-primary" id="submit-puzzle">Submit Solution</button>
+                <button class="btn" id="close-puzzle">Close Puzzle</button>
+            </div>
+        </div>
+
+        <div id="inventory-display" class="inventory hidden">
+            <strong>Inventory:</strong> <span id="inventory-items"></span>
+        </div>
+    </div>
+
+    <script>
+        const gameState = {
+            currentLevel: 1,
+            totalLevels: 5,
+            inventory: [],
+            hasTorch: false,
+            hasKey: false,
+            puzzleSolved: false,
+            timeLeft: 1200, // 20 minutes
+            timerInterval: null,
+            selectedTotem: null,
+            currentPuzzle: null
+        };
+
+        const levels = {
+            1: {
+                name: "Entrance Hall",
+                description: `You stand before the massive stone entrance of the ancient pyramid. The air is thick with dust and mystery. Hieroglyphs cover the walls, telling stories of pharaohs and gods.`,
+            },
+            // basic placeholders for remaining levels
+            2: { name: "Antechamber", description: "A maze of pillars and faintly glowing symbols." },
+            3: { name: "Sun Chamber", description: "A room aligned with the sun; puzzles based on light." },
+            4: { name: "Pharaoh's Passage", description: "Traps guard the way forward." },
+            5: { name: "Inner Sanctum", description: "The final chamber — claim the treasure!" }
+        };
+
+        const puzzles = {
+            3: {
+                name: "Symbol Alignment Puzzle",
+                description: "Arrange the Egyptian symbols so matching pairs are adjacent. Click two adjacent symbols to swap them.",
+                solution: ["🐍", "🐍", "🦅", "🦅", "☥", "☥", "𓃒", "𓃒", "𓂀", "𓂀", "𓊹", "𓊹"],
+                pieces: ["🐍", "🦅", "☥", "𓃒", "𓂀", "𓊹", "🐍", "🦅", "☥", "𓃒", "𓂀", "𓊹"]
+            },
+            5: {
+                name: "Final Ascension Puzzle",
+                description: "Arrange the symbols in the order of the Egyptian pantheon: Ra (sun), then Anubis (jackal), then Horus (falcon), then the protective symbols.",
+                solution: ["𓂀", "𓃒", "𓊹", "🐍", "🦅", "☥", "𓂀", "𓃒", "𓊹", "🐍", "🦅", "☥"],
+                pieces: ["🐍", "🦅", "☥", "𓃒", "𓂀", "𓊹", "𓊹", "𓂀", "𓃒", "☥", "🦅", "🐍"]
+            }
+        };
+
+        function initGame() {
+            updateLevelProgress();
+            displayScene();
+            startTimer();
+
+            document.getElementById('shuffle-totems').addEventListener('click', shufflePuzzle);
+            document.getElementById('submit-puzzle').addEventListener('click', checkPuzzleSolution);
+            document.getElementById('close-puzzle').addEventListener('click', closePuzzle);
+        }
+
+        function updateLevelProgress() {
+            const progress = document.getElementById('level-progress');
+            progress.innerHTML = '';
+
+            for (let i = 1; i <= gameState.totalLevels; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'level-circle';
+                circle.textContent = i;
+
+                if (i === gameState.currentLevel) {
+                    circle.classList.add('current');
+                } else if (i < gameState.currentLevel) {
+                    circle.classList.add('completed');
+                }
+
+                circle.title = levels[i].name;
+                progress.appendChild(circle);
+            }
+
+            document.getElementById('level').textContent = `Level: ${gameState.currentLevel}/5`;
+        }
+
+        function displayScene() {
+            const scene = levels[gameState.currentLevel];
+            const textDisplay = document.getElementById('text-display');
+
+            let html = `<h2>${scene.name}</h2>`;
+            html += `<p>${scene.description}</p>`;
+
+            textDisplay.innerHTML = html;
+            updateOptions();
+            updateLevelProgress();
+        }
+
+        function updateOptions() {
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const scene = levels[gameState.currentLevel];
+
+            scene.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option.text;
+                btn.addEventListener('click', () => handleAction(option.action));
+                container.appendChild(btn);
+            });
+        }
+
+        function handleAction(action) {
+            switch (action) {
+                case 'examineWalls':
+                    examineWalls();
+                    break;
+                case 'tryDoor':
+                    tryDoor();
+                    break;
+                case 'searchEntrance':
+                    searchEntrance();
+                    break;
+                case 'lightTorch':
+                    lightTorch();
+                    break;
+                case 'examineStatues':
+                    examineStatues();
+                    break;
+                case 'listenEchoes':
+                    listenEchoes();
+                    break;
+                case 'approachPuzzleDoor':
+                    approachPuzzleDoor();
+                    break;
+                case 'searchCorridor':
+                    searchCorridor();
+                    break;
+                case 'examinePuzzle':
+                    examinePuzzle();
+                    break;
+                case 'studyWalls':
+                    studyWalls();
+                    break;
+                case 'investigateDevices':
+                    investigateDevices();
+                    break;
+                case 'searchChamber':
+                    searchChamber();
+                    break;
+                case 'examineSarcophagi':
+                    examineSarcophagi();
+                    break;
+                case 'approachSunDoor':
+                    approachSunDoor();
+                    break;
+                case 'studyFinalPuzzle':
+                    studyFinalPuzzle();
+                    break;
+                case 'searchForKey':
+                    searchForKey();
+                    break;
+                case 'examineTreasure':
+                    examineTreasure();
+                    break;
+                case 'approachFinalChallenge':
+                    approachFinalChallenge();
+                    break;
+                case 'gatherTreasure':
+                    gatherTreasure();
+                    break;
+                case 'studyEscape':
+                    studyEscape();
+                    break;
+            }
+        }
+
+        function examineWalls() {
+            addMessage(`The hieroglyphs tell the story of Pharaoh Amenhotep, who built this pyramid to protect his greatest treasures. 
+            One panel shows a sequence: <span class="important">𓂀 → 𓃒 → 𓊹 → 🐍 → 🦅 → ☥</span>. This might be important.`);
+
+            if (!gameState.hasKey && Math.random() < 0.3) {
+                gameState.hasKey = true;
+                gameState.inventory.push('Ancient Key');
+                addMessage(`<span class="success">You found an ancient key hidden behind a loose stone!</span>`);
+                updateInventory();
+            }
+
+            // Allow progression to next level
+            if (gameState.currentLevel === 1) {
+                addMessage(`<span class="important">The stone door now seems accessible. You can try to open it.</span>`);
+            }
+        }
+
+        function tryDoor() {
+            if (gameState.currentLevel === 1) {
+                addMessage(`You push against the stone door. It slowly grinds open, revealing a dark corridor beyond.`);
+                advanceLevel();
+            } else {
+                addMessage(`The door is already open.`);
+            }
+        }
+
+        function searchEntrance() {
+            const foundItem = Math.random() < 0.4;
+            if (foundItem && !gameState.hasTorch) {
+                gameState.hasTorch = true;
+                gameState.inventory.push('Torch');
+                addMessage(`<span class="success">You find a torch and some oil! This will help you see in the dark.</span>`);
+                updateInventory();
+            } else {
+                addMessage(`You search thoroughly but find nothing of value in the entrance.`);
+            }
+        }
+
+        function lightTorch() {
+            if (gameState.hasTorch) {
+                addMessage(`You light your torch. The chamber illuminates, revealing more details in the hieroglyphs.`);
+            } else {
+                addMessage(`<span class="danger">You don't have a torch to light!</span> Search the entrance to find one.`);
+            }
+        }
+
+        function examineStatues() {
+            addMessage(`The statues represent Egyptian gods: Anubis (jackal-headed), Horus (falcon-headed), and Thoth (ibis-headed). 
+            Each holds a symbol matching those you saw in the hieroglyphs.`);
+
+            if (gameState.currentLevel === 2) {
+                addMessage(`<span class="important">The statues seem to point toward the puzzle door.</span>`);
+            }
+        }
+
+        function listenEchoes() {
+            addMessage(`The echoes form a rhythmic pattern: <span class="important">3 taps, pause, 1 tap, pause, 4 taps...</span> 
+            This might be a clue for the puzzle ahead.`);
+        }
+
+        function approachPuzzleDoor() {
+            if (gameState.currentLevel === 2) {
+                addMessage(`The door has a complex lock with movable symbols. It seems you need to solve a puzzle to proceed.`);
+                advanceLevel();
+            }
+        }
+
+        function searchCorridor() {
+            const items = ['Ancient Scroll', 'Gold Coin', 'Ceramic Shard'];
+            if (Math.random() < 0.4 && gameState.inventory.length < 6) {
+                const item = items[Math.floor(Math.random() * items.length)];
+                gameState.inventory.push(item);
+                addMessage(`<span class="success">You found ${item.toLowerCase()} on the floor!</span>`);
+                updateInventory();
+            } else {
+                addMessage(`The corridor floor is mostly clear, covered in centuries of dust.`);
+            }
+        }
+
+        function examinePuzzle() {
+            if (gameState.currentLevel === 3) {
+                gameState.currentPuzzle = 3;
+                openPuzzle();
+            }
+        }
+
+        function studyWalls() {
+            addMessage(`The walls are covered in mathematical equations and star charts. They seem to describe the movement of celestial bodies.`);
+        }
+
+        function investigateDevices() {
+            addMessage(`The mechanical devices are ancient but precise. They seem to be calculating devices, possibly used for astronomical predictions.`);
+        }
+
+        function searchChamber() {
+            if (Math.random() < 0.3) {
+                addMessage(`You find a hidden inscription: "The truth lies in patterns. Match what belongs together."`);
+            } else {
+                addMessage(`The chamber is meticulously clean, with no loose items.`);
+            }
+        }
+
+        function examineSarcophagi() {
+            addMessage(`The sarcophagi are beautifully crafted with gold inlay. One bears an inscription: 
+            "He who seeks the sun's treasure must first walk in darkness and find the key of life."`);
+
+            if (!gameState.hasKey && Math.random() < 0.4) {
+                gameState.hasKey = true;
+                gameState.inventory.push('Golden Scarab Key');
+                addMessage(`<span class="success">You found a golden scarab key hidden in one of the sarcophagi!</span>`);
+                updateInventory();
+            }
+        }
+
+        function approachSunDoor() {
+            if (gameState.currentLevel === 4) {
+                if (gameState.hasKey) {
+                    addMessage(`The golden scarab key fits perfectly! The sun door slowly opens, revealing the treasure vault.`);
+                    advanceLevel();
+                } else {
+                    addMessage(`<span class="danger">The sun door is locked! You need a key to open it.</span>`);
+                }
+            }
+        }
+
+        function studyFinalPuzzle() {
+            if (gameState.currentLevel === 4) {
+                addMessage(`The final puzzle shows Egyptian gods in a specific order. The inscription reads: 
+                "Ra guides, Anubis judges, Horus protects. Arrange them in their divine order."`);
+            }
+        }
+
+        function searchForKey() {
+            if (!gameState.hasKey) {
+                addMessage(`You search the hall carefully. The key must be here somewhere...`);
+                if (Math.random() < 0.5) {
+                    gameState.hasKey = true;
+                    gameState.inventory.push('Golden Scarab Key');
+                    addMessage(`<span class="success">You found the golden scarab key under one of the sarcophagi!</span>`);
+                    updateInventory();
+                }
+            } else {
+                addMessage(`You already have the key.`);
+            }
+        }
+
+        function examineTreasure() {
+            addMessage(`The Pharaoh's Treasure glitters with unimaginable wealth: gold statues, jeweled crowns, 
+            and artifacts from a lost civilization. But it's protected by one final challenge.`);
+        }
+
+        function approachFinalChallenge() {
+            if (gameState.currentLevel === 5) {
+                gameState.currentPuzzle = 5;
+                openPuzzle();
+            }
+        }
+
+        function gatherTreasure() {
+            const treasures = ['Gold Coin', 'Silver Bracelet', 'Lapis Lazuli Gem', 'Ivory Statuette'];
+            const treasure = treasures[Math.floor(Math.random() * treasures.length)];
+            gameState.inventory.push(treasure);
+            addMessage(`<span class="success">You carefully add ${treasure.toLowerCase()} to your collection!</span>`);
+            updateInventory();
+        }
+
+        function studyEscape() {
+            addMessage(`You notice a hidden passage behind a tapestry. It seems to lead outside. 
+            Once you solve the final puzzle, you can escape with the treasure.`);
+        }
+
+        function openPuzzle() {
+            const puzzle = puzzles[gameState.currentPuzzle];
+            document.getElementById('puzzle-section').classList.remove('hidden');
+            document.getElementById('puzzle-description').textContent = puzzle.description;
+            generatePuzzleGrid(gameState.currentPuzzle);
+        }
+
+        function closePuzzle() {
+            document.getElementById('puzzle-section').classList.add('hidden');
+            gameState.selectedTotem = null;
+        }
+
+        function generatePuzzleGrid(level) {
+            const grid = document.getElementById('puzzle-grid');
+            grid.innerHTML = '';
+
+            const puzzle = puzzles[level];
+            if (!puzzle) return;
+
+            // shuffle pieces for start
+            const shuffled = [...puzzle.pieces].sort(() => Math.random() - 0.5);
+
+            // create a simple grid layout (3 columns x 4 rows for 12 pieces)
+            shuffled.forEach((piece, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'totem-piece';
+                btn.style.minWidth = '44px';
+                btn.style.minHeight = '44px';
+                btn.style.margin = '6px';
+                btn.style.fontSize = '22px';
+                btn.dataset.index = index;
+                btn.textContent = piece;
+                btn.addEventListener('click', () => selectTotem(index, btn));
+                grid.appendChild(btn);
+            });
+
+            // store current layout in gameState for validation
+            gameState._puzzleLayout = shuffled.slice();
+        }
+
+        function selectTotem(index, element) {
+            // select first, then if a second adjacent is chosen swap
+            if (gameState.selectedTotem == null) {
+                gameState.selectedTotem = index;
+                element.style.outline = '3px solid #ffd700';
+                return;
+            }
+            const prevIndex = gameState.selectedTotem;
+            // find button elements
+            const grid = document.getElementById('puzzle-grid');
+            const buttons = Array.from(grid.children);
+
+            if (prevIndex === index) {
+                // deselect
+                buttons[prevIndex].style.outline = '';
+                gameState.selectedTotem = null;
+                return;
+            }
+
+            if (areAdjacent(prevIndex, index)) {
+                // swap in layout and UI
+                [gameState._puzzleLayout[prevIndex], gameState._puzzleLayout[index]] =
+                    [gameState._puzzleLayout[index], gameState._puzzleLayout[prevIndex]];
+                buttons[prevIndex].textContent = gameState._puzzleLayout[prevIndex];
+                buttons[index].textContent = gameState._puzzleLayout[index];
+            } else {
+                // not adjacent - flash
+                buttons[prevIndex].style.transition = 'box-shadow 0.2s';
+                buttons[prevIndex].style.boxShadow = '0 0 8px #ff8';
+                setTimeout(() => buttons[prevIndex].style.boxShadow = '', 200);
+            }
+            // clear selection
+            if (buttons[prevIndex]) buttons[prevIndex].style.outline = '';
+            gameState.selectedTotem = null;
+        }
+
+        function areAdjacent(i1, i2) {
+            // grid: 3 columns
+            const cols = 3;
+            const r1 = Math.floor(i1 / cols), c1 = i1 % cols;
+            const r2 = Math.floor(i2 / cols), c2 = i2 % cols;
+            const dr = Math.abs(r1 - r2), dc = Math.abs(c1 - c2);
+            return (dr + dc) === 1;
+        }
+
+        function shufflePuzzle() {
+            const lvl = gameState.currentPuzzle;
+            if (!lvl) return;
+            const puzzle = puzzles[lvl];
+            gameState._puzzleLayout = [...puzzle.pieces].sort(() => Math.random() - 0.5);
+            generatePuzzleGrid(lvl);
+        }
+
+        function checkPuzzleSolution() {
+            const lvl = gameState.currentPuzzle;
+            if (!lvl) return;
+            const puzzle = puzzles[lvl];
+            const layout = gameState._puzzleLayout || [];
+            const ok = layout.length === puzzle.solution.length && layout.every((v, i) => v === puzzle.solution[i]);
+            if (ok) {
+                gameState.puzzleSolved = true;
+                addMessage('<span class="success">Puzzle solved!</span>');
+                closePuzzle();
+                advanceLevel();
+            } else {
+                addMessage('<span class="danger">Not solved yet. Try again.</span>');
+            }
+        }
+
+        // wire initial puzzle open if any
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialPuzzle = gameState.currentLevel === 3 ? 3 : gameState.currentLevel === 5 ? 5 : null;
+            if (initialPuzzle) {
+                gameState.currentPuzzle = initialPuzzle;
+                openPuzzle();
+            }
+        });
+
+        function advanceLevel() {
+            if (gameState.currentLevel < gameState.totalLevels) {
+                gameState.currentLevel++;
+                displayScene();
+            }
+        }
+
+        function addMessage(message) {
+            const textDisplay = document.getElementById('text-display');
+            const messageDiv = document.createElement('div');
+            messageDiv.innerHTML = message;
+            messageDiv.style.marginTop = '15px';
+            messageDiv.style.padding = '10px';
+            messageDiv.style.borderRadius = '5px';
+            messageDiv.style.backgroundColor = 'rgba(0,0,0,0.1)';
+            textDisplay.appendChild(messageDiv);
+            textDisplay.scrollTop = textDisplay.scrollHeight;
+        }
+
+        function updateInventory() {
+            const inventoryItems = document.getElementById('inventory-items');
+            const inventoryDisplay = document.getElementById('inventory-display');
+
+            if (gameState.inventory.length === 0) {
+                inventoryItems.textContent = 'Empty';
+                inventoryDisplay.classList.add('hidden');
+            } else {
+                inventoryItems.innerHTML = '';
+                gameState.inventory.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'inventory-item';
+                    span.textContent = item;
+                    inventoryItems.appendChild(span);
+                });
+                inventoryDisplay.classList.remove('hidden');
+            }
+        }
+
+        function startTimer() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft = Math.max(0, gameState.timeLeft - 1);
+                const mins = Math.floor(gameState.timeLeft / 60);
+                const secs = gameState.timeLeft % 60;
+                const pad = s => s.toString().padStart(2, '0');
+                const t = `${pad(mins)}:${pad(secs)}`;
+                const el = document.getElementById('timer');
+                if (el) el.textContent = 'Time: ' + t;
+            }, 1000);
+        }
+        // safe start
+        startTimer();
+
+        function endGame(success) {
+            clearInterval(gameState.timerInterval);
+
+            const textDisplay = document.getElementById('text-display');
+            const optionsContainer = document.getElementById('options-container');
+
+            if (success) {
+                const treasureCount = gameState.inventory.filter(i =>
+                    !['Torch', 'Ancient Key', 'Golden Scarab Key'].includes(i)
+                ).length;
+
+                textDisplay.innerHTML += `
+                    <div class="ending">
+                        <h2>VICTORY!</h2>
+                        <p>You have successfully navigated the pyramid and claimed the Pharaoh's Treasure!</p>
+                        <p>Treasure Collected: ${treasureCount} valuable items</p>
+                        <p>Time Remaining: ${Math.floor(gameState.timeLeft / 60)}:${(gameState.timeLeft % 60).toString().padStart(2, '0')}</p>
+                        <p>You escape through the hidden passage, richer and wiser than when you entered.</p>
+                    </div>
+                `;
+            } else {
+                textDisplay.innerHTML += `
+                    <div class="ending">
+                        <h2>GAME OVER</h2>
+                        <p>Time has run out! The pyramid's ancient traps have sealed your fate.</p>
+                        <p>You became another mystery of the pyramid, lost to time.</p>
+                    </div>
+                `;
+            }
+
+            optionsContainer.innerHTML = '';
+
+            const restartBtn = document.createElement('button');
+            restartBtn.className = 'option-btn';
+            restartBtn.textContent = 'Play Again';
+            restartBtn.style.gridColumn = '1 / -1';
+            restartBtn.addEventListener('click', () => {
+                location.reload();
+            });
+            optionsContainer.appendChild(restartBtn);
+        }
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+
+</html>

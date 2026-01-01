@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>STAY</title>
+<link rel="icon" href="../icon.jpg" type="image/x-icon">
+<style>
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#0d0d0d;
+  color:#e6e6e6;
+  font-family:monospace;
+  overflow:hidden;
+}
+
+#wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+}
+
+#time{
+  font-size:28px;
+  opacity:.8;
+}
+
+#btn{
+  padding:20px 50px;
+  font-size:22px;
+  background:#111;
+  border:2px solid #444;
+  color:#eee;
+  cursor:pointer;
+}
+
+#btn:hover{background:#181818}
+
+#count{
+  font-size:22px;
+  opacity:.9;
+}
+
+#msg{
+  font-size:16px;
+  opacity:.7;
+  max-width:420px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div id="wrap">
+  <div id="time">00:00</div>
+  <button id="btn">PRESS</button>
+  <div id="count">0 presses</div>
+  <div id="msg">...</div>
+</div>
+
+<script>
+let start = Date.now();
+let presses = 0;
+
+const messages = [
+  [10, "Still here."],
+  [25, "Most people leave before this."],
+  [45, "You’re actually paying attention."],
+  [70, "Wow. You actually saw this message."],
+  [110, "You’ve stayed longer than 90% of visitors."],
+  [160, "This page is starting to remember you."],
+  [240, "There is no reason to keep going."],
+  [360, "You’re doing this on purpose now."],
+  [520, "Not many people reach this."],
+  [800, "We consider you a regular."],
+  [1200, "You are part of the system now."]
+];
+
+setInterval(()=>{
+  let t = Math.floor((Date.now()-start)/1000);
+  let m = String(Math.floor(t/60)).padStart(2,"0");
+  let s = String(t%60).padStart(2,"0");
+  document.getElementById("time").textContent = `${m}:${s}`;
+
+  for(let i=messages.length-1;i>=0;i--){
+    if(t>=messages[i][0]){
+      document.getElementById("msg").textContent = messages[i][1];
+      break;
+    }
+  }
+},1000);
+
+document.getElementById("btn").onclick = ()=>{
+  presses++;
+  document.getElementById("count").textContent = presses+" presses";
+
+  if(presses===10) msg.textContent="You’re testing if this reacts.";
+  if(presses===50) msg.textContent="You didn’t need to click this much.";
+  if(presses===150) msg.textContent="You are still clicking.";
+  if(presses===400) msg.textContent="It remembers your hands.";
+}
+</script>
+</body>
+</html>

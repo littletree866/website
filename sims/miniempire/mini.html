@@ -234,46 +234,69 @@
     let mode = "none", food = 10, money = 10, pop = 0, level = 1, defense = 0, running = false, turn = 0;
     const MINI_SAVE_KEY = 'mini_empire_save';
     function saveMiniState() {
-      const layout = [...document.querySelectorAll('.tile')].map(t => ({
-        terrain: t.dataset.terrain || 'plains',
-        built: t.dataset.built || null,
-        text: t.textContent
-      }));
-      const s = { food, money, pop, level, defense, turn, layout };
-      localStorage.setItem(MINI_SAVE_KEY, JSON.stringify(s));
+      try {
+        const snap = {
+          running: running,
+          turn: turn,
+          money: money,
+          food: food,
+          pop: pop,
+          level: level,
+          defense: defense,
+          grid: Array.from(document.querySelectorAll('.tile')).map(t => ({ terrain: t.dataset.terrain, built: t.dataset.built || null }))
+        };
+        localStorage.setItem(MINI_SAVE_KEY, JSON.stringify(snap));
+        // show subtle UI save notice
+        alertBox.textContent = '💾 Game saved';
+        setTimeout(() => { if (alertBox) alertBox.textContent = ''; }, 1200);
+      } catch (e) {
+        console.warn('Save failed', e);
+      }
     }
     function loadMiniState() {
-      const s = localStorage.getItem(MINI_SAVE_KEY);
-      if (!s) return false;
       try {
+        const s = localStorage.getItem(MINI_SAVE_KEY);
+        if (!s) return false;
         const obj = JSON.parse(s);
-        food = obj.food || food; money = obj.money || money; pop = obj.pop || pop; level = obj.level || level; defense = obj.defense || defense; turn = obj.turn || turn;
-        updateStats();
-        if (obj.layout && obj.layout.length === 100) {
-          const tiles = document.querySelectorAll('.tile');
-          obj.layout.forEach((d, i) => {
-            const t = tiles[i];
-            if (!t) return;
-            t.dataset.terrain = d.terrain || 'plains';
-            t.dataset.built = d.built || '';
-            t.textContent = d.text || getTerrainEmoji(d.terrain);
-
-            if (d.built === 'farm') t.className = 'tile farm';
-            else if (d.built === 'house') t.className = 'tile house';
-            else if (d.built === 'mine') t.className = 'tile mine';
-            else if (d.built === 'market') t.className = 'tile market';
-            else if (d.built === 'fort') t.className = 'tile fort';
-            else if (d.terrain === 'rock' || d.terrain === 'mountain') t.className = 'tile mountain';
-            else if (d.terrain === 'water') t.className = 'tile water';
-            else if (d.terrain === 'forest') t.className = 'tile forest';
-            else { t.className = 'tile grass'; }
+        running = !!obj.running;
+        turn = obj.turn || 0;
+        money = obj.money || 0;
+        food = obj.food || 0;
+        pop = obj.pop || 0;
+        level = obj.level || 1;
+        defense = obj.defense || 0;
+        // restore tiles
+        const tiles = document.querySelectorAll('.tile');
+        if (tiles && tiles.length && obj.grid) {
+          tiles.forEach((t, i) => {
+            const g = obj.grid[i];
+            if (!g) return;
+            delete t.dataset.built;
+            t.className = `tile ${g.terrain}`;
+            t.dataset.terrain = g.terrain;
+            t.textContent = getTerrainEmoji(g.terrain);
+            if (g.built) {
+              t.dataset.built = g.built;
+              t.classList.add(g.built);
+              if (g.built === 'fort') t.textContent = '🛡';
+              else if (g.built === 'farm') t.textContent = '🌾';
+              else if (g.built === 'house') t.textContent = '🏠';
+              else if (g.built === 'mine') t.textContent = '⛏️';
+              else if (g.built === 'market') t.textContent = '🏬';
+            }
           });
         }
+        alertBox.textContent = '⚡ Autosave loaded';
+        setTimeout(() => { if (alertBox) alertBox.textContent = ''; }, 1200);
+        updateStats();
         return true;
-      } catch (e) { return false; }
+      } catch (e) { console.warn('Load failed', e); return false; }
     }
 
-    if (loadMiniState()) { alert('Autosave loaded'); }
+    if (loadMiniState()) {
+      // subtle indicator only
+      console.log('Autosave restored.');
+    }
     setInterval(() => { if (running) saveMiniState(); }, 5000);
 
 
@@ -390,24 +413,27 @@
     }
 
     function resolveRaid(tile) {
-      if (defense >= 5) {
-        defense -= 5;
-
-        const terrain = tile.dataset.terrain || 'plains';
-        tile.className = 'tile ' + (terrain === 'mountain' ? 'mountain' : (terrain === 'water' ? 'water' : (terrain === 'forest' ? 'forest' : 'grass')));
-        tile.textContent = getTerrainEmoji(terrain);
-        tile.dataset.built = '';
-        alertBox.textContent = "🛡️ Forts repelled the enemy!";
+      const alertEl = alertBox;
+      const enemyStrength = Math.floor(Math.random() * 6) + 1; // 1..6
+      if (defense >= enemyStrength) {
+        alertEl.textContent = "🛡️ Forts repelled the enemy!";
+        defense = Math.max(0, defense - Math.floor(enemyStrength / 2));
       } else {
-        food = Math.max(0, food - 5);
-        money = Math.max(0, money - 10);
-
-        tile.dataset.built = '';
-        tile.className = 'tile plains';
-        tile.textContent = '💀';
-        alertBox.textContent = "💀 You were raided! Lost food and money!";
+        alertEl.textContent = "💥 The raid damaged your lands!";
+        const builtTiles = [...document.querySelectorAll('.tile')].filter(t => t.dataset.built);
+        if (builtTiles.length > 0) {
+          const victim = builtTiles[Math.floor(Math.random() * builtTiles.length)];
+          delete victim.dataset.built;
+          victim.className = `tile ${victim.dataset.terrain}`;
+          victim.textContent = victim.dataset.terrain === 'water' ? '🌊' : getTerrainEmoji(victim.dataset.terrain);
+        }
+        pop = Math.max(0, pop - Math.floor(Math.random() * 5));
+        food = Math.max(0, food - Math.floor(Math.random() * 10));
+        // reputation optional: keep if exists
+        if (typeof reputation !== 'undefined') reputation = Math.max(0, reputation - 5);
       }
       updateStats();
+      setTimeout(() => { if (alertEl) alertEl.textContent = ''; }, 3000);
     }
 
 
@@ -416,6 +442,7 @@
       btn.disabled = false;
       txt.textContent = txt.textContent.replace("❌", "✔");
       alertBox.textContent = msg;
+      setTimeout(() => { alertBox.textContent = ''; }, 2000);
     }
 
 
@@ -428,10 +455,15 @@
     }
 
 
+    // ensure single game loop interval and start handler
+    let gameLoopInterval = null;
     startBtn.onclick = () => {
       tutorial.style.display = "none";
-      running = true;
-      setInterval(gameLoop, 1500);
+      if (!running) {
+        running = true;
+        if (!gameLoopInterval) gameLoopInterval = setInterval(gameLoop, 1500);
+        startBtn.disabled = true;
+      }
     };
 
     document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'p') { saveMiniState(); alert('Game saved'); } });

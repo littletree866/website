@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Clicker Quest+ Pro</title>
   <link rel="icon" href="../../icon.jpg" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #6e8efb;
@@ -147,9 +147,17 @@
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     #click {
@@ -334,6 +342,7 @@
         opacity: 1;
         transform: translateY(0) scale(1);
       }
+
       100% {
         opacity: 0;
         transform: translateY(-60px) scale(1.2);
@@ -363,6 +372,7 @@
         opacity: 1;
         transform: translateY(0) rotate(0deg);
       }
+
       to {
         opacity: 0;
         transform: translateY(-200px) rotate(360deg);
@@ -377,6 +387,7 @@
       from {
         box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4), 0 0 15px var(--bonus);
       }
+
       to {
         box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4), 0 0 30px var(--bonus);
       }
@@ -509,7 +520,7 @@
       .upgrade:hover {
         transform: none;
       }
-      
+
       #click:hover {
         transform: none;
         box-shadow: 0 6px 0 rgba(110, 142, 251, 0.4);
@@ -628,8 +639,10 @@
   </div>
 
   <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
-  <audio id="bonusSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
-  <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  <audio id="bonusSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"
+    preload="auto"></audio>
+  <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"
+    preload="auto"></audio>
 
   <script>
     // Game state
@@ -639,6 +652,7 @@
     let clickCost = 10;
     let autoCost = 25;
     let boostCost = 500;
+    // use consistent base for mega cost
     let megaCost = 7500;
     let clickUpgrades = 0;
     let autoUpgrades = 0;
@@ -681,7 +695,8 @@
           // Recalculate costs based on owned upgrades
           clickCost = Math.floor(10 * Math.pow(1.3, clickUpgrades));
           autoCost = Math.floor(25 * Math.pow(1.4, autoUpgrades));
-          megaCost = Math.floor(750 * Math.pow(1.5, megaUpgrades));
+          // fixed: use 7500 base to match initial megaCost
+          megaCost = Math.floor(7500 * Math.pow(1.5, megaUpgrades));
         }
       } catch (e) {
         console.error('Error loading game:', e);
@@ -712,7 +727,7 @@
         const saveIndicator = document.getElementById('saveIndicator');
         saveIndicator.classList.add('show');
         setTimeout(() => saveIndicator.classList.remove('show'), 1000);
-        
+
         lastSaveTime = Date.now();
       } catch (e) {
         console.error('Error saving game:', e);
@@ -754,16 +769,16 @@
     let notificationTimeout = null;
     function showNotification(message, type = 'success') {
       clearTimeout(notificationTimeout);
-      
+
       notificationEl.textContent = message;
       notificationEl.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
       notificationEl.classList.remove('show');
-      
+
       // Force reflow
       void notificationEl.offsetWidth;
-      
+
       notificationEl.classList.add('show');
-      
+
       notificationTimeout = setTimeout(() => {
         notificationEl.classList.remove('show');
       }, 3000);
@@ -781,19 +796,19 @@
     function updateUI() {
       // Update money display
       moneyEl.textContent = '$' + fmt(money);
-      
+
       // Add animation for money change
       moneyEl.classList.add('click-animation');
       setTimeout(() => moneyEl.classList.remove('click-animation'), 200);
-      
+
       // Update best score
       const best = loadBest();
       bestEl.textContent = '$' + fmt(best);
-      
+
       // Update passive income
       const passiveIncome = perSec * (1 + prestigeCount * 0.1);
       perSecondEl.textContent = '$' + fmt(passiveIncome) + '/s';
-      
+
       // Update upgrade info
       document.getElementById('currentPerClick').textContent = (perClick * (1 + prestigeCount * 0.1)).toFixed(1);
       document.getElementById('currentPerSec').textContent = (perSec * (1 + prestigeCount * 0.1)).toFixed(1);
@@ -801,24 +816,24 @@
       document.getElementById('autoUpgrades').textContent = autoUpgrades;
       document.getElementById('megaUpgrades').textContent = megaUpgrades;
       document.getElementById('megaChance').textContent = 10 + megaUpgrades * 5;
-      
+
       // Update costs
       document.getElementById('clickCost').textContent = '$' + fmt(clickCost);
       document.getElementById('autoCost').textContent = '$' + fmt(autoCost);
       document.getElementById('boostCost').textContent = '$' + fmt(boostCost);
       document.getElementById('megaCost').textContent = '$' + fmt(megaCost);
-      
+
       // Update button states
       document.getElementById('buyClick').disabled = money < clickCost;
       document.getElementById('buyAuto').disabled = money < autoCost;
       document.getElementById('buyBoost').disabled = money < boostCost || boostActive;
       document.getElementById('buyMega').disabled = money < megaCost;
-      
+
       // Update prestige
       const prestigeBonus = prestigeCount * 10;
       document.getElementById('prestigeBonus').textContent = prestigeBonus;
       document.getElementById('prestigeButton').disabled = money < 10000;
-      
+
       // Update boost status
       if (boostActive) {
         document.getElementById('boostStatus').textContent = 'Status: Active';
@@ -832,7 +847,7 @@
         document.getElementById('boostTimer').style.display = 'none';
         document.getElementById('boostProgress').style.display = 'none';
       }
-      
+
       // Auto-save every 10 seconds
       if (Date.now() - lastSaveTime > 10000) {
         saveGame();
@@ -859,10 +874,10 @@
     function clickGain(e) {
       // Calculate base value
       let value = perClick * (1 + prestigeCount * 0.1);
-      
+
       // Apply boost
       if (boostActive) value *= 2;
-      
+
       // Check for mega click
       const megaChance = 10 + megaUpgrades * 5;
       let isMega = false;
@@ -870,34 +885,34 @@
         value *= 10;
         isMega = true;
         showNotification('MEGA CLICK! 10x Cash!', 'success');
-        
+
         // Visual effect for mega click
         clickBtn.style.animation = 'none';
         setTimeout(() => {
           clickBtn.style.animation = 'glow 0.5s infinite alternate';
         }, 10);
-        
+
         setTimeout(() => {
           clickBtn.style.animation = '';
         }, 500);
       }
-      
+
       // Add money
       money += value;
-      
+
       // Add floating text
       const color = isMega ? 'var(--bonus)' : (value > perClick * 5 ? 'var(--bonus)' : 'var(--money)');
       addFloatingText(value, e.clientX, e.clientY - 50, color);
-      
+
       // Play sound
       try {
         clickSound.currentTime = 0;
-        clickSound.play().catch(() => {});
-      } catch (e) {}
-      
+        clickSound.play().catch(() => { });
+      } catch (e) { }
+
       // Update UI
       updateUI();
-      
+
       // Create confetti for big clicks
       if (value > perClick * 20) {
         createConfetti(e.clientX, e.clientY);
@@ -913,33 +928,33 @@
         confetti.style.top = y + 'px';
         confetti.style.background = ['var(--money)', 'var(--bonus)', 'var(--primary)', 'var(--secondary)'][i % 4];
         document.body.appendChild(confetti);
-        
+
         // Animate confetti
         const angle = Math.random() * Math.PI * 2;
         const velocity = 2 + Math.random() * 3;
         const rotation = Math.random() * 360;
-        
+
         let posX = x;
         let posY = y;
         let opacity = 1;
-        
+
         const animate = () => {
           posX += Math.cos(angle) * velocity;
           posY += Math.sin(angle) * velocity - 0.1; // Gravity
           opacity -= 0.02;
-          
+
           confetti.style.left = posX + 'px';
           confetti.style.top = posY + 'px';
           confetti.style.opacity = opacity;
           confetti.style.transform = `rotate(${rotation}deg)`;
-          
+
           if (opacity > 0) {
             requestAnimationFrame(animate);
           } else {
             confetti.remove();
           }
         };
-        
+
         requestAnimationFrame(animate);
       }
     }
@@ -951,12 +966,12 @@
         perClick += 1;
         clickUpgrades++;
         clickCost = Math.floor(clickCost * 1.3);
-        
+
         try {
           upgradeSound.currentTime = 0;
-          upgradeSound.play().catch(() => {});
-        } catch (e) {}
-        
+          upgradeSound.play().catch(() => { });
+        } catch (e) { }
+
         showNotification('Click Power Increased!');
         updateUI();
       }
@@ -969,12 +984,12 @@
         perSec += 1;
         autoUpgrades++;
         autoCost = Math.floor(autoCost * 1.4);
-        
+
         try {
           upgradeSound.currentTime = 0;
-          upgradeSound.play().catch(() => {});
-        } catch (e) {}
-        
+          upgradeSound.play().catch(() => { });
+        } catch (e) { }
+
         showNotification('Auto-Earner Purchased!');
         updateUI();
       }
@@ -987,17 +1002,17 @@
         boostActive = true;
         boostTimeLeft = 30;
         clickBtn.classList.add('boost');
-        
+
         // Clear existing timer
         if (boostTimer) {
           clearInterval(boostTimer);
         }
-        
+
         // Start new timer
         boostTimer = setInterval(() => {
           boostTimeLeft--;
           updateUI();
-          
+
           if (boostTimeLeft <= 0) {
             clearInterval(boostTimer);
             boostActive = false;
@@ -1006,7 +1021,7 @@
             updateUI();
           }
         }, 1000);
-        
+
         showNotification('Power Boost Activated for 30s!');
         updateUI();
       }
@@ -1018,12 +1033,12 @@
         money -= megaCost;
         megaUpgrades++;
         megaCost = Math.floor(megaCost * 1.5);
-        
+
         try {
           upgradeSound.currentTime = 0;
-          upgradeSound.play().catch(() => {});
-        } catch (e) {}
-        
+          upgradeSound.play().catch(() => { });
+        } catch (e) { }
+
         showNotification('Mega Click Chance Increased!');
         updateUI();
       }
@@ -1034,11 +1049,11 @@
       if (perSec > 0) {
         const earnings = perSec * (1 + prestigeCount * 0.1);
         money += earnings;
-        
+
         // Add floating text near money display
         const rect = moneyEl.getBoundingClientRect();
         addFloatingText(earnings, rect.x + rect.width / 2, rect.y, 'var(--secondary)');
-        
+
         updateUI();
       }
     }
@@ -1050,28 +1065,28 @@
       coin.style.left = Math.random() * 80 + 10 + '%';
       coin.style.bottom = '20px';
       document.body.appendChild(coin);
-      
+
       coin.addEventListener('click', (evt) => {
         const bonus = Math.floor(Math.random() * 300) + 200;
         money += bonus;
-        
+
         try {
           bonusSound.currentTime = 0;
-          bonusSound.play().catch(() => {});
-        } catch (e) {}
-        
+          bonusSound.play().catch(() => { });
+        } catch (e) { }
+
         addFloatingText(bonus, evt.clientX, evt.clientY - 50, 'var(--bonus)');
         showNotification(`Bonus Coin: +$${fmt(bonus)}!`);
-        
+
         // Remove coin with animation
         coin.style.transform = 'scale(0)';
         setTimeout(() => {
           if (coin.parentNode) coin.remove();
         }, 200);
-        
+
         updateUI();
       });
-      
+
       setTimeout(() => {
         if (coin.parentNode) {
           coin.style.opacity = '0';
@@ -1085,7 +1100,7 @@
     // Create background coins
     function createBackgroundCoins() {
       const coins = ['💰', '💎', '💵', '🪙', '💸'];
-      
+
       for (let i = 0; i < 20; i++) {
         const coin = document.createElement('div');
         coin.className = 'background-coin';
@@ -1109,19 +1124,20 @@
         autoUpgrades = 0;
         megaUpgrades = 0;
         clickCost = 10;
-        autoCost = 25; // Fixed: Consistent base cost
-        megaCost = 750;
-        
+        autoCost = 25;
+        // restore consistent mega base cost
+        megaCost = 7500;
+
         // Clear boost if active
         if (boostActive) {
           clearInterval(boostTimer);
           boostActive = false;
           clickBtn.classList.remove('boost');
         }
-        
+
         // Save immediately
         saveGame();
-        
+
         showNotification(`Prestige ${prestigeCount} achieved! You now have a ${prestigeCount * 10}% bonus!`, 'success');
         updateUI();
       }
@@ -1133,7 +1149,7 @@
       if (e.key === ' ' || (e.key >= '1' && e.key <= '4')) {
         e.preventDefault();
       }
-      
+
       // Spacebar to click
       if (e.key === ' ') {
         // Simulate click at center of button
@@ -1145,9 +1161,9 @@
         clickGain(fakeEvent);
         return;
       }
-      
+
       // Number keys for upgrades
-      switch(e.key) {
+      switch (e.key) {
         case '1':
           document.getElementById('buyClick').click();
           break;
@@ -1168,7 +1184,7 @@
       loadGame();
       createBackgroundCoins();
       updateUI();
-      
+
       // Event listeners
       clickBtn.onclick = clickGain;
       document.getElementById('buyClick').onclick = buyClick;
@@ -1176,29 +1192,29 @@
       document.getElementById('buyBoost').onclick = buyBoost;
       document.getElementById('buyMega').onclick = buyMega;
       document.getElementById('prestigeButton').onclick = prestige;
-      
+
       // Keyboard support
       document.addEventListener('keydown', handleKeyPress);
-      
+
       // Auto-save on page unload
       window.addEventListener('beforeunload', saveGame);
-      
+
       // Auto-save periodically
       setInterval(saveGame, 30000); // Every 30 seconds
-      
+
       // Game loops
       setInterval(autoEarnings, 1000);
       setInterval(() => {
         if (Math.random() < 0.15) spawnBonus();
       }, 8000);
-      
+
       // Welcome message
       setTimeout(() => {
         if (money === 0 && perClick === 1) {
           showNotification('Welcome to Clicker Quest+ Pro! Click the button or press Spacebar to earn money!');
         }
       }, 1000);
-      
+
       // Initial save
       saveGame();
     }

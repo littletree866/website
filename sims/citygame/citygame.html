@@ -622,293 +622,105 @@
     }
 
     function onCellRightClick(x, y) {
-      const cell = gameState.grid[y][x];
-      if (!cell || cell.type === 'empty' || cell.type === 'road') { showMessage('Nothing to upgrade here.'); return; }
-
-      const cfg = getBuildingCfg(cell.type);
-      if (!cfg || !cfg.upgradeCost) { showMessage('This building cannot be upgraded.'); return; }
-
-      if (cell.level >= cfg.maxLevel) { showMessage('Building at max level.'); return; }
-
-      const cost = Math.floor(cfg.upgradeCost * cell.level);
-      if (gameState.money < cost) { showMessage('Not enough money to upgrade.'); return; }
-
-      gameState.money -= cost;
-      cell.level++;
-      showMessage(`Upgraded ${cell.type} to level ${cell.level}`);
-      updateGrid();
+      // Simple right-click action: show upgrade info or sell
+      const cell = gameState.grid && gameState.grid[y] && gameState.grid[y][x];
+      if (!cell) return;
+      if (cell.type && cell.type !== 'empty' && cell.level && cell.level < 3) {
+        if (confirm(`Upgrade ${cell.type} for ${cell.level * 100}?`)) {
+          if (gameState.money >= cell.level * 100) {
+            gameState.money -= cell.level * 100;
+            cell.level++;
+            showMessage('Upgraded building');
+            calculateStats();
+            updateUI();
+          } else showMessage('Not enough money');
+        }
+      } else showMessage('No upgrade available');
     }
-
 
     function calculateBuildingIncome(cell) {
       if (!cell || cell.type === 'empty') return 0;
-      const cfg = getBuildingCfg(cell.type);
-      if (!cfg) return 0;
-      let income = cfg.income || 0;
-
-      if (cfg.levelModifiers && cfg.levelModifiers.income) {
-        income = Math.floor(income * Math.pow(cfg.levelModifiers.income, cell.level - 1));
-      }
-      return income;
+      const base = { residential: 2, commercial: 6, industrial: 4 }[cell.type] || 1;
+      const levelMult = (cell.level || 1) * 0.9;
+      let repBonus = Math.max(0, (gameState.reputation || 50) - 50) * 0.01;
+      return Math.round(base * levelMult * (1 + repBonus));
     }
     function calculateBuildingEnergy(cell) {
       if (!cell || cell.type === 'empty') return 0;
-      const cfg = getBuildingCfg(cell.type);
-      if (!cfg) return 0;
-      let energy = cfg.energy || 0;
-      if (cfg.levelModifiers && cfg.levelModifiers.energy) {
-        energy = Math.floor(energy * Math.pow(cfg.levelModifiers.energy, cell.level - 1));
-      }
-      return energy;
+      // residential consumes, industrial produces a little
+      if (cell.type === 'residential') return -1 * (cell.level || 1);
+      if (cell.type === 'industrial') return 2 * (cell.level || 1);
+      return 0;
     }
 
 
     function calculateStats(applyIncome = true) {
-
-      let population = 0;
-      let income = 0;
-      let happiness = 50;
-      let environmental = 50;
-      let energyUsage = 0;
-
+      // compute totals safely
+      let income = 0, energy = 0, population = 0;
+      if (!gameState.grid) gameState.grid = [];
       for (let y = 0; y < GRID_SIZE; y++) {
         for (let x = 0; x < GRID_SIZE; x++) {
-          const cell = gameState.grid[y][x];
-          if (cell.type === 'empty' || cell.type === 'road') continue;
-          const cfg = getBuildingCfg(cell.type);
-          if (!cfg) continue;
-
-
-          let pop = cfg.population || 0;
-          if (cfg.levelModifiers && cfg.levelModifiers.population) {
-            pop = Math.floor(pop * Math.pow(cfg.levelModifiers.population, cell.level - 1));
-          }
-          population += pop;
-
-
-          income += calculateBuildingIncome(cell);
-
-
-          const energy = calculateBuildingEnergy(cell);
-          energyUsage += energy;
-
-
-          happiness += (cfg.happiness || 0) * cell.level;
-          environmental += (cfg.environmental || 0) * cell.level;
+          const c = gameState.grid[y][x];
+          if (!c) continue;
+          income += calculateBuildingIncome(c);
+          energy += calculateBuildingEnergy(c);
+          if (c.type === 'residential') population += (c.level || 1) * 10;
         }
       }
-
-
-      if (gameState.upgrades.capacity) population = Math.floor(population * 1.25);
-      if (gameState.upgrades.efficiency) income = Math.floor(income * 1.20);
-
-
-      gameState.population = Math.max(0, population);
-      gameState.happiness = Math.max(0, Math.min(100, happiness));
-      gameState.environmental = Math.max(0, Math.min(100, environmental));
       gameState.lastCycleIncome = income;
-
-
-      if (applyIncome) {
-        gameState.money += income;
-
-        if (gameState.upgrades.renewable) gameState.energy = Math.min(gameState.energy + 2, 200);
-      }
-
-
-      if (window.badgeSystem) {
-        if (gameState.counts.residential >= 1 && !window.badgeSystem.isBadgeUnlocked('city-start')) {
-          window.badgeSystem.unlockBadge('city-start');
-        }
-        if (gameState.population >= 500 && !window.badgeSystem.isBadgeUnlocked('city-population')) {
-          window.badgeSystem.unlockBadge('city-population');
-        }
-      }
-
-      q('#incomeDisplay').textContent = `${income}`;
+      if (applyIncome) gameState.money += income;
+      gameState.energy = (gameState.energy || 0) + energy;
+      gameState.population = population;
+      // reputation simple clamp
+      gameState.reputation = Math.max(0, Math.min(100, gameState.reputation || 50));
+      // UI sync
+      if (document.querySelector('#incomeDisplay')) document.querySelector('#incomeDisplay').textContent = `${income}`;
+      if (document.querySelector('#energyDisplay')) document.querySelector('#energyDisplay').textContent = `${gameState.energy}`;
     }
-
 
     function updateChallenges() {
-      gameState.challenges.residential5.current = gameState.counts.residential;
-      gameState.challenges.population100.current = gameState.population;
-      gameState.challenges.income1000.current = Math.max(gameState.challenges.income1000.current, gameState.lastCycleIncome);
+      // map simple challenge progressors
+      gameState.challenges = gameState.challenges || {
+        residential5: { target: 5, current: 0, done: false },
+        population100: { target: 100, current: 0, done: false },
+        income1000: { target: 1000, current: 0, done: false }
+      };
+      // update counts
+      const resCount = gameState.counts && gameState.counts.residential ? gameState.counts.residential : 0;
+      gameState.challenges.residential5.current = resCount;
+      gameState.challenges.population100.current = gameState.population || 0;
+      gameState.challenges.income1000.current = Math.max(gameState.challenges.income1000.current || 0, gameState.lastCycleIncome || 0);
 
-      q('#c1').textContent = `${gameState.challenges.residential5.current}/${gameState.challenges.residential5.target}`;
-      q('#c2').textContent = `${gameState.challenges.population100.current}/${gameState.challenges.population100.target}`;
-      q('#c3').textContent = `${gameState.challenges.income1000.current}/${gameState.challenges.income1000.target}`;
-
-
+      // mark completions
       if (!gameState.challenges.residential5.done && gameState.challenges.residential5.current >= gameState.challenges.residential5.target) {
-        gameState.challenges.residential5.done = true; gameState.money += 200; showMessage('Challenge complete: Build 5 Residential — +$200');
+        gameState.challenges.residential5.done = true;
+        showMessage('Challenge complete: residential5');
       }
       if (!gameState.challenges.population100.done && gameState.challenges.population100.current >= gameState.challenges.population100.target) {
-        gameState.challenges.population100.done = true; gameState.money += 500; showMessage('Challenge complete: Reach 100 Population — +$500');
+        gameState.challenges.population100.done = true;
+        showMessage('Challenge complete: population100');
       }
       if (!gameState.challenges.income1000.done && gameState.challenges.income1000.current >= gameState.challenges.income1000.target) {
-        gameState.challenges.income1000.done = true; gameState.money += 400; showMessage('Challenge complete: Earn $1000 in one cycle — +$400');
+        gameState.challenges.income1000.done = true;
+        showMessage('Challenge complete: income1000');
       }
+
+      // small UI update
+      if (document.getElementById('c1')) document.getElementById('c1').textContent = `${gameState.challenges.residential5.current}/${gameState.challenges.residential5.target}`;
+      if (document.getElementById('c2')) document.getElementById('c2').textContent = `${gameState.challenges.population100.current}/${gameState.challenges.population100.target}`;
+      if (document.getElementById('c3')) document.getElementById('c3').textContent = `${gameState.challenges.income1000.current}/${gameState.challenges.income1000.target}`;
     }
-
-
-    let loopInterval = null;
-    function startGameLoop() {
-      stopGameLoop();
-      const baseMs = 2000;
-      const ms = Math.max(300, Math.floor(baseMs / (gameState.gameSpeed || 1)));
-      loopInterval = setInterval(() => {
-
-        calculateStats(true);
-        gameState.cycleCount++;
-        updateUI();
-        updateChallenges();
-        if (Math.random() < 0.09) triggerRandomEvent();
-        if (Math.random() < 0.02) triggerDisaster();
-      }, ms);
-    }
-    function stopGameLoop() { if (loopInterval) clearInterval(loopInterval); loopInterval = null; }
-
 
     function triggerRandomEvent() {
       const events = [
-        { msg: 'Tourist season! Extra income from commercial zones.', effect: () => { gameState.money += gameState.counts.commercial * 10 } },
-        { msg: 'Energy surge! Power plants produce extra energy.', effect: () => { gameState.energy += gameState.counts.powerPlant * 5 } },
-        { msg: 'Population boom! Residential zones gain people.', effect: () => { gameState.population += Math.floor(gameState.counts.residential * 2) } }
+        { msg: 'Small festival increases reputation', effect: () => { gameState.reputation = Math.min(100, (gameState.reputation || 50) + 5); }, chance: 0.02 },
+        { msg: 'Power shortage reduces income this cycle', effect: () => { gameState.lastCycleIncome = Math.floor((gameState.lastCycleIncome || 0) * 0.7); }, chance: 0.01 }
       ];
       const ev = events[Math.floor(Math.random() * events.length)];
-      ev.effect(); showMessage(ev.msg);
+      if (ev && Math.random() < (ev.chance || 0.02)) { ev.effect(); showMessage(ev.msg); updateUI(); }
     }
 
-    function triggerDisaster() {
-      const disasters = [
-        { name: 'earthquake', chance: 0.012, damage: 0.3 },
-        { name: 'fire', chance: 0.018, damage: 0.2 },
-        { name: 'flood', chance: 0.015, damage: 0.25 }
-      ];
-      const d = disasters[Math.floor(Math.random() * disasters.length)];
-      if (Math.random() < d.chance) {
-        const occupied = [];
-        for (let y = 0; y < GRID_SIZE; y++) for (let x = 0; x < GRID_SIZE; x++) if (gameState.grid[y][x].type !== 'empty' && gameState.grid[y][x].type !== 'road') occupied.push({ x, y });
-        if (occupied.length === 0) return;
-        const toDamage = Math.max(1, Math.floor(occupied.length * d.damage));
-        shuffle(occupied);
-        const damaged = occupied.slice(0, toDamage);
-        damaged.forEach(c => {
-          const b = gameState.grid[c.y][c.x];
-          b.level = Math.max(1, b.level - 1);
-          const el = document.querySelector(`.cell[data-x="${c.x}"][data-y="${c.y}"]`);
-          el.classList.add('disaster');
-          setTimeout(() => el.classList.remove('disaster'), 800);
-        });
-        showMessage(`${capitalize(d.name)} damaged some buildings!`);
-        updateGrid();
-      }
-    }
-
-
-    function updateUI() {
-      q('#money').textContent = `${gameState.money}`;
-      q('#population').textContent = gameState.population;
-      q('#energy').textContent = gameState.energy;
-      q('#residentialCount').textContent = gameState.counts.residential;
-      q('#commercialCount').textContent = gameState.counts.commercial;
-      q('#industrialCount').textContent = gameState.counts.industrial;
-    }
-
-    function setupUI() {
-
-      const grid = q('#buildingsGrid');
-      grid.innerHTML = '';
-      Object.keys(buildingData).forEach(type => {
-        const cfg = buildingData[type];
-        const div = document.createElement('div');
-        div.className = 'building-option';
-        div.dataset.type = type;
-        div.innerHTML = `<div style="font-size:18px">${cfg.symbol} ${capitalize(type)}</div><div class="cost">${cfg.cost}</div>`;
-        div.addEventListener('click', () => selectBuilding(type, div));
-        grid.appendChild(div);
-
-        if (type === gameState.selectedBuilding) div.classList.add('selected');
-      });
-
-
-      const upGrid = q('#upgradesGrid');
-      upGrid.innerHTML = '';
-      const upgradeList = [
-        { id: 'efficiency', name: 'Efficiency Upgrade', desc: '+20% income', cost: 500 },
-        { id: 'capacity', name: 'Housing Capacity', desc: '+25% population', cost: 400 },
-        { id: 'renewable', name: 'Renewable Energy', desc: '+50 energy', cost: 600 }
-      ];
-      upgradeList.forEach(u => {
-        const el = document.createElement('div');
-        el.className = 'upgrade-option';
-        el.dataset.upgrade = u.id;
-        el.innerHTML = `<div style="font-size:18px">🔧</div><div><strong>${u.name}</strong><div style="font-size:12px">${u.desc}</div><div style="font-size:12px;opacity:.9">Cost: ${u.cost}</div></div>`;
-        el.addEventListener('click', () => {
-          if (gameState.upgrades[u.id]) return;
-          if (gameState.money < u.cost) { showMessage('Not enough money for upgrade'); return; }
-          gameState.money -= u.cost; gameState.upgrades[u.id] = true;
-          if (u.id === 'renewable') gameState.energy += 50;
-          showMessage(`Purchased ${u.name} for ${u.cost}`);
-          el.classList.add('disabled'); updateUI();
-        });
-        upGrid.appendChild(el);
-      });
-
-
-      qAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          qAll('.tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          const tname = tab.dataset.tab;
-          qAll('.tab-content').forEach(tc => tc.style.display = 'none');
-          q(`#${tname}Tab`).style.display = 'block';
-        });
-      });
-
-
-      q('#destroyOption').addEventListener('click', () => selectBuilding('destroy', q('#destroyOption')));
-
-
-      q('#pauseBtn').addEventListener('click', () => { gameState.gameSpeed = 0; stopGameLoop(); showMessage('Paused'); });
-      q('#normalBtn').addEventListener('click', () => { gameState.gameSpeed = 1; startGameLoop(); showMessage('Normal speed') });
-      q('#fastBtn').addEventListener('click', () => { gameState.gameSpeed = 2; startGameLoop(); showMessage('Fast speed') });
-
-
-      window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') { e.preventDefault(); if (loopInterval) { stopGameLoop(); showMessage('Paused'); } else { startGameLoop(); showMessage('Resumed'); } }
-        if (e.key.toLowerCase() === 'd') { selectBuilding('destroy'); showMessage('Destroy mode') }
-        if (e.key.toLowerCase() === 'b') { cycleBuilding(); }
-      });
-
-
-      q('#cityGrid').addEventListener('contextmenu', e => e.preventDefault());
-    }
-
-    function selectBuilding(type, el = null) {
-      gameState.selectedBuilding = type;
-      qAll('.building-option').forEach(b => b.classList.remove('selected'));
-      if (el) el.classList.add('selected');
-      else {
-        const opt = document.querySelector(`.building-option[data-type="${type}"]`);
-        if (opt) opt.classList.add('selected');
-        if (type === 'destroy') q('#destroyOption').classList.add('selected'); else q('#destroyOption').classList.remove('selected');
-      }
-    }
-
-    function cycleBuilding() {
-      const types = Object.keys(buildingData);
-      const idx = types.indexOf(gameState.selectedBuilding);
-      const next = types[(idx + 1) % types.length];
-      selectBuilding(next);
-      showMessage(`Selected ${next}`);
-    }
-
-
-    function capitalize(s) { return (s || '').toString().replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()); }
-    function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } return a }
-
-
+    // restore grid array when loading save
     function init() {
       createGrid();
       setupUI();
@@ -926,12 +738,20 @@
           if (typeof obj.population === 'number') gameState.population = obj.population;
           if (typeof obj.energy === 'number') gameState.energy = obj.energy;
           if (Array.isArray(obj.grid) && obj.grid.length === GRID_SIZE) {
-            gameState.grid = obj.grid;
-            updateGrid();
+            // ensure deep structure matches internal format
+            gameState.grid = obj.grid.map(row => row.map(cell => {
+              // ensure expected properties
+              return {
+                type: cell.type || 'empty',
+                level: cell.level || 0,
+                ...cell
+              };
+            }));
           }
-          showMessage('Autosave loaded');
         }
-      } catch (e) { console.warn('city load failed', e); }
+      } catch (err) {
+        console.warn('Failed to load city save:', err);
+      }
 
       setInterval(() => {
         try {

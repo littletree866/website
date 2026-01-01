@@ -5,15 +5,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Zombie Survival</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../../icon.jpg" type="image/x-icon">
   <style>
     * {
       box-sizing: border-box;
-      font-family: 'DM Sans', sans-serif;
+      /* keep control of fonts via body below */
     }
 
     body {
+      font-family: 'DM Sans', sans-serif;
       margin: 0;
       background: radial-gradient(circle at top, #1b1b1b, #000);
       color: #fff;
@@ -27,6 +28,11 @@
       background: #0d0d0d;
       border-radius: 16px;
       box-shadow: 0 0 40px rgba(0, 0, 0, .8);
+    }
+
+    button {
+      font-family: inherit;
+      font-weight: 700;
     }
 
     .hud {
