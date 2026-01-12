@@ -1,11 +1,992 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>February Challenge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stronghold Defense</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: #111;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .game-title {
+            color: #e6c300;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(230, 195, 0, 0.5);
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+        }
+        
+        .game-board {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            background: #000;
+            border: 2px solid #444;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        #gameCanvas {
+            display: block;
+        }
+        
+        .ui-panel {
+            flex: 1;
+            min-width: 300px;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .section-title {
+            color: #e6c300;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .upgrades {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .upgrade-btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .upgrade-btn:hover:not(:disabled) {
+            background: #444;
+            border-color: #e6c300;
+        }
+        
+        .upgrade-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .upgrade-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .upgrade-cost {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .upgrade-level {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        .game-info {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            line-height: 1.5;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .control-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        #startBtn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        #startBtn:hover {
+            background: #3d8b40;
+        }
+        
+        #restartBtn {
+            background: #f44336;
+            color: white;
+        }
+        
+        #restartBtn:hover {
+            background: #d32f2f;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            max-width: 600px;
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+        
+        .game-over h2 {
+            font-size: 3rem;
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .wave-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e6c300;
+            display: none;
+            z-index: 10;
+        }
+        
+        @media (max-width: 1000px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-board {
+                width: 500px;
+                height: 500px;
+            }
+        }
+        
+        @media (max-width: 550px) {
+            .game-board {
+                width: 350px;
+                height: 350px;
+            }
+            
+            .upgrades {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  
+    <h1 class="game-title">Stronghold Defense</h1>
+    
+    <div class="game-container">
+        <div class="game-area">
+            <div class="game-board">
+                <canvas id="gameCanvas" width="600" height="600"></canvas>
+                <div class="wave-indicator" id="waveIndicator">Wave 1</div>
+                <div class="game-over" id="gameOverScreen">
+                    <h2>GAME OVER</h2>
+                    <p id="finalScore">You survived 0 waves</p>
+                    <button class="control-btn" id="restartBtn2">Play Again</button>
+                </div>
+            </div>
+            
+            <div class="ui-panel">
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="health">100</div>
+                        <div class="stat-label">Stronghold Health</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="money">100</div>
+                        <div class="stat-label">Gold</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="wave">1</div>
+                        <div class="stat-label">Wave</div>
+                    </div>
+                </div>
+                
+                <div class="upgrades-section">
+                    <h3 class="section-title">Upgrades</h3>
+                    <div class="upgrades">
+                        <button class="upgrade-btn" id="damageUpgrade">
+                            <div class="upgrade-name">Cannon Damage</div>
+                            <div class="upgrade-cost">Cost: 50</div>
+                            <div class="upgrade-level">Level: 1</div>
+                        </button>
+                        
+                        <button class="upgrade-btn" id="fireRateUpgrade">
+                            <div class="upgrade-name">Fire Rate</div>
+                            <div class="upgrade-cost">Cost: 40</div>
+                            <div class="upgrade-level">Level: 1</div>
+                        </button>
+                        
+                        <button class="upgrade-btn" id="rangeUpgrade">
+                            <div class="upgrade-name">Cannon Range</div>
+                            <div class="upgrade-cost">Cost: 60</div>
+                            <div class="upgrade-level">Level: 1</div>
+                        </button>
+                        
+                        <button class="upgrade-btn" id="healthUpgrade">
+                            <div class="upgrade-name">Stronghold Health</div>
+                            <div class="upgrade-cost">Cost: 80</div>
+                            <div class="upgrade-level">Level: 1</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <h3 class="section-title">Game Info</h3>
+                    <p>Defend your stronghold from enemies attacking from all sides!</p>
+                    <p>Enemies drop gold when defeated. Use gold to upgrade your cannons.</p>
+                    <p>Each wave gets harder. Survive as long as you can!</p>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-btn" id="startBtn">Start Game</button>
+                    <button class="control-btn" id="restartBtn">Restart</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <ul>
+                <li>Your stronghold is in the center of the screen</li>
+                <li>Enemies will spawn from all sides and try to attack your stronghold</li>
+                <li>Cannons automatically target and shoot at enemies</li>
+                <li>Defeated enemies drop gold that you can collect</li>
+                <li>Use gold to upgrade your cannons and stronghold</li>
+                <li>Each wave increases the number of enemies</li>
+                <li>If your stronghold health reaches 0, the game is over</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Game variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const healthDisplay = document.getElementById('health');
+        const moneyDisplay = document.getElementById('money');
+        const waveDisplay = document.getElementById('wave');
+        const waveIndicator = document.getElementById('waveIndicator');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScore = document.getElementById('finalScore');
+        
+        // Game state
+        let gameRunning = false;
+        let strongholdHealth = 100;
+        let money = 100;
+        let wave = 1;
+        let enemies = [];
+        let cannons = [];
+        let projectiles = [];
+        let moneyDrops = [];
+        let lastSpawnTime = 0;
+        let enemySpawnInterval = 2000; // ms
+        let enemySpeed = 1.2;
+        let enemiesPerWave = 5;
+        let enemiesSpawnedThisWave = 0;
+        let waveComplete = false;
+        
+        // Upgrade levels
+        let upgrades = {
+            damage: { level: 1, cost: 50 },
+            fireRate: { level: 1, cost: 40 },
+            range: { level: 1, cost: 60 },
+            health: { level: 1, cost: 80 }
+        };
+        
+        // Stronghold properties
+        const stronghold = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 30,
+            color: '#4CAF50'
+        };
+        
+        // Cannon properties
+        const cannonProperties = {
+            damage: 10,
+            fireRate: 1000, // ms between shots
+            range: 150,
+            lastShotTime: 0
+        };
+        
+        // Initialize cannons (4 cannons pointing in cardinal directions)
+        function initCannons() {
+            cannons = [];
+            const directions = [
+                { x: 1, y: 0, angle: 0 },   // Right
+                { x: 0, y: 1, angle: Math.PI / 2 },   // Down
+                { x: -1, y: 0, angle: Math.PI },   // Left
+                { x: 0, y: -1, angle: 3 * Math.PI / 2 }   // Up
+            ];
+            
+            const cannonDistance = 50;
+            
+            directions.forEach(dir => {
+                cannons.push({
+                    x: stronghold.x + dir.x * cannonDistance,
+                    y: stronghold.y + dir.y * cannonDistance,
+                    angle: dir.angle,
+                    lastShotTime: 0
+                });
+            });
+        }
+        
+        // Enemy class
+        class Enemy {
+            constructor() {
+                // Randomly spawn from one of the four edges
+                const side = Math.floor(Math.random() * 4);
+                let x, y;
+                
+                switch(side) {
+                    case 0: // Top
+                        x = Math.random() * canvas.width;
+                        y = -20;
+                        break;
+                    case 1: // Right
+                        x = canvas.width + 20;
+                        y = Math.random() * canvas.height;
+                        break;
+                    case 2: // Bottom
+                        x = Math.random() * canvas.width;
+                        y = canvas.height + 20;
+                        break;
+                    case 3: // Left
+                        x = -20;
+                        y = Math.random() * canvas.height;
+                        break;
+                }
+                
+                this.x = x;
+                this.y = y;
+                this.radius = 12;
+                this.speed = enemySpeed;
+                this.health = 20;
+                this.maxHealth = 20;
+                this.color = '#f44336';
+                this.value = 10; // Gold dropped when killed
+            }
+            
+            update() {
+                // Move towards the stronghold
+                const dx = stronghold.x - this.x;
+                const dy = stronghold.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                this.x += (dx / distance) * this.speed;
+                this.y += (dy / distance) * this.speed;
+                
+                // Check if reached stronghold
+                if (distance < stronghold.radius + this.radius) {
+                    // Damage stronghold
+                    strongholdHealth -= 5;
+                    healthDisplay.textContent = strongholdHealth;
+                    
+                    // Remove enemy
+                    const index = enemies.indexOf(this);
+                    if (index > -1) {
+                        enemies.splice(index, 1);
+                    }
+                    
+                    // Check game over
+                    if (strongholdHealth <= 0) {
+                        gameOver();
+                    }
+                }
+            }
+            
+            draw() {
+                // Enemy body
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Enemy eye
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(this.x - 4, this.y - 4, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Health bar
+                const healthPercentage = this.health / this.maxHealth;
+                ctx.fillStyle = '#f44336';
+                ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, this.radius * 2, 4);
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, this.radius * 2 * healthPercentage, 4);
+            }
+            
+            takeDamage(damage) {
+                this.health -= damage;
+                if (this.health <= 0) {
+                    // Drop money
+                    moneyDrops.push({
+                        x: this.x,
+                        y: this.y,
+                        value: this.value,
+                        collected: false
+                    });
+                    
+                    // Remove enemy
+                    const index = enemies.indexOf(this);
+                    if (index > -1) {
+                        enemies.splice(index, 1);
+                    }
+                    
+                    // Check if wave is complete
+                    if (enemies.length === 0 && enemiesSpawnedThisWave >= enemiesPerWave) {
+                        waveComplete = true;
+                        setTimeout(() => nextWave(), 2000);
+                    }
+                    
+                    return true;
+                }
+                return false;
+            }
+        }
+        
+        // Projectile class
+        class Projectile {
+            constructor(x, y, target) {
+                this.x = x;
+                this.y = y;
+                this.target = target;
+                this.speed = 5;
+                this.damage = cannonProperties.damage * upgrades.damage.level;
+                this.radius = 4;
+                this.color = '#e6c300';
+            }
+            
+            update() {
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Move towards target
+                this.x += (dx / distance) * this.speed;
+                this.y += (dy / distance) * this.speed;
+                
+                // Check if hit target
+                if (distance < this.target.radius + this.radius) {
+                    if (this.target.takeDamage(this.damage)) {
+                        // Add money if enemy killed
+                        money += this.target.value;
+                        moneyDisplay.textContent = money;
+                        updateUpgradeButtons();
+                    }
+                    
+                    // Remove projectile
+                    const index = projectiles.indexOf(this);
+                    if (index > -1) {
+                        projectiles.splice(index, 1);
+                    }
+                    
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Initialize game
+        function initGame() {
+            strongholdHealth = 100;
+            money = 100;
+            wave = 1;
+            enemies = [];
+            projectiles = [];
+            moneyDrops = [];
+            enemiesSpawnedThisWave = 0;
+            waveComplete = false;
+            
+            // Reset upgrades
+            upgrades = {
+                damage: { level: 1, cost: 50 },
+                fireRate: { level: 1, cost: 40 },
+                range: { level: 1, cost: 60 },
+                health: { level: 1, cost: 80 }
+            };
+            
+            // Reset enemy properties
+            enemySpeed = 1.2;
+            enemiesPerWave = 5;
+            
+            // Update displays
+            healthDisplay.textContent = strongholdHealth;
+            moneyDisplay.textContent = money;
+            waveDisplay.textContent = wave;
+            
+            // Initialize cannons
+            initCannons();
+            
+            // Update upgrade buttons
+            updateUpgradeButtons();
+            
+            // Hide game over screen
+            gameOverScreen.style.display = 'none';
+            
+            // Start game loop
+            gameRunning = true;
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Game loop
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background
+            drawBackground();
+            
+            // Draw stronghold
+            drawStronghold();
+            
+            // Draw cannons
+            drawCannons();
+            
+            // Spawn enemies
+            if (timestamp - lastSpawnTime > enemySpawnInterval && enemiesSpawnedThisWave < enemiesPerWave) {
+                enemies.push(new Enemy());
+                lastSpawnTime = timestamp;
+                enemiesSpawnedThisWave++;
+            }
+            
+            // Update and draw enemies
+            enemies.forEach(enemy => {
+                enemy.update();
+                enemy.draw();
+            });
+            
+            // Update and draw projectiles
+            projectiles.forEach((projectile, index) => {
+                if (projectile.update()) {
+                    projectiles.splice(index, 1);
+                } else {
+                    projectile.draw();
+                }
+            });
+            
+            // Update and draw money drops
+            moneyDrops.forEach((drop, index) => {
+                // Check if collected (player clicks on it)
+                drawMoneyDrop(drop);
+                
+                // Remove if collected
+                if (drop.collected) {
+                    moneyDrops.splice(index, 1);
+                }
+            });
+            
+            // Cannon targeting and shooting
+            cannons.forEach(cannon => {
+                // Find closest enemy in range
+                let closestEnemy = null;
+                let closestDistance = cannonProperties.range * upgrades.range.level;
+                
+                enemies.forEach(enemy => {
+                    const dx = enemy.x - cannon.x;
+                    const dy = enemy.y - cannon.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestEnemy = enemy;
+                    }
+                });
+                
+                // If enemy in range, aim and shoot
+                if (closestEnemy) {
+                    // Calculate angle to enemy
+                    const dx = closestEnemy.x - cannon.x;
+                    const dy = closestEnemy.y - cannon.y;
+                    cannon.angle = Math.atan2(dy, dx);
+                    
+                    // Shoot if cooldown passed
+                    const fireRateAdjusted = cannonProperties.fireRate / upgrades.fireRate.level;
+                    if (timestamp - cannon.lastShotTime > fireRateAdjusted) {
+                        projectiles.push(new Projectile(cannon.x, cannon.y, closestEnemy));
+                        cannon.lastShotTime = timestamp;
+                    }
+                }
+                
+                // Draw cannon
+                drawCannon(cannon);
+            });
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Draw background
+        function drawBackground() {
+            // Draw grid
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw defensive perimeter
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(stronghold.x, stronghold.y, cannonProperties.range * upgrades.range.level, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // Draw stronghold
+        function drawStronghold() {
+            // Draw stronghold base
+            ctx.fillStyle = stronghold.color;
+            ctx.beginPath();
+            ctx.arc(stronghold.x, stronghold.y, stronghold.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw stronghold details
+            ctx.fillStyle = '#2E7D32';
+            ctx.beginPath();
+            ctx.arc(stronghold.x, stronghold.y, stronghold.radius - 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw stronghold windows
+            ctx.fillStyle = '#FFD700';
+            const windowPositions = [
+                { x: stronghold.x - 8, y: stronghold.y - 8 },
+                { x: stronghold.x + 8, y: stronghold.y - 8 },
+                { x: stronghold.x - 8, y: stronghold.y + 8 },
+                { x: stronghold.x + 8, y: stronghold.y + 8 }
+            ];
+            
+            windowPositions.forEach(pos => {
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw health bar
+            const healthPercentage = strongholdHealth / 100;
+            ctx.fillStyle = '#f44336';
+            ctx.fillRect(stronghold.x - 30, stronghold.y - 50, 60, 8);
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(stronghold.x - 30, stronghold.y - 50, 60 * healthPercentage, 8);
+        }
+        
+        // Draw cannon
+        function drawCannon(cannon) {
+            // Cannon base
+            ctx.fillStyle = '#777';
+            ctx.beginPath();
+            ctx.arc(cannon.x, cannon.y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Cannon barrel
+            ctx.save();
+            ctx.translate(cannon.x, cannon.y);
+            ctx.rotate(cannon.angle);
+            
+            ctx.fillStyle = '#555';
+            ctx.fillRect(0, -5, 25, 10);
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(20, -7, 10, 14);
+            
+            ctx.restore();
+        }
+        
+        // Draw all cannons
+        function drawCannons() {
+            cannons.forEach(cannon => {
+                drawCannon(cannon);
+            });
+        }
+        
+        // Draw money drop
+        function drawMoneyDrop(drop) {
+            ctx.fillStyle = drop.collected ? '#4CAF50' : '#FFD700';
+            ctx.beginPath();
+            ctx.arc(drop.x, drop.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw $ symbol
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('$', drop.x, drop.y);
+            
+            // Pulse effect if not collected
+            if (!drop.collected) {
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(drop.x, drop.y, 10 + Math.sin(Date.now() / 200) * 3, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+        
+        // Next wave
+        function nextWave() {
+            wave++;
+            waveDisplay.textContent = wave;
+            
+            // Show wave indicator
+            waveIndicator.textContent = `Wave ${wave}`;
+            waveIndicator.style.display = 'block';
+            setTimeout(() => {
+                waveIndicator.style.display = 'none';
+            }, 2000);
+            
+            // Increase difficulty
+            enemiesPerWave = Math.floor(5 + wave * 1.5);
+            enemySpeed = 1.2 + wave * 0.05;
+            
+            // Reset wave state
+            enemiesSpawnedThisWave = 0;
+            waveComplete = false;
+            
+            // Add bonus money for completing wave
+            money += 25 + wave * 5;
+            moneyDisplay.textContent = money;
+            updateUpgradeButtons();
+        }
+        
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            finalScore.textContent = `You survived ${wave} waves`;
+            gameOverScreen.style.display = 'flex';
+        }
+        
+        // Update upgrade buttons
+        function updateUpgradeButtons() {
+            const damageBtn = document.getElementById('damageUpgrade');
+            const fireRateBtn = document.getElementById('fireRateUpgrade');
+            const rangeBtn = document.getElementById('rangeUpgrade');
+            const healthBtn = document.getElementById('healthUpgrade');
+            
+            damageBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.damage.cost}`;
+            damageBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.damage.level}`;
+            damageBtn.disabled = money < upgrades.damage.cost;
+            
+            fireRateBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.fireRate.cost}`;
+            fireRateBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.fireRate.level}`;
+            fireRateBtn.disabled = money < upgrades.fireRate.cost;
+            
+            rangeBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.range.cost}`;
+            rangeBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.range.level}`;
+            rangeBtn.disabled = money < upgrades.range.cost;
+            
+            healthBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.health.cost}`;
+            healthBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.health.level}`;
+            healthBtn.disabled = money < upgrades.health.cost;
+        }
+        
+        // Buy upgrade
+        function buyUpgrade(upgradeType) {
+            const upgrade = upgrades[upgradeType];
+            
+            if (money >= upgrade.cost) {
+                money -= upgrade.cost;
+                moneyDisplay.textContent = money;
+                
+                upgrade.level++;
+                
+                // Increase cost for next level
+                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                
+                // Apply upgrade effect
+                if (upgradeType === 'health') {
+                    strongholdHealth = 100 + (upgrade.level - 1) * 20;
+                    healthDisplay.textContent = strongholdHealth;
+                }
+                
+                updateUpgradeButtons();
+            }
+        }
+        
+        // Collect money drop on click
+        canvas.addEventListener('click', (e) => {
+            if (!gameRunning) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if clicked on a money drop
+            moneyDrops.forEach(drop => {
+                const dx = drop.x - x;
+                const dy = drop.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 15 && !drop.collected) {
+                    drop.collected = true;
+                    money += drop.value;
+                    moneyDisplay.textContent = money;
+                    updateUpgradeButtons();
+                }
+            });
+        });
+        
+        // Start game button
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!gameRunning) {
+                initGame();
+            }
+        });
+        
+        // Restart buttons
+        document.getElementById('restartBtn').addEventListener('click', initGame);
+        document.getElementById('restartBtn2').addEventListener('click', initGame);
+        
+        // Upgrade buttons
+        document.getElementById('damageUpgrade').addEventListener('click', () => buyUpgrade('damage'));
+        document.getElementById('fireRateUpgrade').addEventListener('click', () => buyUpgrade('fireRate'));
+        document.getElementById('rangeUpgrade').addEventListener('click', () => buyUpgrade('range'));
+        document.getElementById('healthUpgrade').addEventListener('click', () => buyUpgrade('health'));
+        
+        // Initialize game
+        initCannons();
+        updateUpgradeButtons();
+        
+        // Draw initial state
+        drawBackground();
+        drawStronghold();
+        drawCannons();
+        
+        // Instructions for the player
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click "Start Game" to begin!', canvas.width / 2, canvas.height / 2 + 60);
+        ctx.font = '14px Arial';
+        ctx.fillText('Defend the stronghold from all sides', canvas.width / 2, canvas.height / 2 + 90);
+    </script>
 </body>
 </html>
