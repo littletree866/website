@@ -4,287 +4,604 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stronghold Defense</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+    <link rel="icon" href="../../icon.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+   <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #111 0%, #222 100%);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+    
+    .game-title {
+        color: #e6c300;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 2.5rem;
+        text-shadow: 0 0 15px rgba(230, 195, 0, 0.7);
+        letter-spacing: 1px;
+        position: relative;
+    }
+    
+    .game-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #e6c300, transparent);
+    }
+    
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        max-width: 1400px;
+        width: 100%;
+    }
+    
+    .game-area {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        width: 100%;
+    }
+    
+    .game-board {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        background: #000;
+        border: 3px solid #555;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    #gameCanvas {
+        display: block;
+    }
+    
+    .ui-panel {
+        flex: 1;
+        min-width: 300px;
+        max-height: 500px;
+        background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+        border: 2px solid #555;
+        border-radius: 12px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        overflow-y: auto;
+    }
+    
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        background: linear-gradient(145deg, #2a2a2a, #333);
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        border: 1px solid #444;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 5px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
+        transition: transform 0.3s;
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        color: #4CAF50;
+        font-weight: bold;
+        text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #ccc;
+        margin-top: 3px;
+        letter-spacing: 0.5px;
+    }
+    
+    .section-title {
+        color: #e6c300;
+        border-bottom: 1px solid #444;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .upgrades {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .upgrade-btn {
+        background: linear-gradient(145deg, #333, #2a2a2a);
+        color: #fff;
+        border: 1px solid #555;
+        border-radius: 8px;
+        padding: 10px 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .upgrade-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: 0.5s;
+    }
+    
+    .upgrade-btn:hover:not(:disabled)::before {
+        left: 100%;
+    }
+    
+    .upgrade-btn:hover:not(:disabled) {
+        background: linear-gradient(145deg, #3a3a3a, #2f2f2f);
+        border-color: #e6c300;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(230, 195, 0, 0.2);
+    }
+    
+    .upgrade-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .upgrade-name {
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        color: #e6c300;
+    }
+    
+    .upgrade-cost {
+        color: #4CAF50;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .upgrade-level {
+        color: #aaa;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        padding: 2px 8px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+    }
+    
+    .upgrade-effect {
+        color: #88ccff;
+        font-size: 0.75rem;
+        margin-top: 3px;
+        line-height: 1.2;
+    }
+    
+    .game-info {
+        background: linear-gradient(145deg, #2a2a2a, #333);
+        padding: 10px;
+        border-radius: 8px;
+        line-height: 1.4;
+        border: 1px solid #444;
+        font-size: 0.9rem;
+    }
+    
+    .game-info p {
+        margin-bottom: 8px;
+    }
+    
+    .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 5px;
+    }
+    
+    .control-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        min-width: 100px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .control-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
+    
+    .control-btn:focus:not(:active)::after {
+        animation: ripple 1s ease-out;
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
         }
-        
-        body {
-            background: #111;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            min-height: 100vh;
-            overflow-x: hidden;
+        100% {
+            transform: scale(40, 40);
+            opacity: 0;
         }
-        
-        .game-title {
-            color: #e6c300;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 2.5rem;
-            text-shadow: 0 0 10px rgba(230, 195, 0, 0.5);
-        }
-        
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            max-width: 1200px;
-            width: 100%;
-        }
-        
+    }
+    
+    #startBtn {
+        background: linear-gradient(145deg, #4CAF50, #3d8b40);
+        color: white;
+    }
+    
+    #startBtn:hover {
+        background: linear-gradient(145deg, #3d8b40, #2d6b30);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    #pauseBtn {
+        background: linear-gradient(145deg, #FF9800, #F57C00);
+        color: white;
+    }
+    
+    #pauseBtn:hover {
+        background: linear-gradient(145deg, #F57C00, #E65100);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+    }
+    
+    #restartBtn {
+        background: linear-gradient(145deg, #f44336, #d32f2f);
+        color: white;
+    }
+    
+    #restartBtn:hover {
+        background: linear-gradient(145deg, #d32f2f, #b71c1c);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+    }
+    
+    .instructions {
+        margin-top: 20px;
+        max-width: 700px;
+        background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+        padding: 20px;
+        border-radius: 12px;
+        line-height: 1.6;
+        border: 2px solid #444;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .instructions h3 {
+        color: #e6c300;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .instructions ul {
+        padding-left: 25px;
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .instructions li {
+        margin-bottom: 10px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+    }
+    
+    .game-over {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        display: none;
+        animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .game-over h2 {
+        font-size: 3.5rem;
+        color: #f44336;
+        margin-bottom: 15px;
+        text-shadow: 0 0 20px rgba(244, 67, 54, 0.7);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .game-over p {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        color: #e6c300;
+    }
+    
+    .game-over-stats {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        text-align: center;
+        min-width: 250px;
+    }
+    
+    .wave-indicator {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(145deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 20, 0.9));
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: bold;
+        color: #e6c300;
+        display: none;
+        z-index: 10;
+        border: 2px solid #e6c300;
+        font-size: 1.2rem;
+        text-shadow: 0 0 10px rgba(230, 195, 0, 0.5);
+        animation: slideDown 0.5s;
+    }
+    
+    @keyframes slideDown {
+        from { top: -100px; }
+        to { top: 20px; }
+    }
+    
+    .enemy-counter {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 8px 15px;
+        border-radius: 20px;
+        color: #fff;
+        font-weight: bold;
+        border: 2px solid #f44336;
+        font-size: 0.9rem;
+    }
+    
+    .achievement-popup {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(145deg, #2a2a2a, #333);
+        padding: 12px;
+        border-radius: 10px;
+        border-left: 5px solid #e6c300;
+        display: none;
+        animation: slideIn 0.5s;
+        z-index: 1000;
+        min-width: 220px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    @keyframes slideIn {
+        from { right: -300px; }
+        to { right: 20px; }
+    }
+    
+    .achievement-icon {
+        color: #e6c300;
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    
+    .achievement-title {
+        color: #e6c300;
+        font-weight: bold;
+        margin-bottom: 3px;
+        font-size: 0.9rem;
+    }
+    
+    .achievement-desc {
+        font-size: 0.8rem;
+        color: #ccc;
+    }
+    
+    .powerup-container {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 8px 12px;
+        border-radius: 10px;
+        color: #fff;
+        display: none;
+        border: 2px solid #4CAF50;
+        font-size: 0.9rem;
+    }
+    
+    .difficulty-selector {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .difficulty-btn {
+        padding: 6px 15px;
+        margin: 0 5px;
+        background: #333;
+        color: white;
+        border: 2px solid #555;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+    
+    .difficulty-btn.active {
+        background: #e6c300;
+        color: #000;
+        border-color: #e6c300;
+    }
+    
+    .difficulty-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 1200px) {
         .game-area {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            width: 100%;
+            flex-direction: column;
+            align-items: center;
         }
         
         .game-board {
-            position: relative;
-            width: 600px;
-            height: 600px;
-            background: #000;
-            border: 2px solid #444;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        #gameCanvas {
-            display: block;
+            width: 450px;
+            height: 450px;
         }
         
         .ui-panel {
-            flex: 1;
-            min-width: 300px;
-            background: #222;
-            border: 2px solid #444;
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            background: #333;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-        
-        .section-title {
-            color: #e6c300;
-            border-bottom: 1px solid #444;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .upgrades {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .upgrade-btn {
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 15px 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .upgrade-btn:hover:not(:disabled) {
-            background: #444;
-            border-color: #e6c300;
-        }
-        
-        .upgrade-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .upgrade-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .upgrade-cost {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        
-        .upgrade-level {
-            color: #aaa;
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-        
-        .game-info {
-            background: #333;
-            padding: 15px;
-            border-radius: 5px;
-            line-height: 1.5;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        
-        .control-btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        
-        #startBtn {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        #startBtn:hover {
-            background: #3d8b40;
-        }
-        
-        #restartBtn {
-            background: #f44336;
-            color: white;
-        }
-        
-        #restartBtn:hover {
-            background: #d32f2f;
-        }
-        
-        .instructions {
-            margin-top: 20px;
-            max-width: 600px;
-            background: #222;
-            padding: 20px;
-            border-radius: 8px;
-            line-height: 1.6;
+            max-height: 450px;
+            min-width: 450px;
         }
         
         .instructions ul {
-            padding-left: 20px;
-            margin-top: 10px;
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 650px) {
+        .game-board {
+            width: 400px;
+            height: 400px;
         }
         
-        .instructions li {
-            margin-bottom: 8px;
+        .ui-panel {
+            min-width: 100%;
+            max-height: none;
+            order: -1;
         }
         
-        .game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
+        .upgrades {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .controls {
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 100;
-            display: none;
         }
         
-        .game-over h2 {
-            font-size: 3rem;
-            color: #f44336;
-            margin-bottom: 20px;
+        .control-btn {
+            width: 100%;
+            max-width: 200px;
+        }
+    }
+    
+    @media (max-width: 500px) {
+        .game-board {
+            width: 350px;
+            height: 350px;
         }
         
-        .game-over p {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
+        .game-title {
+            font-size: 2rem;
         }
         
-        .wave-indicator {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: #e6c300;
-            display: none;
-            z-index: 10;
+        .ui-panel {
+            min-width: 350px;
         }
-        
-        @media (max-width: 1000px) {
-            .game-area {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .game-board {
-                width: 500px;
-                height: 500px;
-            }
-        }
-        
-        @media (max-width: 550px) {
-            .game-board {
-                width: 350px;
-                height: 350px;
-            }
-            
-            .upgrades {
-                grid-template-columns: 1fr;
-            }
-        }
+    }
     </style>
 </head>
 <body>
     <h1 class="game-title">Stronghold Defense</h1>
     
+    <div class="difficulty-selector">
+        <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
+        <button class="difficulty-btn" data-difficulty="normal">Normal</button>
+        <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+    </div>
+    
     <div class="game-container">
         <div class="game-area">
             <div class="game-board">
-                <canvas id="gameCanvas" width="600" height="600"></canvas>
+                <canvas id="gameCanvas" width="500" height="500"></canvas>
                 <div class="wave-indicator" id="waveIndicator">Wave 1</div>
+                <div class="enemy-counter" id="enemyCounter">Enemies: 0</div>
+                <div class="powerup-container" id="powerupContainer">Power-Up Active: None</div>
                 <div class="game-over" id="gameOverScreen">
                     <h2>GAME OVER</h2>
-                    <p id="finalScore">You survived 0 waves</p>
+                    <div class="game-over-stats">
+                        <p id="finalScore">You survived 0 waves</p>
+                        <p id="finalEnemies">Enemies defeated: 0</p>
+                        <p id="finalMoney">Total money earned: $0</p>
+                    </div>
                     <button class="control-btn" id="restartBtn2">Play Again</button>
                 </div>
             </div>
@@ -296,8 +613,8 @@
                         <div class="stat-label">Stronghold Health</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value" id="money">100</div>
-                        <div class="stat-label">Gold</div>
+                        <div class="stat-value" id="money">$100</div>
+                        <div class="stat-label">Money</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="wave">1</div>
@@ -306,59 +623,68 @@
                 </div>
                 
                 <div class="upgrades-section">
-                    <h3 class="section-title">Upgrades</h3>
+                    <h3 class="section-title">Upgrades <span id="skillPoints">(Points: 0)</span></h3>
                     <div class="upgrades">
                         <button class="upgrade-btn" id="damageUpgrade">
                             <div class="upgrade-name">Cannon Damage</div>
-                            <div class="upgrade-cost">Cost: 50</div>
+                            <div class="upgrade-cost">Cost: $50</div>
                             <div class="upgrade-level">Level: 1</div>
+                            <div class="upgrade-effect">+10 damage per level</div>
                         </button>
                         
                         <button class="upgrade-btn" id="fireRateUpgrade">
                             <div class="upgrade-name">Fire Rate</div>
-                            <div class="upgrade-cost">Cost: 40</div>
+                            <div class="upgrade-cost">Cost: $40</div>
                             <div class="upgrade-level">Level: 1</div>
+                            <div class="upgrade-effect">+15% speed per level</div>
                         </button>
                         
                         <button class="upgrade-btn" id="rangeUpgrade">
                             <div class="upgrade-name">Cannon Range</div>
-                            <div class="upgrade-cost">Cost: 60</div>
+                            <div class="upgrade-cost">Cost: $60</div>
                             <div class="upgrade-level">Level: 1</div>
+                            <div class="upgrade-effect">+20 range per level</div>
                         </button>
                         
                         <button class="upgrade-btn" id="healthUpgrade">
                             <div class="upgrade-name">Stronghold Health</div>
-                            <div class="upgrade-cost">Cost: 80</div>
+                            <div class="upgrade-cost">Cost: $80</div>
                             <div class="upgrade-level">Level: 1</div>
+                            <div class="upgrade-effect">+20 HP per level</div>
+                        </button>
+                        
+                        <button class="upgrade-btn" id="speedUpgrade">
+                            <div class="upgrade-name">Projectile Speed</div>
+                            <div class="upgrade-cost">Cost: $35</div>
+                            <div class="upgrade-level">Level: 1</div>
+                            <div class="upgrade-effect">+25% speed per level</div>
+                        </button>
+                        
+                        <button class="upgrade-btn" id="moneyUpgrade">
+                            <div class="upgrade-name">Money Bonus</div>
+                            <div class="upgrade-cost">Cost: $45</div>
+                            <div class="upgrade-level">Level: 1</div>
+                            <div class="upgrade-effect">+10% money per level</div>
                         </button>
                     </div>
                 </div>
                 
-                <div class="game-info">
-                    <h3 class="section-title">Game Info</h3>
-                    <p>Defend your stronghold from enemies attacking from all sides!</p>
-                    <p>Enemies drop gold when defeated. Use gold to upgrade your cannons.</p>
-                    <p>Each wave gets harder. Survive as long as you can!</p>
-                </div>
-                
                 <div class="controls">
                     <button class="control-btn" id="startBtn">Start Game</button>
+                    <button class="control-btn" id="pauseBtn">Pause</button>
                     <button class="control-btn" id="restartBtn">Restart</button>
                 </div>
             </div>
         </div>
-        
-        <div class="instructions">
-            <h3>How to Play</h3>
-            <ul>
-                <li>Your stronghold is in the center of the screen</li>
-                <li>Enemies will spawn from all sides and try to attack your stronghold</li>
-                <li>Cannons automatically target and shoot at enemies</li>
-                <li>Defeated enemies drop gold that you can collect</li>
-                <li>Use gold to upgrade your cannons and stronghold</li>
-                <li>Each wave increases the number of enemies</li>
-                <li>If your stronghold health reaches 0, the game is over</li>
-            </ul>
+    </div>
+    
+    <div class="achievement-popup" id="achievementPopup">
+        <div style="display: flex; align-items: center;">
+            <div class="achievement-icon">🏆</div>
+            <div>
+                <div class="achievement-title" id="achievementTitle">Achievement Unlocked!</div>
+                <div id="achievementDesc">Description here</div>
+            </div>
         </div>
     </div>
     
@@ -370,60 +696,89 @@
         const moneyDisplay = document.getElementById('money');
         const waveDisplay = document.getElementById('wave');
         const waveIndicator = document.getElementById('waveIndicator');
+        const enemyCounter = document.getElementById('enemyCounter');
+        const powerupContainer = document.getElementById('powerupContainer');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalScore = document.getElementById('finalScore');
+        const finalEnemies = document.getElementById('finalEnemies');
+        const finalMoney = document.getElementById('finalMoney');
+        const achievementPopup = document.getElementById('achievementPopup');
+        const achievementTitle = document.getElementById('achievementTitle');
+        const achievementDesc = document.getElementById('achievementDesc');
         
         // Game state
         let gameRunning = false;
+        let gamePaused = false;
         let strongholdHealth = 100;
         let money = 100;
         let wave = 1;
+        let enemiesDefeated = 0;
+        let totalMoneyEarned = 100;
         let enemies = [];
         let cannons = [];
         let projectiles = [];
         let moneyDrops = [];
+        let powerups = [];
         let lastSpawnTime = 0;
-        let enemySpawnInterval = 2000; // ms
+        let enemySpawnInterval = 2000;
         let enemySpeed = 1.2;
-        let enemiesPerWave = 5;
+        let enemiesPerWave = 6;
         let enemiesSpawnedThisWave = 0;
         let waveComplete = false;
+        let difficulty = 'normal';
+        let powerupActive = null;
+        let powerupEndTime = 0;
+        let achievements = new Set();
+        
+        // Enemy types
+        const ENEMY_TYPES = {
+            NORMAL: { health: 20, speed: 1.2, color: '#f44336', value: 10, radius: 12 },
+            FAST: { health: 10, speed: 2.0, color: '#2196F3', value: 15, radius: 10 },
+            TANK: { health: 50, speed: 0.8, color: '#795548', value: 25, radius: 18 },
+            BOSS: { health: 150, speed: 0.6, color: '#9C27B0', value: 100, radius: 25 }
+        };
         
         // Upgrade levels
         let upgrades = {
-            damage: { level: 1, cost: 50 },
-            fireRate: { level: 1, cost: 40 },
-            range: { level: 1, cost: 60 },
-            health: { level: 1, cost: 80 }
+            damage: { level: 1, cost: 50, effect: 10 },
+            fireRate: { level: 1, cost: 40, effect: 0.85 },
+            range: { level: 1, cost: 60, effect: 20 },
+            health: { level: 1, cost: 80, effect: 20 },
+            speed: { level: 1, cost: 35, effect: 1.25 },
+            money: { level: 1, cost: 45, effect: 0.1 }
         };
         
         // Stronghold properties
         const stronghold = {
             x: canvas.width / 2,
             y: canvas.height / 2,
-            radius: 30,
+            radius: 35,
             color: '#4CAF50'
         };
         
-        // Cannon properties
-        const cannonProperties = {
-            damage: 10,
-            fireRate: 1000, // ms between shots
-            range: 150,
-            lastShotTime: 0
+        // Power-up types
+        const POWERUPS = {
+            RAPID_FIRE: { name: 'Rapid Fire', color: '#FF9800', duration: 10000, effect: 'fireRate' },
+            DOUBLE_DAMAGE: { name: 'Double Damage', color: '#f44336', duration: 8000, effect: 'damage' },
+            SLOW_ENEMIES: { name: 'Slow Enemies', color: '#2196F3', duration: 12000, effect: 'slow' },
+            MONEY_BOOST: { name: 'Money Boost', color: '#FFD700', duration: 15000, effect: 'money' }
         };
         
-        // Initialize cannons (4 cannons pointing in cardinal directions)
+        // Initialize cannons
         function initCannons() {
             cannons = [];
             const directions = [
-                { x: 1, y: 0, angle: 0 },   // Right
-                { x: 0, y: 1, angle: Math.PI / 2 },   // Down
-                { x: -1, y: 0, angle: Math.PI },   // Left
-                { x: 0, y: -1, angle: 3 * Math.PI / 2 }   // Up
+                { x: 1, y: 0, angle: 0 },
+                { x: 0.7, y: 0.7, angle: Math.PI / 4 },
+                { x: 0, y: 1, angle: Math.PI / 2 },
+                { x: -0.7, y: 0.7, angle: 3 * Math.PI / 4 },
+                { x: -1, y: 0, angle: Math.PI },
+                { x: -0.7, y: -0.7, angle: 5 * Math.PI / 4 },
+                { x: 0, y: -1, angle: 3 * Math.PI / 2 },
+                { x: 0.7, y: -0.7, angle: 7 * Math.PI / 4 }
             ];
             
-            const cannonDistance = 50;
+            const cannonDistance = 60;
             
             directions.forEach(dir => {
                 cannons.push({
@@ -437,93 +792,143 @@
         
         // Enemy class
         class Enemy {
-            constructor() {
-                // Randomly spawn from one of the four edges
+            constructor(type = 'NORMAL') {
+                const config = ENEMY_TYPES[type];
                 const side = Math.floor(Math.random() * 4);
                 let x, y;
                 
                 switch(side) {
-                    case 0: // Top
-                        x = Math.random() * canvas.width;
-                        y = -20;
-                        break;
-                    case 1: // Right
-                        x = canvas.width + 20;
-                        y = Math.random() * canvas.height;
-                        break;
-                    case 2: // Bottom
-                        x = Math.random() * canvas.width;
-                        y = canvas.height + 20;
-                        break;
-                    case 3: // Left
-                        x = -20;
-                        y = Math.random() * canvas.height;
-                        break;
+                    case 0: x = Math.random() * canvas.width; y = -30; break;
+                    case 1: x = canvas.width + 30; y = Math.random() * canvas.height; break;
+                    case 2: x = Math.random() * canvas.width; y = canvas.height + 30; break;
+                    case 3: x = -30; y = Math.random() * canvas.height; break;
                 }
                 
                 this.x = x;
                 this.y = y;
-                this.radius = 12;
-                this.speed = enemySpeed;
-                this.health = 20;
-                this.maxHealth = 20;
-                this.color = '#f44336';
-                this.value = 10; // Gold dropped when killed
+                this.radius = config.radius;
+                this.speed = config.speed * (difficulty === 'easy' ? 0.8 : difficulty === 'hard' ? 1.3 : 1.0);
+                this.health = config.health;
+                this.maxHealth = config.health;
+                this.color = config.color;
+                this.value = Math.floor(config.value * (1 + upgrades.money.level * upgrades.money.effect));
+                this.type = type;
+                this.trail = [];
+                this.trailLength = 15;
             }
             
             update() {
-                // Move towards the stronghold
+                // Add current position to trail
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > this.trailLength) {
+                    this.trail.shift();
+                }
+                
+                // Apply slow effect if powerup is active
+                let currentSpeed = this.speed;
+                if (powerupActive === 'SLOW_ENEMIES' && Date.now() < powerupEndTime) {
+                    currentSpeed *= 0.5;
+                }
+                
+                // Move towards stronghold
                 const dx = stronghold.x - this.x;
                 const dy = stronghold.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                this.x += (dx / distance) * this.speed;
-                this.y += (dy / distance) * this.speed;
+                this.x += (dx / distance) * currentSpeed;
+                this.y += (dy / distance) * currentSpeed;
                 
-                // Check if reached stronghold
+                // Check collision with stronghold
                 if (distance < stronghold.radius + this.radius) {
-                    // Damage stronghold
-                    strongholdHealth -= 5;
+                    strongholdHealth -= this.type === 'BOSS' ? 20 : this.type === 'TANK' ? 10 : 5;
                     healthDisplay.textContent = strongholdHealth;
                     
-                    // Remove enemy
                     const index = enemies.indexOf(this);
-                    if (index > -1) {
-                        enemies.splice(index, 1);
-                    }
+                    if (index > -1) enemies.splice(index, 1);
                     
-                    // Check game over
-                    if (strongholdHealth <= 0) {
-                        gameOver();
-                    }
+                    if (strongholdHealth <= 0) gameOver();
                 }
             }
             
             draw() {
+                // Draw trail
+                ctx.globalAlpha = 0.3;
+                this.trail.forEach((pos, i) => {
+                    const alpha = i / this.trailLength;
+                    const radius = this.radius * alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+                
                 // Enemy body
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Enemy eye
+                // Enemy details based on type
+                ctx.fillStyle = '#000';
+                if (this.type === 'FAST') {
+                    // Fast enemies have wings
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - 10, this.y);
+                    ctx.lineTo(this.x - 20, this.y - 8);
+                    ctx.lineTo(this.x - 20, this.y + 8);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + 10, this.y);
+                    ctx.lineTo(this.x + 20, this.y - 8);
+                    ctx.lineTo(this.x + 20, this.y + 8);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.type === 'TANK') {
+                    // Tank enemies have armor plates
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius - 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else if (this.type === 'BOSS') {
+                    // Boss enemies have crown
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * Math.PI * 2) / 5;
+                        const spikeX = this.x + Math.cos(angle) * (this.radius + 5);
+                        const spikeY = this.y + Math.sin(angle) * (this.radius + 5);
+                        if (i === 0) ctx.moveTo(spikeX, spikeY);
+                        else ctx.lineTo(spikeX, spikeY);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                // Eyes
                 ctx.fillStyle = '#000';
                 ctx.beginPath();
                 ctx.arc(this.x - 4, this.y - 4, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x + 4, this.y - 4, 3, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Health bar
                 const healthPercentage = this.health / this.maxHealth;
                 ctx.fillStyle = '#f44336';
-                ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, this.radius * 2, 4);
+                ctx.fillRect(this.x - this.radius, this.y - this.radius - 15, this.radius * 2, 5);
                 ctx.fillStyle = '#4CAF50';
-                ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, this.radius * 2 * healthPercentage, 4);
+                ctx.fillRect(this.x - this.radius, this.y - this.radius - 15, this.radius * 2 * healthPercentage, 5);
             }
             
             takeDamage(damage) {
                 this.health -= damage;
                 if (this.health <= 0) {
-                    // Drop money
+                    // Drop money with chance for powerup
                     moneyDrops.push({
                         x: this.x,
                         y: this.y,
@@ -531,13 +936,25 @@
                         collected: false
                     });
                     
-                    // Remove enemy
-                    const index = enemies.indexOf(this);
-                    if (index > -1) {
-                        enemies.splice(index, 1);
+                    enemiesDefeated++;
+                    enemyCounter.textContent = `Enemies: ${enemiesDefeated}`;
+                    
+                    // Chance to drop powerup (higher for bosses)
+                    if ((this.type === 'BOSS' && Math.random() < 0.5) || Math.random() < 0.05) {
+                        const powerupTypes = Object.keys(POWERUPS);
+                        const randomType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                        powerups.push({
+                            x: this.x,
+                            y: this.y,
+                            type: randomType,
+                            collected: false,
+                            radius: 15
+                        });
                     }
                     
-                    // Check if wave is complete
+                    const index = enemies.indexOf(this);
+                    if (index > -1) enemies.splice(index, 1);
+                    
                     if (enemies.length === 0 && enemiesSpawnedThisWave >= enemiesPerWave) {
                         waveComplete = true;
                         setTimeout(() => nextWave(), 2000);
@@ -555,10 +972,19 @@
                 this.x = x;
                 this.y = y;
                 this.target = target;
-                this.speed = 5;
-                this.damage = cannonProperties.damage * upgrades.damage.level;
-                this.radius = 4;
+                this.speed = 5 * (1 + (upgrades.speed.level - 1) * 0.25);
+                this.damage = 10 * upgrades.damage.level;
+                this.radius = 5;
                 this.color = '#e6c300';
+                
+                // Apply powerup effects
+                if (powerupActive === 'DOUBLE_DAMAGE' && Date.now() < powerupEndTime) {
+                    this.damage *= 2;
+                    this.color = '#f44336';
+                }
+                if (powerupActive === 'RAPID_FIRE' && Date.now() < powerupEndTime) {
+                    this.speed *= 1.5;
+                }
             }
             
             update() {
@@ -566,111 +992,113 @@
                 const dy = this.target.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                // Move towards target
                 this.x += (dx / distance) * this.speed;
                 this.y += (dy / distance) * this.speed;
                 
-                // Check if hit target
                 if (distance < this.target.radius + this.radius) {
                     if (this.target.takeDamage(this.damage)) {
-                        // Add money if enemy killed
                         money += this.target.value;
+                        totalMoneyEarned += this.target.value;
                         moneyDisplay.textContent = money;
                         updateUpgradeButtons();
                     }
                     
-                    // Remove projectile
                     const index = projectiles.indexOf(this);
-                    if (index > -1) {
-                        projectiles.splice(index, 1);
-                    }
-                    
+                    if (index > -1) projectiles.splice(index, 1);
                     return true;
                 }
-                
                 return false;
             }
             
             draw() {
+                // Glowing effect
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 15;
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Inner core
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius / 2, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
         
         // Initialize game
         function initGame() {
-            strongholdHealth = 100;
+            strongholdHealth = 100 + (upgrades.health.level - 1) * upgrades.health.effect;
             money = 100;
             wave = 1;
+            enemiesDefeated = 0;
+            totalMoneyEarned = 100;
             enemies = [];
             projectiles = [];
             moneyDrops = [];
+            powerups = [];
             enemiesSpawnedThisWave = 0;
             waveComplete = false;
-            
-            // Reset upgrades
-            upgrades = {
-                damage: { level: 1, cost: 50 },
-                fireRate: { level: 1, cost: 40 },
-                range: { level: 1, cost: 60 },
-                health: { level: 1, cost: 80 }
-            };
-            
-            // Reset enemy properties
-            enemySpeed = 1.2;
-            enemiesPerWave = 5;
+            powerupActive = null;
             
             // Update displays
             healthDisplay.textContent = strongholdHealth;
             moneyDisplay.textContent = money;
             waveDisplay.textContent = wave;
+            enemyCounter.textContent = `Enemies: ${enemiesDefeated}`;
             
             // Initialize cannons
             initCannons();
             
-            // Update upgrade buttons
+            // Update UI
             updateUpgradeButtons();
+            updatePowerupDisplay();
             
             // Hide game over screen
             gameOverScreen.style.display = 'none';
             
             // Start game loop
             gameRunning = true;
+            gamePaused = false;
             requestAnimationFrame(gameLoop);
         }
         
         // Game loop
         function gameLoop(timestamp) {
-            if (!gameRunning) return;
+            if (!gameRunning || gamePaused) return;
             
-            // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background
             drawBackground();
-            
-            // Draw stronghold
             drawStronghold();
             
-            // Draw cannons
-            drawCannons();
+            // Update powerup timer
+            if (powerupActive && Date.now() > powerupEndTime) {
+                powerupActive = null;
+                updatePowerupDisplay();
+            }
             
             // Spawn enemies
             if (timestamp - lastSpawnTime > enemySpawnInterval && enemiesSpawnedThisWave < enemiesPerWave) {
-                enemies.push(new Enemy());
+                let enemyType = 'NORMAL';
+                
+                // Determine enemy type based on wave
+                if (wave >= 10 && Math.random() < 0.1) enemyType = 'BOSS';
+                else if (wave >= 7 && Math.random() < 0.2) enemyType = 'TANK';
+                else if (wave >= 4 && Math.random() < 0.3) enemyType = 'FAST';
+                
+                enemies.push(new Enemy(enemyType));
                 lastSpawnTime = timestamp;
                 enemiesSpawnedThisWave++;
             }
             
-            // Update and draw enemies
+            // Update and draw game objects
             enemies.forEach(enemy => {
                 enemy.update();
                 enemy.draw();
             });
             
-            // Update and draw projectiles
             projectiles.forEach((projectile, index) => {
                 if (projectile.update()) {
                     projectiles.splice(index, 1);
@@ -679,22 +1107,20 @@
                 }
             });
             
-            // Update and draw money drops
             moneyDrops.forEach((drop, index) => {
-                // Check if collected (player clicks on it)
                 drawMoneyDrop(drop);
-                
-                // Remove if collected
-                if (drop.collected) {
-                    moneyDrops.splice(index, 1);
-                }
+                if (drop.collected) moneyDrops.splice(index, 1);
             });
             
-            // Cannon targeting and shooting
+            powerups.forEach((powerup, index) => {
+                drawPowerup(powerup);
+                if (powerup.collected) powerups.splice(index, 1);
+            });
+            
+            // Cannon logic
             cannons.forEach(cannon => {
-                // Find closest enemy in range
                 let closestEnemy = null;
-                let closestDistance = cannonProperties.range * upgrades.range.level;
+                let closestDistance = 150 + (upgrades.range.level - 1) * upgrades.range.effect;
                 
                 enemies.forEach(enemy => {
                     const dx = enemy.x - cannon.x;
@@ -707,43 +1133,54 @@
                     }
                 });
                 
-                // If enemy in range, aim and shoot
                 if (closestEnemy) {
-                    // Calculate angle to enemy
                     const dx = closestEnemy.x - cannon.x;
                     const dy = closestEnemy.y - cannon.y;
                     cannon.angle = Math.atan2(dy, dx);
                     
-                    // Shoot if cooldown passed
-                    const fireRateAdjusted = cannonProperties.fireRate / upgrades.fireRate.level;
-                    if (timestamp - cannon.lastShotTime > fireRateAdjusted) {
+                    let fireRate = 1000 * upgrades.fireRate.effect ** (upgrades.fireRate.level - 1);
+                    if (powerupActive === 'RAPID_FIRE' && Date.now() < powerupEndTime) {
+                        fireRate /= 2;
+                    }
+                    
+                    if (timestamp - cannon.lastShotTime > fireRate) {
                         projectiles.push(new Projectile(cannon.x, cannon.y, closestEnemy));
                         cannon.lastShotTime = timestamp;
                     }
                 }
                 
-                // Draw cannon
                 drawCannon(cannon);
             });
             
             requestAnimationFrame(gameLoop);
         }
         
-        // Draw background
+        // Drawing functions
         function drawBackground() {
-            // Draw grid
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 1;
+            // Starfield
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Vertical lines
+            // Distant stars
+            ctx.fillStyle = '#333';
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 37) % canvas.width;
+                const y = (i * 23) % canvas.height;
+                const size = (i % 3) + 1;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
             for (let x = 0; x < canvas.width; x += 50) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
-            
-            // Horizontal lines
             for (let y = 0; y < canvas.height; y += 50) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
@@ -751,107 +1188,146 @@
                 ctx.stroke();
             }
             
-            // Draw defensive perimeter
-            ctx.strokeStyle = '#4CAF50';
+            // Defensive perimeter
+            const range = 150 + (upgrades.range.level - 1) * upgrades.range.effect;
+            ctx.strokeStyle = 'rgba(76, 175, 80, 0.3)';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.arc(stronghold.x, stronghold.y, cannonProperties.range * upgrades.range.level, 0, Math.PI * 2);
+            ctx.arc(stronghold.x, stronghold.y, range, 0, Math.PI * 2);
             ctx.stroke();
             ctx.setLineDash([]);
         }
         
-        // Draw stronghold
         function drawStronghold() {
-            // Draw stronghold base
+            // Outer ring
             ctx.fillStyle = stronghold.color;
             ctx.beginPath();
             ctx.arc(stronghold.x, stronghold.y, stronghold.radius, 0, Math.PI * 2);
             ctx.fill();
             
-            // Draw stronghold details
+            // Inner structure
             ctx.fillStyle = '#2E7D32';
             ctx.beginPath();
-            ctx.arc(stronghold.x, stronghold.y, stronghold.radius - 5, 0, Math.PI * 2);
+            ctx.arc(stronghold.x, stronghold.y, stronghold.radius - 8, 0, Math.PI * 2);
             ctx.fill();
             
-            // Draw stronghold windows
+            // Windows with glow
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 10;
             ctx.fillStyle = '#FFD700';
             const windowPositions = [
-                { x: stronghold.x - 8, y: stronghold.y - 8 },
-                { x: stronghold.x + 8, y: stronghold.y - 8 },
-                { x: stronghold.x - 8, y: stronghold.y + 8 },
-                { x: stronghold.x + 8, y: stronghold.y + 8 }
+                { x: stronghold.x - 12, y: stronghold.y - 12 },
+                { x: stronghold.x + 12, y: stronghold.y - 12 },
+                { x: stronghold.x - 12, y: stronghold.y + 12 },
+                { x: stronghold.x + 12, y: stronghold.y + 12 },
+                { x: stronghold.x, y: stronghold.y - 20 },
+                { x: stronghold.x, y: stronghold.y + 20 },
+                { x: stronghold.x - 20, y: stronghold.y },
+                { x: stronghold.x + 20, y: stronghold.y }
             ];
             
             windowPositions.forEach(pos => {
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
+                ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
                 ctx.fill();
             });
+            ctx.shadowBlur = 0;
             
-            // Draw health bar
-            const healthPercentage = strongholdHealth / 100;
+            // Health bar
+            const maxHealth = 100 + (upgrades.health.level - 1) * upgrades.health.effect;
+            const healthPercentage = strongholdHealth / maxHealth;
             ctx.fillStyle = '#f44336';
-            ctx.fillRect(stronghold.x - 30, stronghold.y - 50, 60, 8);
-            ctx.fillStyle = '#4CAF50';
-            ctx.fillRect(stronghold.x - 30, stronghold.y - 50, 60 * healthPercentage, 8);
+            ctx.fillRect(stronghold.x - 40, stronghold.y - 60, 80, 10);
+            ctx.fillStyle = healthPercentage > 0.5 ? '#4CAF50' : healthPercentage > 0.25 ? '#FF9800' : '#f44336';
+            ctx.fillRect(stronghold.x - 40, stronghold.y - 60, 80 * healthPercentage, 10);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(stronghold.x - 40, stronghold.y - 60, 80, 10);
         }
         
-        // Draw cannon
         function drawCannon(cannon) {
-            // Cannon base
+            // Base
             ctx.fillStyle = '#777';
             ctx.beginPath();
-            ctx.arc(cannon.x, cannon.y, 10, 0, Math.PI * 2);
+            ctx.arc(cannon.x, cannon.y, 12, 0, Math.PI * 2);
             ctx.fill();
             
-            // Cannon barrel
+            // Barrel with gradient
             ctx.save();
             ctx.translate(cannon.x, cannon.y);
             ctx.rotate(cannon.angle);
             
-            ctx.fillStyle = '#555';
-            ctx.fillRect(0, -5, 25, 10);
+            const gradient = ctx.createLinearGradient(0, -8, 30, -8);
+            gradient.addColorStop(0, '#666');
+            gradient.addColorStop(1, '#444');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, -8, 30, 16);
             
             ctx.fillStyle = '#333';
-            ctx.fillRect(20, -7, 10, 14);
+            ctx.fillRect(25, -10, 10, 20);
             
             ctx.restore();
         }
         
-        // Draw all cannons
-        function drawCannons() {
-            cannons.forEach(cannon => {
-                drawCannon(cannon);
-            });
-        }
-        
-        // Draw money drop
         function drawMoneyDrop(drop) {
+            // Pulsing effect
+            const pulse = Math.sin(Date.now() / 200) * 3;
+            
+            // Outer glow
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 15;
             ctx.fillStyle = drop.collected ? '#4CAF50' : '#FFD700';
             ctx.beginPath();
-            ctx.arc(drop.x, drop.y, 8, 0, Math.PI * 2);
+            ctx.arc(drop.x, drop.y, 10 + pulse, 0, Math.PI * 2);
             ctx.fill();
+            ctx.shadowBlur = 0;
             
-            // Draw $ symbol
+            // Dollar sign
             ctx.fillStyle = '#000';
-            ctx.font = 'bold 10px Arial';
+            ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('$', drop.x, drop.y);
             
-            // Pulse effect if not collected
+            // Value indicator
             if (!drop.collected) {
-                ctx.strokeStyle = '#FFD700';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(drop.x, drop.y, 10 + Math.sin(Date.now() / 200) * 3, 0, Math.PI * 2);
-                ctx.stroke();
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Arial';
+                ctx.fillText(drop.value, drop.x, drop.y + 20);
             }
         }
         
-        // Next wave
+        function drawPowerup(powerup) {
+            const config = POWERUPS[powerup.type];
+            const pulse = Math.sin(Date.now() / 300) * 4;
+            
+            // Outer glow
+            ctx.shadowColor = config.color;
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = config.color;
+            ctx.beginPath();
+            ctx.arc(powerup.x, powerup.y, powerup.radius + pulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Icon based on type
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            let icon = '⚡';
+            switch(powerup.type) {
+                case 'RAPID_FIRE': icon = '⚡'; break;
+                case 'DOUBLE_DAMAGE': icon = '⚔️'; break;
+                case 'SLOW_ENEMIES': icon = '🐌'; break;
+                case 'MONEY_BOOST': icon = '💰'; break;
+            }
+            ctx.fillText(icon, powerup.x, powerup.y);
+        }
+        
+        // Game progression
         function nextWave() {
             wave++;
             waveDisplay.textContent = wave;
@@ -859,71 +1335,72 @@
             // Show wave indicator
             waveIndicator.textContent = `Wave ${wave}`;
             waveIndicator.style.display = 'block';
-            setTimeout(() => {
-                waveIndicator.style.display = 'none';
-            }, 2000);
+            setTimeout(() => waveIndicator.style.display = 'none', 2000);
             
             // Increase difficulty
-            enemiesPerWave = Math.floor(5 + wave * 1.5);
-            enemySpeed = 1.2 + wave * 0.05;
+            enemiesPerWave = Math.floor(6 + wave * 1.8);
+            enemySpeed = 1.2 + wave * 0.07;
             
             // Reset wave state
             enemiesSpawnedThisWave = 0;
             waveComplete = false;
             
-            // Add bonus money for completing wave
-            money += 25 + wave * 5;
+            // Bonus money
+            const bonus = 30 + wave * 8;
+            money += bonus;
+            totalMoneyEarned += bonus;
             moneyDisplay.textContent = money;
+            
+            // Unlock achievements
+            checkAchievements();
             updateUpgradeButtons();
         }
         
-        // Game over
         function gameOver() {
             gameRunning = false;
             finalScore.textContent = `You survived ${wave} waves`;
+            finalEnemies.textContent = `Enemies defeated: ${enemiesDefeated}`;
+            finalMoney.textContent = `Total money earned: $${totalMoneyEarned}`;
             gameOverScreen.style.display = 'flex';
         }
         
-        // Update upgrade buttons
+        // UI functions
         function updateUpgradeButtons() {
-            const damageBtn = document.getElementById('damageUpgrade');
-            const fireRateBtn = document.getElementById('fireRateUpgrade');
-            const rangeBtn = document.getElementById('rangeUpgrade');
-            const healthBtn = document.getElementById('healthUpgrade');
-            
-            damageBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.damage.cost}`;
-            damageBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.damage.level}`;
-            damageBtn.disabled = money < upgrades.damage.cost;
-            
-            fireRateBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.fireRate.cost}`;
-            fireRateBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.fireRate.level}`;
-            fireRateBtn.disabled = money < upgrades.fireRate.cost;
-            
-            rangeBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.range.cost}`;
-            rangeBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.range.level}`;
-            rangeBtn.disabled = money < upgrades.range.cost;
-            
-            healthBtn.querySelector('.upgrade-cost').textContent = `Cost: ${upgrades.health.cost}`;
-            healthBtn.querySelector('.upgrade-level').textContent = `Level: ${upgrades.health.level}`;
-            healthBtn.disabled = money < upgrades.health.cost;
+            Object.keys(upgrades).forEach(key => {
+                const btn = document.getElementById(key + 'Upgrade');
+                if (btn) {
+                    btn.querySelector('.upgrade-cost').textContent = `Cost: $${upgrades[key].cost}`;
+                    btn.querySelector('.upgrade-level').textContent = `Level: ${upgrades[key].level}`;
+                    btn.disabled = money < upgrades[key].cost || upgrades[key].level >= 10;
+                }
+            });
         }
         
-        // Buy upgrade
+        function updatePowerupDisplay() {
+            if (powerupActive && Date.now() < powerupEndTime) {
+                const config = POWERUPS[powerupActive];
+                const timeLeft = Math.ceil((powerupEndTime - Date.now()) / 1000);
+                powerupContainer.style.display = 'block';
+                powerupContainer.innerHTML = `Power-Up: ${config.name} (${timeLeft}s)`;
+                powerupContainer.style.borderColor = config.color;
+            } else {
+                powerupContainer.style.display = 'none';
+                powerupActive = null;
+            }
+        }
+        
         function buyUpgrade(upgradeType) {
             const upgrade = upgrades[upgradeType];
             
-            if (money >= upgrade.cost) {
+            if (money >= upgrade.cost && upgrade.level < 10) {
                 money -= upgrade.cost;
                 moneyDisplay.textContent = money;
-                
                 upgrade.level++;
-                
-                // Increase cost for next level
                 upgrade.cost = Math.floor(upgrade.cost * 1.5);
                 
-                // Apply upgrade effect
                 if (upgradeType === 'health') {
-                    strongholdHealth = 100 + (upgrade.level - 1) * 20;
+                    const healthIncrease = upgrade.effect;
+                    strongholdHealth += healthIncrease;
                     healthDisplay.textContent = strongholdHealth;
                 }
                 
@@ -931,7 +1408,48 @@
             }
         }
         
-        // Collect money drop on click
+        function activatePowerup(type) {
+            powerupActive = type;
+            powerupEndTime = Date.now() + POWERUPS[type].duration;
+            updatePowerupDisplay();
+            
+            // Show achievement for first powerup
+            if (!achievements.has('first_powerup')) {
+                achievements.add('first_powerup');
+                showAchievement('Power Up!', 'Activated your first power-up');
+            }
+        }
+        
+        function checkAchievements() {
+            if (wave >= 5 && !achievements.has('wave_5')) {
+                achievements.add('wave_5');
+                showAchievement('Survivor', 'Reached wave 5');
+            }
+            if (wave >= 10 && !achievements.has('wave_10')) {
+                achievements.add('wave_10');
+                showAchievement('Veteran Defender', 'Reached wave 10');
+            }
+            if (enemiesDefeated >= 50 && !achievements.has('50_kills')) {
+                achievements.add('50_kills');
+                showAchievement('Enemy Slayer', 'Defeated 50 enemies');
+            }
+            if (money >= 500 && !achievements.has('rich')) {
+                achievements.add('rich');
+                showAchievement('War Funded', 'Accumulated $500');
+            }
+        }
+        
+        function showAchievement(title, description) {
+            achievementTitle.textContent = title;
+            achievementDesc.textContent = description;
+            achievementPopup.style.display = 'block';
+            
+            setTimeout(() => {
+                achievementPopup.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Event listeners
         canvas.addEventListener('click', (e) => {
             if (!gameRunning) return;
             
@@ -939,37 +1457,69 @@
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             
-            // Check if clicked on a money drop
+            // Collect money drops
             moneyDrops.forEach(drop => {
                 const dx = drop.x - x;
                 const dy = drop.y - y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (distance < 15 && !drop.collected) {
+                if (distance < 20 && !drop.collected) {
                     drop.collected = true;
                     money += drop.value;
+                    totalMoneyEarned += drop.value;
                     moneyDisplay.textContent = money;
                     updateUpgradeButtons();
                 }
             });
+            
+            // Collect powerups
+            powerups.forEach(powerup => {
+                const dx = powerup.x - x;
+                const dy = powerup.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 25 && !powerup.collected) {
+                    powerup.collected = true;
+                    activatePowerup(powerup.type);
+                }
+            });
         });
         
-        // Start game button
+        // Button events
         document.getElementById('startBtn').addEventListener('click', () => {
-            if (!gameRunning) {
-                initGame();
+            if (!gameRunning) initGame();
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            if (gameRunning) {
+                gamePaused = !gamePaused;
+                document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume' : 'Pause';
+                if (!gamePaused) requestAnimationFrame(gameLoop);
             }
         });
         
-        // Restart buttons
         document.getElementById('restartBtn').addEventListener('click', initGame);
         document.getElementById('restartBtn2').addEventListener('click', initGame);
         
         // Upgrade buttons
-        document.getElementById('damageUpgrade').addEventListener('click', () => buyUpgrade('damage'));
-        document.getElementById('fireRateUpgrade').addEventListener('click', () => buyUpgrade('fireRate'));
-        document.getElementById('rangeUpgrade').addEventListener('click', () => buyUpgrade('range'));
-        document.getElementById('healthUpgrade').addEventListener('click', () => buyUpgrade('health'));
+        Object.keys(upgrades).forEach(key => {
+            document.getElementById(key + 'Upgrade').addEventListener('click', () => buyUpgrade(key));
+        });
+        
+        // Difficulty buttons
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.dataset.difficulty;
+                
+                // Show achievement for changing difficulty
+                if (!achievements.has('difficulty_change')) {
+                    achievements.add('difficulty_change');
+                    showAchievement('Challenge Seeker', `Playing on ${difficulty} difficulty`);
+                }
+            });
+        });
         
         // Initialize game
         initCannons();
@@ -980,13 +1530,17 @@
         drawStronghold();
         drawCannons();
         
-        // Instructions for the player
+        // Draw initial instructions
         ctx.fillStyle = '#fff';
-        ctx.font = '16px Arial';
+        ctx.font = '20px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Click "Start Game" to begin!', canvas.width / 2, canvas.height / 2 + 60);
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Stronghold Defense', canvas.width / 2, canvas.height / 2 - 50);
+        ctx.font = '16px Arial';
+        ctx.fillText('Select difficulty and click "Start Game"', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.fillText('Defend the stronghold from all sides!', canvas.width / 2, canvas.height / 2 + 30);
         ctx.font = '14px Arial';
-        ctx.fillText('Defend the stronghold from all sides', canvas.width / 2, canvas.height / 2 + 90);
+        ctx.fillText('Upgrade cannons between waves', canvas.width / 2, canvas.height / 2 + 70);
     </script>
 </body>
 </html>

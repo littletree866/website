@@ -6,6 +6,7 @@
   <title>Archives</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../../icon.jpg" type="image/x-icon">
 
   <style>
@@ -26,7 +27,7 @@
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       line-height: 1.6;
       color: var(--text);
       background: linear-gradient(135deg, #f5f7fa 0%, #eaf0ff 100%);
@@ -284,6 +285,16 @@
       color: #d8570d
     }
 
+    .status-delayed {
+      background: #fffbeb;
+      color: #f3da1adc
+    }
+
+    .status-unavailable {
+      background: #f3f4f6;
+      color: #6b7280
+    }
+
     /* Empty state */
     .empty {
       padding: 40px;
@@ -324,27 +335,11 @@
             stroke-linejoin="round" />
           <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" />
         </svg>
-        <input id="search" placeholder="Search by title, description, tag..." />
+        <input id="search" placeholder="Search..." />
         <button id="clearSearch" title="Clear"
           style="background:transparent;border:0;cursor:pointer;font-weight:700;color:var(--muted)">×</button>
       </div>
 
-      <select id="yearFilter" class="select">
-        <option value="all">All Years</option>
-        <option>2026</option>
-        <option>2025</option>
-      </select>
-
-      <select id="categoryFilter" class="select-small">
-        <option value="all">All Categories</option>
-        <option>Updates</option>
-        <option>Games</option>
-        <option>Sims</option>
-        <option>Casino</option>
-        <option>Docs</option>
-        <option>NewGames</option>
-        <option>Notes</option>
-      </select>
     </div>
 
     <h2 class="section-header">
@@ -355,12 +350,23 @@
     </h2>
 
     <div class="archive-grid" id="archiveGrid">
-      <!-- Alphabetical list (titles only; file locations removed from descriptions) -->
+
+      <!-- Games Section (Alphabetical) -->
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Blackjack+" data-desc="Card game"
+        data-status="unavailable">
+        <div class="card-body">
+          <div><span class="archive-tag">Game</span><span class="status-pill status-unavailable">Unavailable</span>
+          </div>
+          <div class="archive-title">Blackjack+</div>
+          <div class="archive-meta">2025 · Casino</div>
+          <p class="description">Classic blackjack with multiple deck support and strategy tracking.</p>
+        </div>
+      </div>
 
       <div class="archive-card" data-year="2025" data-category="Games" data-title="Click Me"
-        data-desc="Interactive experimental page" data-status="available">
+        data-desc="Interactive experimental page" data-status="inprogress">
         <div class="card-body">
-          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-inprogress">In Progress</span></div>
           <div class="archive-title">Click Me</div>
           <div class="archive-meta">2025 · Experimental</div>
           <p class="description">A reactive interactive experiment that shifts visuals as you click.</p>
@@ -377,32 +383,32 @@
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Casino" data-title="Cursed Dice"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Cursed Dice"
         data-desc="Dice casino game" data-status="available">
         <div class="card-body">
-          <div><span class="archive-tag">Casino</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Cursed Dice</div>
           <div class="archive-meta">2025 · Casino</div>
           <p class="description">Bet on die rolls with random curse mechanics altering outcomes.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2026" data-category="NewGames" data-title="DO NOT PRESS"
+      <div class="archive-card" data-year="2026" data-category="Games" data-title="DO NOT PRESS"
         data-desc="Experimental prank/experience" data-status="available">
         <div class="card-body">
-          <div><span class="archive-tag">New</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">DO NOT PRESS</div>
           <div class="archive-meta">2026 · Experimental</div>
           <p class="description">A chaotic interactive experience that escalates as you press the button.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Games" data-title="Dumbest Game — STAY"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Dumbest Game"
         data-desc="Timer & message experiment" data-status="archived">
         <div class="card-body">
           <div><span class="archive-tag">Game</span><span class="status-pill status-archived">Archived</span></div>
-          <div class="archive-title">Dumbest Game — STAY</div>
-          <div class="archive-meta">2025 · Prototype</div>
+          <div class="archive-title">The World's Dumbest Game</div>
+          <div class="archive-meta">2025 · Game</div>
           <p class="description">Small experimental page that tracked time and clicks with evolving messages.</p>
         </div>
       </div>
@@ -417,43 +423,45 @@
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Sims" data-title="Metropolis Builder"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Metropolis Builder"
         data-desc="City builder" data-status="available">
         <div class="card-body">
-          <div><span class="archive-tag">Sim</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Metropolis Builder</div>
           <div class="archive-meta">2025 · Simulation</div>
           <p class="description">Deeper city-builder: zone, roads, utilities and manage pollution and happiness.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Sims" data-title="Mini Empire"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Mini Empire"
         data-desc="10x10 builder with raids" data-status="available">
         <div class="card-body">
-          <div><span class="archive-tag">Sim</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Mini Empire</div>
           <div class="archive-meta">2025 · Simulation</div>
           <p class="description">Turn-based 10x10 city builder balancing food, gold and defense against raids.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2026" data-category="Games" data-title="Pokémon Arcane Duel"
-        data-desc="Arcane duel RPG" data-status="inprogress">
-        <div class="card-body">
-          <div><span class="archive-tag">Game</span><span class="status-pill status-inprogress"> In Progress</span></div>
-          <div class="archive-title">Pokémon Arcane Duel</div>
-          <div class="archive-meta">2026 · RPG</div>
-          <p class="description">Duel mechanics and party HUD under active development.</p>
-        </div>
-      </div>
-
       <div class="archive-card" data-year="2026" data-category="Games" data-title="Pokémon Great Rock (Final)"
         data-desc="In development" data-status="inprogress">
         <div class="card-body">
-          <div><span class="archive-tag">Game</span><span class="status-pill status-inprogress"> In Progress</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-inprogress"> In Progress</span>
+          </div>
           <div class="archive-title">Pokémon Great Rock (Final)</div>
           <div class="archive-meta">2026 · In Progress</div>
           <p class="description">Final duel system and save/load features — ongoing development.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Poker" data-desc="Poker game"
+        data-status="unavailable">
+        <div class="card-body">
+          <div><span class="archive-tag">Game</span><span class="status-pill status-unavailable">Unavailable</span>
+          </div>
+          <div class="archive-title">Poker</div>
+          <div class="archive-meta">2025 · Casino</div>
+          <p class="description">Texas Hold'em poker with AI opponents and hand analysis.</p>
         </div>
       </div>
 
@@ -467,22 +475,33 @@
         </div>
       </div>
 
-      <div class="archive-card" data-year="2026" data-category="NewGames" data-title="Pyramid Explorer"
+      <div class="archive-card" data-year="2026" data-category="Games" data-title="Pyramid Explorer"
         data-desc="Narrative puzzle adventure" data-status="available">
         <div class="card-body">
-          <div><span class="archive-tag">New</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Pyramid Explorer</div>
-          <div class="archive-meta">Jan 2026 · New</div>
+          <div class="archive-meta">2026 · Game</div>
           <p class="description">Narrative puzzle adventure with totem puzzles and discovery-driven levels.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Casino" data-title="Slot Machine" data-desc="3x3 slots"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Roulette" data-desc="Roulette game"
+        data-status="unavailable">
+        <div class="card-body">
+          <div><span class="archive-tag">Game</span><span class="status-pill status-unavailable">Unavailable</span>
+          </div>
+          <div class="archive-title">Roulette</div>
+          <div class="archive-meta">2025 · Casino</div>
+          <p class="description">European roulette with betting options and statistics tracking.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Slot Machine" data-desc="3x3 slots"
         data-status="available">
         <div class="card-body">
-          <div><span class="archive-tag">Casino</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Slot Machine</div>
-          <div class="archive-meta">2025 · Casino</div>
+          <div class="archive-meta">2025 · Game</div>
           <p class="description">3x3 slot with paylines, animated reels and win feedback.</p>
         </div>
       </div>
@@ -497,20 +516,21 @@
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Game Documentation"
-        data-desc="Documentation hub" data-status="available">
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Supply & Demand"
+        data-desc="Economics simulation" data-status="unavailable">
         <div class="card-body">
-          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
-          <div class="archive-title">Game Documentation</div>
-          <div class="archive-meta">Jan 15, 2026 · Docs</div>
-          <p class="description">Guides, controls and tips for the project games and features.</p>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-unavailable">Unavailable</span>
+          </div>
+          <div class="archive-title">Supply & Demand</div>
+          <div class="archive-meta">2025 · Simulation</div>
+          <p class="description">Economic simulation exploring supply, demand and market dynamics.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2025" data-category="Notes" data-title="The Bomb Game"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="The Bomb Game"
         data-desc="Archived prototype" data-status="archived">
         <div class="card-body">
-          <div><span class="archive-tag">Notes</span><span class="status-pill status-archived">Archived</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-archived">Archived</span></div>
           <div class="archive-title">The Bomb Game</div>
           <div class="archive-meta">2025 · Archived</div>
           <p class="description">Early clicker prototype; archived for cleanup.</p>
@@ -528,92 +548,13 @@
       </div>
 
       <div class="archive-card" data-year="2025" data-category="Games" data-title="The Impossible Game"
-        data-desc="Precision platformer" data-status="available">
+        data-desc="Precision platformer" data-status="unavailable">
         <div class="card-body">
-          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
+          <div><span class="archive-tag">Game</span><span class="status-pill status-unavailable">Unavailable</span>
+          </div>
           <div class="archive-title">The Impossible Game</div>
           <div class="archive-meta">2025 · Platformer</div>
           <p class="description">High-precision platforming with strict timing and checkpoints.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2025" data-category="Updates" data-title="v1.12.14" data-desc="Oct 10, 2025"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.12.14</div>
-          <div class="archive-meta">Oct 10, 2025 · Release</div>
-          <p class="description">Restructured files and baseline styling updates.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2025" data-category="Updates" data-title="v1.13.15" data-desc="Oct 25, 2025"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.13.15</div>
-          <div class="archive-meta">Oct 25, 2025 · Release</div>
-          <p class="description">UI improvements, navigation updates and accessibility tweaks.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2025" data-category="Updates" data-title="v1.14.15" data-desc="Nov 12, 2025"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.14.15</div>
-          <div class="archive-meta">Nov 12, 2025 · Release</div>
-          <p class="description">Visual polish, particle improvements and bug fixes.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2025" data-category="Updates" data-title="v1.15.16" data-desc="Nov 25, 2025"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.15.16</div>
-          <div class="archive-meta">Nov 25, 2025 · Release</div>
-          <p class="description">Polish pass and initial new-game scaffolding; site fixes.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2025" data-category="Updates" data-title="v1.15.18" data-desc="Dec 10, 2025"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.15.18</div>
-          <div class="archive-meta">Dec 10, 2025 · Release</div>
-          <p class="description">Polish pass and Tower Defense+ added; site rework and asset cleanup.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2026" data-category="Updates" data-title="v1.16.19" data-desc="Jan 1, 2026"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.16.19</div>
-          <div class="archive-meta">Jan 1, 2026 · Release</div>
-          <p class="description">Added Tower Defense 2, monthly challenge, badge system and fixes.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2026" data-category="Updates" data-title="v1.17.20" data-desc="Jan 15, 2026"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
-          <div class="archive-title">v1.17.20</div>
-          <div class="archive-meta">Jan 15, 2026 · Release</div>
-          <p class="description">Monthly challenge improvements, new Pyramid release and general reorganizations.</p>
-        </div>
-      </div>
-
-      <div class="archive-card" data-year="2026" data-category="Updates" data-title="v1.18.22" data-desc="Feb 2, 2026"
-        data-status="update">
-        <div class="card-body">
-          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Planned</span></div>
-          <div class="archive-title">v1.18.22</div>
-          <div class="archive-meta">Feb 2, 2026 · Planned</div>
-          <p class="description">Next major release — roadmap and details to be announced.</p>
         </div>
       </div>
 
@@ -637,31 +578,126 @@
         </div>
       </div>
 
-      <div class="archive-card" data-year="2026" data-category="Games" data-title="Wizard Battle"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Wealth Builder"
+        data-desc="Life simulation" data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Wealth Builder</div>
+          <div class="archive-meta">2025 · Simulation</div>
+          <p class="description">Manage finances and build wealth through strategic decisions.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Wizard Battle"
         data-desc="Arcane duel system" data-status="available">
         <div class="card-body">
           <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Wizard Battle</div>
-          <div class="archive-meta">2026 · Duel</div>
+          <div class="archive-meta">2025 · Duel</div>
           <p class="description">Arcane duel system with mana management, spells and shop upgrades.</p>
         </div>
       </div>
 
-      <div class="archive-card" data-year="2026" data-category="Games" data-title="Zombie Survival"
+      <div class="archive-card" data-year="2025" data-category="Games" data-title="Zombie Survival"
         data-desc="Top-down wave shooter" data-status="available">
         <div class="card-body">
           <div><span class="archive-tag">Game</span><span class="status-pill status-available">Available</span></div>
           <div class="archive-title">Zombie Survival</div>
-          <div class="archive-meta">2026 · Shooter</div>
+          <div class="archive-meta">2025 · Shooter</div>
           <p class="description">Top-down survival defending against waves with ally spawn mechanics.</p>
         </div>
       </div>
+
+      <!-- Updates Section -->
+      <div class="archive-card" data-year="2026" data-category="Updates" data-title="v1.17.20" data-desc="Jan 15, 2026"
+        data-status="update">
+        <div class="card-body">
+          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Released</span></div>
+          <div class="archive-title">v1.17.20</div>
+          <div class="archive-meta">Jan 15, 2026 · Release</div>
+          <p class="description">Monthly challenge improvements, new Pyramid release and general reorganizations.
+            General reorganizations and code fixes.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2026" data-category="Updates" data-title="v1.18.22" data-desc="Feb 2, 2026"
+        data-status="update">
+        <div class="card-body">
+          <div><span class="archive-tag">Update</span><span class="status-pill status-update">Planned</span></div>
+          <div class="archive-title">v1.18.22</div>
+          <div class="archive-meta">Feb 2, 2026 · Planned</div>
+          <p class="description">Next major release — roadmap and details to be announced.</p>
+        </div>
+      </div>
+
+      <!-- Information & Docs Section -->
+      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Challenges & Badges"
+        data-desc="Badges system" data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Challenges & Badges</div>
+          <div class="archive-meta">2025 · Guides</div>
+          <p class="description">View all available challenges and earned badges across the platform.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Documentation" data-desc="Game guides"
+        data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Documentation</div>
+          <div class="archive-meta">2025 · Guides</div>
+          <p class="description">Comprehensive guides, controls and tips for all games and features.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Game Documentation"
+        data-desc="Documentation hub" data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Game Documentation</div>
+          <div class="archive-meta">2025 · Docs</div>
+          <p class="description">Guides, controls and tips for the project games and features.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Snapshots" data-desc="Gallery"
+        data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Snapshots</div>
+          <div class="archive-meta">2025 · Gallery</div>
+          <p class="description">Screenshot gallery showcasing gameplay moments and project milestones.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Update Info" data-desc="Release notes"
+        data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Update Info</div>
+          <div class="archive-meta">2025 · Release Notes</div>
+          <p class="description">Detailed changelog and release notes for all version updates.</p>
+        </div>
+      </div>
+
+      <div class="archive-card" data-year="2025" data-category="Docs" data-title="Source Code"
+        data-desc="GitHub repository" data-status="available">
+        <div class="card-body">
+          <div><span class="archive-tag">Docs</span><span class="status-pill status-available">Available</span></div>
+          <div class="archive-title">Source Code</div>
+          <div class="archive-meta">2025 · GitHub</div>
+          <p class="description">Open-source repository with all project code and contributions welcome.</p>
+        </div>
+      </div>
+
     </div>
 
     <div id="emptyState" class="empty" style="display:none">No results. Try clearing filters or search.</div>
 
     <footer>
-      <p>© Littletree866</p>
+      <p>© Infinity Nexus</p>
+      <p>Created by Littletree866</p>
     </footer>
 
   </div>
@@ -717,6 +753,8 @@
 
     // initial setup
     staggerVisibleCards();
+    // apply filters on load so resultCount and visibility are accurate
+    applyFilters();
   </script>
 
 </body>

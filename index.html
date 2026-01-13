@@ -10,15 +10,10 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
+		rel="stylesheet">
 
 	<style>
-
-		mark{
-			background: #ffffff;
-			color: #ffffff;
-		}
-
 		:root {
 			--primary: #6e8efb;
 			--secondary: #a777e3;
@@ -31,9 +26,8 @@
 
 		/* Make the main title more restrained (less shimmer) */
 		.main-title {
-			font-family: 'DM Sans', sans-serif;
 			font-size: clamp(2.2rem, 4.2vw, 3.2rem);
-			font-weight: 800;
+			font-weight: 500;
 			letter-spacing: 0.06em;
 			text-align: center;
 			background: linear-gradient(120deg, #00f0ff, #7b5cff, #ff3cac);
@@ -67,8 +61,13 @@
 		}
 
 		@keyframes snowFall {
-			from { background-position: 0 -600px; }
-			to   { background-position: 0 600px; }
+			from {
+				background-position: 0 -600px;
+			}
+
+			to {
+				background-position: 0 600px;
+			}
 		}
 
 
@@ -211,7 +210,6 @@
 			color: var(--dark);
 			text-decoration: none;
 			font-weight: 200;
-			font-size: 0.98rem;
 			box-shadow: 0 6px 18px rgba(13, 38, 63, 0.06);
 			transition: transform 0.18s var(--transition), box-shadow 0.18s var(--transition);
 			overflow: hidden;
@@ -220,6 +218,7 @@
 		.content-link .normal-text,
 		.content-link .hover-text {
 			display: inline-block;
+
 		}
 
 		.content-link .hover-text {
@@ -380,6 +379,52 @@
 			box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
 		}
 
+		.unavailable-badge {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 10px;
+			border-radius: 999px;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: .4px;
+			text-transform: uppercase;
+			color: #55555a;
+			background: #f1b5bd;
+			border: 1px solid #C7D2FE;
+		}
+
+		.beta-badge {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 10px;
+			border-radius: 999px;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: .4px;
+			text-transform: uppercase;
+			color: #312E81;
+			background: #EEF2FF;
+			border: 1px solid #C7D2FE;
+		}
+
+		.new-badge {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 10px;
+			border-radius: 999px;
+			font-size: 11px;
+			font-weight: 800;
+			letter-spacing: .5px;
+			text-transform: uppercase;
+			color: #065F46;
+			background: #ECFDF5;
+			border: 1px solid #6EE7B7;
+		}
+
+		.small-text {
+			font-size: 11px !important;
+		}
+
 		@media (max-width: 768px) {
 			header h1 {
 				font-size: 1.8rem;
@@ -405,12 +450,14 @@
 	<header>
 		<div class="container">
 			<h1 style="font-family: DM Sans;  font-size: 35px;" class="main-title">Infinity Nexus</h1>
-			<p style="font-weight: 200; font-family: Space Grotesk;">Welcome! This is an open-sourced personal project with any contributions
+			<p style="font-weight: 200; font-family: Space Grotesk;">Welcome! This is an open-sourced personal project
+				with any contributions
 				welcome.</p>
-			<p style="font-weight: 200; font-family: Space Grotesk;">Updates will now come approximately every 2 weeks and in
+			<p style="font-weight: 200; font-family: Space Grotesk;">Updates will now come approximately every 2 weeks
+				and in
 				a new format.</p>
-			<p style="font-weight: 200; font-family: Space Grotesk;">For complete release notes click <a href="info/updateinfo/updateinfo.html"
-					style="font-weight: bold; color:#0a0a0a">here</a>.</p>
+			<p style="font-weight: 200; font-family: Space Grotesk;">For complete release notes click <a
+					href="info/updateinfo/updateinfo.html" style="font-weight: bold; color:#0a0a0a">here</a>.</p>
 			<p style="font-weight: bold; font-family: 'Space Grotesk';">January 15, 2026 • Version 1.17.20</p>
 		</div>
 	</header>
@@ -432,7 +479,8 @@
 
 
 				<!-- Work in Progress Section -->
-				<h2 class="category-header" style="margin-bottom: 0;">🌟 Work in Progress <span class="coming-soon-badge">Coming Soon</span></h2>
+				<h2 class="category-header" style="margin-bottom: 0;">🌟 Work in Progress <span
+						class="coming-soon-badge">Coming Soon</span></h2>
 				<p class="description" style="margin-top: 0;">👀 Take a look at what's coming soon</p>
 				<a href=null class="content-link disabled">
 					<span class="normal-text">⚔️ Pokemon Great Rock (Final)</span>
@@ -458,18 +506,18 @@
 				<a href="newgames/pyramid/pyramid.html" class="content-link">
 					<span class="normal-text">🏜️ Pyramid</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="coming-soon-badge">New</span>
+					<span class="new-badge">New</span>
 				</a>
 				<a href="newgames/thegame/thegame.html" class="content-link">
 					<span class="normal-text">🔘 DO NOT PRESS</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="coming-soon-badge">New</span>
+					<span class="new-badge">New</span>
 				</a>
-				
-				
+
+
 
 				<!-- Featured Section -->
-				<h2 class="category-header" style="margin-bottom: 0;">👍 Featured  Projects</h2>
+				<h2 class="category-header" style="margin-bottom: 0;">👍 Featured Projects</h2>
 				<p class="description" style="margin-top: 0;">🔥 My Picks</p>
 
 				<a href="games/tower/tower.html" class="content-link">
@@ -480,9 +528,10 @@
 					<span class="normal-text">🛡️ Tower Defense 2+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="games/platformergame/platformergame.html" class="content-link">
-					<span class="normal-text">😵 The Impossible Game</span>
+				<a href="games/platformergame/platformergame.html" class="content-link disabled">
+					<span class="normal-text" style="font-size: 8px;">😵 The Impossible Game</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
 
 
@@ -507,7 +556,7 @@
 				<a href="games/wizardgame/wizardgame.html" class="content-link">
 					<span class="normal-text">🧙‍♂️ Wizard Battle</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a> 
+				</a>
 				<a href="games/pokemon/pokemon.html" class="content-link disabled">
 					<span class="normal-text">⚔️ Pokémon Great Rock (BASIC)</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
@@ -530,17 +579,20 @@
 					<span class="normal-text">🎰 Slot Machine</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="casinogames/blackjack/blackjack.html" class="content-link">
+				<a href="casinogames/blackjack/blackjack.html" class="content-link disabled">
 					<span class="normal-text">🃏 Blackjack+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
-				<a href="casinogames/poker/poker.html" class="content-link">
+				<a href="casinogames/poker/poker.html" class="content-link disabled">
 					<span class="normal-text">♠️ Poker</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
-				<a href="casinogames/roulette/roulette.html" class="content-link">
+				<a href="casinogames/roulette/roulette.html" class="content-link disabled">
 					<span class="normal-text">🎡 Roulette</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
 				<a href="casinogames/curseddice/curseddice.html" class="content-link">
 					<span class="normal-text">🎲 Cursed Dice</span>
@@ -558,9 +610,10 @@
 					<span class="normal-text">🏙️ Metropolis Builder</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="sims/s&d/money.html" class="content-link">
+				<a href="sims/s&d/money.html" class="content-link disabled">
 					<span class="normal-text">📊 Supply & Demand</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
 				<a href="sims/box/box.html" class="content-link">
 					<span class="normal-text">📦 The Box</span>
@@ -578,12 +631,14 @@
 				<!-- Information & Guides Section -->
 				<h2 class="category-header">📄 Information & Guides</h2>
 				<a href="info/challengebadge/challenge.html" class="content-link">
-					<span class="normal-text">🏅 Challenges & Badges <span class="coming-soon-badge">Beta</span></span>
+					<span class="normal-text">🏅 Challenges & Badges </span>
 					<span class="hover-text">➡️ View Badges</span>
+					<span class="beta-badge">Beta</span>
 				</a>
-				<a href="info/docs/documentation.html" class="content-link">
-					<span class="normal-text">📋 Game Documentation</span>
+				<a href="info/docs/documentation.html" class="content-link disabled">
+					<span class="normal-text" style="font-size: 1px !important">📋 Game Documentation</span>
 					<span class="hover-text">➡️ Read Guides</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
 				<a href="info/snapshots/snapshots.html" class="content-link">
 					<span class="normal-text">🖼️ Snapshots</span>
@@ -596,7 +651,7 @@
 				<a href="info/archives/archives.html" class="content-link">
 					<span class="normal-text">🗝️ Archives</span>
 					<span class="hover-text">➡️ See Archives</span>
-					<span class="coming-soon-badge">Beta</span>
+					<span class="beta-badge">Beta</span>
 				</a>
 				<a href="https://github.com/littletree866/infinity-nexus" class="content-link" target="_blank">
 					<span class="normal-text">💻 Source Code</span>

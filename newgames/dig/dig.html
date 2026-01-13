@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dig Deep</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;display:flex;height:100vh;background:#070b12;color:white;font-family:'Space Grotesk',sans-serif}
+#game{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;gap:14px}
+#hud{background:#0f1623;border:2px solid #1f2a3a;border-radius:14px;padding:12px 20px}
+#world{
+width:440px;height:600px;
+display:grid;grid-template-columns:repeat(9,1fr);
+grid-auto-rows:1fr;
+aspect-ratio:9/12;
+gap:8px;padding:8px;
+border:3px solid #1f2a3a;border-radius:22px;background:#04070d;
+box-shadow:0 0 40px #00ff8055
+}
+.tile{
+font-weight:700;cursor:pointer;user-select:none;
+transition:.15s;
+box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),0 4px 8px rgba(0,0,0,.5)
+}
+.tile:hover{transform:scale(1.05)}
+#sidebar{width:340px;background:#070b12;padding:24px;border-left:3px solid #1f2a3a}
+table{width:100%;border-collapse:collapse}
+td,th{padding: 6px;border-bottom:0.11px solid #1f2a3a}
+th{color:#00ffd0}
+.grass{background:linear-gradient(#4cff3a,#0a7a12)}
+.dirt{background:linear-gradient(#8b5a2b,#5a3818)}
+.stone{background:linear-gradient(#888,#444)}
+.coal{background:linear-gradient(#222,#000)}
+.iron{background:linear-gradient(#ffb26a,#a85b22)}
+.gold{background:linear-gradient(#fff29a,#c9a000)}
+.diamond{background:linear-gradient(#8fffff,#00b3b3);box-shadow:0 0 15px #00ffffaa}
+.player{outline:3px solid #00ff88}
+</style>
+</head>
+<body>
+
+<div id="game">
+<h2>⛏ DIG DEEP</h2>
+<div id="hud">
+Depth: <span id="depth">0</span> |
+Score: <span id="score">0</span> |
+Combo: <span id="combo">0</span><br>
+Energy: <span id="energy">100</span> |
+Health: <span id="health">100</span>
+</div>
+<div id="world"></div>
+</div>
+
+<div id="sidebar">
+<h3>Block Values</h3>
+<table style="width:100%;border-collapse:collapse;font-size:14px">
+  <thead>
+    <tr style="background:#001f2a;color:#00ffd0;text-align:left">
+      <th style="padding:8px;border-bottom:2px solid #00ffd0">Block</th>
+      <th style="padding:8px;border-bottom:2px solid #00ffd0">Points</th>
+      <th style="padding:8px;border-bottom:2px solid #00ffd0">Spawn %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background:#08131e">
+      <td style="padding:6px">Grass</td>
+      <td style="padding:6px">1</td>
+      <td style="padding:6px;color:#4cff3a" id="sgra"></td>
+    </tr>
+    <tr style="background:#0b1a26">
+      <td style="padding:6px">Dirt</td>
+      <td style="padding:6px">1</td>
+      <td style="padding:6px;color:#cfa16b" id="sd"></td>
+    </tr>
+    <tr style="background:#08131e">
+      <td style="padding:6px">Stone</td>
+      <td style="padding:6px">3</td>
+      <td style="padding:6px;color:#888" id="ss"></td>
+    </tr>
+    <tr style="background:#0b1a26">
+      <td style="padding:6px">Coal</td>
+      <td style="padding:6px">8</td>
+      <td style="padding:6px;color:#df2b2b" id="sc"></td>
+    </tr>
+    <tr style="background:#08131e">
+      <td style="padding:6px">Iron</td>
+      <td style="padding:6px">15</td>
+      <td style="padding:6px;color:#ffb26a" id="si"></td>
+    </tr>
+    <tr style="background:#0b1a26">
+      <td style="padding:6px">Gold</td>
+      <td style="padding:6px">30</td>
+      <td style="padding:6px;color:#fff29a" id="sg"></td>
+    </tr>
+    <tr style="background:#08131e">
+      <td style="padding:6px">Diamond</td>
+      <td style="padding:6px">80</td>
+      <td style="padding:6px;color:#0ff" id="sdm"></td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin-top:12px">
+Depth Multiplier = 1 + (depth / 50)<br>
+Combo Multiplier = 1 + (combo × 0.15)
+</p>
+</div>
+
+<script>
+const W=9, VIEW_H=9;
+let depth=0,score=0,combo=0,energy=100,health=100;
+let playerX=4,playerY=0,world=[];
+
+const blocks=[
+{name:"Grass",cls:"grass",pts:1},
+{name:"Dirt",cls:"dirt",pts:1},
+{name:"Stone",cls:"stone",pts:3},
+{name:"Coal",cls:"coal",pts:8},
+{name:"Iron",cls:"iron",pts:15},
+{name:"Gold",cls:"gold",pts:30},
+{name:"Diamond",cls:"diamond",pts:80}
+];
+
+function getWeights(d){
+ if(d<3) return [70,25,5,0,0,0,0];
+ if(d<10) return [10,40,40,8,2,0,0];
+ if(d<30) return [0,20,40,20,12,6,2];
+ if(d<60) return [0,0,30,25,20,15,10];
+ return [0,0,15,25,20,20,20];
+}
+
+function genBlock(d){
+ let w=getWeights(d),sum=0;
+ let r=Math.random()*w.reduce((a,b)=>a+b,0);
+ for(let i=0;i<w.length;i++){sum+=w[i];if(r<sum)return blocks[i];}
+}
+
+function addRow(){
+ let d=world.length,row=[];
+ for(let i=0;i<W;i++) row.push(genBlock(d));
+ world.push(row);
+}
+
+for(let i=0;i<20;i++) addRow();
+
+function applyGravity(){
+ for(let x=0;x<W;x++)for(let y=world.length-1;y>0;y--)
+  if(world[y][x]==null){world[y][x]=world[y-1][x];world[y-1][x]=null;}
+}
+
+function draw(){
+ const w=document.getElementById("world");
+ w.innerHTML="";
+ let start=Math.max(0,playerY-2);
+ for(let y=start;y<start+VIEW_H;y++){
+  if(!world[y]) addRow();
+  for(let x=0;x<W;x++){
+   let t=document.createElement("div");
+   let b=world[y][x];
+   t.className="tile "+(b?b.cls:"");
+   if(x==playerX&&y==playerY) t.classList.add("player"), t.textContent="YOU";
+   t.onclick=()=>mine(x,y);
+   w.appendChild(t);
+  }
+ }
+ updateSpawnChart();
+ depthEl.textContent=depth;
+ scoreEl.textContent=Math.floor(score);
+ comboEl.textContent=combo;
+ energyEl.textContent=Math.floor(energy);
+ healthEl.textContent=Math.floor(health);
+}
+
+function updateSpawnChart(){
+ let w=getWeights(depth),sum=w.reduce((a,b)=>a+b,0);
+ ["sgra","sd","ss","sc","si","sg","sdm"].forEach((id,i)=>{
+  document.getElementById(id).textContent=Math.round(w[i]/sum*100)+"%";
+ });
+}
+
+function mine(x,y){
+ if(Math.abs(x-playerX)+Math.abs(y-playerY)!=1) return;
+ let b=world[y][x]; if(!b) return;
+ energy-=5;
+ if(energy<0){health+=energy;energy=0;}
+ if(health<=0){alert("Run Over");location.reload();}
+ let dm=1+(depth/50),cm=1+(combo*0.15);
+ score+=b.pts*dm*cm;
+ combo=b.name!="Grass"&&b.name!="Dirt"?combo+1:0;
+ world[y][x]=null;
+ playerX=x;playerY=y;depth++;
+ applyGravity();
+ if(playerY>world.length-6) addRow();
+ draw();
+}
+
+const depthEl=document.getElementById("depth"),
+scoreEl=document.getElementById("score"),
+comboEl=document.getElementById("combo"),
+energyEl=document.getElementById("energy"),
+healthEl=document.getElementById("health");
+
+draw();
+</script>
+</body>
+</html>
