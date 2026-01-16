@@ -1,17 +1,29 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supply & Demand</title>
     <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #6e8efb;
+            --primary-dark: #5a79e5;
             --secondary: #a777e3;
             --dark: #2c3e50;
             --light: #f8f9fa;
             --text: #333333;
+            --success: #4CAF50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196f3;
+            --profit: #2ecc71;
+            --loss: #e74c3c;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
         }
 
         * {
@@ -21,112 +33,214 @@
         }
 
         body {
-            font-family: 'Ink Free', cursive;
-            max-width: 1000px;
+            font-family: 'Jura', sans-serif;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: var(--light);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
         }
 
-        h1 {
-            color: var(--dark);
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid var(--primary);
+            border-bottom: 4px solid var(--dark);
+        }
+
+        .game-header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .game-header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 30px;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
         }
 
         .panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .panel h2,
-        .panel h3 {
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .panel h2, .panel h3 {
             color: var(--dark);
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid var(--secondary);
-        }
-
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--secondary);
             font-weight: 600;
-            transition: all 0.2s ease;
-            margin: 5px;
-        }
-
-        button:hover {
-            background-color: var(--secondary);
-            transform: translateY(-2px);
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        #game-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        #stats {
-            grid-column: span 2;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px;
-            background-color: rgba(110, 142, 251, 0.1);
-            border-radius: 5px;
-        }
-
-        .stat-value {
-            font-weight: bold;
-        }
-
-        #day-timer {
-            background-color: var(--dark);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin: 15px 0;
-            font-weight: bold;
-        }
-
-        .shop-item,
-        .inventory-item {
             display: flex;
             align-items: center;
-            padding: 10px;
-            margin: 10px 0;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            gap: 10px;
         }
 
-        .item-img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
+        .panel h2 i, .panel h3 i {
+            color: var(--secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(110, 142, 251, 0.1), rgba(167, 119, 227, 0.1));
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(110, 142, 251, 0.2);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark);
+            opacity: 0.8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .stat-value.money {
+            color: var(--profit);
+        }
+
+        .stat-card .stat-value.loan {
+            color: var(--loss);
+        }
+
+        .stat-card .stat-value.reputation {
+            color: var(--warning);
+        }
+
+        .day-timer {
+            background: linear-gradient(to right, var(--dark), #34495e);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-timer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+        }
+
+        .timer-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .timer-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .item-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .shop-item, .inventory-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .shop-item:hover, .inventory-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .shop-item.unlocked {
+            border-color: var(--success);
+        }
+
+        .shop-item.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .item-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-right: 15px;
-            border-radius: 5px;
+            color: white;
+            font-size: 1.5rem;
         }
 
         .item-info {
@@ -134,123 +248,1418 @@
         }
 
         .item-name {
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 1.1rem;
             margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .item-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
         }
 
         .item-price {
-            color: var(--secondary);
-            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-tag {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .sell-price {
+            color: var(--profit);
+            font-weight: 600;
+            background: rgba(46, 204, 113, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Jura', sans-serif;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #45a049);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, var(--danger), #d32f2f);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(to right, var(--warning), #f57c00);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .customer-area {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .customer-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .customers-panel {
+            position: relative;
+            min-height: 200px;
+        }
+
+        .customers-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .customer {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .customer:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .customer.impatient {
+            border-color: var(--warning);
+            animation: pulse 2s infinite;
+        }
+
+        .customer.leaving {
+            border-color: var(--danger);
+            opacity: 0.7;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+
+        .customer-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .customer-message {
+            font-size: 0.9rem;
+            color: var(--dark);
+            margin-top: 8px;
+            font-style: italic;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .customer-timer {
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .customer-timer-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), var(--warning));
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .quest-panel {
+            position: relative;
+        }
+
+        .quest-giver {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), #8e44ad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .quest-giver:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .quest-info {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 2px solid gold;
+        }
+
+        .quest-title {
+            color: var(--dark);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quest-progress {
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), #27ae60);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
         }
 
         .art-studio {
             text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px dashed var(--secondary);
         }
 
-        .art-studio img {
-            max-width: 150px;
-            margin-bottom: 15px;
-        }
-
-        #seating-area {
-            position: fixed;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: white;
-            padding: 15px;
+        .art-canvas {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: artGlow 3s infinite alternate;
         }
 
-        #quest-giver {
+        @keyframes artGlow {
+            0% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+            100% { box-shadow: 0 10px 40px rgba(167, 119, 227, 0.4); }
+        }
+
+        .notification-container {
             position: fixed;
+            top: 20px;
             right: 20px;
-            bottom: 20px;
-            z-index: 100;
-            cursor: pointer;
-            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
         }
 
-        #quest-giver:hover {
-            transform: translateY(-5px);
+        .notification {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        #quest-giver img {
-            width: 80px;
-            height: 80px;
+        .notification.success {
+            border-left-color: var(--success);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning);
+        }
+
+        .notification.danger {
+            border-left-color: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .loan-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--danger);
+            color: white;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            border: 3px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .tutorial-content {
+            background: white;
+            color: var(--dark);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .hotkeys {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .hotkey-item {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .hotkey-key {
+            display: inline-block;
+            background: var(--dark);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-right: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            #game-container {
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .panel {
+                padding: 20px;
+            }
+            
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
-
-            #stats {
-                grid-column: span 1;
+            
+            .action-buttons {
+                flex-direction: column;
             }
-
-            #seating-area,
-            #quest-giver {
-                position: static;
-                transform: none;
-                margin: 20px 0;
+            
+            .btn {
+                width: 100%;
             }
-
         }
     </style>
 </head>
-
 <body>
-    <h1>Supply & Demand</h1>
-    <div id="game-container">
-        <div id="stats" class="panel">
-            <h2>Stats</h2>
-            <div class="stat-item">
-                <span>Day:</span>
-                <span class="stat-value" id="day">1</span>
-            </div>
-            <div class="stat-item">
-                <span>Money:</span>
-                <span class="stat-value" id="money">$100</span>
-            </div>
-            <div class="stat-item">
-                <span>Loan:</span>
-                <span class="stat-value" id="loan">$0</span>
-            </div>
-            <div class="stat-item">
-                <span>Reputation:</span>
-                <span class="stat-value" id="reputation">20/100</span>
-            </div>
-            <div class="stat-item">
-                <span>Customers:</span>
-                <span class="stat-value" id="customers">0</span>
-            </div>
-            <div id="day-timer">Next day in: 15s</div>
-            <button onclick="borrowMoney()"><i class="fas fa-coins"></i> Borrow Money</button>
-            <div id="quest-info"></div>
+    <div class="game-container">
+        <div class="game-header">
+            <h1><i class="fas fa-chart-line"></i> SUPPLY & DEMAND</h1>
+            <div class="subtitle">Business Management Simulator</div>
         </div>
+        
+        <div class="main-content">
+            <!-- Stats Panel -->
+            <div class="panel stats-panel">
+                <h2><i class="fas fa-chart-bar"></i> Business Stats</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Day</div>
+                        <div class="stat-value" id="day">1</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Money</div>
+                        <div class="stat-value money" id="money">$100</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Loan</div>
+                        <div class="stat-value loan" id="loan">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Reputation</div>
+                        <div class="stat-value reputation" id="reputation">20/100</div>
+                    </div>
+                </div>
+                
+                <div class="day-timer">
+                    <div class="timer-text">Next day in: <span id="time-left">15</span>s</div>
+                    <div class="timer-bar">
+                        <div class="timer-fill" id="timer-fill"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9rem;">Customers waiting: <span id="customers-waiting">0</span></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-warning" onclick="borrowMoney()">
+                        <i class="fas fa-coins"></i> Borrow $250
+                    </button>
+                    <button class="btn btn-primary" onclick="nextDay()">
+                        <i class="fas fa-forward"></i> Skip to Next Day
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Shop Panel -->
+            <div class="panel shop-panel">
+                <h2><i class="fas fa-store"></i> Wholesale Supplier</h2>
+                <div class="item-grid" id="shop-items">
+                    <!-- Shop items will be dynamically added here -->
+                </div>
+                <div class="empty-state" id="shop-empty" style="display: none;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>No items available in the shop</p>
+                </div>
+            </div>
+            
+            <!-- Inventory Panel -->
+            <div class="panel inventory-panel">
+                <h2><i class="fas fa-boxes"></i> Your Inventory</h2>
+                <div class="item-grid" id="inventory-items">
+                    <!-- Inventory items will be dynamically added here -->
+                </div>
+                <div class="empty-state" id="inventory-empty">
+                    <i class="fas fa-box-open"></i>
+                    <p>Your inventory is empty</p>
+                    <p>Buy items from the shop to start selling!</p>
+                </div>
+            </div>
 
-        <div id="inventory" class="panel">
-            <h3>Inventory</h3>
+                  <!-- Art Studio -->
+            <div class="panel" id="art-studio" style="display: none;">
+                <h2><i class="fas fa-palette"></i> Art Studio</h2>
+                <div class="art-studio">
+                    <div class="art-canvas">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <p>Create unique paintings to sell at premium prices!</p>
+                    <button class="btn btn-primary" onclick="createArt()" style="margin-top: 15px;">
+                        <i class="fas fa-plus-circle"></i> Create Painting
+                    </button>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Paintings sell for $50-$150 depending on quality
+                    </p>
+                </div>
+            </div>
 
-        </div>
-
-        <div id="shop" class="panel">
-            <h3>Shop</h3>
-
-        </div>
-
-        <div id="art" class="panel art-studio">
-            <h3>Art Studio</h3>
-
+            
+            <!-- Customer Area -->
+            <div class="customer-area">
+                <div class="panel customers-panel">
+                    <h2><i class="fas fa-users"></i> Customers</h2>
+                    <div class="customers-container" id="customers-container">
+                        <!-- Customers will be dynamically added here -->
+                    </div>
+                    <div class="empty-state" id="customers-empty">
+                        <i class="fas fa-user-clock"></i>
+                        <p>No customers at the moment</p>
+                        <p>Wait for the next day or improve your reputation!</p>
+                    </div>
+                </div>
+                
+                <div class="panel quest-panel">
+                    <div class="quest-giver" onclick="interactWithQuestGiver()" title="Talk to Quest Giver">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h2><i class="fas fa-tasks"></i> Active Quest</h2>
+                    <div class="quest-info" id="quest-info">
+                        <div class="quest-title">
+                            <i class="fas fa-bullseye"></i>
+                            <span id="quest-title">No Active Quest</span>
+                        </div>
+                        <p id="quest-description">Talk to the quest giver to get a quest!</p>
+                        <div class="quest-progress" id="quest-progress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="quest-progress-bar"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="quest-progress-text">0/0</span>
+                                <span id="quest-reward">Reward: $0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+      
         </div>
     </div>
+    
+    <div class="notification-container" id="notification-container">
+        <!-- Notifications will appear here -->
+    </div>
+    
+    <footer>
+        <p>Supply & Demand Business Simulator | Use keyboard shortcuts: B to borrow, N for next day, 1-4 to buy items</p>
+    </footer>
 
-    <script src="money.js"></script>
+    <script>
+        // Game state
+        let money = 100;
+        let loan = 0;
+        let day = 1;
+        let inventory = [];
+        let reputation = 20;
+        let customersWaiting = 0;
+        let artUnlocked = false;
+        let timeLeft = 15;
+        let dayInterval;
+        let activeCustomers = [];
+        let currentQuest = null;
+        let questCompleted = false;
+        let moneyEarnedSinceQuestStart = 0;
+        
+        // Game constants
+        const DAY_DURATION = 15; // seconds per day
+        const CUSTOMER_PATIENCE = 7000; // ms before customer leaves
+        const LOAN_AMOUNT = 250;
+        const LOAN_REPAYMENT = 300;
+        const LOAN_TERM_DAYS = 30;
+        
+        // Shop items
+        const shopItems = [
+            { 
+                id: 1, 
+                name: "Coffee", 
+                cost: 5, 
+                sellPrice: 10, 
+                icon: "fas fa-coffee",
+                description: "Hot brewed coffee",
+                color: "#6f4e37"
+            },
+            { 
+                id: 2, 
+                name: "Sandwich", 
+                cost: 8, 
+                sellPrice: 15, 
+                icon: "fas fa-bread-slice",
+                description: "Fresh deli sandwich",
+                color: "#ffb347"
+            },
+            { 
+                id: 3, 
+                name: "Book", 
+                cost: 12, 
+                sellPrice: 25, 
+                icon: "fas fa-book",
+                description: "Bestselling novel",
+                color: "#8b4513"
+            },
+            { 
+                id: 4, 
+                name: "Painting Supplies", 
+                cost: 50, 
+                sellPrice: 0, 
+                unlocksArt: true, 
+                icon: "fas fa-paint-brush",
+                description: "Unlocks art studio",
+                color: "#a777e3"
+            }
+        ];
+        
+        // Quests
+        const quests = [
+            {
+                description: "Sell 3 coffees",
+                targetItem: "Coffee",
+                targetCount: 3,
+                reward: 30,
+                progress: 0
+            },
+            {
+                description: "Sell 2 sandwiches",
+                targetItem: "Sandwich",
+                targetCount: 2,
+                reward: 30,
+                progress: 0
+            },
+            {
+                description: "Sell 1 book",
+                targetItem: "Book",
+                targetCount: 1,
+                reward: 25,
+                progress: 0
+            },
+            {
+                description: "Create 2 paintings",
+                targetItem: "Painting",
+                targetCount: 2,
+                reward: 100,
+                progress: 0
+            },
+            {
+                description: "Earn $50 in one day",
+                targetItem: "Money",
+                targetCount: 50,
+                reward: 75,
+                progress: 0
+            }
+        ];
+        
+        // Customer data
+        const customerMessages = [
+            "I'll have the usual!",
+            "This place is great!",
+            "The service here is excellent! :)",
+            "I've been waiting a while...",
+            "What do you recommend?",
+            "Just browsing for now",
+            "I need a quick pick-me-up",
+            "Love the ambiance here!"
+        ];
+        
+        // Initialize game
+        function initGame() {
+            // Load saved game if available
+            loadGame();
+            
+            // Start day cycle
+            startDayCycle();
+            
+            // Render initial UI
+            updateUI();
+            renderShop();
+            renderInventory();
+            
+            // Setup keyboard shortcuts
+            setupKeyboardShortcuts();
+            
+            // Show tutorial on first load
+            if (!localStorage.getItem('snd_tutorial_shown')) {
+                showTutorial();
+                localStorage.setItem('snd_tutorial_shown', 'true');
+            }
+            
+            // Add some initial customers
+            setTimeout(() => {
+                for (let i = 0; i < 2; i++) {
+                    addCustomer();
+                }
+            }, 1000);
+        }
+        
+        // Start the day timer
+        function startDayCycle() {
+            clearInterval(dayInterval);
+            timeLeft = DAY_DURATION;
+            
+            dayInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                
+                if (timeLeft <= 0) {
+                    nextDay();
+                }
+                
+                // Update customer patience indicators
+                updateCustomerTimers();
+                
+                // Auto-save every 10 seconds
+                if (timeLeft % 10 === 0) {
+                    saveGame();
+                }
+            }, 1000);
+        }
+        
+        // Update timer display
+        function updateTimerUI() {
+            const timeLeftEl = document.getElementById('time-left');
+            const timerFillEl = document.getElementById('timer-fill');
+            
+            if (timeLeftEl) timeLeftEl.textContent = timeLeft;
+            if (timerFillEl) {
+                const percentage = (timeLeft / DAY_DURATION) * 100;
+                timerFillEl.style.width = `${percentage}%`;
+                
+                // Change color based on time remaining
+                if (percentage < 25) {
+                    timerFillEl.style.background = 'linear-gradient(to right, #ff9800, #f44336)';
+                } else if (percentage < 50) {
+                    timerFillEl.style.background = 'linear-gradient(to right, #ffeb3b, #ff9800)';
+                }
+            }
+        }
+        
+        // Move to next day
+        function nextDay() {
+            clearInterval(dayInterval);
+            day++;
+            
+            // Clear any existing customers
+            activeCustomers.forEach(customer => {
+                clearTimeout(customer.timeout);
+            });
+            activeCustomers = [];
+            
+            // Add new customers based on reputation
+            const newCustomerCount = Math.floor(reputation / 20) + Math.floor(Math.random() * 3);
+            customersWaiting = newCustomerCount;
+            
+            for (let i = 0; i < newCustomerCount; i++) {
+                setTimeout(() => addCustomer(), i * 1000);
+            }
+            
+            // Check for loan repayment
+            if (loan > 0 && day % LOAN_TERM_DAYS === 0) {
+                if (money >= loan) {
+                    money -= loan;
+                    loan = 0;
+                    showNotification("Loan paid off!", "success");
+                } else {
+                    reputation -= 20;
+                    showNotification("Failed to pay loan! Reputation -20", "danger");
+                }
+            }
+            
+            // Show day notification
+            showNotification(`Day ${day} has begun! ${newCustomerCount} customers arrived.`, "info");
+            
+            // Update UI and restart timer
+            updateUI();
+            renderCustomers();
+            startDayCycle();
+            
+            // Reset daily money earned for quest
+            moneyEarnedSinceQuestStart = 0;
+        }
+        
+        // Borrow money
+        function borrowMoney() {
+            if (loan > 0) {
+                showNotification("You already have an outstanding loan!", "warning");
+                return;
+            }
+            
+            money += LOAN_AMOUNT;
+            loan = LOAN_REPAYMENT;
+            
+            showNotification(`Borrowed $${LOAN_AMOUNT}. Repay $${LOAN_REPAYMENT} in ${LOAN_TERM_DAYS} days.`, "warning");
+            updateUI();
+        }
+        
+        // Buy item from shop
+        function buyItem(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (!item) return;
+            
+            if (money < item.cost) {
+                showNotification("Not enough money!", "danger");
+                return;
+            }
+            
+            money -= item.cost;
+            
+            if (item.unlocksArt) {
+                artUnlocked = true;
+                document.getElementById('art-studio').style.display = 'block';
+                showNotification("Art studio unlocked! You can now create paintings.", "success");
+                
+                // Update shop item to show it's purchased
+                renderShop();
+            } else {
+                // Add to inventory
+                inventory.push({
+                    id: item.id,
+                    name: item.name,
+                    cost: item.cost,
+                    sellPrice: item.sellPrice,
+                    icon: item.icon,
+                    color: item.color
+                });
+                
+                showNotification(`Bought ${item.name} for $${item.cost}`, "success");
+                renderInventory();
+            }
+            
+            updateUI();
+        }
+        
+        // Sell item to customer
+        function sellItem(itemIndex) {
+            if (customersWaiting <= 0) {
+                showNotification("No customers to serve!", "warning");
+                return;
+            }
+            
+            if (itemIndex < 0 || itemIndex >= inventory.length) {
+                return;
+            }
+            
+            const item = inventory[itemIndex];
+            const amountEarned = item.sellPrice;
+            
+            money += amountEarned;
+            reputation = Math.min(100, reputation + 2);
+            customersWaiting--;
+            
+            // Update quest progress
+            updateQuestProgress(item.name, amountEarned);
+            
+            // Remove customer if any are waiting
+            if (activeCustomers.length > 0) {
+                const servedCustomer = activeCustomers.shift();
+                clearTimeout(servedCustomer.timeout);
+                
+                // Show customer feedback
+                const feedbackMessages = [
+                    "Thanks, that was delicious!",
+                    "Perfect, just what I needed!",
+                    "Great service, I'll be back!",
+                    "Thanks for the quick service!"
+                ];
+                const randomFeedback = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
+                
+                showNotification(`Sold ${item.name} for $${amountEarned}. ${randomFeedback}`, "success");
+            }
+            
+            // Remove item from inventory
+            inventory.splice(itemIndex, 1);
+            
+            // Update UI
+            updateUI();
+            renderInventory();
+            renderCustomers();
+        }
+        
+        // Create art (if unlocked)
+        function createArt() {
+            if (!artUnlocked) return;
+            
+            const artValue = Math.floor(Math.random() * 101) + 50; // $50-$150
+            const paintingTypes = ["Abstract", "Portrait", "Landscape", "Modern", "Classic"];
+            const paintingType = paintingTypes[Math.floor(Math.random() * paintingTypes.length)];
+            
+            inventory.push({
+                id: 100 + Math.floor(Math.random() * 1000),
+                name: `${paintingType} Painting`,
+                cost: 0,
+                sellPrice: artValue,
+                icon: "fas fa-palette",
+                color: "#a777e3"
+            });
+            
+            // Update quest progress
+            updateQuestProgress("Painting");
+            
+            showNotification(`Created a ${paintingType} painting worth $${artValue}!`, "success");
+            renderInventory();
+        }
+        
+        // Add a new customer
+        function addCustomer() {
+            if (activeCustomers.length >= 8) return;
+            
+            const customerId = Date.now() + Math.random();
+            const messageIndex = Math.floor(Math.random() * customerMessages.length);
+            const customerMessage = customerMessages[messageIndex];
+            
+            // Assign a random icon/avatar
+            const customerIcons = ["fas fa-user", "fas fa-user-tie", "fas fa-user-graduate", "fas fa-user-ninja", 
+                                   "fas fa-user-astronaut", "fas fa-user-md", "fas fa-user-secret"];
+            const customerIcon = customerIcons[Math.floor(Math.random() * customerIcons.length)];
+            
+            const customer = {
+                id: customerId,
+                icon: customerIcon,
+                message: customerMessage,
+                patience: 100,
+                timeout: setTimeout(() => {
+                    // Customer leaves if not served
+                    activeCustomers = activeCustomers.filter(c => c.id !== customerId);
+                    customersWaiting = Math.max(0, customersWaiting - 1);
+                    reputation = Math.max(0, reputation - 1);
+                    
+                    showNotification("A customer left without being served! Reputation -1", "danger");
+                    
+                    updateUI();
+                    renderCustomers();
+                }, CUSTOMER_PATIENCE)
+            };
+            
+            activeCustomers.push(customer);
+            renderCustomers();
+        }
+        
+        // Update customer patience indicators
+        function updateCustomerTimers() {
+            activeCustomers.forEach(customer => {
+                if (customer.startTime) {
+                    const elapsed = Date.now() - customer.startTime;
+                    customer.patience = Math.max(0, 100 - (elapsed / CUSTOMER_PATIENCE * 100));
+                } else {
+                    customer.startTime = Date.now();
+                }
+            });
+            
+            // Re-render customers to update timers
+            if (activeCustomers.length > 0) {
+                renderCustomers();
+            }
+        }
+        
+        // Quest system
+        function interactWithQuestGiver() {
+            if (!currentQuest) {
+                // Filter available quests (don't show painting quest if art not unlocked)
+                const availableQuests = quests.filter(q => 
+                    (q.targetItem !== "Painting" || artUnlocked)
+                );
+                
+                if (availableQuests.length > 0) {
+                    currentQuest = { ...availableQuests[Math.floor(Math.random() * availableQuests.length)] };
+                    moneyEarnedSinceQuestStart = 0;
+                    currentQuest.progress = 0;
+                    
+                    showNotification(`New Quest: ${currentQuest.description}`, "info");
+                    updateQuestUI();
+                } else {
+                    showNotification("No quests available right now. Come back later!", "warning");
+                }
+            } else if (questCompleted) {
+                // Complete quest
+                money += currentQuest.reward;
+                showNotification(`Quest completed! You received $${currentQuest.reward}`, "success");
+                
+                currentQuest = null;
+                questCompleted = false;
+                moneyEarnedSinceQuestStart = 0;
+                
+                updateQuestUI();
+                updateUI();
+            } else {
+                // Show current quest progress
+                showNotification(`Current Quest: ${currentQuest.description}\nProgress: ${currentQuest.progress}/${currentQuest.targetCount}`, "info");
+            }
+        }
+        
+        // Update quest progress
+        function updateQuestProgress(itemName, amountEarned = 0) {
+            if (!currentQuest || questCompleted) return;
+            
+            if (currentQuest.targetItem === "Money") {
+                moneyEarnedSinceQuestStart += amountEarned;
+                currentQuest.progress = moneyEarnedSinceQuestStart;
+            } else if (itemName === currentQuest.targetItem) {
+                currentQuest.progress++;
+            }
+            
+            if (currentQuest.progress >= currentQuest.targetCount) {
+                questCompleted = true;
+                showNotification("Quest completed! Return to the quest giver for your reward.", "success");
+            }
+            
+            updateQuestUI();
+        }
+        
+        // Update quest UI
+        function updateQuestUI() {
+            const questTitle = document.getElementById('quest-title');
+            const questDescription = document.getElementById('quest-description');
+            const questProgress = document.getElementById('quest-progress');
+            const questProgressBar = document.getElementById('quest-progress-bar');
+            const questProgressText = document.getElementById('quest-progress-text');
+            const questReward = document.getElementById('quest-reward');
+            
+            if (currentQuest) {
+                questTitle.textContent = "Active Quest";
+                questDescription.textContent = currentQuest.description;
+                questProgress.style.display = 'block';
+                
+                const progressPercentage = Math.min(100, (currentQuest.progress / currentQuest.targetCount) * 100);
+                questProgressBar.style.width = `${progressPercentage}%`;
+                questProgressText.textContent = `${currentQuest.progress}/${currentQuest.targetCount}`;
+                questReward.textContent = `Reward: $${currentQuest.reward}`;
+            } else {
+                questTitle.textContent = "No Active Quest";
+                questDescription.textContent = "Talk to the quest giver to get a quest!";
+                questProgress.style.display = 'none';
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = "info") {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Set icon based on type
+            let icon = "fas fa-info-circle";
+            if (type === "success") icon = "fas fa-check-circle";
+            if (type === "warning") icon = "fas fa-exclamation-triangle";
+            if (type === "danger") icon = "fas fa-times-circle";
+            
+            notification.innerHTML = `
+                <i class="${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+        
+        // Render shop items
+        function renderShop() {
+            const shopContainer = document.getElementById('shop-items');
+            const emptyState = document.getElementById('shop-empty');
+            
+            if (!shopContainer) return;
+            
+            shopContainer.innerHTML = '';
+            
+            shopItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = `shop-item ${item.unlocksArt && artUnlocked ? 'disabled' : ''}`;
+                itemElement.onclick = () => !(item.unlocksArt && artUnlocked) && buyItem(item.id);
+                
+                // Check if painting supplies already purchased
+                const alreadyPurchased = item.unlocksArt && artUnlocked;
+                
+                itemElement.innerHTML = `
+                    <div class="item-icon" style="background: linear-gradient(135deg, ${item.color}, ${item.color}80);">
+                        <i class="${item.icon}"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-desc">${item.description}</div>
+                        <div class="item-price">
+                            <span class="price-tag">$${item.cost}</span>
+                            ${item.sellPrice > 0 ? `<span class="sell-price">Sells for $${item.sellPrice}</span>` : ''}
+                            ${item.unlocksArt ? `<span style="color: #a777e3; font-weight: 600;">${alreadyPurchased ? '✓ Purchased' : 'Unlocks Art Studio'}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                shopContainer.appendChild(itemElement);
+            });
+            
+            // Show empty state if no items
+            emptyState.style.display = shopItems.length === 0 ? 'block' : 'none';
+        }
+        
+        // Render inventory
+        function renderInventory() {
+            const inventoryContainer = document.getElementById('inventory-items');
+            const emptyState = document.getElementById('inventory-empty');
+            
+            if (!inventoryContainer) return;
+            
+            inventoryContainer.innerHTML = '';
+            
+            if (inventory.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            inventory.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'inventory-item';
+                itemElement.onclick = () => sellItem(index);
+                
+                itemElement.innerHTML = `
+                    <div class="item-icon" style="background: linear-gradient(135deg, ${item.color || '#6e8efb'}, ${item.color ? item.color + '80' : '#6e8efb80'});">
+                        <i class="${item.icon || 'fas fa-box'}"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">
+                            <span class="price-tag">Sell for $${item.sellPrice}</span>
+                            <span style="color: #666; font-size: 0.9rem;">Click to sell</span>
+                        </div>
+                    </div>
+                `;
+                
+                inventoryContainer.appendChild(itemElement);
+            });
+        }
+        
+        // Render customers
+        function renderCustomers() {
+            const customersContainer = document.getElementById('customers-container');
+            const emptyState = document.getElementById('customers-empty');
+            const waitingCountEl = document.getElementById('customers-waiting');
+            
+            if (!customersContainer) return;
+            
+            customersContainer.innerHTML = '';
+            
+            if (activeCustomers.length === 0) {
+                emptyState.style.display = 'block';
+                if (waitingCountEl) waitingCountEl.textContent = '0';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            if (waitingCountEl) waitingCountEl.textContent = activeCustomers.length.toString();
+            
+            activeCustomers.forEach(customer => {
+                const customerElement = document.createElement('div');
+                customerElement.className = `customer ${customer.patience < 30 ? 'impatient' : ''}`;
+                customerElement.id = `customer-${customer.id}`;
+                
+                // Determine if customer is about to leave
+                const isLeavingSoon = customer.patience < 15;
+                
+                customerElement.innerHTML = `
+                    <div class="customer-avatar">
+                        <i class="${customer.icon}"></i>
+                    </div>
+                    <div class="customer-message">"${customer.message}"</div>
+                    <div class="customer-timer">
+                        <div class="customer-timer-fill" style="width: ${customer.patience}%"></div>
+                    </div>
+                    ${isLeavingSoon ? '<div style="color: #f44336; font-size: 0.8rem; margin-top: 5px;">Getting impatient!</div>' : ''}
+                `;
+                
+                customersContainer.appendChild(customerElement);
+            });
+        }
+        
+        // Update main UI
+        function updateUI() {
+            // Update stat values
+            document.getElementById('day').textContent = day;
+            document.getElementById('money').textContent = `$${money}`;
+            document.getElementById('loan').textContent = `$${loan}`;
+            document.getElementById('reputation').textContent = `${reputation}/100`;
+            
+            // Update timer
+            updateTimerUI();
+            
+            // Update reputation color indicator
+            const reputationEl = document.getElementById('reputation');
+            if (reputation >= 80) {
+                reputationEl.style.color = '#2ecc71';
+            } else if (reputation >= 50) {
+                reputationEl.style.color = '#f39c12';
+            } else {
+                reputationEl.style.color = '#e74c3c';
+            }
+            
+            // Show loan badge if loan exists
+            const loanStat = document.querySelector('.stat-card:nth-child(3)');
+            const existingBadge = loanStat.querySelector('.loan-badge');
+            
+            if (loan > 0 && !existingBadge) {
+                const badge = document.createElement('div');
+                badge.className = 'loan-badge';
+                badge.innerHTML = '<i class="fas fa-exclamation"></i>';
+                badge.title = `Loan due in ${LOAN_TERM_DAYS - (day % LOAN_TERM_DAYS)} days`;
+                loanStat.style.position = 'relative';
+                loanStat.appendChild(badge);
+            } else if (loan === 0 && existingBadge) {
+                existingBadge.remove();
+            }
+        }
+        
+        // Save game to localStorage
+        function saveGame() {
+            const gameState = {
+                money,
+                loan,
+                day,
+                inventory,
+                reputation,
+                customersWaiting,
+                artUnlocked,
+                currentQuest,
+                questCompleted,
+                moneyEarnedSinceQuestStart
+            };
+            
+            try {
+                localStorage.setItem('snd_save', JSON.stringify(gameState));
+            } catch (e) {
+                console.error('Failed to save game:', e);
+            }
+        }
+        
+        // Load game from localStorage
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem('snd_save');
+                if (!saved) return;
+                
+                const gameState = JSON.parse(saved);
+                
+                money = gameState.money || money;
+                loan = gameState.loan || loan;
+                day = gameState.day || day;
+                inventory = gameState.inventory || inventory;
+                reputation = gameState.reputation || reputation;
+                customersWaiting = gameState.customersWaiting || customersWaiting;
+                artUnlocked = gameState.artUnlocked || artUnlocked;
+                currentQuest = gameState.currentQuest || currentQuest;
+                questCompleted = gameState.questCompleted || questCompleted;
+                moneyEarnedSinceQuestStart = gameState.moneyEarnedSinceQuestStart || moneyEarnedSinceQuestStart;
+                
+                // Show art studio if unlocked
+                if (artUnlocked) {
+                    document.getElementById('art-studio').style.display = 'block';
+                }
+                
+                showNotification('Game loaded successfully!', 'success');
+            } catch (e) {
+                console.error('Failed to load game:', e);
+            }
+        }
+        
+        // Setup keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger if user is typing in an input field
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                switch(e.key.toLowerCase()) {
+                    case 'b':
+                        e.preventDefault();
+                        borrowMoney();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        nextDay();
+                        break;
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                        e.preventDefault();
+                        const index = parseInt(e.key) - 1;
+                        if (index < shopItems.length) {
+                            buyItem(shopItems[index].id);
+                        }
+                        break;
+                    case 'q':
+                        e.preventDefault();
+                        interactWithQuestGiver();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        // Sell first item in inventory if available
+                        if (inventory.length > 0) {
+                            sellItem(0);
+                        }
+                        break;
+                    case 'a':
+                        e.preventDefault();
+                        if (artUnlocked) {
+                            createArt();
+                        }
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        // Reset game confirmation
+                        if (confirm('Reset game? All progress will be lost.')) {
+                            localStorage.removeItem('snd_save');
+                            localStorage.removeItem('snd_tutorial_shown');
+                            location.reload();
+                        }
+                        break;
+                }
+            });
+        }
+        
+        // Show tutorial
+        function showTutorial() {
+            const tutorial = document.createElement('div');
+            tutorial.className = 'tutorial-overlay';
+            tutorial.id = 'tutorial-overlay';
+            
+            tutorial.innerHTML = `
+                <div class="tutorial-content">
+                    <h2><i class="fas fa-graduation-cap"></i> Welcome to Supply & Demand!</h2>
+                    <p>Manage your shop by buying items at wholesale prices and selling them to customers for profit.</p>
+                    
+                    <h3>How to Play:</h3>
+                    <ol style="margin-left: 20px; margin-bottom: 20px;">
+                        <li>Buy items from the Wholesale Supplier</li>
+                        <li>Sell items to waiting customers</li>
+                        <li>Complete quests for extra money</li>
+                        <li>Pay back loans on time to maintain reputation</li>
+                        <li>Unlock the art studio to create premium paintings</li>
+                    </ol>
+                    
+                    <h3>Keyboard Shortcuts:</h3>
+                    <div class="hotkeys">
+                        <div class="hotkey-item"><span class="hotkey-key">B</span> Borrow money</div>
+                        <div class="hotkey-item"><span class="hotkey-key">N</span> Next day</div>
+                        <div class="hotkey-item"><span class="hotkey-key">1-4</span> Buy shop items</div>
+                        <div class="hotkey-item"><span class="hotkey-key">Q</span> Talk to quest giver</div>
+                        <div class="hotkey-item"><span class="hotkey-key">S</span> Sell first inventory item</div>
+                        <div class="hotkey-item"><span class="hotkey-key">A</span> Create art (if unlocked)</div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="document.getElementById('tutorial-overlay').remove()" style="margin-top: 20px; width: 100%;">
+                        <i class="fas fa-play"></i> Start Playing!
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(tutorial);
+        }
+        
+        // Initialize game when page loads
+        window.onload = initGame;
+    </script>
 </body>
-
 </html>

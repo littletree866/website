@@ -12,15 +12,9 @@
 - **Has games for everyone** — All different types of games, play what you want.
 
 
-## 🛠️ Technical Stack
-
-- **HTML5** - Semantic markup and Canvas for graphics
-- **CSS3** - Grid/Flexbox layouts, gradients, animations
-- **ES6+ JavaScript** - Modern syntax with efficient game loops
-- **localStorage API** - Persistent save system per game
-
 ## 📅 Updates Log
 
+- **Version 1.18.22** — February 2, 2026
 - **Version 1.17.20** — January 15, 2026
 - **Version 1.16.19** — January 1, 2026
 - **Version 1.15.18** — December 10, 2025
