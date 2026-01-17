@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Impossible Game</title>
-      <link rel="icon" href="../../icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,96 +16,106 @@
         }
 
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Jura', sans-serif;
             margin: 0;
             overflow: hidden;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             color: #fff;
+            letter-spacing: 0.5px;
         }
 
-        button { font-family: inherit; }
+        button {
+            font-family: inherit;
+            font-weight: 600;
+        }
 
         #gameContainer {
             position: relative;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+            border-radius: 16px;
             overflow: hidden;
-            border: 2px solid #4a4a6d;
+            border: 3px solid #2d2d5a;
+            background: #1a1a2e;
         }
 
         canvas {
-            background: linear-gradient(to bottom, #87CEEB 0%, #98d4f0 100%);
+            background: linear-gradient(to bottom, #1e3c72 0%, #2a5298 100%);
             display: block;
-            border-radius: 10px;
+            border-radius: 14px;
         }
 
-        /* UI Improvements */
+        /* Enhanced UI */
         #ui {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 25px;
+            left: 25px;
             color: white;
-            font-size: 22px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
-            font-family: "DM Sans", sans-serif;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 15px 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 24px;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.9);
+            font-family: "Jura", sans-serif;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 30, 70, 0.8));
+            padding: 20px 25px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(100, 100, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         #levelText {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
-            color: #ffdd00;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #scoreContainer {
-            font-size: 20px;
+            color: #00ffea;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #scoreContainer {
+            font-size: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffdd00;
         }
 
         #healthContainer {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 10px;
         }
 
         #healthLabel {
-            font-size: 18px;
+            font-size: 20px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            color: #ff6b8b;
         }
 
         #healthBar {
-            width: 240px;
-            height: 24px;
-            background: linear-gradient(90deg, #2a0a0a, #1a0505);
-            border-radius: 12px;
+            width: 280px;
+            height: 28px;
+            background: linear-gradient(90deg, #1a0505, #2a0a0a);
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8), 0 3px 6px rgba(0, 0, 0, 0.3);
-            border: 2px solid #4a1a1a;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4);
+            border: 2px solid #5a1a1a;
         }
 
         #healthFill {
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #ff2f2f, #ff6b6b);
+            background: linear-gradient(90deg, #ff416c, #ff4b2b, #ff416c);
             background-size: 200% 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: healthPulse 2s infinite;
             position: relative;
@@ -119,19 +129,16 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shimmer 3s infinite;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2.5s infinite;
         }
 
         @keyframes healthPulse {
-
-            0%,
-            100% {
+            0%, 100% {
                 opacity: 1;
             }
-
             50% {
-                opacity: 0.9;
+                opacity: 0.85;
             }
         }
 
@@ -139,7 +146,6 @@
             0% {
                 transform: translateX(-100%);
             }
-
             100% {
                 transform: translateX(100%);
             }
@@ -148,214 +154,214 @@
         /* Controls Display */
         #controls {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 12px 16px;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 16px;
+            bottom: 25px;
+            left: 25px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 30, 70, 0.8));
+            padding: 15px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(100, 100, 255, 0.2);
+            font-size: 18px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .control-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
         .key {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 4px 10px;
-            border-radius: 6px;
-            min-width: 30px;
+            background: linear-gradient(135deg, rgba(100, 100, 255, 0.3), rgba(70, 70, 200, 0.4));
+            padding: 6px 14px;
+            border-radius: 8px;
+            min-width: 36px;
             text-align: center;
             font-weight: 700;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(150, 150, 255, 0.4);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
         /* Pause Button */
         #pauseBtn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #555, #333);
+            top: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #4a4a8a, #2d2d5a);
             color: white;
-            padding: 12px 24px;
-            font-size: 20px;
+            padding: 14px 28px;
+            font-size: 22px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            font-family: "DM Sans", sans-serif;
-            font-weight: 500;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            transition: all 0.2s ease;
-            border: 2px solid #666;
+            font-family: "Jura", sans-serif;
+            font-weight: 600;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #5a5aaa;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         #pauseBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-            background: linear-gradient(135deg, #666, #444);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+            background: linear-gradient(135deg, #5a5aaa, #3d3d7a);
         }
 
         #pauseBtn:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(0) scale(1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
-        /* Screens */
+        /* Enhanced Screens */
         .screen {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(30, 30, 60, 0.95));
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 50, 0.98));
             color: white;
-            padding: 50px 80px;
-            font-size: 44px;
-            border-radius: 24px;
+            padding: 60px 100px;
+            font-size: 48px;
+            border-radius: 28px;
             text-align: center;
             display: none;
-            font-family: "DM Sans", sans-serif;
+            font-family: "Jura", sans-serif;
             font-weight: 700;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            border: 3px solid #4a4a6d;
-            min-width: 500px;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
+            border: 4px solid #4a4a8a;
+            min-width: 600px;
+            backdrop-filter: blur(20px);
             z-index: 1000;
+            animation: screenEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes screenEntrance {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
 
         .screen h2 {
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #ffdd00, #ff6b6b);
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #00ffea, #ff6b8b, #ffdd00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-size: 64px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .screen p {
-            font-size: 24px;
-            margin: 20px 0;
-            color: #ccc;
-            font-weight: 400;
+            font-size: 28px;
+            margin: 25px 0;
+            color: #ddd;
+            font-weight: 500;
         }
 
         .screen button {
-            margin-top: 30px;
-            padding: 15px 40px;
-            font-size: 24px;
+            margin-top: 40px;
+            padding: 18px 50px;
+            font-size: 28px;
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             cursor: pointer;
-            font-family: "DM Sans", sans-serif;
+            font-family: "Jura", sans-serif;
             font-weight: 700;
-            background: linear-gradient(135deg, #4CAF50, #45a049);
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
             color: white;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
 
         .screen button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(135deg, #66BB6A, #4CAF50);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
         }
 
         .screen button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(0) scale(1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
         }
 
         /* Double Jump Indicator */
         #doubleJumpIndicator {
             position: absolute;
-            top: 20px;
+            top: 25px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 200, 255, 0.2);
-            color: #00ffff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 18px;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 150, 255, 0.4));
+            color: #00ffea;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 20px;
             display: none;
             align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(0, 200, 255, 0.4);
-            animation: pulse 2s infinite;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 200, 255, 0.5);
+            animation: pulseGlow 2s infinite;
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 8px 32px rgba(0, 200, 255, 0.3);
             }
-
             50% {
-                opacity: 0.7;
+                box-shadow: 0 8px 32px rgba(0, 200, 255, 0.6);
             }
-        }
-
-        /* Particle Effects Container */
-        #particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        /* Instructions Screen */
-        #instructionsScreen {
-            z-index: 1001;
-        }
-
-        .instructions {
-            font-size: 18px;
-            color: #aaa;
-            line-height: 1.6;
-            margin-top: 10px;
         }
 
         /* Mobile Controls */
         #mobileControls {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            right: 25px;
             display: none;
-            gap: 20px;
+            gap: 25px;
         }
 
         .mobile-btn {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: linear-gradient(135deg, rgba(100, 100, 255, 0.4), rgba(70, 70, 200, 0.5));
+            border: 3px solid rgba(150, 150, 255, 0.6);
             color: white;
-            font-size: 32px;
+            font-size: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             user-select: none;
-            backdrop-filter: blur(5px);
-            transition: all 0.1s;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
         .mobile-btn:active {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(0.95);
+            background: linear-gradient(135deg, rgba(150, 150, 255, 0.6), rgba(100, 100, 255, 0.7));
+            transform: scale(0.9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         /* Responsive */
@@ -374,14 +380,16 @@
 
             .screen {
                 min-width: 90vw;
-                padding: 30px;
-                font-size: 36px;
+                padding: 40px;
+                font-size: 32px;
             }
 
-            #ui,
-            #controls,
-            #pauseBtn {
-                transform: scale(0.9);
+            .screen h2 {
+                font-size: 48px;
+            }
+
+            #ui, #controls, #pauseBtn {
+                transform: scale(0.95);
             }
         }
 
@@ -392,6 +400,15 @@
 
             #controls {
                 display: none;
+            }
+            
+            #ui {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            #levelText {
+                font-size: 22px;
             }
         }
     </style>
@@ -422,8 +439,6 @@
 
         <button id="pauseBtn">⏸️ Pause</button>
 
-        <div id="particles"></div>
-
         <div id="gameOverScreen" class="screen">
             <h2>Game Over</h2>
             <p>Score: <span id="finalScore">0</span></p>
@@ -432,16 +447,16 @@
         </div>
 
         <div id="winScreen" class="screen">
-            <h2>You Win! 🎉</h2>
+            <h2>Victory! 🎉</h2>
             <p>Final Score: <span id="winScore">0</span></p>
             <button onclick="resetGame()">Play Again</button>
         </div>
 
         <div id="instructionsScreen" class="screen">
             <h2>The Impossible Game</h2>
-            <p class="instructions">Reach the goal while avoiding enemies and traps!</p>
-            <p class="instructions">Collect coins for points and power-ups for special abilities.</p>
-            <p class="instructions">Complete all 4 levels to win!</p>
+            <p>Reach the goal while avoiding enemies and traps!</p>
+            <p>Collect coins for points and power-ups for abilities.</p>
+            <p>Complete all 4 levels to win!</p>
             <button onclick="startGame()">Start Game</button>
         </div>
     </div>
@@ -449,8 +464,11 @@
     <script>
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
-        const particlesContainer = document.getElementById("particles");
-
+        
+        // Performance improvements
+        let lastFrameTime = 0;
+        const FPS = 60;
+        const frameDuration = 1000 / FPS;
 
         const keys = { left: false, right: false, up: false };
         let paused = false;
@@ -460,7 +478,7 @@
         let gameStarted = false;
         let particles = [];
         let screenShake = 0;
-
+        let gameTime = 0;
 
         const scoreText = document.getElementById("scoreText");
         const healthFill = document.getElementById("healthFill");
@@ -472,29 +490,27 @@
         const winScore = document.getElementById("winScore");
         const doubleJumpIndicator = document.getElementById("doubleJumpIndicator");
 
-
         const world = { width: 2400, height: canvas.height };
-        let camera = { x: 0, width: canvas.width, smooth: 0.08 };
-
+        let camera = { x: 0, width: canvas.width, smooth: 0.05 };
 
         let player = {
             x: 50, y: 50, w: 36, h: 44,
             vx: 0, vy: 0,
-            speed: 4.8,
+            speed: 5.2,
             jumping: false,
             onGround: false,
             coyote: 0,
             canDoubleJump: false,
             facing: 1,
             dashCooldown: 0,
-            invincible: 0
+            invincible: 0,
+            jumpBuffer: 0
         };
 
-
-        const gravity = 0.7;
-        const jumpForce = -13;
-        const COYOTE_TIME = 0.15;
-
+        const gravity = 0.8;
+        const jumpForce = -14;
+        const COYOTE_TIME = 0.2;
+        const JUMP_BUFFER = 0.1;
 
         let platforms = [];
         let enemies = [];
@@ -502,68 +518,97 @@
         let powerUps = [];
         let goal = null;
         let decorations = [];
+        let backgrounds = [];
         let lastTime = performance.now();
 
-
+        // Fix: Initialize platforms properly
+        function initPlatforms() {
+            platforms = [];
+            enemies = [];
+            coins = [];
+            powerUps = [];
+            goal = null;
+            decorations = [];
+            backgrounds = [];
+        }
 
         function loadLevel(n) {
             level = n;
             document.getElementById("levelText").textContent = `🎯 Level: ${level}`;
-            enemies = []; platforms = []; coins = []; powerUps = []; goal = null; decorations = [];
+            
+            initPlatforms();
 
+            // Platform factory functions
+            function staticPlat(x, y, w, h) { 
+                return { x, y, w, h, type: 'static', color: '#4ECC88' }; 
+            }
+            
+            function movingPlat(x, y, w, h, minX, maxX, speed) { 
+                return { x, y, w, h, type: 'moving', vx: speed, minX, maxX, color: '#7FB069' }; 
+            }
+            
+            function fallPlat(x, y, w, h, delay) { 
+                return { x, y, w, h, type: 'fall', fallDelay: delay, falling: false, vy: 0, color: '#9DC183' }; 
+            }
+            
+            function spike(x, y, w, h) { 
+                return { x, y, w, h, type: 'spike', color: '#ff5555' }; 
+            }
+            
+            function lava(x, y, w, h) { 
+                return { x, y, w, h, type: 'lava', color: '#ff2222', anim: 0 }; 
+            }
+            
+            function bouncyPlat(x, y, w, h) { 
+                return { x, y, w, h, type: 'bouncy', bounce: 20, color: '#FFD700' }; 
+            }
+            
+            function conveyor(x, y, w, h, dir) { 
+                return { x, y, w, h, type: 'conveyor', dir: dir, speed: 2.5, anim: 0, color: '#8888ff' }; 
+            }
 
-            function staticPlat(x, y, w, h) { return { x, y, w, h, type: 'static' }; }
-            function movingPlat(x, y, w, h, minX, maxX, speed) { return { x, y, w, h, type: 'moving', vx: speed, minX, maxX }; }
-            function fallPlat(x, y, w, h, delay) { return { x, y, w, h, type: 'fall', fallDelay: delay, falling: false, vy: 0 }; }
-            function spike(x, y, w, h) { return { x, y, w, h, type: 'spike' }; }
-            function lava(x, y, w, h) { return { x, y, w, h, type: 'lava' }; }
-            function bouncyPlat(x, y, w, h) { return { x, y, w, h, type: 'bouncy', bounce: 18 }; }
-            function conveyor(x, y, w, h, dir) { return { x, y, w, h, type: 'conveyor', dir: dir, speed: 2 }; }
+            // Entity factory functions
+            function makeEnemy(x, y, minX, maxX, speed = 1.5) { 
+                return { x, y, w: 36, h: 36, vx: speed, minX, maxX, anim: 0, type: 'ground' }; 
+            }
+            
+            function makeCoin(x, y) { 
+                return { x, y, w: 20, h: 20, collected: false, anim: 0 }; 
+            }
+            
+            function makePowerUp(x, y, type = 'doubleJump') { 
+                return { x, y, w: 28, h: 28, type: type, collected: false, anim: 0 }; 
+            }
 
-            function makeEnemy(x, y, minX, maxX, speed = 1.2) { return { x, y, w: 36, h: 36, vx: speed, minX, maxX, anim: 0 }; }
-            function makeFlyingEnemy(x, y, minX, maxX, minY, maxY, speed = 1) { return { x, y, w: 40, h: 30, vx: speed, vy: 0, minX, maxX, minY, maxY, anim: 0, type: 'flying' }; }
-            function makeCoin(x, y) { return { x, y, w: 16, h: 16, collected: false, anim: 0 }; }
-            function makePowerUp(x, y) { return { x, y, w: 24, h: 24, type: 'doubleJump', collected: false, anim: 0 }; }
-            function makeDecoration(x, y, w, h, type) { return { x, y, w, h, type }; }
-
-
+            // Level designs
             if (level === 1) {
                 world.width = 1800;
                 platforms = [
-
                     staticPlat(0, 860, 400, 40),
                     staticPlat(550, 860, 300, 40),
                     staticPlat(950, 860, 400, 40),
                     staticPlat(1450, 860, 350, 40),
-
-
+                    
                     staticPlat(200, 750, 120, 20),
                     staticPlat(400, 700, 120, 20),
-                    movingPlat(620, 650, 140, 20, 600, 850, 1.5),
-
-
-                    fallPlat(900, 600, 120, 20, 400),
+                    movingPlat(620, 650, 140, 20, 600, 850, 1.8),
+                    
+                    fallPlat(900, 600, 120, 20, 500),
                     staticPlat(1100, 550, 120, 20),
-
-
+                    
                     staticPlat(1300, 500, 80, 20),
                     staticPlat(1400, 450, 80, 20),
                     staticPlat(1500, 400, 80, 20),
-
-
-                    spike(300, 820, 100, 8),
-                    spike(800, 820, 100, 8),
-                    spike(1200, 820, 100, 8)
+                    
+                    spike(300, 820, 100, 12),
+                    spike(800, 820, 100, 12),
+                    spike(1200, 820, 100, 12)
                 ];
 
+                enemies.push(makeEnemy(250, 730, 200, 300, 1.2));
+                enemies.push(makeEnemy(1120, 530, 1100, 1200, 1.5));
 
-                enemies.push(makeEnemy(250, 730, 200, 300, 1.0));
-                enemies.push(makeEnemy(1120, 530, 1100, 1200, 1.2));
-                enemies.push(makeEnemy(1520, 380, 1500, 1600, 0.8));
-
-
-                goal = { x: 1700, y: 360, w: 44, h: 64, anim: 0 };
-
+                goal = { x: 1700, y: 360, w: 50, h: 70, anim: 0 };
 
                 coins.push(
                     makeCoin(250, 710),
@@ -572,20 +617,13 @@
                     makeCoin(1350, 450),
                     makeCoin(1550, 350)
                 );
+                
                 powerUps.push(makePowerUp(1450, 350));
-
-
-                decorations.push(makeDecoration(100, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(600, 800, 25, 35, 'tree'));
-                decorations.push(makeDecoration(1000, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(1400, 800, 25, 35, 'tree'));
             }
-
 
             if (level === 2) {
                 world.width = 2200;
                 platforms = [
-
                     staticPlat(0, 860, 200, 40),
                     staticPlat(300, 860, 150, 40),
                     staticPlat(550, 860, 200, 40),
@@ -594,115 +632,68 @@
                     staticPlat(1450, 860, 200, 40),
                     staticPlat(1750, 860, 250, 40),
                     staticPlat(2050, 860, 150, 40),
-
-
-                    spike(200, 856, 100, 8),
-                    spike(450, 856, 100, 8),
-                    spike(750, 856, 100, 8),
-                    spike(1000, 856, 100, 8),
-                    spike(1400, 856, 50, 8),
-                    spike(1700, 856, 50, 8),
-
-
-                    staticPlat(250, 750, 80, 20),
-
-                    staticPlat(450, 700, 80, 20),
-
-                    movingPlat(650, 650, 100, 20, 630, 800, 2.0),
-
-
-                    movingPlat(900, 600, 120, 20, 880, 920, 1.5),
-                    movingPlat(1100, 550, 120, 20, 1080, 1120, 1.5),
-                    movingPlat(1300, 500, 120, 20, 1280, 1320, 1.5),
-
-
+                    
+                    spike(200, 856, 100, 12),
+                    spike(450, 856, 100, 12),
+                    spike(750, 856, 100, 12),
+                    spike(1000, 856, 100, 12),
+                    
+                    movingPlat(650, 650, 100, 20, 630, 800, 2.2),
+                    movingPlat(900, 600, 120, 20, 880, 920, 1.8),
+                    
                     staticPlat(1500, 400, 60, 20),
                     staticPlat(1580, 350, 60, 20),
                     staticPlat(1660, 300, 60, 20),
                     lava(1500, 870, 220, 30)
                 ];
 
+                enemies.push(makeEnemy(270, 730, 250, 300, 1.8));
+                enemies.push(makeEnemy(1150, 530, 1100, 1200, 2.0));
 
-                enemies.push(makeEnemy(270, 730, 250, 300, 1.5));
-                enemies.push(makeEnemy(470, 680, 450, 500, 1.3));
-                enemies.push(makeEnemy(1150, 530, 1100, 1200, 1.8));
-                enemies.push(makeEnemy(1520, 380, 1500, 1600, 1.0));
-
-
-                goal = { x: 2100, y: 300, w: 44, h: 64, anim: 0 };
-
+                goal = { x: 2100, y: 300, w: 50, h: 70, anim: 0 };
 
                 coins.push(
                     makeCoin(280, 700),
-                    makeCoin(480, 650),
                     makeCoin(700, 610),
                     makeCoin(1150, 510),
                     makeCoin(1600, 310),
                     makeCoin(2120, 260)
                 );
+                
                 powerUps.push(makePowerUp(1350, 450));
-
-
-                decorations.push(makeDecoration(50, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(350, 800, 25, 35, 'tree'));
-                decorations.push(makeDecoration(1000, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(1800, 800, 25, 35, 'tree'));
             }
-
 
             if (level === 3) {
                 world.width = 2600;
                 platforms = [
-
                     staticPlat(0, 860, 150, 40),
                     lava(150, 876, 100, 24),
                     staticPlat(250, 860, 150, 40),
-                    lava(400, 876, 120, 24),
-                    staticPlat(520, 860, 180, 40),
-                    lava(700, 876, 150, 24),
-
-
-                    movingPlat(300, 750, 120, 20, 280, 500, 1.8),
-                    movingPlat(600, 700, 120, 20, 550, 750, 2.0),
-
-
-                    fallPlat(850, 650, 100, 20, 300),
+                    
+                    movingPlat(300, 750, 120, 20, 280, 500, 2.0),
+                    movingPlat(600, 700, 120, 20, 550, 750, 2.2),
+                    
+                    fallPlat(850, 650, 100, 20, 400),
                     fallPlat(1000, 600, 100, 20, 400),
-                    fallPlat(1150, 550, 100, 20, 500),
-
-
+                    
                     conveyor(1300, 500, 200, 20, 1),
                     conveyor(1520, 450, 200, 20, -1),
-
-
+                    
                     staticPlat(1350, 400, 60, 20),
-                    spike(1350, 396, 60, 8),
-                    staticPlat(1430, 350, 60, 20),
-                    spike(1430, 346, 60, 8),
-                    staticPlat(1510, 300, 60, 20),
-                    spike(1510, 296, 60, 8),
-
-
-                    movingPlat(1650, 400, 140, 20, 1600, 1850, 1.5),
+                    spike(1350, 396, 60, 12),
+                    
+                    bouncyPlat(1650, 400, 140, 20),
                     staticPlat(1800, 350, 120, 20),
-                    movingPlat(1950, 300, 140, 20, 1900, 2100, 1.7),
-
-
+                    
                     lava(900, 876, 400, 24),
-                    lava(1400, 876, 300, 24),
-                    lava(1850, 876, 250, 24)
+                    lava(1400, 876, 300, 24)
                 ];
 
+                enemies.push(makeEnemy(320, 730, 300, 500, 1.8));
+                enemies.push(makeEnemy(620, 680, 600, 750, 2.0));
+                enemies.push(makeEnemy(1020, 530, 1000, 1150, 1.5));
 
-                enemies.push(makeEnemy(320, 730, 300, 500, 1.4));
-                enemies.push(makeEnemy(620, 680, 600, 750, 1.6));
-                enemies.push(makeEnemy(1020, 530, 1000, 1150, 1.2));
-                enemies.push(makeEnemy(1450, 330, 1430, 1530, 1.8));
-                enemies.push(makeEnemy(1970, 280, 1950, 2100, 1.3));
-
-
-                goal = { x: 2500, y: 250, w: 44, h: 64, anim: 0 };
-
+                goal = { x: 2500, y: 250, w: 50, h: 70, anim: 0 };
 
                 coins.push(
                     makeCoin(350, 710),
@@ -711,167 +702,151 @@
                     makeCoin(1050, 560),
                     makeCoin(1400, 460),
                     makeCoin(1480, 310),
-                    makeCoin(2000, 260),
-                    makeCoin(2520, 210)
+                    makeCoin(2000, 260)
                 );
-                powerUps.push(makePowerUp(1700, 350));
-
-
-                decorations.push(makeDecoration(100, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(550, 800, 25, 35, 'tree'));
-                decorations.push(makeDecoration(1250, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(2000, 800, 25, 35, 'tree'));
+                
+                powerUps.push(makePowerUp(1700, 350, 'doubleJump'));
+                powerUps.push(makePowerUp(1300, 450, 'speed'));
             }
-
 
             if (level === 4) {
                 world.width = 3000;
                 platforms = [
-
                     staticPlat(0, 860, 200, 40),
-
-
-                    movingPlat(250, 800, 100, 20, 240, 400, 2.5),
-                    movingPlat(450, 750, 100, 20, 430, 600, 2.2),
-                    movingPlat(650, 700, 100, 20, 630, 800, 2.8),
-
-
-                    staticPlat(800, 650, 60, 20),
-                    spike(800, 646, 60, 12),
-                    staticPlat(880, 600, 60, 20),
-                    spike(880, 596, 60, 12),
-                    staticPlat(960, 550, 60, 20),
-                    spike(960, 546, 60, 12),
-
-
+                    
+                    movingPlat(250, 800, 100, 20, 240, 400, 2.8),
+                    movingPlat(450, 750, 100, 20, 430, 600, 2.5),
+                    
                     bouncyPlat(1100, 500, 100, 20),
                     bouncyPlat(1250, 450, 100, 20),
                     bouncyPlat(1400, 400, 100, 20),
-                    bouncyPlat(1250, 350, 100, 20),
-                    bouncyPlat(1100, 300, 100, 20),
-
-
+                    
                     conveyor(1500, 600, 200, 20, 1),
                     conveyor(1720, 550, 200, 20, -1),
-                    conveyor(1500, 450, 200, 20, 1),
-                    conveyor(1720, 400, 200, 20, -1),
-
-
-                    fallPlat(1950, 500, 80, 20, 200),
-                    fallPlat(2050, 450, 80, 20, 250),
-                    fallPlat(2150, 400, 80, 20, 300),
-                    fallPlat(2250, 350, 80, 20, 350),
-
-
-                    movingPlat(2400, 300, 120, 20, 2380, 2550, 3.0),
-                    movingPlat(2600, 250, 120, 20, 2580, 2750, 2.8),
-                    movingPlat(2800, 200, 120, 20, 2780, 2950, 3.2),
-
-
+                    
+                    fallPlat(1950, 500, 80, 20, 300),
+                    fallPlat(2050, 450, 80, 20, 300),
+                    
+                    movingPlat(2400, 300, 120, 20, 2380, 2550, 3.2),
+                    movingPlat(2600, 250, 120, 20, 2580, 2750, 3.0),
+                    
                     lava(200, 876, 600, 24),
                     lava(850, 876, 300, 24),
-                    lava(1450, 876, 500, 24),
-                    lava(1900, 876, 400, 24),
-                    lava(2400, 876, 600, 24)
+                    lava(1900, 876, 400, 24)
                 ];
 
+                enemies.push(makeEnemy(270, 780, 250, 400, 2.2));
+                enemies.push(makeEnemy(470, 730, 450, 600, 2.0));
+                enemies.push(makeEnemy(820, 630, 800, 960, 1.8));
+                enemies.push(makeEnemy(1520, 580, 1500, 1700, 2.3));
 
-                enemies.push(makeEnemy(270, 780, 250, 400, 2.0));
-                enemies.push(makeEnemy(470, 730, 450, 600, 1.8));
-                enemies.push(makeEnemy(670, 680, 650, 800, 2.2));
-                enemies.push(makeEnemy(820, 630, 800, 960, 1.6));
-                enemies.push(makeEnemy(980, 530, 960, 1100, 1.9));
-                enemies.push(makeEnemy(1520, 580, 1500, 1700, 2.1));
-                enemies.push(makeEnemy(1730, 530, 1720, 1920, 1.7));
-                enemies.push(makeEnemy(2420, 280, 2400, 2550, 2.3));
-                enemies.push(makeEnemy(2620, 230, 2600, 2750, 2.0));
-
-
-                goal = { x: 2900, y: 150, w: 44, h: 64, anim: 0 };
-
+                goal = { x: 2900, y: 150, w: 50, h: 70, anim: 0 };
 
                 coins.push(
                     makeCoin(300, 760),
                     makeCoin(500, 710),
                     makeCoin(700, 660),
                     makeCoin(850, 610),
-                    makeCoin(900, 560),
                     makeCoin(1150, 460),
                     makeCoin(1350, 410),
                     makeCoin(1550, 560),
-                    makeCoin(1770, 510),
-                    makeCoin(2000, 460),
-                    makeCoin(2200, 310),
                     makeCoin(2450, 260),
-                    makeCoin(2650, 210),
-                    makeCoin(2920, 110)
+                    makeCoin(2650, 210)
                 );
-
-                powerUps.push(makePowerUp(1300, 400));
-                powerUps.push(makePowerUp(2700, 200));
-
-
-                decorations.push(makeDecoration(50, 800, 30, 40, 'tree'));
-                decorations.push(makeDecoration(1200, 800, 25, 35, 'tree'));
-                decorations.push(makeDecoration(2500, 800, 30, 40, 'tree'));
+                
+                powerUps.push(makePowerUp(1300, 400, 'doubleJump'));
+                powerUps.push(makePowerUp(2700, 200, 'shield'));
             }
 
             resetPlayer();
         }
 
-
-
+        // Input handling
         document.addEventListener("keydown", e => {
             if (!gameStarted) return;
 
-            if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
-            if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
-            if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") {
-                e.preventDefault();
-                keys.up = true;
+            switch(e.key.toLowerCase()) {
+                case "arrowleft":
+                case "a":
+                    keys.left = true;
+                    break;
+                case "arrowright":
+                case "d":
+                    keys.right = true;
+                    break;
+                case "arrowup":
+                case "w":
+                case " ":
+                    e.preventDefault();
+                    keys.up = true;
+                    player.jumpBuffer = JUMP_BUFFER;
+                    break;
+                case "escape":
+                    paused = !paused;
+                    document.getElementById("pauseBtn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
+                    break;
             }
-
-
-            if (e.key === "h") health = Math.min(100, health + 20);
-            if (e.key === "n" && level < 4) loadLevel(level + 1);
         });
 
         document.addEventListener("keyup", e => {
-            if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
-            if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
-            if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") keys.up = false;
+            switch(e.key.toLowerCase()) {
+                case "arrowleft":
+                case "a":
+                    keys.left = false;
+                    break;
+                case "arrowright":
+                case "d":
+                    keys.right = false;
+                    break;
+                case "arrowup":
+                case "w":
+                case " ":
+                    keys.up = false;
+                    break;
+            }
         });
 
-
+        // Mobile controls
         const leftBtn = document.getElementById("leftBtn");
         const rightBtn = document.getElementById("rightBtn");
         const jumpBtn = document.getElementById("jumpBtn");
 
-        leftBtn.addEventListener("touchstart", () => keys.left = true);
-        leftBtn.addEventListener("touchend", () => keys.left = false);
-        leftBtn.addEventListener("mousedown", () => keys.left = true);
-        leftBtn.addEventListener("mouseup", () => keys.left = false);
-        leftBtn.addEventListener("mouseleave", () => keys.left = false);
+        const setupMobileButton = (btn, key) => {
+            const startEvent = (e) => {
+                e.preventDefault();
+                keys[key] = true;
+                if (key === 'up') player.jumpBuffer = JUMP_BUFFER;
+            };
+            
+            const endEvent = (e) => {
+                e.preventDefault();
+                keys[key] = false;
+            };
+            
+            btn.addEventListener("touchstart", startEvent);
+            btn.addEventListener("touchend", endEvent);
+            btn.addEventListener("mousedown", startEvent);
+            btn.addEventListener("mouseup", endEvent);
+            btn.addEventListener("mouseleave", endEvent);
+        };
 
-        rightBtn.addEventListener("touchstart", () => keys.right = true);
-        rightBtn.addEventListener("touchend", () => keys.right = false);
-        rightBtn.addEventListener("mousedown", () => keys.right = true);
-        rightBtn.addEventListener("mouseup", () => keys.right = false);
-        rightBtn.addEventListener("mouseleave", () => keys.right = false);
+        setupMobileButton(leftBtn, 'left');
+        setupMobileButton(rightBtn, 'right');
+        setupMobileButton(jumpBtn, 'up');
 
-        jumpBtn.addEventListener("touchstart", () => { keys.up = true; setTimeout(() => keys.up = false, 200); });
-        jumpBtn.addEventListener("mousedown", () => { keys.up = true; setTimeout(() => keys.up = false, 200); });
-
-
+        // Pause button
         document.getElementById("pauseBtn").onclick = () => {
             if (!gameStarted) return;
             paused = !paused;
             document.getElementById("pauseBtn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
         };
 
-
+        // Collision detection
         function rectCollision(a, b) {
-            return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+            return a.x < b.x + b.w && 
+                   a.x + a.w > b.x && 
+                   a.y < b.y + b.h && 
+                   a.y + a.h > b.y;
         }
 
         function damage(amount) {
@@ -881,15 +856,13 @@
             if (health < 0) health = 0;
             healthFill.style.width = Math.max(0, health) + "%";
 
+            screenShake = 15;
+            
+            // Visual feedback
+            canvas.style.filter = "brightness(2) saturate(3)";
+            setTimeout(() => canvas.style.filter = "", 150);
 
-            screenShake = 10;
-
-
-            canvas.style.filter = "brightness(1.5) saturate(2)";
-            setTimeout(() => canvas.style.filter = "", 100);
-
-
-            player.invincible = 60;
+            player.invincible = 90; // Increased invincibility frames
 
             if (health <= 0) {
                 finalScore.textContent = score;
@@ -909,6 +882,7 @@
             player.coyote = 0;
             player.canDoubleJump = false;
             player.invincible = 0;
+            player.jumpBuffer = 0;
             camera.x = 0;
             doubleJumpIndicator.style.display = "none";
         }
@@ -923,6 +897,7 @@
             healthFill.style.width = "100%";
             loadLevel(1);
             document.getElementById("pauseBtn").textContent = "⏸️ Pause";
+            gameTime = 0;
         }
 
         function startGame() {
@@ -930,179 +905,228 @@
             resetGame();
         }
 
-        function createParticles(x, y, count, color, speed = 2) {
+        function createParticles(x, y, count, color, speed = 3) {
             for (let i = 0; i < count; i++) {
                 particles.push({
                     x, y,
                     vx: (Math.random() - 0.5) * speed,
-                    vy: (Math.random() - 0.5) * speed,
+                    vy: (Math.random() - 0.5) * speed - 2,
                     life: 1,
                     color,
-                    size: Math.random() * 4 + 2
+                    size: Math.random() * 5 + 3
                 });
             }
         }
 
-
         function update(dt) {
             if (paused || !gameStarted) return;
 
+            gameTime += dt;
 
+            // Update particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 particles[i].x += particles[i].vx;
                 particles[i].y += particles[i].vy;
-                particles[i].life -= 0.02;
+                particles[i].life -= 0.03;
+                particles[i].vy += 0.1; // Gravity
 
                 if (particles[i].life <= 0) {
                     particles.splice(i, 1);
                 }
             }
 
-
+            // Screen shake
             if (screenShake > 0) screenShake -= 1;
 
-
+            // Invincibility frames
             if (player.invincible > 0) {
                 player.invincible--;
             }
 
+            // Jump buffer
+            if (player.jumpBuffer > 0) {
+                player.jumpBuffer -= dt;
+            }
 
+            // Movement
             player.vx = 0;
-            if (keys.left) { player.vx = -player.speed; player.facing = -1; }
-            if (keys.right) { player.vx = player.speed; player.facing = 1; }
+            if (keys.left) { 
+                player.vx = -player.speed; 
+                player.facing = -1; 
+            }
+            if (keys.right) { 
+                player.vx = player.speed; 
+                player.facing = 1; 
+            }
 
+            // Coyote time
+            if (player.onGround) {
+                player.coyote = COYOTE_TIME;
+                player.canDoubleJump = false; // Reset double jump when on ground
+            } else {
+                player.coyote -= dt;
+            }
 
-            if (player.onGround) player.coyote = COYOTE_TIME;
-            else player.coyote -= dt;
-
-
-            if (keys.up && (player.onGround || player.coyote > 0 || (player.canDoubleJump && !player.jumping))) {
+            // Jumping with buffer
+            if ((keys.up || player.jumpBuffer > 0) && 
+                (player.onGround || player.coyote > 0 || (player.canDoubleJump && !player.jumping))) {
+                
                 player.vy = jumpForce;
-                if (!player.onGround) {
+                
+                if (!player.onGround && player.coyote <= 0) {
                     player.canDoubleJump = false;
                     doubleJumpIndicator.style.display = "none";
-                    createParticles(player.x + player.w / 2, player.y + player.h / 2, 15, "#00ffff", 3);
+                    createParticles(player.x + player.w / 2, player.y + player.h / 2, 20, "#00ffff", 4);
                 }
+                
                 player.jumping = true;
                 player.onGround = false;
                 player.coyote = 0;
-                createParticles(player.x + player.w / 2, player.y + player.h, 10, "#ffffff", 2);
+                player.jumpBuffer = 0;
+                createParticles(player.x + player.w / 2, player.y + player.h, 15, "#ffffff", 3);
             }
 
-
+            // Apply gravity and movement
             player.vy += gravity;
             player.x += player.vx;
             player.y += player.vy;
 
-
+            // World boundaries
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > world.width) player.x = world.width - player.w;
 
-
+            // Platform collision
             let onGround = false;
             for (let p of platforms) {
                 if (p.type === 'fall' && p.falling) continue;
                 if (p.type === 'spike' || p.type === 'lava') continue;
 
                 if (rectCollision(player, p)) {
-                    if (player.vy > 0 && (player.y + player.h) - player.vy <= p.y + 6) {
+                    // Landing on top of platform
+                    if (player.vy > 0 && (player.y + player.h) - player.vy <= p.y + 10) {
                         player.y = p.y - player.h;
                         player.vy = 0;
                         player.jumping = false;
                         onGround = true;
 
+                        // Bouncy platform
+                        if (p.type === 'bouncy') {
+                            player.vy = -p.bounce;
+                            createParticles(p.x + p.w / 2, p.y, 25, "#FFD700", 4);
+                        }
+                        
+                        // Fall platform activation
                         if (p.type === 'fall' && !p.falling) {
                             setTimeout(() => {
                                 p.falling = true;
-                                createParticles(p.x + p.w / 2, p.y + p.h / 2, 20, "#A0522D", 1);
+                                createParticles(p.x + p.w / 2, p.y + p.h / 2, 30, "#A0522D", 2);
                             }, p.fallDelay || 500);
                         }
-                    } else {
-
-                        if (player.x + player.w > p.x && player.x < p.x) player.x = p.x - player.w;
-                        else if (player.x < p.x + p.w && player.x + player.w > p.x + p.w) player.x = p.x + p.w;
+                    } 
+                    // Side collision
+                    else if (player.vx !== 0) {
+                        if (player.x + player.w > p.x && player.x < p.x) {
+                            player.x = p.x - player.w;
+                        } else if (player.x < p.x + p.w && player.x + player.w > p.x + p.w) {
+                            player.x = p.x + p.w;
+                        }
                     }
                 }
             }
             player.onGround = onGround;
 
-
+            // Enemy collision
             for (let e of enemies) {
                 e.x += e.vx;
-                e.anim += 0.1;
-                if (e.x < e.minX) e.vx = Math.abs(e.vx);
-                if (e.x > e.maxX) e.vx = -Math.abs(e.vx);
+                e.anim += 0.15;
+                
+                // Turn around at boundaries
+                if (e.x < e.minX) {
+                    e.vx = Math.abs(e.vx);
+                    e.x = e.minX;
+                }
+                if (e.x > e.maxX) {
+                    e.vx = -Math.abs(e.vx);
+                    e.x = e.maxX;
+                }
 
                 if (rectCollision(player, e) && player.invincible <= 0) {
+                    // Stomp enemy
                     if (player.vy > 0 && player.y + player.h < e.y + 20) {
-
                         enemies.splice(enemies.indexOf(e), 1);
-                        score += 200;
-                        player.vy = -10;
-                        createParticles(e.x + e.w / 2, e.y + e.h / 2, 25, "#ff0000", 3);
+                        score += 250;
+                        player.vy = -12;
+                        createParticles(e.x + e.w / 2, e.y + e.h / 2, 30, "#ff0000", 4);
                         continue;
                     }
-                    damage(20);
-                    player.vx = e.vx > 0 ? -6 : 6;
-                    player.vy = -4;
+                    // Take damage
+                    damage(25);
+                    player.vx = e.vx > 0 ? -8 : 8;
+                    player.vy = -6;
                 }
             }
 
-
+            // Hazard collision
             for (let h of platforms) {
                 if (h.type === 'spike' || h.type === 'lava') {
                     if (rectCollision(player, h) && player.invincible <= 0) {
-                        if (h.type === 'spike') damage(40);
+                        if (h.type === 'spike') damage(35);
                         if (h.type === 'lava') damage(999);
                     }
                 }
 
+                // Update moving platforms
                 if (h.type === 'moving') {
                     h.x += h.vx;
                     if (h.x < h.minX) h.vx = Math.abs(h.vx);
                     if (h.x + h.w > h.maxX) h.vx = -Math.abs(h.vx);
                 }
 
+                // Update falling platforms
                 if (h.type === 'fall' && h.falling) {
-                    h.vy += gravity * 0.5;
+                    h.vy += gravity * 0.6;
                     h.y += h.vy;
                 }
             }
 
-
+            // Coin collection
             for (let c of coins) {
                 if (!c.collected) {
-                    c.anim += 0.1;
+                    c.anim += 0.2;
                     if (rectCollision(player, c)) {
                         c.collected = true;
-                        score += 50;
-                        createParticles(c.x + 8, c.y + 8, 12, "#ffdd00", 2);
+                        score += 75;
+                        createParticles(c.x + 10, c.y + 10, 15, "#ffdd00", 3);
                     }
                 }
             }
 
-
+            // Power-up collection
             for (let p of powerUps) {
                 if (!p.collected) {
-                    p.anim += 0.1;
+                    p.anim += 0.15;
                     if (rectCollision(player, p)) {
                         p.collected = true;
+                        
                         if (p.type === 'doubleJump') {
                             player.canDoubleJump = true;
                             doubleJumpIndicator.style.display = "flex";
-                            createParticles(p.x + 12, p.y + 12, 20, "#00ffff", 3);
+                            createParticles(p.x + 14, p.y + 14, 25, "#00ffff", 4);
                         }
+                        // Add more power-up types here
                     }
                 }
             }
 
-
+            // Goal collision
             if (goal && rectCollision(player, goal)) {
-                goal.anim += 0.05;
+                goal.anim += 0.1;
                 if (level < 4) {
                     loadLevel(level + 1);
-                    score += 500;
-                    createParticles(goal.x + 22, goal.y + 32, 30, "#FFD700", 4);
+                    score += 750;
+                    health = Math.min(100, health + 30); // Heal between levels
+                    healthFill.style.width = health + "%";
+                    createParticles(goal.x + 25, goal.y + 35, 40, "#FFD700", 5);
                 } else {
                     winScore.textContent = score;
                     winScreen.style.display = "block";
@@ -1110,277 +1134,370 @@
                 }
             }
 
+            // Fall damage
+            if (player.y > canvas.height + 500) {
+                damage(50);
+                player.x = Math.max(0, player.x - 100);
+                player.y = 100;
+                player.vy = 0;
+            }
 
-            if (player.y > canvas.height + 600) damage(200);
-
-
+            // Camera follow with smoothing
             let targetX = player.x + player.w / 2 - canvas.width / 2;
             camera.x += (targetX - camera.x) * camera.smooth;
             camera.x = Math.max(0, Math.min(camera.x, world.width - canvas.width));
 
-
+            // Update UI
             scoreText.textContent = score;
         }
 
-
         function drawParallax() {
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "#1e3c72");
+            gradient.addColorStop(1, "#2a5298");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
-
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            let cloudOffset = camera.x * 0.1;
+            // Distant mountains
+            ctx.fillStyle = "rgba(30, 30, 60, 0.6)";
             for (let i = 0; i < 5; i++) {
-                let x = (i * 300 + cloudOffset) % (canvas.width + 400) - 200;
-                let y = 100 + Math.sin(i * 0.5) * 30;
-                drawCloud(x, y, 80 + Math.sin(i) * 20);
+                let x = (i * 400 - camera.x * 0.1) % (canvas.width + 800) - 400;
+                let height = 200 + Math.sin(i) * 50;
+                ctx.beginPath();
+                ctx.moveTo(x, canvas.height);
+                ctx.lineTo(x + 200, canvas.height - height);
+                ctx.lineTo(x + 400, canvas.height);
+                ctx.fill();
+            }
+
+            // Clouds
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            for (let i = 0; i < 8; i++) {
+                let x = (i * 250 + camera.x * 0.05) % (canvas.width + 500) - 250;
+                let y = 80 + Math.sin(i + gameTime) * 40;
+                drawCloud(x, y, 120 + Math.sin(i) * 40);
             }
         }
 
         function drawCloud(x, y, size) {
             ctx.beginPath();
-            ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
-            ctx.arc(x + size * 0.3, y - size * 0.1, size * 0.4, 0, Math.PI * 2);
-            ctx.arc(x + size * 0.6, y, size * 0.35, 0, Math.PI * 2);
-            ctx.arc(x + size * 0.3, y + size * 0.1, size * 0.3, 0, Math.PI * 2);
+            ctx.arc(x, y, size * 0.25, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.25, y - size * 0.1, size * 0.35, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.5, y, size * 0.3, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.25, y + size * 0.1, size * 0.25, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        function draw() {
+        function drawPlatform(p) {
+            let sx = p.x - camera.x;
+            
+            // Skip if off screen (performance optimization)
+            if (sx + p.w < 0 || sx > canvas.width) return;
 
+            ctx.save();
+            
+            // Platform-specific drawing
+            switch(p.type) {
+                case 'spike':
+                    ctx.fillStyle = "#333";
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.fillStyle = p.color;
+                    for (let s = 0; s < p.w; s += 16) {
+                        ctx.beginPath();
+                        ctx.moveTo(sx + s, p.y + p.h);
+                        ctx.lineTo(sx + s + 8, p.y);
+                        ctx.lineTo(sx + s + 16, p.y + p.h);
+                        ctx.fill();
+                    }
+                    break;
+                    
+                case 'lava':
+                    p.anim += 0.1;
+                    const lavaY = p.y + Math.sin(p.anim) * 3;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(sx, lavaY, p.w, p.h);
+                    
+                    // Lava bubbles
+                    ctx.fillStyle = "rgba(255, 100, 0, 0.7)";
+                    for (let i = 0; i < 3; i++) {
+                        let bubbleX = sx + (Math.sin(p.anim + i) * 20 + i * 40) % p.w;
+                        let bubbleY = lavaY + Math.cos(p.anim + i) * 2;
+                        ctx.beginPath();
+                        ctx.arc(bubbleX, bubbleY, 5 + Math.sin(p.anim * 2 + i) * 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                    
+                case 'moving':
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = "#5A8C4A";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+                    break;
+                    
+                case 'fall':
+                    ctx.fillStyle = p.falling ? "#A0522D" : p.color;
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = p.falling ? "#8B4513" : "#7CA56C";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+                    break;
+                    
+                case 'bouncy':
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = "#FFA500";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+                    
+                    // Spring pattern
+                    ctx.strokeStyle = "#FF8C00";
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(sx + 10 + i * 30, p.y + 5);
+                        ctx.lineTo(sx + 25 + i * 30, p.y + p.h - 5);
+                        ctx.stroke();
+                    }
+                    break;
+                    
+                case 'conveyor':
+                    p.anim += 0.2;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    
+                    // Arrow pattern
+                    ctx.fillStyle = "#6666ff";
+                    for (let i = 0; i < p.w / 20; i++) {
+                        let arrowX = sx + (i * 20 - p.anim * p.dir * 20) % p.w;
+                        ctx.beginPath();
+                        if (p.dir > 0) {
+                            ctx.moveTo(arrowX, p.y + p.h/2);
+                            ctx.lineTo(arrowX + 15, p.y + 5);
+                            ctx.lineTo(arrowX + 15, p.y + p.h - 5);
+                        } else {
+                            ctx.moveTo(arrowX + 15, p.y + p.h/2);
+                            ctx.lineTo(arrowX, p.y + 5);
+                            ctx.lineTo(arrowX, p.y + p.h - 5);
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    break;
+                    
+                default: // static
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(sx, p.y, p.w, p.h);
+                    ctx.strokeStyle = "#3DAF70";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(sx, p.y, p.w, p.h);
+                    
+                    // Grass on top
+                    ctx.fillStyle = "#5CDB95";
+                    for (let i = 0; i < p.w / 10; i++) {
+                        let grassX = sx + i * 10 + Math.sin(i) * 3;
+                        ctx.fillRect(grassX, p.y - 3, 2, 8 + Math.sin(i + gameTime) * 4);
+                    }
+            }
+            
+            ctx.restore();
+        }
+
+        function draw() {
+            // Apply screen shake
             let shakeX = screenShake > 0 ? (Math.random() - 0.5) * screenShake : 0;
             let shakeY = screenShake > 0 ? (Math.random() - 0.5) * screenShake : 0;
             ctx.setTransform(1, 0, 0, 1, shakeX, shakeY);
 
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
+            // Clear with sky
             drawParallax();
 
-
+            // Draw all platforms
             for (let p of platforms) {
-                let sx = p.x - camera.x;
-
-                if (p.type === 'spike') {
-                    ctx.fillStyle = "#222";
-                    ctx.fillRect(sx, p.y, p.w, p.h);
-                    ctx.fillStyle = "#ff5555";
-                    for (let s = 0; s < p.w; s += 12) {
-                        ctx.beginPath();
-                        ctx.moveTo(sx + s, p.y + p.h);
-                        ctx.lineTo(sx + s + 6, p.y);
-                        ctx.lineTo(sx + s + 12, p.y + p.h);
-                        ctx.fill();
-                    }
-                    continue;
-                }
-
-                if (p.type === 'lava') {
-
-                    ctx.fillStyle = "#b22222";
-                    ctx.fillRect(sx, p.y, p.w, p.h);
-
-                    continue;
-                }
-
-
-                if (p.type === 'moving') {
-                    ctx.fillStyle = "#7FB069";
-                    ctx.fillRect(sx, p.y, p.w, p.h);
-                    ctx.strokeStyle = "#5A8C4A";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(sx, p.y, p.w, p.h);
-                } else if (p.type === 'fall') {
-                    ctx.fillStyle = p.falling ? "#A0522D" : "#9DC183";
-                    ctx.fillRect(sx, p.y, p.w, p.h);
-                    ctx.strokeStyle = p.falling ? "#8B4513" : "#7CA56C";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(sx, p.y, p.w, p.h);
-
-
-                    if (!p.falling) {
-                        ctx.strokeStyle = "#8B4513";
-                        ctx.lineWidth = 1;
-                        for (let i = 0; i < 3; i++) {
-                            let crackX = sx + (i + 1) * (p.w / 4) + Math.sin(i) * 5;
-                            ctx.beginPath();
-                            ctx.moveTo(crackX, p.y + 2);
-                            ctx.lineTo(crackX + Math.sin(i) * 3, p.y + p.h - 2);
-                            ctx.stroke();
-                        }
-                    }
-                } else {
-                    ctx.fillStyle = "#4ECC88";
-                    ctx.fillRect(sx, p.y, p.w, p.h);
-                    ctx.strokeStyle = "#3DAF70";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(sx, p.y, p.w, p.h);
-                }
+                drawPlatform(p);
             }
 
-
+            // Draw enemies
             for (let e of enemies) {
                 let ex = e.x - camera.x;
+                
+                // Body
                 ctx.fillStyle = "#d9534f";
                 ctx.fillRect(ex, e.y, e.w, e.h);
-
-
+                
+                // Eyes
                 ctx.fillStyle = "#fff";
-                let eyeOffset = Math.sin(e.anim) * 2;
-                ctx.fillRect(ex + 6, e.y + 8 + eyeOffset, 6, 6);
-                ctx.fillRect(ex + 24, e.y + 8 + eyeOffset, 6, 6);
-
-
+                let eyeOffset = Math.sin(e.anim) * 3;
+                ctx.fillRect(ex + 8, e.y + 10 + eyeOffset, 8, 8);
+                ctx.fillRect(ex + 20, e.y + 10 + eyeOffset, 8, 8);
+                
+                // Outline
                 ctx.strokeStyle = "#a94442";
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 3;
                 ctx.strokeRect(ex, e.y, e.w, e.h);
             }
 
-
+            // Draw coins
             for (let c of coins) {
                 if (!c.collected) {
                     let cx = c.x - camera.x;
-                    let cy = c.y + Math.sin(c.anim) * 3;
+                    let cy = c.y + Math.sin(c.anim) * 4;
+                    
+                    // Shine effect
                     ctx.fillStyle = "#ffdd00";
                     ctx.beginPath();
-                    ctx.arc(cx + 8, cy + 8, 8, 0, Math.PI * 2);
+                    ctx.arc(cx + 10, cy + 10, 10, 0, Math.PI * 2);
                     ctx.fill();
-
+                    
                     ctx.strokeStyle = "#ffaa00";
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 3;
                     ctx.stroke();
-
-
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+                    
+                    // Highlight
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
                     ctx.beginPath();
-                    ctx.arc(cx + 5, cy + 5, 3, 0, Math.PI * 2);
+                    ctx.arc(cx + 6, cy + 6, 4, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
 
-
+            // Draw power-ups
             for (let p of powerUps) {
                 if (!p.collected) {
                     let px = p.x - camera.x;
-                    let py = p.y + Math.sin(p.anim) * 4;
-
+                    let py = p.y + Math.sin(p.anim) * 5;
+                    
                     if (p.type === 'doubleJump') {
-
+                        // Main body
                         ctx.fillStyle = "#00ffff";
                         ctx.fillRect(px, py, p.w, p.h);
-
-
+                        
+                        // Wings
                         ctx.fillStyle = "#00aaff";
                         ctx.beginPath();
-                        ctx.ellipse(px - 4, py + p.h / 2, 6, 10, 0, 0, Math.PI * 2);
+                        ctx.ellipse(px - 6, py + p.h / 2, 8, 12, 0, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.beginPath();
-                        ctx.ellipse(px + p.w + 4, py + p.h / 2, 6, 10, 0, 0, Math.PI * 2);
+                        ctx.ellipse(px + p.w + 6, py + p.h / 2, 8, 12, 0, 0, Math.PI * 2);
                         ctx.fill();
-
+                        
+                        // Outline
                         ctx.strokeStyle = "#0088cc";
-                        ctx.lineWidth = 2;
+                        ctx.lineWidth = 3;
                         ctx.strokeRect(px, py, p.w, p.h);
+                        
+                        // Sparkle
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                        ctx.beginPath();
+                        ctx.arc(px + 6, py + 6, 3, 0, Math.PI * 2);
+                        ctx.fill();
                     }
                 }
             }
 
-
+            // Draw goal
             if (goal) {
                 let gx = goal.x - camera.x;
                 let gy = goal.y;
-
-
-                ctx.fillStyle = "#6a4c32";
-                ctx.fillRect(gx + 10, gy, 6, goal.h);
-
-
-                goal.anim += 0.08;
-                let sway = Math.sin(goal.anim) * 8;
-
-
+                
+                // Flag pole
+                ctx.fillStyle = "#8B4513";
+                ctx.fillRect(gx + 15, gy, 8, goal.h);
+                
+                // Flag animation
+                goal.anim += 0.1;
+                let sway = Math.sin(goal.anim) * 10;
+                
+                // Flag
                 ctx.fillStyle = "#FFD700";
                 ctx.beginPath();
-                ctx.moveTo(gx + 16, gy + 8);
-                ctx.quadraticCurveTo(gx + 40 + sway, gy + 14, gx + 16, gy + 28);
+                ctx.moveTo(gx + 23, gy + 10);
+                ctx.quadraticCurveTo(gx + 50 + sway, gy + 20, gx + 23, gy + 40);
                 ctx.closePath();
                 ctx.fill();
-
-
+                
+                // Flag outline
                 ctx.strokeStyle = "#DAA520";
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 3;
                 ctx.stroke();
-
-
+                
+                // Base
                 ctx.fillStyle = "#333";
-                ctx.fillRect(gx, gy + goal.h, 60, 8);
+                ctx.fillRect(gx, gy + goal.h, 60, 10);
             }
 
-
+            // Draw player
             let px = player.x - camera.x;
             let py = player.y;
-
-
+            
+            // Squash and stretch
             let vy = player.vy;
-            let scaleY = player.onGround ? 1.08 : Math.max(0.85, 1 - vy * 0.015);
+            let scaleY = player.onGround ? 1.1 : Math.max(0.9, 1 - vy * 0.02);
             let drawW = player.w;
             let drawH = player.h * scaleY;
             let drawX = px;
             let drawY = py + (player.h - drawH);
-
-
-            let alpha = player.invincible > 0 && Math.floor(player.invincible / 3) % 2 === 0 ? 0.5 : 1;
-
-
+            
+            // Invincibility flash
+            let alpha = player.invincible > 0 && Math.floor(player.invincible / 5) % 2 === 0 ? 0.5 : 1;
+            
+            // Body
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.fillRect(drawX, drawY, drawW, drawH);
-
-
+            
+            // Outline
             ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.strokeRect(drawX, drawY, drawW, drawH);
-
-
+            
+            // Eyes
             ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
             let eyeY = drawY + drawH * 0.3;
-            let eyeOffset = Math.sin(performance.now() * 0.005) * 2;
-            let eyeSpacing = 8 * player.facing;
-            ctx.fillRect(drawX + drawW / 2 - 4 + eyeSpacing, eyeY + eyeOffset, 4, 4);
-            ctx.fillRect(drawX + drawW / 2 + 4 + eyeSpacing, eyeY + eyeOffset, 4, 4);
+            let eyeOffset = Math.sin(gameTime * 0.01) * 2;
+            let eyeSpacing = 10 * player.facing;
+            ctx.fillRect(drawX + drawW / 2 - 6 + eyeSpacing, eyeY + eyeOffset, 6, 6);
+            ctx.fillRect(drawX + drawW / 2 + 6 + eyeSpacing, eyeY + eyeOffset, 6, 6);
+            
+            // Trail effect when moving fast
+            if (Math.abs(player.vx) > 3 && player.onGround) {
+                ctx.fillStyle = `rgba(100, 100, 255, 0.3)`;
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillRect(drawX - i * 8 * player.facing, drawY + drawH - 5, 6, 3);
+                }
+            }
 
-
+            // Draw particles
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             for (let p of particles) {
                 ctx.globalAlpha = p.life;
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
-                ctx.arc(p.x - camera.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.arc(p.x - camera.x, p.y, p.size * p.life, 0, Math.PI * 2);
                 ctx.fill();
             }
             ctx.globalAlpha = 1;
 
-
+            // Reset transform
             ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
 
+        // Game loop with frame rate limiting
+        function loop(currentTime) {
+            const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.1);
+            lastTime = currentTime;
 
-        function loop(now) {
-            let dt = (now - lastTime) / 1000;
-            lastTime = now;
-
-            update(dt);
+            update(deltaTime);
             draw();
 
             requestAnimationFrame(loop);
         }
 
-
-
+        // Start the game
         instructionsScreen.style.display = "block";
-
-
-        loop(performance.now());
+        lastTime = performance.now();
+        loop(lastTime);
     </script>
 </body>
-
 </html>

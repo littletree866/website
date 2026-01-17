@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Don't Click Me</title>
+  <link rel="icon" type="image/png" href="../../icon.jpg" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      font-family: system-ui, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    #game {
+      text-align: center;
+    }
+
+    #button {
+      padding: 24px 48px;
+      font-size: 26px;
+      font-weight: 800;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      background: #ef4444;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    #button:hover {
+      transform: scale(1.05);
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 18px;
+      min-height: 28px;
+      opacity: 0.9;
+    }
+
+    #counter {
+      margin-top: 10px;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .shake {
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-5px, 3px); }
+      50% { transform: translate(5px, -3px); }
+      75% { transform: translate(-3px, -5px); }
+      100% { transform: translate(0, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <button id="button">DON'T CLICK ME</button>
+    <div id="message"></div>
+    <div id="counter"></div>
+  </div>
+
+  <script>
+    const button = document.getElementById('button');
+    const message = document.getElementById('message');
+    const counter = document.getElementById('counter');
+
+    let clicks = Number(localStorage.getItem('dontClickClicks')) || 0;
+
+    const messages = [
+      "I literally told you not to.",
+      "Okay, funny. Stop now.",
+      "You're doing this on purpose.",
+      "This isn't impressive.",
+      "Do you feel in control?",
+      "Please stop.",
+      "I'm begging you.",
+      "Something bad will happen.",
+      "Last warning.",
+      "You made your choice."
+    ];
+
+    updateUI();
+
+    button.addEventListener('click', () => {
+      clicks++;
+      localStorage.setItem('dontClickClicks', clicks);
+
+      document.body.classList.remove('shake');
+      void document.body.offsetWidth;
+      document.body.classList.add('shake');
+
+      if (clicks < messages.length) {
+        message.textContent = messages[clicks - 1];
+      } else if (clicks < 25) {
+        message.textContent = "It keeps happening...";
+      } else if (clicks < 50) {
+        message.textContent = "You're still clicking.";
+        button.style.transform = `translate(${rand(-100,100)}px, ${rand(-60,60)}px)`;
+      } else if (clicks < 100) {
+        message.textContent = "This is getting out of hand.";
+        document.body.style.background = `rgb(${rand(0,40)},0,0)`;
+        button.textContent = "STOP";
+      } else {
+        message.textContent = "You broke it. Refresh if you dare.";
+        button.disabled = true;
+        button.style.background = '#374151';
+      }
+
+      updateUI();
+    });
+
+    function updateUI() {
+      counter.textContent = `Clicks: ${clicks}`;
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Secret ending: don't click for 10 seconds
+    let idleTimer;
+    document.addEventListener('mousemove', resetIdle);
+    document.addEventListener('click', resetIdle);
+
+    function resetIdle() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        message.textContent = "You finally stopped. Obedience rewarded.";
+        button.textContent = "THANK YOU";
+        button.style.background = '#22c55e';
+      }, 10000);
+    }
+  </script>
+</body>
+</html>

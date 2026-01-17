@@ -6,10 +6,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Documentation</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	<link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed:wght@400;500;700&display=swap"
-		rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet">
 	<link rel="icon" href="../../icon.jpg" type="image/x-icon">
 
 	<style>
@@ -20,6 +18,7 @@
 			--light: #f8f9fa;
 			--text: #333;
 			--border-radius: 12px;
+			--muted: #6f7b8a;
 		}
 
 		* {
@@ -29,12 +28,12 @@
 		}
 
 		body {
-			font-family: 'Space Grotesk', sans-serif;
+			font-family: 'Jura', sans-serif;
 			line-height: 1.7;
 			color: var(--text);
 			background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
 			min-height: 100vh;
-			padding: 20px;
+			padding: 28px 20px;
 		}
 
 		.container {
@@ -42,6 +41,7 @@
 			margin: 0 auto;
 		}
 
+		/* Header */
 		header {
 			text-align: center;
 			padding: 60px 20px;
@@ -49,7 +49,7 @@
 			color: white;
 			border-radius: var(--border-radius);
 			margin-bottom: 40px;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+			box-shadow: 0 12px 40px rgba(110, 142, 251, 0.2);
 			position: relative;
 			overflow: hidden;
 		}
@@ -62,7 +62,7 @@
 			width: 200%;
 			height: 200%;
 			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-			animation: shimmer 6s infinite;
+			animation: shimmer 8s infinite;
 		}
 
 		@keyframes shimmer {
@@ -95,7 +95,7 @@
 		}
 
 		.section-header {
-			font-size: 2rem;
+			font-size: 1.9rem;
 			color: var(--dark);
 			margin: 50px 0 25px 0;
 			padding-bottom: 12px;
@@ -103,12 +103,35 @@
 			font-weight: 700;
 		}
 
+		.intro-card {
+			background: white;
+			border-radius: var(--border-radius);
+			padding: 32px;
+			margin-bottom: 40px;
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+			border-left: 5px solid var(--secondary);
+		}
+
+		.intro-card h2 {
+			color: var(--primary);
+			margin-bottom: 16px;
+			font-size: 1.8rem;
+			font-weight: 700;
+		}
+
+		.intro-card p {
+			color: #555;
+			margin-bottom: 12px;
+			line-height: 1.8;
+			font-weight: 500;
+		}
+
 		.game-card {
 			background: white;
 			border-radius: var(--border-radius);
-			padding: 28px;
-			margin-bottom: 25px;
-			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+			padding: 32px;
+			margin-bottom: 28px;
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 			border-left: 5px solid var(--primary);
 			animation: slideUp 0.6s ease-out forwards;
@@ -127,80 +150,40 @@
 		}
 
 		.game-card:hover {
-			transform: translateY(-8px);
-			box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+			transform: translateY(-6px);
+			box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
 		}
 
 		.game-card h2 {
 			color: var(--primary);
 			margin-bottom: 12px;
-			font-size: 1.9rem;
+			font-size: 1.8rem;
 			font-weight: 700;
 		}
 
-		.game-card h3 {
-			color: var(--dark);
-			margin-top: 22px;
-			margin-bottom: 12px;
-			font-size: 1.2rem;
-			font-weight: 700;
-			border-left: 4px solid var(--secondary);
-			padding-left: 12px;
-		}
-
-		.description {
-			color: #555;
+		.game-meta {
+			display: flex;
+			gap: 16px;
 			margin-bottom: 16px;
-			line-height: 1.8;
-			font-weight: 500;
+			flex-wrap: wrap;
+			align-items: center;
 		}
 
-		.controls,
-		.features,
-		.tips {
-			background: #f8f9fa;
-			padding: 16px;
-			border-radius: 8px;
-			margin: 12px 0;
-			border-left: 4px solid var(--secondary);
+		.game-year {
+			font-size: 0.9rem;
+			color: var(--muted);
+			font-weight: 600;
 		}
 
-		.controls ul,
-		.features ul,
-		.tips ul {
-			margin-left: 24px;
-		}
-
-		.controls li,
-		.features li,
-		.tips li {
-			margin: 10px 0;
-			font-weight: 500;
-			line-height: 1.6;
-		}
-
-		.controls li strong,
-		.features li strong,
-		.tips li strong {
-			color: var(--primary);
-		}
-
-		.play-link {
+		.game-type {
 			display: inline-block;
 			background: linear-gradient(135deg, var(--primary), var(--secondary));
 			color: white;
-			padding: 12px 28px;
-			border-radius: 8px;
-			text-decoration: none;
-			margin-top: 18px;
-			transition: all 0.3s ease;
-			font-weight: 700;
-			box-shadow: 0 4px 12px rgba(110, 142, 251, 0.3);
-		}
-
-		.play-link:hover {
-			transform: translateY(-3px);
-			box-shadow: 0 8px 20px rgba(110, 142, 251, 0.4);
+			padding: 5px 12px;
+			border-radius: 999px;
+			font-size: 0.75rem;
+			font-weight: 800;
+			letter-spacing: 0.5px;
 		}
 
 		.difficulty {
@@ -209,8 +192,6 @@
 			border-radius: 20px;
 			font-size: 0.85rem;
 			font-weight: 700;
-			margin-top: 14px;
-			margin-right: 10px;
 		}
 
 		.difficulty.easy {
@@ -233,9 +214,76 @@
 			color: white;
 		}
 
+		.description {
+			color: #555;
+			margin-bottom: 20px;
+			line-height: 1.8;
+			font-weight: 500;
+		}
+
+		.game-card h3 {
+			color: var(--dark);
+			margin-top: 26px;
+			margin-bottom: 14px;
+			font-size: 1.25rem;
+			font-weight: 700;
+			border-left: 4px solid var(--secondary);
+			padding-left: 12px;
+		}
+
+		.controls,
+		.features,
+		.tips {
+			background: #f8f9fa;
+			padding: 18px;
+			border-radius: 10px;
+			margin: 14px 0;
+			border-left: 4px solid var(--secondary);
+		}
+
+		.controls ul,
+		.features ul,
+		.tips ul {
+			margin-left: 24px;
+		}
+
+		.controls li,
+		.features li,
+		.tips li {
+			margin: 12px 0;
+			font-weight: 500;
+			line-height: 1.7;
+			color: #555;
+		}
+
+		.controls li strong,
+		.features li strong,
+		.tips li strong {
+			color: var(--primary);
+			font-weight: 700;
+		}
+
+		.play-link {
+			display: inline-block;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			color: white;
+			padding: 12px 28px;
+			border-radius: 8px;
+			text-decoration: none;
+			margin-top: 20px;
+			transition: all 0.3s ease;
+			font-weight: 700;
+			box-shadow: 0 4px 12px rgba(110, 142, 251, 0.3);
+		}
+
+		.play-link:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 8px 20px rgba(110, 142, 251, 0.4);
+		}
+
 		footer {
 			text-align: center;
-			margin-top: 60px;
+			margin-top: 70px;
 			padding: 40px 0;
 			border-top: 2px solid #ddd;
 			color: #666;
@@ -246,21 +294,39 @@
 			font-weight: 500;
 		}
 
+		.back-link {
+			display: inline-block;
+			margin-bottom: 20px;
+			color: var(--primary);
+			text-decoration: none;
+			font-weight: 600;
+			transition: all 0.2s ease;
+		}
+
+		.back-link:hover {
+			transform: translateX(-4px);
+		}
+
 		@media (max-width: 768px) {
 			header h1 {
 				font-size: 2rem;
 			}
 
 			.section-header {
-				font-size: 1.6rem;
+				font-size: 1.5rem;
 			}
 
 			.game-card {
-				padding: 20px;
+				padding: 24px;
 			}
 
 			.game-card h2 {
 				font-size: 1.5rem;
+			}
+
+			.game-meta {
+				flex-direction: column;
+				align-items: flex-start;
 			}
 		}
 	</style>
@@ -268,739 +334,552 @@
 
 <body>
 	<div class="container">
+		<a href="../../index.html" class="back-link">← Back to Home</a>
+
 		<header>
-			<h1> Infinity Nexus Game Documentation</h1>
-			<p>Complete guides, controls, and gameplay tips for all Infinity Nexus games</p>
+			<h1>📖 Game Documentation</h1>
+			<p>Complete guides, controls, strategies, and pro tips for all Infinity Nexus games</p>
+			<p style="font-size: 0.95rem; margin-top: 12px; opacity: 0.9;">Last Updated: February 2, 2026 • Version
+				1.18.22
+			</p>
 		</header>
 
-
-		<div class="game-card">
+		<div class="intro-card">
 			<h2>⚜️ Welcome to the Documentation</h2>
-			<p class="description">
-				This is your comprehensive guide to Infinity Nexus.
-				Each game has detailed instructions, controls, features, and pro tips to help you master them.
-			</p>
-			<p class="description" style="color: #666; font-size: 0.95rem;">
-				<strong>Project Duration:</strong> 10 months |
-				<strong>Last Updated:</strong> January 15, 2026 |
-				<strong>Next Target:</strong> February 2, 2026
-			</p>
+			<p>This comprehensive guide covers every game in Infinity Nexus with detailed instructions, control schemes,
+				gameplay tips, and strategic advice. Whether you're a beginner or an experienced player, you'll find
+				everything you need to master each game.</p>
+			<p><strong>Pro Tip:</strong> Use the difficulty badges to find games matching your skill level. Start with
+				Easy
+				games and work your way up!</p>
 		</div>
 
-		<!-- Available Now quick links -->
-		<div class="game-card" aria-labelledby="available-now">
-			<h2 id="available-now">▶ Available Now</h2>
-			<p class="description">Quick access to playable games in the current release (v1.17.20).</p>
-			<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
-				<a class="play-link" href="../../newgames/pyramid/pyramid.html">▶ Pyramid</a>
-				<a class="play-link" href="../../newgames/thegame/thegame.html">▶ DO NOT PRESS</a>
-				<a class="play-link" href="../../monthlychallenges/jan2026/Jan2026Challenge.html">▶ January
-					Challenge</a>
-				<a class="play-link" href="../../games/clickergame/clickergame.html">▶ Clicker Quest+</a>
-				<a class="play-link" href="../../games/georunner/runner.html">▶ Geometry Runner</a>
-				<a class="play-link" href="../../games/puzzle/puzzle.html">▶ Puzzle Master</a>
-				<a class="play-link" href="../../games/tower/tower.html">▶ Tower Defense+</a>
-				<a class="play-link" href="../../newgames/tower2.html">▶ Tower Defense 2</a>
-				<a class="play-link" href="../../games/platformergame/platformergame.html">▶ The Impossible Game</a>
-				<a class="play-link" href="../../games/spacegame/spacegame.html">▶ Space Game</a>
-				<a class="play-link" href="../../games/pokemon/pokemon.html">▶ Pokémon Great Rock</a>
-				<a class="play-link" href="../../newgames/zombie.html">▶ Zombie Survival</a>
-				<a class="play-link" href="../../casinogames/slot/slot.html">▶ Slot Machine</a>
-				<a class="play-link" href="../../casinogames/blackjack/blackjack.html">▶ Blackjack+</a>
-				<a class="play-link" href="../../casinogames/poker/poker.html">▶ Poker</a>
-				<a class="play-link" href="../../casinogames/roulette/roulette.html">▶ Roulette</a>
-				<a class="play-link" href="../../casinogames/curseddice/curseddice.html">▶ Cursed Dice</a>
-				<a class="play-link" href="../../sims/lifegame/life.html">▶ Wealth Builder</a>
-				<a class="play-link" href="../../sims/citygame/citygame.html">▶ Metropolis Builder</a>
-				<a class="play-link" href="../../sims/mini.html">▶ Mini Empire</a>
-				<a class="play-link" href="../../sims/box/box.html">▶ The Box</a>
-			</div>
-		</div>
-
-		<!--Monthly challenges Jan -> Dec-->
+		<!-- ===== MONTHLY CHALLENGES ===== -->
 		<h2 class="section-header">🏆 Monthly Challenges</h2>
 
-		<!--Medium: The January Challenge -->
 		<div class="game-card">
-			<h2>❄️ The January Challenge</h2>
-			<p class="description">A challenging platformer with 4 levels, each with unique obstacles and coin
-				collection goals.</p>
+			<h2>❄️ January Challenge</h2>
+			<div class="game-meta">
+				<span class="game-year">2026 • Monthly Challenge</span>
+				<span class="difficulty medium">Medium</span>
+			</div>
+			<p class="description">A challenging 4-level platformer with coin collection mechanics, spike hazards, and
+				escalating difficulty. Complete levels by collecting coins and reaching goal flags.</p>
 
-			<h3>How to Play</h3>
-			<div class="description">Navigate through 4 levels of increasing difficulty. Collect all coins in each level
-				to unlock the next one. Avoid spikes and reach the goal flag to complete a level.</div>
+			<h3>🎮 How to Play</h3>
+			<div class="description">Navigate through 4 platforming levels of increasing difficulty. Collect all coins
+				in
+				each level to unlock the next. Avoid spike traps, reach the goal flag, and complete each level to
+				progress through the challenge.</div>
 
-			<h3>Controls</h3>
+			<h3>⌨️ Controls</h3>
 			<div class="controls">
 				<ul>
-					<li><strong>Arrow Keys</strong> — Move left/right and jump</li>
+					<li><strong>Arrow Keys / WASD</strong> — Move left and right</li>
+					<li><strong>Space / Up Arrow</strong> — Jump</li>
 					<li><strong>ESC</strong> — Pause the game</li>
 				</ul>
 			</div>
 
-			<h3>Features</h3>
+			<h3>✨ Features</h3>
 			<div class="features">
 				<ul>
-					<li>4 unique platforming levels with increasing difficulty</li>
-					<li>5 coins per level</li>
-					<li>Coin collection mechanics and goal flags</li>
-					<li>Checkpoint system for respawning on death</li>
-					<li>Pause functionality and visual feedback for deaths</li>
-					<li>Optional coin routes for a bonus score</li>
+					<li>4 unique platforming levels with escalating difficulty progression</li>
+					<li>5 collectible coins per level with strategic placement</li>
+					<li>Checkpoint system for safe respawning</li>
+					<li>Spike hazards and goal flag mechanics</li>
+					<li>Score tracking and completion rewards</li>
+					<li>Visual feedback and level progression indicators</li>
 				</ul>
 			</div>
 
-			<h3>Tips</h3>
+			<h3>💡 Tips</h3>
 			<div class="tips">
 				<ul>
-					<li>Use checkpoints strategically to avoid restarting from the beginning of a level.</li>
-					<li>Prioritize collecting coins early in each level to maximize your score.</li>
-					<li>Practice tricky jumps and timing to avoid spikes and hazards.</li>
+					<li>Use checkpoints strategically to avoid full level restarts</li>
+					<li>Plan your coin routes before attempting difficult jumps</li>
+					<li>Practice timing on challenging sections to reduce frustration</li>
+					<li>Each level has an optimal coin collection path—explore to find it</li>
+					<li>Don't rush; taking your time leads to better coin collection</li>
 				</ul>
 			</div>
 
-			<span class="difficulty medium">Medium</span>
-			<a href="../../monthlychallenges/jan2026/Jan2026Challenge.html" class="play-link">▶ Play Now</a>
+			<a href="../../monthlychallenges/jan2026/Jan2026Challenge.html" class="play-link">▶ Play January Challenge
+			</a>
 		</div>
 
-		<!-- ===== Game Corner (ordered Easy -> Rage) ===== -->
-		<h2 class="section-header">🎮 Game Corner</h2>
+		<div class="game-card">
+			<h2>🏆 February Challenge</h2>
+			<div class="game-meta">
+				<span class="game-year">2026 • Monthly Challenge</span>
+				<span class="difficulty medium">Medium</span>
+			</div>
+			<p class="description">The February Challenge awaits! Test your skills in this new monthly event with unique
+				mechanics, exclusive rewards, and badges for completion.</p>
 
-		<!-- Easy: Clicker Quest+ -->
+			<h3>🎮 How to Play</h3>
+			<div class="description">Complete the February Challenge objectives to earn exclusive badges and rewards.
+				Check back regularly for details on this month's theme and special mechanics.</div>
+
+			<h3>🎁 Rewards</h3>
+			<div class="features">
+				<ul>
+					<li>Exclusive February badge upon completion</li>
+					<li>Bragging rights on the community leaderboard</li>
+					<li>Special cosmetic rewards</li>
+					<li>Progress toward achievement milestones</li>
+				</ul>
+			</div>
+
+			<a href="../../monthlychallenges/feb2026/Feb2026Challenge.html" class="play-link">▶ Play February Challenge
+			</a>
+		</div>
+
+		<!-- ===== FEATURED PROJECTS ===== -->
+		<h2 class="section-header">👍 Featured Projects</h2>
+
+		<div class="game-card">
+			<h2>🛡️ Tower Defense+</h2>
+			<div class="game-meta">
+				<span class="game-year">2025 • Strategy</span>
+				<span class="difficulty hard">Hard</span>
+			</div>
+			<p class="description">A strategic tower defense game where placement and timing are crucial. Build diverse
+				towers, manage gold, and survive escalating enemy waves. Strategic thinking required!</p>
+
+			<h3>🎮 How to Play</h3>
+			<div class="description">Place towers on grass tiles to defend your base. Enemies follow set paths toward
+				your
+				base. Each defeated enemy drops gold—use it to upgrade towers or build new ones. Survive all waves to
+				win.</div>
+
+			<h3>⌨️ Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Tile</strong> — Select a grass tile to place a tower (if you have enough gold)
+					</li>
+					<li><strong>Click Tower</strong> — Upgrade selected tower or view its stats</li>
+					<li><strong>Start Wave Button</strong> — Begin the next enemy wave</li>
+				</ul>
+			</div>
+
+			<h3>🏛️ Tower Types</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Basic</strong> — Affordable, reliable single-target damage (good starter)</li>
+					<li><strong>Sniper</strong> — Long range, high damage, slow fire rate (specialized)</li>
+					<li><strong>Frost</strong> — Slows enemies and reduces attack damage (utility)</li>
+					<li><strong>Bomb</strong> — Area-of-effect damage to multiple enemies (crowd control)</li>
+					<li><strong>Flame</strong> — Applies damage-over-time effect (sustained damage)</li>
+				</ul>
+			</div>
+
+			<h3>💡 Strategy Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Create chokepoints with tower placement to maximize coverage</li>
+					<li>Balance offensive and defensive towers for versatility</li>
+					<li>Upgrade towers strategically—focus on high-traffic areas first</li>
+					<li>Save gold for emergencies and critical late-game upgrades</li>
+					<li>Frost towers are invaluable for slowing strong enemies</li>
+					<li>Plan ahead—preview enemy paths before placing towers</li>
+				</ul>
+			</div>
+
+			<a href="../../games/tower/tower.html" class="play-link">▶ Play Tower Defense+</a>
+		</div>
+
+		<div class="game-card">
+			<h2>🛡️ Tower Defense 2+</h2>
+			<div class="game-meta">
+				<span class="game-year">2026 • Strategy</span>
+				<span class="difficulty rage">Rage</span>
+			</div>
+			<p class="description">The advanced sequel featuring multiple paths, tower synergies, research trees, and
+				significantly tougher enemy types. For experienced tower defense players only.</p>
+
+			<h3>🎮 How to Play</h3>
+			<div class="description">Defend multiple entry paths simultaneously using diverse towers. Research
+				technologies to unlock synergies and powerful combinations. Adapt your strategy to counter different
+				enemy
+				types including armored, flying, and boss units.</div>
+
+			<h3>⌨️ Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Tile</strong> — Place tower on available space</li>
+					<li><strong>Click Tower</strong> — Upgrade, sell, or view stats</li>
+					<li><strong>Research Panel</strong> — Unlock technology synergies and upgrades</li>
+					<li><strong>Wave Button</strong> — Start next enemy wave</li>
+				</ul>
+			</div>
+
+			<h3>🏛️ Tower Types</h3>
+			<div class="features">
+				<ul>
+					<li><strong>Archer</strong> — Fast, multi-shot, standard damage</li>
+					<li><strong>Cannon</strong> — Slow, powerful area damage</li>
+					<li><strong>Wizard</strong> — Magic damage with special effects</li>
+					<li><strong>Tesla</strong> — Chain lightning between enemies</li>
+					<li><strong>Farm</strong> — Generates passive income</li>
+				</ul>
+			</div>
+
+			<h3>🔬 Advanced Features</h3>
+			<div class="features">
+				<ul>
+					<li>Multiple entry paths requiring cross-path defense strategy</li>
+					<li>Research tree with tower synergies and global buffs</li>
+					<li>Enemy types: regular, armored, healers, flying, and bosses</li>
+					<li>Wave scaling with dynamic difficulty progression</li>
+					<li>Tech combinations that unlock powerful effects</li>
+				</ul>
+			</div>
+
+			<h3>💡 Advanced Strategy Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Place towers at path intersections to cover multiple routes efficiently</li>
+					<li>Use Farms early for steady passive income growth</li>
+					<li>Research synergies that match your tower selection for maximum efficiency</li>
+					<li>Balance offense and defense on each path based on enemy types</li>
+					<li>Study enemy patterns to counter them effectively</li>
+					<li>Upgrade Tesla towers to chain across multiple paths</li>
+				</ul>
+			</div>
+
+			<a href="../../games/tower2/tower2.html" class="play-link">▶ Play Tower Defense 2+</a>
+		</div>
+
 		<div class="game-card">
 			<h2>👆 Clicker Quest+</h2>
-			<p class="description">A polished incremental clicker: click for cash, buy upgrades, and build passive
-				income to progress through tiers.</p>
+			<div class="game-meta">
+				<span class="game-year">2025 • Incremental</span>
+				<span class="difficulty easy">Easy</span>
+			</div>
+			<p class="description">A polished incremental clicker with deep progression systems. Click for cash, buy
+				upgrades, unlock new mechanics, and push toward massive numbers. Perfect for active or idle play.</p>
 
-			<h3>How to Play</h3>
-			<div class="description">Click the main button to earn money. Spend it on upgrades (click power,
-				auto-earners, boosts). Progress unlocks new upgrade trees and prestige mechanics.</div>
+			<h3>🎮 How to Play</h3>
+			<div class="description">Click the main button to earn currency. Purchase upgrades to increase click power,
+				unlock auto-earners, and activate timed boosts. Progress through prestige layers to multiply your
+				earnings
+				exponentially.</div>
 
-			<h3>Controls</h3>
+			<h3>⌨️ Controls</h3>
 			<div class="controls">
 				<ul>
-					<li><strong>Left Click</strong> — Earn primary currency (multiplies with upgrades)</li>
-					<li><strong>Upgrade Buttons</strong> — Buy click power, auto-earn, and timed boosts</li>
-					<li><strong>Prestige</strong> — Reset for permanent multipliers (unlocks later)</li>
+					<li><strong>Left Click Main Button</strong> — Earn primary currency</li>
+					<li><strong>Upgrade Buttons</strong> — Buy click power, auto-earn, and temporary boosts</li>
+					<li><strong>Prestige Button</strong> — Reset for permanent multipliers (unlocks later)</li>
+					<li><strong>Settings</strong> — Customize game speed and notifications</li>
 				</ul>
 			</div>
 
-			<h3>Features</h3>
+			<h3>✨ Features</h3>
 			<div class="features">
 				<ul>
-					<li>Incremental progression and prestige layers</li>
-					<li>Multiple upgrade trees and temporary boosts</li>
-					<li>Auto-earners for passive income and offline gains</li>
-					<li>Visual floating text and particle feedback</li>
-					<li>State saved to localStorage</li>
+					<li>Multiple upgrade trees with scaling costs and increasing returns</li>
+					<li>Auto-earners for passive income and offline progression</li>
+					<li>Temporary boosts with strategic cooldown mechanics</li>
+					<li>Prestige layers for exponential progression multipliers</li>
+					<li>Visual floating text and satisfying particle feedback</li>
+					<li>Game state saved to localStorage for persistence</li>
+					<li>Offline earnings when closed</li>
 				</ul>
 			</div>
 
-			<h3>Tips</h3>
+			<h3>💡 Progression Tips</h3>
 			<div class="tips">
 				<ul>
-					<li>Prioritize Auto Earners after basic click power to scale while idle</li>
-					<li>Use boosts during active play to maximize short-term gains</li>
-					<li>Prestige when progression slows to gain long-term multipliers</li>
+					<li>Prioritize auto-earners after basic click power for passive income</li>
+					<li>Use boosts during active sessions for maximum immediate gains</li>
+					<li>Prestige when progression noticeably slows (usually every few hours)</li>
+					<li>Balance between active clicks and idle income sources</li>
+					<li>Higher prestige layers provide huge multipliers—worth the reset</li>
+					<li>Unlock all auto-earners before pushing for prestige</li>
 				</ul>
 			</div>
 
-			<span class="difficulty easy">Easy</span>
-			<a href="../../games/clickergame/clickergame.html" class="play-link">▶ Play Now</a>
+			<a href="../../games/clickergame/clickergame.html" class="play-link">▶ Play Clicker Quest+</a>
 		</div>
 
-		<!-- Easy: Puzzle Master -->
+		<!-- ===== GAME CORNER ===== -->
+		<h2 class="section-header">🎮 Game Corner</h2>
+
 		<div class="game-card">
-			<h2>🧩 Puzzle Master</h2>
-			<p class="description">A calm sliding-block puzzle with Endless and Timed modes. Solve numerical puzzles and
-				chase best times.</p>
+			<h2>🏃 Geometry Runner</h2>
+			<div class="game-meta">
+				<span class="game-year">2025 • Runner</span>
+				<span class="difficulty medium">Medium</span>
+			</div>
+			<p class="description">An endless runner featuring shape-matching mechanics and beautiful parallax
+				scrolling.
+				Jump obstacles, match shapes, collect power-ups, and chase your personal best score.</p>
 
-			<h3>How to Play</h3>
-			<div class="description">Slide tiles into the empty space to order numbers. Endless mode is untimed; Last
-				Stand is timed with escalating difficulty.</div>
+			<h3>🎮 How to Play</h3>
+			<div class="description">Press Space to jump and avoid incoming obstacles. Your character shape cycles
+				through forms or can be controlled to match obstacle shapes. Collect power-ups for temporary
+				invincibility
+				and survive as long as possible.</div>
 
-			<h3>Controls</h3>
+			<h3>⌨️ Controls</h3>
 			<div class="controls">
 				<ul>
-					<li><strong>Click Tile</strong> — Slide tiles adjacent to the empty space</li>
-					<li><strong>Mode Select</strong> — Choose Endless or Last Stand</li>
-					<li><strong>Restart</strong> — Shuffle puzzle</li>
+					<li><strong>Space Bar</strong> — Jump to avoid obstacles</li>
+					<li><strong>1/2/3 Keys</strong> — Change character shape (optional; auto-cycles)</li>
+					<li><strong>P Key</strong> — Pause/Resume game</li>
 				</ul>
 			</div>
 
-			<h3>Features</h3>
+			<h3>✨ Features</h3>
 			<div class="features">
 				<ul>
-					<li>Endless and timed challenge modes</li>
-					<li>Move counter and best-time tracking</li>
-					<li>Local bests saved in localStorage</li>
+					<li>Procedural obstacle generation for infinite replayability</li>
+					<li>Shape-matching mechanic (circle, square, triangle)</li>
+					<li>Parallax starfield and mountain backgrounds</li>
+					<li>Power-ups for temporary invincibility frames</li>
+					<li>Progressive speed increase as you advance</li>
+					<li>Best score tracking with localStorage</li>
+					<li>Particle effects and satisfying visual feedback</li>
 				</ul>
 			</div>
 
-			<h3>Tips</h3>
+			<h3>💡 Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Master timing on your jumps to consistently avoid obstacles</li>
+					<li>Use shape-cycling strategically for better obstacle matching</li>
+					<li>Collect power-ups early to extend your run duration</li>
+					<li>The game progressively speeds up—stay sharp and responsive</li>
+					<li>Notice patterns in obstacle generation—predict upcoming hazards</li>
+				</ul>
+			</div>
+
+			<a href="../../games/georunner/runner.html" class="play-link">▶ Play Geometry Runner</a>
+		</div>
+
+		<div class="game-card">
+			<h2>🧩 Puzzle Master</h2>
+			<div class="game-meta">
+				<span class="game-year">2025 • Puzzle</span>
+				<span class="difficulty easy">Easy</span>
+			</div>
+			<p class="description">A satisfying sliding-block puzzle with two distinct modes: Endless (untimed) for
+				_RELATIVE_ relaxation and Last Stand (timed) for competitive challenge and speed runs.</p>
+
+			<h3>🎮 How to Play</h3>
+			<div class="description">Slide numbered tiles into the empty space to arrange them in order. In Endless
+				mode,
+				solve at your own pace with no pressure. In Last Stand, race against the clock with increasing
+				difficulty
+				for each solved puzzle.</div>
+
+			<h3>⌨️ Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Click Adjacent Tile</strong> — Slide tile toward empty space</li>
+					<li><strong>Mode Buttons</strong> — Select Endless or Last Stand mode</li>
+					<li><strong>Shuffle Button</strong> — Generate new puzzle configuration</li>
+				</ul>
+			</div>
+
+			<h3>✨ Features</h3>
+			<div class="features">
+				<ul>
+					<li>Endless mode for relaxed, pressure-free solving</li>
+					<li>Last Stand timed challenge with escalating difficulty</li>
+					<li>Move counter for optimization and speedrun tracking</li>
+					<li>Best-time tracking per game mode</li>
+					<li>Local leaderboard saved in localStorage</li>
+				</ul>
+			</div>
+
+			<h3>💡 Solving Tips</h3>
 			<div class="tips">
 				<ul>
 					<li>Solve corners and edges first, then arrange middle tiles</li>
-					<li>Use the empty space strategically to cycle tiles into position</li>
+					<li>Use the empty space to cycle tiles efficiently</li>
+					<li>Practice in Endless mode before attempting Last Stand speedruns</li>
+					<li>Corner positions are hardest—plan ahead</li>
 				</ul>
 			</div>
 
-			<span class="difficulty easy">Easy</span>
-			<a href="../../games/puzzle/puzzle.html" class="play-link">▶ Play Now</a>
+			<a href="../../games/puzzle/puzzle.html" class="play-link">▶ Play Puzzle Master</a>
 		</div>
 
-		<!-- Easy: Zombie Survival -->
 		<div class="game-card">
-			<h2>🧟 Zombie Survival</h2>
-			<p class="description">A top-down shooter where you defend against waves of zombies. Simple.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Defend your position by shooting zombies. </div>
-
-			<h3>Controls</h3>
-			<div class="controls">
-				<ul>
-					<li><strong>Mouse Click</strong> — Click to shoot</li>
-					<li><strong>Arrow Keys</strong> — Move character</li>
-				</ul>
+			<h2>🔘 DO NOT PRESS</h2>
+			<div class="game-meta">
+				<span class="game-year">2026 • Experimental</span>
+				<span class="difficulty easy">Easy</span>
 			</div>
+			<p class="description">A chaotic experimental experience that escalates in absurdity as you press the
+				button.
+				Perfect for quick laughs and discovering strange effects.</p>
 
-			<h3>Features</h3>
+			<h3>🎮 How to Play</h3>
+			<div class="description">There's one button. Press it and see what happens. Each press triggers
+				unpredictable
+				and increasingly ridiculous events. How far will you go before chaos overwhelms you?</div>
+
+			<h3>✨ Features</h3>
 			<div class="features">
 				<ul>
-					<li>Wave-based zombie attacks with increasing difficulty</li>
-					<li>Slightly harder than a regular zombie survival game</li>
-					<li>Health and score HUD</li>
-					<li>Allie spawn chance from a zombie that has died (~9% per zombie killed)</li>
+					<li>Unpredictable events triggered by each button press</li>
+					<li>Escalating absurdity and visual chaos</li>
+					<li>Quick play sessions (2-5 minutes)</li>
+					<li>Perfect for entertainment and discovery</li>
+					<li>No consequences—press away!</li>
 				</ul>
 			</div>
 
-			<h3>Tips</h3>
-			<div class="tips">
-				<ul>
-					<li>Hope for the best for allies</li>
-					<li>The faster ones strike faster! Kill them first!</li>
-				</ul>
-			</div>
-
-			<span class="difficulty easy">Easy</span>
-			<a href="../../newgames/zombie.html" class="play-link">▶ Play Now</a>
+			<a href="../../newgames/thegame/thegame.html" class="play-link">▶ Play DO NOT PRESS</a>
 		</div>
 
-		<!-- Medium: Geometry Runner -->
-		<div class="game-card">
-			<h2>🏃 Geometry Runner</h2>
-			<p class="description">An endless runner where you jump over obstacles and match shapes. Features parallax
-				scrolling backgrounds and progressive difficulty.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">
-				Press Space to jump and avoid obstacles. Your shape cycles automatically or you can press 1/2/3 to match
-				incoming obstacles. Collect power-ups for temporary invincibility and aim for the highest score.
-			</div>
-
-			<h3>Controls</h3>
-			<div class="controls">
-				<ul>
-					<li><strong>Space Bar</strong> - Jump</li>
-					<li><strong>1/2/3 Keys</strong> - Change shape (optional, auto-cycles)</li>
-					<li><strong>P Key</strong> - Pause/Resume</li>
-				</ul>
-			</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Endless procedural obstacle generation</li>
-					<li>Shape-matching mechanic (circle, square, triangle)</li>
-					<li>Parallax starfield and mountain backgrounds for depth</li>
-					<li>Power-ups for temporary invincibility</li>
-					<li>Progressive speed increase</li>
-					<li>Best score tracking with localStorage</li>
-					<li>Particle effects and visual feedback</li>
-				</ul>
-			</div>
-
-			<h3>Tips</h3>
-			<div class="tips">
-				<ul>
-					<li>Master timing your jumps to avoid obstacles</li>
-					<li>Use shape-cycling strategically for better matching</li>
-					<li>Collect power-ups early for longer runs</li>
-					<li>The game gets faster—stay alert!</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../games/runner.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Pokémon Great Rock -->
-		<div class="game-card">
-			<h2>⚔️ Pokémon Great Rock</h2>
-			<p class="description">A turn-based creature battler inspired by classic monster-catching games. Catch,
-				train, and strategize using types and moves.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Explore routes, encounter wild creatures, battle using moves, manage items, and
-				build a balanced team to progress through trainers and bosses.</div>
-
-			<h3>Controls</h3>
-			<div class="controls">
-				<ul>
-					<li><strong>Click Move</strong> — Select attacks during battle</li>
-					<li><strong>Bag</strong> — Use items (pokéballs, potions)</li>
-					<li><strong>Save/Load</strong> — Use the in-game buttons to persist progress</li>
-				</ul>
-			</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Creature capture and leveling</li>
-					<li>Turn-based tactical combat and type effectiveness</li>
-					<li>Item economy (catching and healing)</li>
-					<li>Local save/load and basic progression tracking</li>
-				</ul>
-			</div>
-
-			<h3>Tips</h3>
-			<div class="tips">
-				<ul>
-					<li>Use type advantages where possible; build team coverage</li>
-					<li>Carry enough Pokéballs and potions before boss fights</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../games/pokemon/pokemon.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Wizard Battle -->
-		<div class="game-card">
-			<h2>🧙‍♂️ Wizard Battle</h2>
-			<p class="description">An arcane duel system: manage mana, cast spells, and improve your arsenal across
-				encounters and a shop.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Choose spells and manage mana. Defeat enemies to earn XP and gold, then visit the
-				shop to upgrade spells and stats.</div>
-
-			<h3>Controls</h3>
-			<div class="controls">
-				<ul>
-					<li><strong>Click Spell</strong> — Cast (requires mana)</li>
-					<li><strong>Shop</strong> — Buy spells and upgrades</li>
-					<li><strong>Inventory</strong> — Manage spells and items</li>
-				</ul>
-			</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Multiple spell types with visual effects</li>
-					<li>Mana regeneration and mana-upgrade path</li>
-					<li>XP progression, leveling, and in-battle shop options</li>
-				</ul>
-			</div>
-
-			<h3>Tips</h3>
-			<div class="tips">
-				<ul>
-					<li>Balance offensive and healing spells for sustainability</li>
-					<li>Invest in mana regen to cast more frequently</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../games/wizardgame/wizardgame.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Hard: Space Game -->
-		<div class="game-card">
-			<h2>🚀 Space Game</h2>
-			<p class="description">A fast-paced 2D shooter with procedural waves, power-ups, and distinct boss
-				encounters demanding reflex and pattern recall.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Control the ship with arrow keys and shoot with space. Collect power-ups, avoid
-				enemy patterns, and defeat bosses for rewards.</div>
-
-			<h3>Controls</h3>
-			<div class="controls">
-				<ul>
-					<li><strong>Arrow Keys</strong> — Move ship</li>
-					<li><strong>Space</strong> — Shoot</li>
-					<li><strong>ESC</strong> — Pause</li>
-				</ul>
-			</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Procedural enemy waves with escalating difficulty</li>
-					<li>Multiple power-ups (shield, rapid fire, mega blast)</li>
-					<li>Distinct boss patterns and visual particle effects</li>
-				</ul>
-			</div>
-
-			<h3>Tips</h3>
-			<div class="tips">
-				<ul>
-					<li>Prioritize survival; pick power-ups that complement your playstyle</li>
-					<li>Learn boss timings and movement patterns</li>
-				</ul>
-			</div>
-
-			<span class="difficulty hard">Hard</span>
-			<a href="../../games/spacegame/spacegame.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Rage: The Impossible Game -->
-		<div class="game-card">
-			<h2>😵 The Impossible Game</h2>
-			<p class="description">A precision platformer focused on tight timing and pixel-perfect jumps — extreme
-				difficulty for master players.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Use precise jumps and timing to traverse hazardous obstacle courses. Checkpoints
-				exist but the complexity ramps quickly.</div>
-
-			<h3>Controls</h3>
-			<div class="controls">
-				<ul>
-					<li><strong>Arrow Keys / WASD</strong> — Move</li>
-					<li><strong>Space</strong> — Jump (hold for higher jump)</li>
-				</ul>
-			</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>High-precision platforming levels with checkpoints</li>
-					<li>Progressive difficulty requiring memorization and skill</li>
-					<li>Best time tracking for competitive runs</li>
-				</ul>
-			</div>
-
-			<h3>Tips</h3>
-			<div class="tips">
-				<ul>
-					<li>Practice difficult sections repeatedly to memorize patterns</li>
-					<li>Use variable jump height to fine-tune landings</li>
-				</ul>
-			</div>
-
-			<span class="difficulty rage">Rage</span>
-			<a href="../../games/platformergame/platformergame.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- ===== Chance Games (ordered Easy -> Medium) ===== -->
+		<!-- ===== ADDITIONAL GAMES (CONDENSED) ===== -->
 		<h2 class="section-header">🎲 Chance Games</h2>
 
-		<!-- Easy: Slot Machine -->
 		<div class="game-card">
 			<h2>🎰 Slot Machine</h2>
-			<p class="description">3x3 slot with multiple bet levels and symbol payouts. Simple mechanics that are fun
-				and visually satisfying.</p>
+			<div class="game-meta">
+				<span class="game-year">2025 • Casino</span>
+				<span class="difficulty easy">Easy</span>
+			</div>
+			<p class="description">A 3x3 slot with multiple bet levels and symbol payouts. Simple mechanics combined
+				with satisfying spinning animations make this a quick, fun play.</p>
 
-			<h3>How to Play</h3>
-			<div class="description">Choose a bet amount, spin, and match symbols across lines to win. Higher bets
-				unlock more paylines and bigger potential payouts.</div>
+			<h3>🎮 How to Play</h3>
+			<div class="description">Choose a bet amount (affects available paylines), spin the reels, and match symbols
+				across lines to win. Higher bets unlock more paylines and bigger payouts.</div>
 
-			<h3>Features</h3>
-			<div class="features">
+			<h3>⌨️ Controls</h3>
+			<div class="controls">
 				<ul>
-					<li>Different bet tiers with payout multipliers</li>
-					<li>Animated reels and win feedback</li>
-					<li>Local score and coin tracking</li>
+					<li><strong>Bet Select</strong> — Choose your wager level (1-5)</li>
+					<li><strong>Spin Button</strong> — Spin the reels</li>
+					<li><strong>Payline Display</strong> — View winning combinations for current bet</li>
 				</ul>
 			</div>
 
-			<span class="difficulty easy">Easy</span>
-			<a href="../../casinogames/slot.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Easy: Roulette -->
-		<div class="game-card">
-			<h2>🎡 Roulette Improved</h2>
-			<p class="description">Pick a number and spin a 12-segment wheel. A straightforward luck-based game with
-				clear odds.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Select a number (1–12) and spin. If the wheel lands on your number you win;
-				otherwise try again.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>12-number wheel with smooth animation</li>
-					<li>Clear win/lose UI and simple odds</li>
-				</ul>
-			</div>
-
-			<span class="difficulty easy">Easy</span>
-			<a href="../../casinogames/roulette.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Easy: Cursed Dice -->
-		<div class="game-card">
-			<h2>🎲 Cursed Dice</h2>
-			<p class="description">Bet on a die roll with random curse mechanics altering outcomes — low complexity with
-				a twist.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Choose a number 1–6, roll, and win if your number appears. Beware of curses that
-				can reroll, double, or invert outcomes.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Simple betting mechanics with random curse events</li>
-					<li>Visual dice animation and stakes</li>
-				</ul>
-			</div>
-
-			<span class="difficulty easy">Easy</span>
-			<a href="../../casinogames/curseddice.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Blackjack+ -->
-		<div class="game-card">
-			<h2>🃏 Blackjack+</h2>
-			<p class="description">Classic blackjack versus dealer. Use basic strategy to maximize wins while managing
-				chips.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Hit to take another card or Stand to end your turn. Dealer plays to standard rules.
-				Aces are 1 or 11.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Full 52-card deck with auto shuffling</li>
-					<li>Dealer AI and standard house rules</li>
-					<li>Chip counter and round-based play</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../casinogames/blackjack.html" class="play-link">▶ Play Now</a>
-		</div>
-		<!-- Medium: Poker -->
-		<div class="game-card">
-			<h2>♠️ Poker</h2>
-			<p class="description">A simplified Texas Hold 'em poker game against AI opponents. Bet, bluff, and win
-				chips.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Receive two hole cards, then bet through rounds of community cards. Use poker
-				strategy to outplay opponents.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Basic AI opponents with betting logic</li>
-					<li>Hand ranking and showdown mechanics</li>
-					<li>Chip management and round progression</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../casinogames/poker.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- ===== Simulations (ordered Easy -> Rage) ===== -->
-		<h2 class="section-header">💡 Simulations</h2>
-
-		<!-- Easy: Mini Empire -->
-		<div class="game-card">
-			<h2>🏰 Mini Empire: Defenders</h2>
-			<p class="description">A turn-based builder: place farms, houses, mines, and forts on a 10x10 grid and
-				defend versus raids.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Place buildings to generate resources. Balance food, gold, and defense as raids
-				occur on a fixed schedule.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>10x10 grid city builder with resource balance</li>
-					<li>Buildings that unlock progressively by tech level</li>
-					<li>Periodic raids to test your defenses</li>
-				</ul>
-			</div>
-
-			<span class="difficulty easy">Easy</span>
-			<a href="../../sims/mini.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Wealth Builder -->
-		<div class="game-card">
-			<h2>💰 Wealth Builder</h2>
-			<p class="description">A personal finance sim: complete tasks, take jobs, and invest to grow net worth and
-				unlock new revenue streams.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Complete short tasks or take part-time jobs for cash, then invest or buy businesses
-				to scale income over time.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Task-based earnings and passive income mechanics</li>
-					<li>Investment options and business purchases</li>
-					<li>Save/load via localStorage</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../sims/lifegame/life.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Supply & Demand -->
-		<div class="game-card">
-			<h2>📊 Supply & Demand</h2>
-			<p class="description">Manage a small shop: buy inventory, serve customers, and complete daily quests to
-				grow your business.</p>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Dynamic customer arrival and time-limited quests</li>
-					<li>Inventory, pricing, and reputation systems</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../sims/s&d/money.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Metropolis Builder -->
-		<div class="game-card">
-			<h2>🏙️ Metropolis Builder</h2>
-			<p class="description">A deeper city-builder: zone, connect with roads, manage utilities, and grow
-				population while balancing pollution and happiness.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Zone residential/commercial/industrial, build infrastructure and services, then
-				manage growth and events.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>27x16 grid with multi-faceted resource management</li>
-					<li>Random events, infrastructure, and tech unlocks</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../sims/citygame/citygame.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Medium: Great Empire -->
-		<div class="game-card">
-			<h2>👑 Great Empire Game</h2>
-			<p class="description">Turn-based empire battles with upgradeable stats, enemy loot, and incremental
-				progression against rival AIs.</p>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Turn-based combat, loot, and economy</li>
-					<li>Progressive region unlocks and difficulty curve</li>
-				</ul>
-			</div>
-
-			<span class="difficulty medium">Medium</span>
-			<a href="../../sims/empire.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Hard: The Box -->
-		<div class="game-card">
-			<h2>📦 The Box</h2>
-			<p class="description">A layered puzzle/adventure with five cryptic levels and branching endings — focused
-				on discovery and problem solving.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Solve environmental puzzles, collect items, and make choices that affect outcomes.
-				Hints are limited per scene.</div>
-
-			<h3>Features</h3>
-			<div class="features">
-				<ul>
-					<li>Five increasing-difficulty puzzle scenes</li>
-					<li>Inventory-based puzzles and multiple endings</li>
-				</ul>
-			</div>
-
-			<span class="difficulty hard">Hard</span>
-			<a href="../../sims/box/box.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Hard: Tower Defense+ -->
-		<div class="game-card">
-			<h2>🛡️ Tower Defense+</h2>
-			<p class="description">Strategic tower defense with tower upgrades, placement strategy, and wave-based
-				progression.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Place towers on grass tiles, upgrade them, and manage resources to stop waves of
-				enemies before they reach the exit.</div>
-
-			<h3>Tower Types</h3>
-			<div class="features">
-				<ul>
-					<li>Basic — inexpensive and reliable</li>
-					<li>Sniper — long range, high single-target damage</li>
-					<li>Frost — slows enemies</li>
-					<li>Bomb — area damage</li>
-					<li>Flame — damage over time</li>
-				</ul>
-			</div>
-
-			<span class="difficulty hard">Hard</span>
-			<a href="../../newgames/tower.html" class="play-link">▶ Play Now</a>
-		</div>
-
-		<!-- Rage: Tower Defense 2 -->
-		<div class="game-card">
-			<h2>🛡️ Tower Defense 2</h2>
-			<p class="description">An advanced tower defense: multiple entry paths, tougher enemy types, synergies, tech
-				research, and much higher challenge.</p>
-
-			<h3>How to Play</h3>
-			<div class="description">Build diverse towers (Archer, Cannon, Wizard, Tesla, Farm), research tech
-				synergies, and manage wave composition on multiple paths.</div>
-
-			<h3>Tower Types & Features</h3>
-			<div class="features">
-				<ul>
-					<li>Archer, Cannon, Wizard, Tesla, and Farm towers with unique mechanics</li>
-					<li>Research tree for synergies and global buffs</li>
-					<li>Multiple entry paths requiring cross-path defense</li>
-					<li>Higher-difficulty enemy varieties (healers, armored, bosses)</li>
-				</ul>
-			</div>
-
-			<h3>Tips</h3>
+			<h3>💡 Tips</h3>
 			<div class="tips">
 				<ul>
-					<li>Place towers to cover multiple path intersections and choke points</li>
-					<li>Use Farms early for steady passive income on higher waves</li>
-					<li>Prioritize research that complements your core tower mix</li>
+					<li>Understand paylines for each bet tier before wagering</li>
+					<li>Manage your bankroll across multiple spins</li>
+					<li>Higher bets offer bigger payouts but higher risk</li>
 				</ul>
 			</div>
 
-			<span class="difficulty rage">Rage</span>
-			<a href="../../newgames/tower2.html" class="play-link">▶ Play Now</a>
+			<a href="../../casinogames/slot/slot.html" class="play-link">▶ Play Slot Machine</a>
+		</div>
+
+		<div class="game-card">
+			<h2>🃏 Blackjack+</h2>
+			<div class="game-meta">
+				<span class="game-year">2025 • Casino</span>
+				<span class="difficulty medium">Medium</span>
+			</div>
+			<p class="description">Classic blackjack versus an AI dealer. Use basic strategy to beat the house while
+				managing your chip stack across multiple hands.</p>
+
+			<h3>🎮 How to Play</h3>
+			<div class="description">Receive two cards and decide to Hit (take another card) or Stand (end your turn).
+				Reach 21 or get closer than the dealer without exceeding 21 to win. Aces count as 1 or 11.</div>
+
+			<h3>⌨️ Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Bet Amount</strong> — Wager your chips before dealing</li>
+					<li><strong>Hit Button</strong> — Take another card</li>
+					<li><strong>Stand Button</strong> — End your turn and let dealer play</li>
+					<li><strong>Deal Button</strong> — Start a new hand</li>
+				</ul>
+			</div>
+
+			<h3>💡 Strategy Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Hit on 16 or lower; stand on 17 or higher</li>
+					<li>Double down on 11 (strong starting hand)</li>
+					<li>Always split Aces and 8s for better odds</li>
+					<li>Manage your bankroll across multiple hands</li>
+				</ul>
+			</div>
+
+			<a href="../../casinogames/blackjack/blackjack.html" class="play-link">▶ Play Blackjack+</a>
+		</div>
+
+		<!-- ===== SIMULATIONS ===== -->
+		<h2 class="section-header">💡 Simulations</h2>
+
+		<div class="game-card">
+			<h2>💰 Wealth Builder</h2>
+			<div class="game-meta">
+				<span class="game-year">2025 • Simulation</span>
+				<span class="difficulty medium">Medium</span>
+			</div>
+			<p class="description">A personal finance simulator. Complete tasks, take jobs, invest wisely, and build
+				passive income streams to grow your net worth over time.</p>
+
+			<h3>🎮 How to Play</h3>
+			<div class="description">Earn cash by completing quick tasks or taking part-time jobs. Invest money into
+				businesses or stocks for passive income. Scale your earnings through smart financial decisions.</div>
+
+			<h3>⌨️ Controls</h3>
+			<div class="controls">
+				<ul>
+					<li><strong>Task Button</strong> — Complete a quick task for cash</li>
+					<li><strong>Job Button</strong> — Take a part-time job</li>
+					<li><strong>Invest Button</strong> — Buy businesses or stocks</li>
+					<li><strong>Next Day</strong> — Advance time and collect passive income</li>
+				</ul>
+			</div>
+
+			<h3>💡 Financial Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Diversify income sources early for stability</li>
+					<li>Invest in passive income as soon as possible</li>
+					<li>Complete tasks for quick capital to bootstrap investments</li>
+					<li>Scale passive income for exponential growth over time</li>
+				</ul>
+			</div>
+
+			<a href="../../sims/lifegame/life.html" class="play-link">▶ Play Wealth Builder</a>
+		</div>
+
+		<div class="game-card">
+			<h2>🏙️ Metropolis Builder</h2>
+			<div class="game-meta">
+				<span class="game-year">2025 • Simulation</span>
+				<span class="difficulty medium">Medium</span>
+			</div>
+			<p class="description">A deep city builder on a 27x16 grid. Zone residential, commercial, and industrial
+				areas; build infrastructure; manage pollution and citizen happiness.</p>
+
+			<h3>🎮 How to Play</h3>
+			<div class="description">Zone areas (residential, commercial, industrial), connect with roads, build
+				utilities
+				(water, power), and manage growth while balancing pollution and citizen happiness.</div>
+
+			<h3>💡 City Planning Tips</h3>
+			<div class="tips">
+				<ul>
+					<li>Separate industrial zones from residential for happiness</li>
+					<li>Plan roads efficiently to reduce travel time</li>
+					<li>Provide adequate utilities to prevent outages</li>
+					<li>Monitor pollution and citizen happiness metrics constantly</li>
+				</ul>
+			</div>
+
+			<a href="../../sims/citygame/citygame.html" class="play-link">▶ Play Metropolis Builder</a>
 		</div>
 
 		<footer>
-			<p>© <span id="year"></span> Littletree866 — All games are open-source</p>
-			<p style="font-size: 0.9rem; opacity: 0.8;">For more games, visit the <a href="../../index.html"
-					style="color: var(--primary); text-decoration: none; font-weight: 700;">Game Hub</a></p>
+			<p>© <span id="year"></span> Infinity Nexus — All games are open-source</p>
+			<p style="font-size: 0.9rem; opacity: 0.8;">For the complete game hub, visit the <a href="../../index.html"
+					style="color: var(--primary); text-decoration: none; font-weight: 700;">homepage</a></p>
 		</footer>
 	</div>
 
