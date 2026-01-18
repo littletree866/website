@@ -1,480 +1,1055 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cursed Dice</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="../icon.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../../icon.jpg">
     <style>
+        :root {
+            --primary-dark: #0a0a14;
+            --secondary-dark: #1a1a2e;
+            --accent-blue: #4cc9f0;
+            --accent-pink: #f72585;
+            --accent-purple: #7209b7;
+            --accent-green: #06d6a0;
+            --accent-gold: #ffd166;
+            --accent-danger: #ef476f;
+            --text-light: #e6e6ff;
+            --text-dim: #a9b7c6;
+            --dice-bg: #ffffff;
+            --curse-color: #9d4edd;
+            --win-glow: rgba(6, 214, 160, 0.3);
+            --lose-glow: rgba(239, 71, 111, 0.3);
+            --curse-glow: rgba(157, 78, 221, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Jura', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            color: var(--text-light);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(76, 201, 240, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(247, 37, 133, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
         }
 
         header {
             text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            border: 2px solid #4cc9f0;
-            box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+            padding: 25px;
+            background: linear-gradient(145deg, var(--secondary-dark), #141428);
+            border-radius: 20px;
+            border: 3px solid var(--accent-blue);
+            box-shadow: 
+                0 0 30px rgba(76, 201, 240, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                var(--accent-blue), 
+                var(--accent-pink),
+                var(--accent-purple));
         }
 
         h1 {
-            font-size: 2.8rem;
-            color: #4cc9f0;
-            text-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+            font-size: 3.5rem;
+            color: var(--accent-blue);
+            text-shadow: 
+                0 0 20px rgba(76, 201, 240, 0.7),
+                2px 2px 0 rgba(0, 0, 0, 0.3);
             margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        h1::before {
+            content: '🎲';
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        h1::after {
+            content: '⚡';
+            position: absolute;
+            right: -50px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .subtitle {
-            font-size: 1.2rem;
-            color: #a9b7c6;
+            font-size: 1.3rem;
+            color: var(--text-dim);
             margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 500;
         }
 
         .game-area {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .game-area {
                 grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            h1::before,
+            h1::after {
+                display: none;
             }
         }
 
         .game-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid #4361ee;
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(20, 20, 40, 0.9));
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                var(--accent-blue), 
+                transparent);
+        }
+
+        .game-panel.betting-panel {
+            border-color: var(--accent-blue);
+        }
+
+        .game-panel.dice-panel {
+            border-color: var(--accent-purple);
         }
 
         .stats-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid #3a0ca3;
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(20, 20, 40, 0.9));
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid var(--accent-green);
             grid-column: 1 / -1;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                var(--accent-green), 
+                transparent);
         }
 
         h2 {
-            color: #f72585;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-            border-bottom: 2px solid #f72585;
-            padding-bottom: 5px;
+            color: var(--accent-pink);
+            margin-bottom: 20px;
+            font-size: 2rem;
+            border-bottom: 3px solid var(--accent-pink);
+            padding-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h2::after {
+            content: '';
+            flex-grow: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-pink), transparent);
         }
 
         h3 {
-            color: #4361ee;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--accent-blue);
+            border-radius: 50%;
         }
 
         .coins-display {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 2px solid #ffd166;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.6), rgba(42, 42, 62, 0.6));
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 3px solid var(--accent-gold);
+            box-shadow: 0 4px 20px rgba(255, 209, 102, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .coins-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 215, 0, 0.1), 
+                transparent);
+            transition: left 0.5s;
+        }
+
+        .coins-display:hover::before {
+            left: 100%;
         }
 
         .coins-amount {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: #ffd166;
-            text-shadow: 0 0 5px rgba(255, 209, 102, 0.7);
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            text-shadow: 0 0 15px rgba(255, 209, 102, 0.7);
+            letter-spacing: 1px;
+        }
+
+        .coins-label {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .bet-controls {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 15px;
         }
 
         .bet-amount {
-            font-size: 1.5rem;
-            color: #06d6a0;
-            font-weight: bold;
+            font-size: 2.2rem;
+            color: var(--accent-green);
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(6, 214, 160, 0.5);
+            letter-spacing: 1px;
         }
 
         .bet-btn {
-            background: #06d6a0;
-            color: #000;
+            background: linear-gradient(145deg, var(--accent-blue), #3aa8d0);
+            color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.8rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bet-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.5s;
         }
 
         .bet-btn:hover {
-            background: #05c490;
-            transform: scale(1.1);
+            background: linear-gradient(145deg, #3aa8d0, var(--accent-blue));
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.5);
+        }
+
+        .bet-btn:hover::before {
+            left: 100%;
+        }
+
+        .bet-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .number-selection {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .number-btn {
-            background: #3a0ca3;
+            background: linear-gradient(145deg, var(--accent-purple), #5a08a5);
             color: white;
             border: none;
-            height: 60px;
-            border-radius: 10px;
-            font-size: 1.8rem;
-            font-weight: bold;
+            height: 80px;
+            border-radius: 15px;
+            font-size: 2.2rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(114, 9, 183, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .number-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.5s;
         }
 
         .number-btn:hover {
-            background: #480ca8;
+            background: linear-gradient(145deg, #5a08a5, var(--accent-purple));
             transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(114, 9, 183, 0.5);
+        }
+
+        .number-btn:hover::before {
+            left: 100%;
         }
 
         .number-btn.selected {
-            background: #f72585;
-            box-shadow: 0 0 15px rgba(247, 37, 133, 0.7);
+            background: linear-gradient(145deg, var(--accent-pink), #d11573);
+            box-shadow: 
+                0 0 30px rgba(247, 37, 133, 0.7),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
             transform: translateY(-5px);
+            animation: selectedPulse 2s infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 30px rgba(247, 37, 133, 0.7),
+                    inset 0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 
+                    0 0 45px rgba(247, 37, 133, 1),
+                    inset 0 0 30px rgba(255, 255, 255, 0.3);
+            }
         }
 
         .roll-btn {
-            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+            background: linear-gradient(145deg, var(--accent-pink), #d11573);
             color: white;
             border: none;
             width: 100%;
-            padding: 18px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            border-radius: 10px;
+            padding: 22px;
+            font-size: 2rem;
+            font-weight: 800;
+            border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-top: 10px;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 20px rgba(247, 37, 133, 0.4);
+            position: relative;
+            overflow: hidden;
         }
 
-        .roll-btn:hover {
+        .roll-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.5s;
+        }
+
+        .roll-btn:hover:not(:disabled) {
+            background: linear-gradient(145deg, #d11573, var(--accent-pink));
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(247, 37, 133, 0.4);
+            box-shadow: 0 10px 35px rgba(247, 37, 133, 0.6);
+        }
+
+        .roll-btn:hover:not(:disabled)::before {
+            left: 100%;
         }
 
         .roll-btn:disabled {
-            background: #555;
+            background: linear-gradient(145deg, #555, #444);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .roll-btn.rolling {
+            animation: rollBtnPulse 1s infinite;
+        }
+
+        @keyframes rollBtnPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(247, 37, 133, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(247, 37, 133, 0.8);
+            }
         }
 
         .dice-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 200px;
-            perspective: 1000px;
-            margin-bottom: 20px;
+            height: 250px;
+            perspective: 1200px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .dice {
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 1s;
+            transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: rotateX(15deg) rotateY(15deg);
         }
 
         .dice-face {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: white;
-            border-radius: 15px;
+            background: linear-gradient(145deg, var(--dice-bg), #f0f0f0);
+            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: #1a1a2e;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-            border: 3px solid #333;
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--secondary-dark);
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.2),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 4px solid var(--secondary-dark);
+            backface-visibility: hidden;
         }
 
         .dot {
-            width: 20px;
-            height: 20px;
-            background: #1a1a2e;
+            width: 24px;
+            height: 24px;
+            background: var(--secondary-dark);
             border-radius: 50%;
             position: absolute;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .face-1 {
-            transform: translateZ(60px);
+            transform: translateZ(70px);
         }
 
         .face-2 {
-            transform: rotateX(180deg) translateZ(60px);
+            transform: rotateX(180deg) translateZ(70px);
         }
 
         .face-3 {
-            transform: rotateY(90deg) translateZ(60px);
+            transform: rotateY(90deg) translateZ(70px);
         }
 
         .face-4 {
-            transform: rotateY(-90deg) translateZ(60px);
+            transform: rotateY(-90deg) translateZ(70px);
         }
 
         .face-5 {
-            transform: rotateX(90deg) translateZ(60px);
+            transform: rotateX(90deg) translateZ(70px);
         }
 
         .face-6 {
-            transform: rotateX(-90deg) translateZ(60px);
+            transform: rotateX(-90deg) translateZ(70px);
         }
 
         .result-display {
             text-align: center;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            min-height: 70px;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            min-height: 85px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
         }
 
-        .win {
-            background: rgba(6, 214, 160, 0.2);
-            color: #06d6a0;
-            border: 2px solid #06d6a0;
+        .result-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.5s;
         }
 
-        .lose {
-            background: rgba(239, 71, 111, 0.2);
-            color: #ef476f;
-            border: 2px solid #ef476f;
+        .result-display.win {
+            background: linear-gradient(145deg, var(--win-glow), rgba(6, 214, 160, 0.1));
+            color: var(--accent-green);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(6, 214, 160, 0.3);
+            animation: winPulse 2s infinite;
         }
 
-        .neutral {
-            background: rgba(76, 201, 240, 0.2);
-            color: #4cc9f0;
-            border: 2px solid #4cc9f0;
-        }
-
-        .curse-active {
-            background: rgba(115, 3, 192, 0.2);
-            color: #7303c0;
-            border: 2px solid #7303c0;
-            animation: curse-pulse 2s infinite;
-        }
-
-        @keyframes curse-pulse {
-            0% {
-                box-shadow: 0 0 5px rgba(115, 3, 192, 0.5);
+        @keyframes winPulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(6, 214, 160, 0.3);
             }
-
             50% {
-                box-shadow: 0 0 20px rgba(115, 3, 192, 0.8);
+                box-shadow: 0 0 50px rgba(6, 214, 160, 0.6);
             }
+        }
 
-            100% {
-                box-shadow: 0 0 5px rgba(115, 3, 192, 0.5);
+        .result-display.lose {
+            background: linear-gradient(145deg, var(--lose-glow), rgba(239, 71, 111, 0.1));
+            color: var(--accent-danger);
+            border-color: var(--accent-danger);
+            box-shadow: 0 0 30px rgba(239, 71, 111, 0.3);
+            animation: losePulse 2s infinite;
+        }
+
+        @keyframes losePulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(239, 71, 111, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(239, 71, 111, 0.6);
+            }
+        }
+
+        .result-display.neutral {
+            background: linear-gradient(145deg, rgba(76, 201, 240, 0.1), rgba(76, 201, 240, 0.05));
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .result-display.curse-active {
+            background: linear-gradient(145deg, var(--curse-glow), rgba(157, 78, 221, 0.1));
+            color: var(--curse-color);
+            border-color: var(--curse-color);
+            box-shadow: 0 0 35px rgba(157, 78, 221, 0.4);
+            animation: cursePulse 2s infinite;
+        }
+
+        @keyframes cursePulse {
+            0%, 100% {
+                box-shadow: 0 0 35px rgba(157, 78, 221, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(157, 78, 221, 0.7);
             }
         }
 
         .curse-list {
             list-style-type: none;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .curse-list li {
-            padding: 10px;
-            margin-bottom: 8px;
-            background: rgba(115, 3, 192, 0.2);
-            border-radius: 8px;
-            border-left: 4px solid #7303c0;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: linear-gradient(145deg, rgba(157, 78, 221, 0.15), rgba(157, 78, 221, 0.05));
+            border-radius: 12px;
+            border-left: 5px solid var(--curse-color);
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .curse-list li:hover {
+            transform: translateX(5px);
+            background: linear-gradient(145deg, rgba(157, 78, 221, 0.25), rgba(157, 78, 221, 0.1));
+        }
+
+        .curse-list li::before {
+            content: '☠️';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.3;
+            font-size: 1.2rem;
         }
 
         .active-curse {
-            font-weight: bold;
-            color: #ff9e00;
-            animation: curse-flash 1.5s infinite;
+            font-weight: 800;
+            color: var(--curse-color);
+            animation: curseFlash 1.5s infinite;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        @keyframes curse-flash {
-
-            0%,
-            100% {
+        @keyframes curseFlash {
+            0%, 100% {
                 opacity: 1;
+                text-shadow: 0 0 10px var(--curse-color);
             }
-
             50% {
-                opacity: 0.7;
+                opacity: 0.8;
+                text-shadow: 0 0 20px var(--curse-color);
             }
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .stat-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            padding: 20px;
+            border-radius: 15px;
             text-align: center;
+            border: 2px solid var(--accent-blue);
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(76, 201, 240, 0.1), 
+                transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-box:hover::before {
+            left: 100%;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #4cc9f0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
         }
 
         .stat-label {
-            font-size: 0.9rem;
-            color: #a9b7c6;
+            font-size: 1rem;
+            color: var(--text-dim);
             margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .game-log {
-            height: 150px;
+            height: 180px;
             overflow-y: auto;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 15px;
-            font-family: monospace;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.6), rgba(20, 20, 40, 0.6));
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 2px solid var(--accent-purple);
+            position: relative;
+        }
+
+        .game-log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .game-log::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .game-log::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-purple), #5a08a5);
+            border-radius: 4px;
         }
 
         .log-entry {
-            padding: 5px;
+            padding: 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Jura', monospace;
+            font-size: 0.95rem;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .log-entry::before {
+            content: '▶';
+            position: absolute;
+            left: 10px;
+            color: var(--accent-blue);
         }
 
         .log-win {
-            color: #06d6a0;
+            color: var(--accent-green);
+            background: rgba(6, 214, 160, 0.05);
         }
 
         .log-lose {
-            color: #ef476f;
+            color: var(--accent-danger);
+            background: rgba(239, 71, 111, 0.05);
         }
 
         .log-curse {
-            color: #ff9e00;
+            color: var(--curse-color);
+            background: rgba(157, 78, 221, 0.05);
+        }
+
+        .log-neutral {
+            color: var(--text-dim);
         }
 
         footer {
             text-align: center;
-            margin-top: 20px;
-            color: #a9b7c6;
+            margin-top: 30px;
+            color: var(--text-dim);
             font-size: 0.9rem;
-            padding: 15px;
+            padding: 20px;
             width: 100%;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         .difficulty {
             display: inline-block;
-            padding: 5px 15px;
-            background: #06d6a0;
+            padding: 8px 20px;
+            background: linear-gradient(145deg, var(--accent-green), #05b58d);
             color: #000;
-            border-radius: 20px;
-            font-weight: bold;
-            margin-top: 10px;
+            border-radius: 25px;
+            font-weight: 800;
+            margin-top: 15px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
         }
 
         .instructions {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 1px solid #4cc9f0;
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(20, 20, 40, 0.9));
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 3px solid var(--accent-blue);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .instructions ul {
-            margin-left: 20px;
-            margin-top: 10px;
+            margin-left: 25px;
+            margin-top: 15px;
         }
 
         .instructions li {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
         }
 
         .rolling {
-            animation: rollDice 1s;
+            animation: rollDice 1s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes rollDice {
             0% {
-                transform: rotateX(0) rotateY(0) rotateZ(0);
+                transform: rotateX(0) rotateY(0) rotateZ(0) scale(1);
             }
-
             25% {
-                transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg);
+                transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg) scale(1.1);
             }
-
             50% {
-                transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg);
+                transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(1.2);
             }
-
             75% {
-                transform: rotateX(540deg) rotateY(270deg) rotateZ(135deg);
+                transform: rotateX(540deg) rotateY(270deg) rotateZ(135deg) scale(1.1);
             }
-
             100% {
-                transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg);
+                transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg) scale(1);
             }
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(20, 20, 40, 0.95));
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid var(--accent-gold);
+            display: none;
+            animation: slideIn 0.5s;
+            z-index: 1000;
+            min-width: 280px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--accent-gold);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideIn {
+            from { right: -300px; }
+            to { right: 30px; }
+        }
+
+        .achievement-icon {
+            color: var(--accent-gold);
+            font-size: 2rem;
+            margin-right: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .achievement-title {
+            color: var(--accent-gold);
+            font-weight: 800;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .achievement-desc {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        .multiplier-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, rgba(157, 78, 221, 0.9), rgba(157, 78, 221, 0.7));
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: none;
+            animation: pulse 1.5s infinite;
+            border: 2px solid white;
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.7);
+        }
+
+        .combo-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(145deg, rgba(247, 37, 133, 0.9), rgba(247, 37, 133, 0.7));
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: none;
+            animation: comboPulse 1s infinite;
+            border: 2px solid white;
+            box-shadow: 0 0 25px rgba(247, 37, 133, 0.7);
+        }
+
+        @keyframes comboPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .jackpot-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, rgba(255, 209, 102, 0.95), rgba(255, 215, 0, 0.8));
+            padding: 30px 50px;
+            border-radius: 20px;
+            color: #000;
+            font-weight: 900;
+            font-size: 2.5rem;
+            display: none;
+            z-index: 50;
+            animation: jackpotPulse 1s infinite;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-align: center;
+            border: 5px solid #ffd700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes jackpotPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1);
+                box-shadow: 0 0 80px rgba(255, 215, 0, 0.9);
+            }
+        }
+
+        .special-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+
+        .streak-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, rgba(76, 201, 240, 0.9), rgba(76, 201, 240, 0.7));
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: none;
+            border: 2px solid white;
+            box-shadow: 0 0 25px rgba(76, 201, 240, 0.7);
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <header>
-            <h1>🎲 Cursed Dice</h1>
+            <h1>CURSED DICE</h1>
+            <div class="subtitle">Roll with fate, gamble with the cursed spirits</div>
+            <div class="difficulty">CURSE LEVEL: ⚡⚡⚡</div>
         </header>
 
         <div class="stats-panel">
-            <h2>Game Stats</h2>
+            <h2>🎯 Game Statistics</h2>
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-value" id="total-rolls">0</div>
@@ -492,41 +1067,49 @@
                     <div class="stat-value" id="curses-triggered">0</div>
                     <div class="stat-label">Curses Triggered</div>
                 </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="win-streak">0</div>
+                    <div class="stat-label">Win Streak</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="total-coins">100</div>
+                    <div class="stat-label">Total Coins</div>
+                </div>
             </div>
 
             <div class="game-log">
                 <div id="log-entries">
-                    <div class="log-entry">Welcome to Cursed Dice! Place your bet and roll the dice.</div>
+                    <div class="log-entry log-neutral">🚀 Welcome to CURSED DICE! Place your bet and challenge fate...</div>
                 </div>
             </div>
         </div>
 
         <div class="game-area">
-            <div class="game-panel">
+            <div class="game-panel betting-panel">
                 <h2>🎯 Betting Area</h2>
 
                 <div class="coins-display">
                     <div>
-                        <div style="font-size: 1.2rem; color: #a9b7c6;">Your Coins</div>
+                        <div class="coins-label">Your Fortune</div>
                         <div class="coins-amount" id="coins">100</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 1.2rem; color: #a9b7c6;">Current Bet</div>
+                        <div class="coins-label">Current Bet</div>
                         <div class="bet-amount" id="current-bet">10</div>
                     </div>
                 </div>
 
-                <h3>Adjust Bet Amount</h3>
+                <h3>⚖️ Adjust Bet Amount</h3>
                 <div class="bet-controls">
                     <button class="bet-btn" id="decrease-bet">-</button>
-                    <div style="text-align: center;">
-                        <div style="font-size: 1rem; color: #a9b7c6; margin-bottom: 5px;">Bet Amount</div>
+                    <div style="text-align: center; flex-grow: 1;">
+                        <div style="font-size: 1.1rem; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px;">BET AMOUNT</div>
                         <div class="bet-amount" id="bet-amount">10</div>
                     </div>
                     <button class="bet-btn" id="increase-bet">+</button>
                 </div>
 
-                <h3>Select Number to Bet On</h3>
+                <h3>🎯 Select Number to Bet On</h3>
                 <div class="number-selection">
                     <button class="number-btn" data-number="1">1</button>
                     <button class="number-btn" data-number="2">2</button>
@@ -536,43 +1119,55 @@
                     <button class="number-btn" data-number="6">6</button>
                 </div>
 
-                <button class="roll-btn" id="roll-btn">ROLL DICE</button>
+                <button class="roll-btn" id="roll-btn">ROLL THE DICE</button>
+                <div class="combo-display" id="comboDisplay">COMBO: 0x</div>
+                <div class="streak-indicator" id="streakIndicator">STREAK: 0</div>
             </div>
 
-            <div class="game-panel">
+            <div class="game-panel dice-panel">
                 <h2>🎲 Dice Roll</h2>
 
                 <div class="dice-container">
-                    <div class="dice" id="dice">
-
-                    </div>
+                    <div class="dice" id="dice"></div>
+                    <div class="multiplier-display" id="multiplierDisplay">x2.0</div>
+                    <div class="jackpot-warning" id="jackpotWarning">JACKPOT!</div>
+                    <div class="special-effect" id="specialEffect"></div>
                 </div>
 
                 <div class="result-display neutral" id="result-display">
-                    Select a number and roll the dice!
+                    Select a number and test your fate...
                 </div>
 
-                <h3>Active Curse</h3>
+                <h3>☠️ Active Curse</h3>
                 <div id="curse-display" class="result-display neutral">
-                    No active curse
+                    No active curse... for now
                 </div>
 
-                <h3>Possible Curses</h3>
+                <h3>⚠️ Possible Curses</h3>
                 <ul class="curse-list">
-                    <li><span class="active-curse">Double Trouble</span>: Roll two dice, if either matches your bet you
-                        win</li>
-                    <li><span class="active-curse">Skewed Dice</span>: Dice results are biased toward odd/even numbers
-                    </li>
-                    <li><span class="active-curse">Reroll Curse</span>: You must reroll if you win, but keep winnings
-                    </li>
-                    <li><span class="active-curse">Inverse Luck</span>: Win on numbers adjacent to your bet instead</li>
+                    <li><span class="active-curse">Double Trouble</span>: Roll two dice, win if either matches</li>
+                    <li><span class="active-curse">Skewed Dice</span>: Dice biased toward specific numbers</li>
+                    <li><span class="active-curse">Reroll Curse</span>: Win triggers another roll</li>
+                    <li><span class="active-curse">Inverse Luck</span>: Win on adjacent numbers</li>
+                    <li><span class="active-curse">Ghost Dice</span>: Hidden dice rolls with extra odds</li>
+                    <li><span class="active-curse">Chain Curse</span>: Wins chain for multiplier bonus</li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <script>
+    <div class="achievement-popup" id="achievementPopup">
+        <div style="display: flex; align-items: center;">
+            <div class="achievement-icon">🏆</div>
+            <div>
+                <div class="achievement-title" id="achievementTitle">Achievement Unlocked!</div>
+                <div id="achievementDesc">Description here</div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        // Enhanced game state
         let gameState = {
             coins: 100,
             currentBet: 10,
@@ -582,97 +1177,136 @@
             losses: 0,
             cursesTriggered: 0,
             activeCurse: null,
-            curseDuration: 0
+            curseDuration: 0,
+            winStreak: 0,
+            loseStreak: 0,
+            combo: 0,
+            achievements: new Set(),
+            multiplier: 1.0,
+            lastWinTime: 0,
+            jackpotCount: 0,
+            cursedRolls: 0,
+            totalCoinsWon: 0,
+            totalCoinsLost: 0
         };
 
-
+        // Enhanced curses with better effects
         const curses = [
             {
                 name: "Double Trouble",
-                description: "Roll two dice, if either matches your bet you win",
+                description: "Roll two dice, win if either matches your bet",
                 effect: "doubleRoll",
-                duration: 1
+                duration: 2,
+                color: "#FF4081",
+                icon: "🎲🎲"
             },
             {
                 name: "Skewed Dice",
                 description: "Dice results are biased toward odd numbers",
                 effect: "skewOdd",
-                duration: 2
+                duration: 3,
+                color: "#4CAF50",
+                icon: "⚖️"
             },
             {
                 name: "Reroll Curse",
                 description: "You must reroll if you win, but keep winnings",
                 effect: "rerollOnWin",
-                duration: 3
+                duration: 2,
+                color: "#FF9800",
+                icon: "🔄"
             },
             {
                 name: "Inverse Luck",
                 description: "Win on numbers adjacent to your bet instead",
                 effect: "adjacentWin",
-                duration: 2
+                duration: 3,
+                color: "#2196F3",
+                icon: "↔️"
             },
             {
                 name: "Half Bet",
                 description: "Your bet is halved for this roll",
                 effect: "halfBet",
-                duration: 1
+                duration: 1,
+                color: "#795548",
+                icon: "📉"
             },
             {
-                name: "Cursed Coins",
+                name: "High Risk",
                 description: "Win triple coins but lose double on failure",
                 effect: "highRisk",
-                duration: 1
+                duration: 2,
+                color: "#F44336",
+                icon: "🎰"
+            },
+            {
+                name: "Ghost Dice",
+                description: "Hidden ghost dice affects the outcome",
+                effect: "ghostDice",
+                duration: 2,
+                color: "#9C27B0",
+                icon: "👻"
+            },
+            {
+                name: "Chain Curse",
+                description: "Consecutive wins increase multiplier",
+                effect: "chainMultiplier",
+                duration: 4,
+                color: "#FFD700",
+                icon: "⛓️"
             }
         ];
 
+        // Achievement system
+        const achievements = [
+            { id: 'first_win', name: 'First Victory', desc: 'Win your first bet', condition: (state) => state.wins >= 1 },
+            { id: 'cursed_roll', name: 'Cursed!', desc: 'Trigger your first curse', condition: (state) => state.cursesTriggered >= 1 },
+            { id: 'streak_3', name: 'Hot Streak', desc: 'Win 3 times in a row', condition: (state) => state.winStreak >= 3 },
+            { id: 'rich', name: 'High Roller', desc: 'Accumulate 500 coins', condition: (state) => state.coins >= 500 },
+            { id: 'jackpot', name: 'Jackpot King', desc: 'Win a jackpot roll', condition: (state) => state.jackpotCount >= 1 },
+            { id: 'cursed_master', name: 'Cursed Master', desc: 'Survive 10 cursed rolls', condition: (state) => state.cursedRolls >= 10 },
+            { id: 'combo_5', name: 'Combo Master', desc: 'Achieve a 5x combo', condition: (state) => state.combo >= 5 },
+            { id: 'lucky_7', name: 'Lucky Seven', desc: 'Roll exactly 7 with double dice', condition: () => false }
+        ];
 
+        // Initialize the game
         document.addEventListener('DOMContentLoaded', function () {
-
             createDiceFaces();
-
-
             setupEventListeners();
-
-
             updateDisplay();
-
-
-            addLogEntry("Welcome to Cursed Dice! Place your bet and roll the dice.", "neutral");
+            addLogEntry("🚀 Welcome to CURSED DICE! The cursed spirits await your bet...", "neutral");
+            
+            // Create special effect canvas
+            createSpecialEffectCanvas();
         });
-
 
         function createDiceFaces() {
             const dice = document.getElementById('dice');
-
+            dice.innerHTML = '';
 
             for (let i = 1; i <= 6; i++) {
                 const face = document.createElement('div');
                 face.className = `dice-face face-${i}`;
                 face.id = `face-${i}`;
-
-
+                face.innerHTML = `<div class="face-number">${i}</div>`;
                 addDotsToFace(face, i);
-
                 dice.appendChild(face);
             }
         }
 
-
         function addDotsToFace(face, number) {
-
-            face.innerHTML = '';
-
-
             const dotPositions = {
                 1: [[50, 50]],
-                2: [[20, 20], [80, 80]],
-                3: [[20, 20], [50, 50], [80, 80]],
-                4: [[20, 20], [20, 80], [80, 20], [80, 80]],
-                5: [[20, 20], [20, 80], [50, 50], [80, 20], [80, 80]],
-                6: [[20, 20], [20, 50], [20, 80], [80, 20], [80, 50], [80, 80]]
+                2: [[25, 25], [75, 75]],
+                3: [[25, 25], [50, 50], [75, 75]],
+                4: [[25, 25], [25, 75], [75, 25], [75, 75]],
+                5: [[25, 25], [25, 75], [50, 50], [75, 25], [75, 75]],
+                6: [[25, 20], [25, 50], [25, 80], [75, 20], [75, 50], [75, 80]]
             };
 
-
+            face.querySelectorAll('.dot').forEach(dot => dot.remove());
+            
             dotPositions[number].forEach(pos => {
                 const dot = document.createElement('div');
                 dot.className = 'dot';
@@ -683,20 +1317,20 @@
             });
         }
 
-
         function setupEventListeners() {
-
+            // Number selection
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                     selectNumber(parseInt(this.getAttribute('data-number')));
                 });
             });
 
-
+            // Bet controls
             document.getElementById('increase-bet').addEventListener('click', function () {
-                if (gameState.currentBet < gameState.coins) {
+                if (gameState.currentBet < gameState.coins - 5) {
                     gameState.currentBet += 5;
                     updateDisplay();
+                    addLogEntry(`Bet increased to ${gameState.currentBet} coins`, "neutral");
                 }
             });
 
@@ -704,18 +1338,22 @@
                 if (gameState.currentBet > 5) {
                     gameState.currentBet -= 5;
                     updateDisplay();
+                    addLogEntry(`Bet decreased to ${gameState.currentBet} coins`, "neutral");
                 }
             });
 
-
+            // Roll button
             document.getElementById('roll-btn').addEventListener('click', rollDice);
+
+            // Quick bet buttons (add later if needed)
         }
 
-
         function selectNumber(number) {
+            if (gameState.selectedNumber === number) return;
+            
             gameState.selectedNumber = number;
-
-
+            
+            // Visual feedback
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.classList.remove('selected');
                 if (parseInt(btn.getAttribute('data-number')) === number) {
@@ -723,152 +1361,174 @@
                 }
             });
 
-
+            // Enable roll button
             document.getElementById('roll-btn').disabled = false;
-
-
-            document.getElementById('result-display').textContent = `Betting on number ${number}`;
-            document.getElementById('result-display').className = 'result-display neutral';
-
-            addLogEntry(`Selected number ${number} to bet on.`, "neutral");
+            
+            // Update display
+            const resultDisplay = document.getElementById('result-display');
+            resultDisplay.textContent = `Betting ${gameState.currentBet} coins on number ${number}`;
+            resultDisplay.className = 'result-display neutral';
+            
+            addLogEntry(`Selected number ${number} with bet of ${gameState.currentBet} coins`, "neutral");
         }
-
 
         function rollDice() {
             if (gameState.selectedNumber === null) {
-                alert("Please select a number first!");
+                showNotification("Select a number first!");
                 return;
             }
 
             if (gameState.currentBet > gameState.coins) {
-                alert("You don't have enough coins for this bet!");
+                showNotification("Insufficient coins!");
                 return;
             }
 
-
+            // Deduct bet
             gameState.coins -= gameState.currentBet;
             gameState.totalRolls++;
-
-
+            
+            // Disable controls during roll
             const rollBtn = document.getElementById('roll-btn');
             rollBtn.disabled = true;
+            rollBtn.classList.add('rolling');
             rollBtn.textContent = "ROLLING...";
-
-
+            
+            // Animate dice
             const dice = document.getElementById('dice');
             dice.classList.add('rolling');
-
-
+            
+            // Determine curse
             let curseEffect = null;
-            if (Math.random() < 0.2 && gameState.activeCurse === null) {
+            const curseChance = 0.25 + (gameState.cursedRolls * 0.02);
+            
+            if (Math.random() < curseChance && gameState.activeCurse === null) {
                 const randomCurse = curses[Math.floor(Math.random() * curses.length)];
                 gameState.activeCurse = randomCurse;
                 gameState.curseDuration = randomCurse.duration;
                 gameState.cursesTriggered++;
+                gameState.cursedRolls++;
                 curseEffect = randomCurse.effect;
-
-                addLogEntry(`💀 Curse Activated: ${randomCurse.name} - ${randomCurse.description}`, "curse");
-
-
-                document.getElementById('curse-display').textContent = `${randomCurse.name}: ${randomCurse.description}`;
-                document.getElementById('curse-display').className = 'result-display curse-active';
+                
+                addLogEntry(`☠️ CURSE ACTIVATED: ${randomCurse.icon} ${randomCurse.name} - ${randomCurse.description}`, "curse");
+                
+                // Update curse display
+                const curseDisplay = document.getElementById('curse-display');
+                curseDisplay.textContent = `${randomCurse.icon} ${randomCurse.name}: ${randomCurse.description}`;
+                curseDisplay.className = 'result-display curse-active';
+                curseDisplay.style.borderColor = randomCurse.color;
+                
+                // Show achievement
+                checkAchievement('cursed_roll');
             }
-
-
+            
+            // Apply curse effects to bet
             let actualBet = gameState.currentBet;
+            let curseMultiplier = 1.0;
+            
             if (gameState.activeCurse) {
-                if (gameState.activeCurse.effect === "halfBet") {
-                    actualBet = Math.floor(actualBet / 2);
-                    addLogEntry(`Curse effect: Your bet is halved to ${actualBet} coins.`, "curse");
+                switch(gameState.activeCurse.effect) {
+                    case "halfBet":
+                        actualBet = Math.floor(actualBet / 2);
+                        addLogEntry(`Curse effect: Bet halved to ${actualBet} coins`, "curse");
+                        break;
+                    case "chainMultiplier":
+                        curseMultiplier = 1 + (gameState.winStreak * 0.5);
+                        updateMultiplierDisplay(curseMultiplier);
+                        break;
                 }
-
-
+                
+                // Decrease curse duration
                 gameState.curseDuration--;
                 if (gameState.curseDuration <= 0) {
-                    addLogEntry(`Curse "${gameState.activeCurse.name}" has expired.`, "curse");
+                    addLogEntry(`Curse "${gameState.activeCurse.name}" has expired`, "curse");
                     gameState.activeCurse = null;
-                    document.getElementById('curse-display').textContent = "No active curse";
-                    document.getElementById('curse-display').className = 'result-display neutral';
+                    const curseDisplay = document.getElementById('curse-display');
+                    curseDisplay.textContent = "No active curse... for now";
+                    curseDisplay.className = 'result-display neutral';
                 }
             }
-
-
-            let diceResult = generateDiceResult(curseEffect);
-
-
-            if (gameState.activeCurse && gameState.activeCurse.effect === "rerollOnWin") {
-
-            }
-
-
+            
+            // Generate dice result
+            const diceResult = generateDiceResult(curseEffect);
+            
+            // Simulate roll animation
             setTimeout(() => {
-
                 dice.classList.remove('rolling');
-
-
                 showDiceResult(diceResult);
-
-
+                
+                // Check win
                 const isWin = checkWin(diceResult, gameState.selectedNumber, curseEffect);
-
-
-                handleResult(isWin, diceResult, actualBet, curseEffect);
-
-
+                
+                // Handle result
+                handleResult(isWin, diceResult, actualBet, curseMultiplier, curseEffect);
+                
+                // Re-enable controls
                 rollBtn.disabled = false;
-                rollBtn.textContent = "ROLL DICE";
-
-
+                rollBtn.classList.remove('rolling');
+                rollBtn.textContent = "ROLL THE DICE";
+                
+                // Update display
                 updateDisplay();
-
-
+                
+                // Check for achievements
+                checkAchievements();
+                
+                // Handle special curses
                 if (isWin && gameState.activeCurse && gameState.activeCurse.effect === "rerollOnWin") {
                     setTimeout(() => {
-                        addLogEntry("Reroll Curse: You must roll again!", "curse");
-                        alert("Reroll Curse! You won but must roll again with the same bet.");
-
+                        addLogEntry("🔄 Reroll Curse: Victory forces another roll!", "curse");
+                        showNotification("Reroll Curse! Win again to keep your winnings!");
+                        
+                        // Auto-roll with same bet and number
                         rollDice();
-                    }, 1500);
+                    }, 2000);
+                }
+                
+                // Check for jackpot
+                if (isWin && diceResult === 6 && gameState.selectedNumber === 6 && actualBet >= 20) {
+                    triggerJackpot();
                 }
             }, 1000);
         }
 
-
         function generateDiceResult(curseEffect) {
-            // Return either a single number or an array [a,b] when doubleRoll is active
             if (curseEffect === 'doubleRoll') {
                 const a = Math.floor(Math.random() * 6) + 1;
                 const b = Math.floor(Math.random() * 6) + 1;
-                return [a, b];
+                return { type: 'double', values: [a, b] };
             }
-
+            
+            if (curseEffect === 'ghostDice') {
+                const visible = Math.floor(Math.random() * 6) + 1;
+                const ghost = Math.floor(Math.random() * 6) + 1;
+                return { type: 'ghost', visible: visible, ghost: ghost };
+            }
+            
             let result;
             switch (curseEffect) {
                 case "skewOdd":
-                    if (Math.random() < 0.7) {
-                        result = [1, 3, 5][Math.floor(Math.random() * 3)];
-                    } else {
-                        result = Math.floor(Math.random() * 6) + 1;
-                    }
+                    result = Math.random() < 0.7 ? [1, 3, 5][Math.floor(Math.random() * 3)] : Math.floor(Math.random() * 6) + 1;
                     break;
                 case "adjacentWin":
                     result = Math.floor(Math.random() * 6) + 1;
                     break;
                 default:
-                    result = Math.floor(Math.random() * 6) + 1;
+                    // Normal roll with slight bias for cursed rolls
+                    if (gameState.cursedRolls > 5 && Math.random() < 0.3) {
+                        result = Math.random() < 0.5 ? 6 : 1;
+                    } else {
+                        result = Math.floor(Math.random() * 6) + 1;
+                    }
             }
-            return result;
+            
+            return { type: 'single', value: result };
         }
-
 
         function showDiceResult(result) {
             const dice = document.getElementById('dice');
-
-            // If result is an array (double roll), show both values in the result display and rotate dice to first
-            if (Array.isArray(result)) {
-                const first = result[0];
-                const second = result[1];
-                // show first on 3D cube
+            
+            if (result.type === 'double') {
+                const [first, second] = result.values;
                 let rotation = '';
                 switch (first) {
                     case 1: rotation = 'rotateX(0deg) rotateY(0deg)'; break;
@@ -879,12 +1539,10 @@
                     case 6: rotation = 'rotateX(-90deg) rotateY(0deg)'; break;
                 }
                 dice.style.transform = rotation;
-
-                // display both results in the result box (keeps cube visual for first die)
                 document.getElementById('result-display').textContent = `Dice: ${first} & ${second}`;
-            } else {
+            } else if (result.type === 'ghost') {
                 let rotation = '';
-                switch (result) {
+                switch (result.visible) {
                     case 1: rotation = 'rotateX(0deg) rotateY(0deg)'; break;
                     case 2: rotation = 'rotateX(180deg) rotateY(0deg)'; break;
                     case 3: rotation = 'rotateX(0deg) rotateY(90deg)'; break;
@@ -893,110 +1551,358 @@
                     case 6: rotation = 'rotateX(-90deg) rotateY(0deg)'; break;
                 }
                 dice.style.transform = rotation;
+                document.getElementById('result-display').textContent = `Dice: ${result.visible} (Ghost: ${result.ghost})`;
+            } else {
+                let rotation = '';
+                switch (result.value) {
+                    case 1: rotation = 'rotateX(0deg) rotateY(0deg)'; break;
+                    case 2: rotation = 'rotateX(180deg) rotateY(0deg)'; break;
+                    case 3: rotation = 'rotateX(0deg) rotateY(90deg)'; break;
+                    case 4: rotation = 'rotateX(0deg) rotateY(-90deg)'; break;
+                    case 5: rotation = 'rotateX(90deg) rotateY(0deg)'; break;
+                    case 6: rotation = 'rotateX(-90deg) rotateY(0deg)'; break;
+                }
+                dice.style.transform = rotation;
+                document.getElementById('result-display').textContent = `Dice: ${result.value}`;
             }
         }
 
         function checkWin(diceResult, selectedNumber, curseEffect) {
-            // If double roll (array) win if either die equals the selected number
-            if (Array.isArray(diceResult)) {
-                return diceResult[0] === selectedNumber || diceResult[1] === selectedNumber;
+            if (diceResult.type === 'double') {
+                return diceResult.values[0] === selectedNumber || diceResult.values[1] === selectedNumber;
             }
-
+            
+            if (diceResult.type === 'ghost') {
+                return diceResult.visible === selectedNumber || diceResult.ghost === selectedNumber;
+            }
+            
             if (curseEffect === "adjacentWin") {
                 const adjacentNumbers = [
                     selectedNumber - 1 >= 1 ? selectedNumber - 1 : null,
                     selectedNumber + 1 <= 6 ? selectedNumber + 1 : null
                 ].filter(num => num !== null);
-                return adjacentNumbers.includes(diceResult);
+                return adjacentNumbers.includes(diceResult.value);
             }
-
-            return diceResult === selectedNumber;
+            
+            return diceResult.value === selectedNumber;
         }
 
-
-        function handleResult(isWin, diceResult, actualBet, curseEffect) {
+        function handleResult(isWin, diceResult, actualBet, multiplier, curseEffect) {
             let winnings = 0;
             let resultClass = '';
             let resultText = '';
             let logType = '';
-
+            
+            // Calculate combo
+            const now = Date.now();
+            if (isWin && now - gameState.lastWinTime < 3000) {
+                gameState.combo++;
+                updateComboDisplay();
+            } else {
+                gameState.combo = isWin ? 1 : 0;
+            }
+            
             if (isWin) {
-
+                gameState.lastWinTime = now;
+                gameState.winStreak++;
+                gameState.loseStreak = 0;
+                
+                // Calculate base winnings
+                let baseWinnings = actualBet * 2;
+                
+                // Apply curse effects
                 if (gameState.activeCurse && gameState.activeCurse.effect === "highRisk") {
-                    winnings = actualBet * 3;
-                    resultText = `Cursed Win! Dice shows ${diceResult}. You win ${winnings} coins!`;
-                    addLogEntry(`Cursed Win! Won ${winnings} coins (triple) on ${diceResult}`, "win");
-                } else {
-                    winnings = actualBet * 2;
-                    resultText = `You win! Dice shows ${diceResult}. You win ${winnings} coins!`;
-                    addLogEntry(`Win! Dice showed ${diceResult}, won ${winnings} coins`, "win");
+                    baseWinnings = actualBet * 3;
                 }
-
+                
+                // Apply multiplier
+                winnings = Math.floor(baseWinnings * multiplier);
+                
+                // Apply combo bonus
+                if (gameState.combo > 1) {
+                    winnings += Math.floor(winnings * (gameState.combo * 0.1));
+                }
+                
+                // Update stats
                 gameState.coins += winnings;
                 gameState.wins++;
+                gameState.totalCoinsWon += winnings;
+                
+                // Format result text
+                let diceText = '';
+                if (diceResult.type === 'double') {
+                    diceText = `${diceResult.values[0]} & ${diceResult.values[1]}`;
+                } else if (diceResult.type === 'ghost') {
+                    diceText = `${diceResult.visible} (Ghost: ${diceResult.ghost})`;
+                } else {
+                    diceText = diceResult.value;
+                }
+                
+                resultText = `VICTORY! Dice: ${diceText}. You win ${winnings} coins!`;
+                if (multiplier > 1) resultText += ` (x${multiplier.toFixed(1)})`;
+                if (gameState.combo > 1) resultText += ` + Combo ${gameState.combo}x`;
+                
+                addLogEntry(`🏆 WIN! +${winnings} coins on ${diceText}`, "win");
+                
                 resultClass = 'win';
                 logType = "win";
-
+                
+                // Check for first win achievement
+                if (gameState.wins === 1) checkAchievement('first_win');
+                
             } else {
-
-                if (gameState.activeCurse && gameState.activeCurse.effect === "highRisk") {
-                    const loss = actualBet * 2;
-                    gameState.coins -= actualBet;
-                    resultText = `Cursed Loss! Dice shows ${diceResult}. You lose ${loss} total coins!`;
-                    addLogEntry(`Cursed Loss! Lost ${loss} coins (double) on ${diceResult}`, "lose");
-                } else {
-                    resultText = `You lose! Dice shows ${diceResult}. You lose ${actualBet} coins.`;
-                    addLogEntry(`Loss! Dice showed ${diceResult}, lost ${actualBet} coins`, "lose");
-                }
-
+                gameState.winStreak = 0;
+                gameState.loseStreak++;
                 gameState.losses++;
+                gameState.totalCoinsLost += actualBet;
+                
+                // Check for high risk curse
+                let lossAmount = actualBet;
+                if (gameState.activeCurse && gameState.activeCurse.effect === "highRisk") {
+                    lossAmount = actualBet * 2;
+                    gameState.coins -= actualBet; // Already deducted base bet
+                }
+                
+                let diceText = '';
+                if (diceResult.type === 'double') {
+                    diceText = `${diceResult.values[0]} & ${diceResult.values[1]}`;
+                } else if (diceResult.type === 'ghost') {
+                    diceText = `${diceResult.visible}`;
+                } else {
+                    diceText = diceResult.value;
+                }
+                
+                resultText = `DEFEAT! Dice: ${diceText}. Lost ${lossAmount} coins.`;
+                
+                addLogEntry(`💔 LOSS! -${lossAmount} coins on ${diceText}`, "lose");
+                
                 resultClass = 'lose';
                 logType = "lose";
             }
-
-
+            
+            // Update result display
             const resultDisplay = document.getElementById('result-display');
             resultDisplay.textContent = resultText;
             resultDisplay.className = `result-display ${resultClass}`;
+            
+            // Update streak display
+            updateStreakDisplay();
+            
+            // Check for streak achievement
+            if (gameState.winStreak >= 3) checkAchievement('streak_3');
+            if (gameState.combo >= 5) checkAchievement('combo_5');
         }
 
-
         function updateDisplay() {
-
+            // Update coins and bet
             document.getElementById('coins').textContent = gameState.coins;
             document.getElementById('current-bet').textContent = gameState.currentBet;
             document.getElementById('bet-amount').textContent = gameState.currentBet;
-
-
+            document.getElementById('total-coins').textContent = gameState.coins;
+            
+            // Update statistics
             document.getElementById('total-rolls').textContent = gameState.totalRolls;
             document.getElementById('wins').textContent = gameState.wins;
             document.getElementById('losses').textContent = gameState.losses;
             document.getElementById('curses-triggered').textContent = gameState.cursesTriggered;
-
-
-            document.getElementById('roll-btn').disabled = gameState.selectedNumber === null || gameState.coins < gameState.currentBet;
+            document.getElementById('win-streak').textContent = gameState.winStreak;
+            
+            // Update roll button state
+            document.getElementById('roll-btn').disabled = 
+                gameState.selectedNumber === null || 
+                gameState.coins < gameState.currentBet;
+            
+            // Check for rich achievement
+            if (gameState.coins >= 500) checkAchievement('rich');
         }
 
+        function updateComboDisplay() {
+            const comboDisplay = document.getElementById('comboDisplay');
+            if (gameState.combo > 1) {
+                comboDisplay.textContent = `COMBO: ${gameState.combo}x`;
+                comboDisplay.style.display = 'block';
+                comboDisplay.style.animation = 'comboPulse 0.5s';
+            } else {
+                comboDisplay.style.display = 'none';
+            }
+        }
+
+        function updateStreakDisplay() {
+            const streakIndicator = document.getElementById('streakIndicator');
+            if (gameState.winStreak > 1) {
+                streakIndicator.textContent = `STREAK: ${gameState.winStreak}`;
+                streakIndicator.style.display = 'block';
+            } else if (gameState.loseStreak > 2) {
+                streakIndicator.textContent = `LOSE STREAK: ${gameState.loseStreak}`;
+                streakIndicator.style.backgroundColor = 'linear-gradient(145deg, rgba(239, 71, 111, 0.9), rgba(239, 71, 111, 0.7))';
+                streakIndicator.style.display = 'block';
+            } else {
+                streakIndicator.style.display = 'none';
+            }
+        }
+
+        function updateMultiplierDisplay(multiplier) {
+            const multiplierDisplay = document.getElementById('multiplierDisplay');
+            multiplierDisplay.textContent = `x${multiplier.toFixed(1)}`;
+            multiplierDisplay.style.display = 'block';
+            setTimeout(() => multiplierDisplay.style.display = 'none', 3000);
+        }
 
         function addLogEntry(message, type) {
             const logEntries = document.getElementById('log-entries');
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry log-${type}`;
-
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             logEntry.textContent = `[${timestamp}] ${message}`;
-
+            
             logEntries.appendChild(logEntry);
-
-
             logEntries.scrollTop = logEntries.scrollHeight;
-
-
-            if (logEntries.children.length > 20) {
+            
+            // Limit log entries
+            if (logEntries.children.length > 15) {
                 logEntries.removeChild(logEntries.firstChild);
             }
         }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(145deg, var(--accent-pink), #d11573);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 5px 25px rgba(247, 37, 133, 0.5);
+                animation: slideDown 0.5s;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function triggerJackpot() {
+            gameState.jackpotCount++;
+            const jackpotAmount = Math.floor(gameState.currentBet * 10);
+            gameState.coins += jackpotAmount;
+            gameState.totalCoinsWon += jackpotAmount;
+            
+            const jackpotWarning = document.getElementById('jackpotWarning');
+            jackpotWarning.style.display = 'block';
+            
+            addLogEntry(`🎰 JACKPOT! You won ${jackpotAmount} coins!`, "win");
+            showAchievement("Jackpot King", `Won ${jackpotAmount} coins in a jackpot!`);
+            
+            // Create special effects
+            createJackpotEffects();
+            
+            setTimeout(() => {
+                jackpotWarning.style.display = 'none';
+            }, 3000);
+            
+            checkAchievement('jackpot');
+        }
+
+        function createJackpotEffects() {
+            const effectContainer = document.getElementById('specialEffect');
+            effectContainer.style.display = 'block';
+            
+            // Create confetti effect
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: absolute;
+                    width: 10px;
+                    height: 10px;
+                    background: ${['#FFD700', '#FF6B6B', '#4ECDC4', '#FFD166'][Math.floor(Math.random() * 4)]};
+                    top: 50%;
+                    left: 50%;
+                    border-radius: 2px;
+                    z-index: 100;
+                `;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 2 + Math.random() * 3;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                let x = 0, y = 0;
+                const animate = () => {
+                    x += vx;
+                    y += vy;
+                    vy += 0.1; // gravity
+                    
+                    confetti.style.transform = `translate(${x}px, ${y}px) rotate(${x}deg)`;
+                    
+                    if (y < 300) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        confetti.remove();
+                    }
+                };
+                
+                effectContainer.appendChild(confetti);
+                requestAnimationFrame(animate);
+            }
+            
+            setTimeout(() => {
+                effectContainer.style.display = 'none';
+                effectContainer.innerHTML = '';
+            }, 3000);
+        }
+
+        function createSpecialEffectCanvas() {
+            const effectContainer = document.getElementById('specialEffect');
+            effectContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 10;
+                display: none;
+            `;
+        }
+
+        function checkAchievement(id) {
+            const achievement = achievements.find(a => a.id === id);
+            if (achievement && !gameState.achievements.has(id) && achievement.condition(gameState)) {
+                gameState.achievements.add(id);
+                showAchievement(achievement.name, achievement.desc);
+                return true;
+            }
+            return false;
+        }
+
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!gameState.achievements.has(achievement.id) && achievement.condition(gameState)) {
+                    gameState.achievements.add(achievement.id);
+                    showAchievement(achievement.name, achievement.desc);
+                }
+            });
+        }
+
+        function showAchievement(title, description) {
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementDesc').textContent = description;
+            popup.style.display = 'block';
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 4000);
+        }
     </script>
 </body>
-
 </html>

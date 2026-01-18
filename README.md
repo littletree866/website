@@ -1,9 +1,9 @@
-# Infinity Nexus (v1.17.20 — Released Jan 15, 2026)
+# Infinity Nexus (v1.18.22 — Released Feb 2, 2026)
 
 
 ## ⚡ Key Features
 
-- **Pure Vanilla JavaScript** - No frameworks, lightweight and fast
+- **Pure HTML JavaScript** - No frameworks, lightweight and fast
 - **Responsive Design** - Works on all device sizes
 - **Local Storage** - Most games save automatically to browser storage
 - **Smooth Animations** - CSS3 transitions and particle effects
