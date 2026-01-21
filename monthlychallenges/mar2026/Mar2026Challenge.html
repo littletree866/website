@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dot Grow - Addictive Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body { margin:0; overflow:hidden; font-family:'Jura',sans-serif; }
+canvas{display:block;}
+#score { position:absolute; color:#fff; top:10px; left:10px; font-size:20px; }
+#gameover { position:absolute; color:#f00; top:50%; left:50%; transform:translate(-50%,-50%); font-size:40px; display:none; }
+</style>
+</head>
+<body>
+<div id="score">Size: 10</div>
+<div id="gameover">Game Over! Press R to Restart</div>
+<canvas id="game"></canvas>
+<script>
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let player={x:0,y:0,r:10,speed:3,vx:0,vy:0,dash:0};
+let dots=[], obstacles=[], particles=[], stars=[];
+let keys={}, gameOver=false;
+const worldSize=2000;
+
+// Initialize background stars
+for(let i=0;i<200;i++) stars.push({x:Math.random()*worldSize*2-worldSize, y:Math.random()*worldSize*2-worldSize, r:Math.random()*2+1, color:'#555'} );
+
+// Utility
+function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function normalize(dx,dy){let len=Math.hypot(dx,dy);return len?{x:dx/len,y:dy/len}:{x:0,y:0};}
+
+// Particle effect
+function spawnParticles(x,y,color,count){
+  for(let i=0;i<count;i++){
+    particles.push({x,y,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,r:Math.random()*3+1,life:30,color});
+  }
+}
+
+// Safe spawn around player size
+function spawnDotAroundPlayer(){
+  let size = player.r * (Math.random()*0.7 + 0.7); // ~70%-140% of player size
+  let x,y,attempts=0;
+  do{
+    x = player.x + Math.random()*worldSize*2 - worldSize;
+    y = player.y + Math.random()*worldSize*2 - worldSize;
+    attempts++;
+  }while(distance({x,y},player)<50 && attempts<50);
+  let dot = {x,y,r:size,color:`hsl(${Math.random()*360},70%,50%)`,vx:0,vy:0,dx:(Math.random()-0.5)*2,dy:(Math.random()-0.5)*2,type:'normal'};
+  if(Math.random()<0.1){ dot.type = Math.random()<0.5?'gold':'speed'; dot.color=dot.type==='gold'?'#FFD700':'#00FFFF'; }
+  return dot;
+}
+
+// Initialize dots
+for(let i=0;i<200;i++) dots.push(spawnDotAroundPlayer());
+
+// Obstacles
+for(let i=0;i<30;i++) obstacles.push({x:Math.random()*worldSize*2-worldSize,y:Math.random()*worldSize*2-worldSize,r:Math.random()*30+20,color:'#444'});
+
+// Spawn giant dot
+function spawnGiantDot(){
+  let dot = spawnDotAroundPlayer();
+  dot.type='giant'; dot.r = Math.random()*50+40; dot.color='hsl('+Math.random()*360+',70%,30%)';
+  dots.push(dot);
+}
+
+// Input
+window.addEventListener('keydown', e=>{ keys[e.key]=true; if(e.key==='r'&&gameOver) restartGame(); });
+window.addEventListener('keyup', e=>keys[e.key]=false);
+
+// Restart
+function restartGame(){
+  player={x:0,y:0,r:10,speed:3,vx:0,vy:0,dash:0};
+  dots=[]; obstacles=[]; particles=[]; stars=[]; gameOver=false;
+  document.getElementById('gameover').style.display='none';
+  document.getElementById('score').innerText=`Size: ${player.r}`;
+  for(let i=0;i<200;i++) dots.push(spawnDotAroundPlayer());
+  for(let i=0;i<30;i++) obstacles.push({x:Math.random()*worldSize*2-worldSize,y:Math.random()*worldSize*2-worldSize,r:Math.random()*30+20,color:'#444'});
+  for(let i=0;i<200;i++) stars.push({x:Math.random()*worldSize*2-worldSize, y:Math.random()*worldSize*2-worldSize, r:Math.random()*2+1, color:'#555'} );
+}
+
+// Update
+function update(){
+  if(gameOver) return;
+
+  // Dash mechanic
+  let dashMultiplier = 1;
+  if(keys[' ']){ dashMultiplier=2; player.dash++; if(player.dash>50) dashMultiplier=1; }
+  else player.dash=0;
+
+  // Player movement
+  let ax=0, ay=0;
+  if(keys.ArrowUp) ay -= player.speed*dashMultiplier;
+  if(keys.ArrowDown) ay += player.speed*dashMultiplier;
+  if(keys.ArrowLeft) ax -= player.speed*dashMultiplier;
+  if(keys.ArrowRight) ax += player.speed*dashMultiplier;
+  player.vx += (ax - player.vx)*0.15;
+  player.vy += (ay - player.vy)*0.15;
+  let prevX=player.x, prevY=player.y;
+  player.x += player.vx; player.y += player.vy;
+
+  // Obstacle collision
+  for(let obs of obstacles){
+    if(distance(player,obs)<player.r+obs.r){ player.x=prevX; player.y=prevY; player.vx=0; player.vy=0; }
+  }
+
+  // Update dots
+  for(let dot of dots){
+    let ax=0, ay=0;
+    // flee bigger dots
+    if(dot.r<player.r*0.9 && distance(dot,player)<250){
+      let dir=normalize(dot.x-player.x,dot.y-player.y);
+      ax+=dir.x*1; ay+=dir.y*1;
+    }
+    for(let other of dots){
+      if(dot===other) continue;
+      if(other.r>dot.r*1.1 && distance(dot,other)<200){ let dir=normalize(dot.x-other.x,dot.y-other.y); ax+=dir.x*0.5; ay+=dir.y*0.5; }
+      if(other.r<dot.r*0.9 && distance(dot,other)<200){ let dir=normalize(other.x-dot.x,other.y-dot.y); ax+=dir.x*0.2; ay+=dir.y*0.2; }
+    }
+    dot.vx += (ax-dot.vx)*0.1; dot.vy += (ay-dot.vy)*0.1;
+    dot.x += dot.vx; dot.y += dot.vy;
+
+    if(dot.x<-worldSize||dot.x>worldSize) dot.vx*=-1;
+    if(dot.y<-worldSize||dot.y>worldSize) dot.vy*=-1;
+
+    // Eat smaller dots
+    for(let j=dots.length-1;j>=0;j--){
+      if(dot===dots[j]) continue;
+      if(distance(dot,dots[j])<dot.r && dot.r>dots[j].r){ 
+        dot.r+=dots[j].r*0.2; spawnParticles(dots[j].x,dots[j].y,dots[j].color,5); dots.splice(j,1); 
+      }
+    }
+    // Eat player
+    if(distance(dot,player)<dot.r && dot.r>player.r){ gameOver=true; document.getElementById('gameover').style.display='block'; }
+  }
+
+  // Player eats dots
+  for(let i=dots.length-1;i>=0;i--){
+    let dot=dots[i];
+    if(distance(player,dot)<player.r && player.r>dot.r){
+      if(dot.type==='gold') player.r+=dot.r*0.5;
+      else if(dot.type==='speed') player.speed+=1;
+      else player.r+=dot.r*0.2;
+      spawnParticles(dot.x,dot.y,dot.color,10);
+      dots.splice(i,1);
+      spawnGiantDot();
+    }
+  }
+
+  // Particles update
+  for(let i=particles.length-1;i>=0;i--){ let p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.life--; if(p.life<=0) particles.splice(i,1); }
+
+  document.getElementById('score').innerText=`Size: ${Math.round(player.r)}`;
+}
+
+// Draw
+function draw(){
+  // Background gradient
+  let gradient = ctx.createLinearGradient(0,0,0,canvas.height);
+  gradient.addColorStop(0,'#111'); gradient.addColorStop(1,'#222');
+  ctx.fillStyle=gradient; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  let offsetX=canvas.width/2-player.x, offsetY=canvas.height/2-player.y;
+
+  // stars
+  for(let s of stars){ ctx.beginPath(); ctx.arc(s.x+offsetX,s.y+offsetY,s.r,0,Math.PI*2); ctx.fillStyle=s.color; ctx.fill(); }
+
+  // obstacles
+  for(let obs of obstacles){ ctx.beginPath(); ctx.arc(obs.x+offsetX,obs.y+offsetY,obs.r,0,Math.PI*2); ctx.fillStyle=obs.color; ctx.fill(); }
+
+  // dots
+  for(let dot of dots){ ctx.beginPath(); ctx.arc(dot.x+offsetX,dot.y+offsetY,dot.r,0,Math.PI*2); ctx.fillStyle=dot.color; ctx.fill(); }
+
+  // particles
+  for(let p of particles){ ctx.beginPath(); ctx.arc(p.x+offsetX,p.y+offsetY,p.r,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill(); }
+
+  // player
+  ctx.beginPath(); ctx.arc(canvas.width/2,canvas.height/2,player.r,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+}
+
+// Loop
+function loop(){ update(); draw(); requestAnimationFrame(loop); }
+loop();
+</script>
+</body>
+</html>

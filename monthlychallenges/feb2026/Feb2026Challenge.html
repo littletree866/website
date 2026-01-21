@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stronghold Defense</title>
+    <title>February Challenge</title>
     <link rel="icon" href="../../icon.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -122,6 +122,8 @@
 
         #gameCanvas {
             display: block;
+            width: 100%;
+            height: 100%;
         }
 
         .ui-panel {
@@ -944,19 +946,6 @@
             animation: slideDown 0.3s;
         }
 
-        .log-entry {
-            color: #ccc;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            padding: 5px;
-            border-left: 3px solid;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .log-entry.damage { border-color: var(--danger-color); }
-        .log-entry.kill { border-color: var(--secondary-color); }
-        .log-entry.upgrade { border-color: var(--primary-color); }
-        .log-entry.powerup { border-color: var(--info-color); }
 
         .boss-warning {
             position: absolute;
@@ -993,10 +982,15 @@
             0%, 100% { border-color: var(--danger-color); }
             50% { border-color: #ff0000; }
         }
+        
+        @keyframes fadeUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+        }
     </style>
 </head>
 <body>
-    <h1 class="game-title">Stronghold Defense</h1>
+    <h1 class="game-title">February Challenge</h1>
     
     <div class="difficulty-selector">
         <button class="difficulty-btn easy" data-difficulty="easy">Easy</button>
@@ -1012,7 +1006,6 @@
                 <div class="enemy-counter" id="enemyCounter">Enemies: 0</div>
                 <div class="powerup-container" id="powerupContainer">Power-Up Active: None</div>
                 <div class="wave-preview" id="wavePreview">Next: Normal Enemies</div>
-                <div class="combat-log" id="combatLog"></div>
                 <div class="boss-warning" id="bossWarning">BOSS INCOMING!</div>
                 <div class="game-over" id="gameOverScreen">
                     <h2>GAME OVER</h2>
@@ -1036,7 +1029,7 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="money">$100</div>
-                        <div class="stat-label">Resources</div>
+                        <div class="stat-label">Money</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="wave">1</div>
@@ -1105,6 +1098,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
     
     <div class="achievement-popup" id="achievementPopup">
@@ -1118,1308 +1112,1164 @@
     </div>
 
     <script>
-        // Game variables
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const healthDisplay = document.getElementById('health');
-        const moneyDisplay = document.getElementById('money');
-        const waveDisplay = document.getElementById('wave');
-        const waveIndicator = document.getElementById('waveIndicator');
-        const enemyCounter = document.getElementById('enemyCounter');
-        const powerupContainer = document.getElementById('powerupContainer');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const finalScore = document.getElementById('finalScore');
-        const finalEnemies = document.getElementById('finalEnemies');
-        const finalMoney = document.getElementById('finalMoney');
-        const achievementPopup = document.getElementById('achievementPopup');
-        const achievementTitle = document.getElementById('achievementTitle');
-        const achievementDesc = document.getElementById('achievementDesc');
-        const wavePreview = document.getElementById('wavePreview');
-        const combatLog = document.getElementById('combatLog');
-        const bossWarning = document.getElementById('bossWarning');
-        
-        // Enhanced game state
-        let gameRunning = false;
-        let gamePaused = false;
-        let strongholdHealth = 100;
-        let maxHealth = 100;
-        let money = 100;
-        let wave = 1;
-        let enemiesDefeated = 0;
-        let totalMoneyEarned = 100;
-        let enemies = [];
-        let cannons = [];
-        let projectiles = [];
-        let moneyDrops = [];
-        let powerups = [];
-        let lastSpawnTime = 0;
-        let enemySpawnInterval = 2000;
-        let enemySpeed = 1.2;
-        let enemiesPerWave = 6;
-        let enemiesSpawnedThisWave = 0;
-        let waveComplete = false;
-        let difficulty = 'normal';
-        let powerupActive = null;
-        let powerupEndTime = 0;
-        let achievements = new Set();
-        let skillPoints = 0;
-        let shotsFired = 0;
-        let shotsHit = 0;
-        let bossWave = false;
-        let bossSpawned = false;
-        let combo = 0;
-        let lastKillTime = 0;
-        let comboTimeout = null;
-        
-        // Enhanced enemy types with better scaling
-        const ENEMY_TYPES = {
-            NORMAL: { 
-                health: 25, 
-                speed: 1.2, 
-                color: '#f44336', 
-                value: 12, 
-                radius: 12,
-                name: 'Grunt'
-            },
-            FAST: { 
-                health: 15, 
-                speed: 2.2, 
-                color: '#2196F3', 
-                value: 18, 
-                radius: 10,
-                name: 'Scout'
-            },
-            TANK: { 
-                health: 60, 
-                speed: 0.7, 
-                color: '#795548', 
-                value: 35, 
-                radius: 20,
-                name: 'Tank'
-            },
-            BOSS: { 
-                health: 200, 
-                speed: 0.5, 
-                color: '#9C27B0', 
-                value: 150, 
-                radius: 30,
-                name: 'Warlord'
-            }
-        };
-        
-        // Enhanced upgrades with scaling costs
-        let upgrades = {
-            damage: { level: 1, cost: 50, effect: 12, maxLevel: 15 },
-            fireRate: { level: 1, cost: 40, effect: 0.82, maxLevel: 12 },
-            range: { level: 1, cost: 60, effect: 25, maxLevel: 10 },
-            health: { level: 1, cost: 80, effect: 25, maxLevel: 8 },
-            speed: { level: 1, cost: 35, effect: 1.3, maxLevel: 10 },
-            money: { level: 1, cost: 45, effect: 0.12, maxLevel: 10 }
-        };
-        
-        // Stronghold properties
-        const stronghold = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 40,
-            color: '#4CAF50'
-        };
-        
-        // Enhanced power-up types
-        const POWERUPS = {
-            RAPID_FIRE: { 
-                name: 'Rapid Fire', 
-                color: '#FF9800', 
-                duration: 10000, 
-                effect: 'fireRate',
-                icon: '⚡'
-            },
-            DOUBLE_DAMAGE: { 
-                name: 'Double Damage', 
-                color: '#f44336', 
-                duration: 8000, 
-                effect: 'damage',
-                icon: '⚔️'
-            },
-            SLOW_ENEMIES: { 
-                name: 'Slow Enemies', 
-                color: '#2196F3', 
-                duration: 12000, 
-                effect: 'slow',
-                icon: '🐌'
-            },
-            MONEY_BOOST: { 
-                name: 'Money Boost', 
-                color: '#FFD700', 
-                duration: 15000, 
-                effect: 'money',
-                icon: '💰'
-            },
-            SHIELD: {
-                name: 'Energy Shield',
-                color: '#00BCD4',
-                duration: 10000,
-                effect: 'shield',
-                icon: '🛡️'
-            }
-        };
-        
-        // Initialize cannons with visual variety
-        function initCannons() {
-            cannons = [];
-            const directions = [
-                { x: 1, y: 0, angle: 0 },
-                { x: 0.7, y: 0.7, angle: Math.PI / 4 },
-                { x: 0, y: 1, angle: Math.PI / 2 },
-                { x: -0.7, y: 0.7, angle: 3 * Math.PI / 4 },
-                { x: -1, y: 0, angle: Math.PI },
-                { x: -0.7, y: -0.7, angle: 5 * Math.PI / 4 },
-                { x: 0, y: -1, angle: 3 * Math.PI / 2 },
-                { x: 0.7, y: -0.7, angle: 7 * Math.PI / 4 }
-            ];
-            
-            const cannonDistance = 70;
-            
-            directions.forEach((dir, index) => {
-                cannons.push({
-                    x: stronghold.x + dir.x * cannonDistance,
-                    y: stronghold.y + dir.y * cannonDistance,
-                    angle: dir.angle,
-                    lastShotTime: 0,
-                    type: index % 3, // Different cannon types
-                    cooldown: 0
-                });
-            });
-        }
-        
-        // Enhanced Enemy class
-        class Enemy {
-            constructor(type = 'NORMAL') {
-                const config = ENEMY_TYPES[type];
-                const side = Math.floor(Math.random() * 4);
-                let x, y;
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('Game initializing...');
                 
-                switch(side) {
-                    case 0: x = Math.random() * canvas.width; y = -40; break;
-                    case 1: x = canvas.width + 40; y = Math.random() * canvas.height; break;
-                    case 2: x = Math.random() * canvas.width; y = canvas.height + 40; break;
-                    case 3: x = -40; y = Math.random() * canvas.height; break;
-                }
+                // Game variables
+                const canvas = document.getElementById('gameCanvas');
+                const ctx = canvas.getContext('2d');
+                const healthDisplay = document.getElementById('health');
+                const moneyDisplay = document.getElementById('money');
+                const waveDisplay = document.getElementById('wave');
+                const waveIndicator = document.getElementById('waveIndicator');
+                const enemyCounter = document.getElementById('enemyCounter');
+                const powerupContainer = document.getElementById('powerupContainer');
+                const gameOverScreen = document.getElementById('gameOverScreen');
+                const finalScore = document.getElementById('finalScore');
+                const finalEnemies = document.getElementById('finalEnemies');
+                const finalMoney = document.getElementById('finalMoney');
+                const finalAccuracy = document.getElementById('finalAccuracy');
+                const finalRank = document.getElementById('finalRank');
+                const achievementPopup = document.getElementById('achievementPopup');
+                const achievementTitle = document.getElementById('achievementTitle');
+                const achievementDesc = document.getElementById('achievementDesc');
+                const wavePreview = document.getElementById('wavePreview');
+                const combatLog = document.getElementById('combatLog');
+                const bossWarning = document.getElementById('bossWarning');
                 
-                this.x = x;
-                this.y = y;
-                this.radius = config.radius;
-                this.speed = config.speed * getDifficultyMultiplier();
-                this.health = config.health;
-                this.maxHealth = config.health;
-                this.color = config.color;
-                this.value = Math.floor(config.value * (1 + upgrades.money.level * upgrades.money.effect));
-                this.type = type;
-                this.name = config.name;
-                this.trail = [];
-                this.trailLength = 20;
-                this.sprite = null;
-                this.rotation = 0;
-            }
-            
-            update() {
-                // Add current position to trail
-                this.trail.push({ x: this.x, y: this.y, time: Date.now() });
-                if (this.trail.length > this.trailLength) {
-                    this.trail.shift();
-                }
+                // Enhanced game state
+                let gameRunning = false;
+                let gamePaused = false;
+                let strongholdHealth = 100;
+                let maxHealth = 100;
+                let money = 100;
+                let wave = 1;
+                let enemiesDefeated = 0;
+                let totalMoneyEarned = 100;
+                let enemies = [];
+                let cannons = [];
+                let projectiles = [];
+                let moneyDrops = [];
+                let powerups = [];
+                let lastSpawnTime = 0;
+                let enemySpawnInterval = 2000;
+                let enemiesPerWave = 6;
+                let enemiesSpawnedThisWave = 0;
+                let waveComplete = false;
+                let difficulty = 'normal';
+                let powerupActive = null;
+                let powerupEndTime = 0;
+                let achievements = new Set();
+                let skillPoints = 0;
+                let shotsFired = 0;
+                let shotsHit = 0;
+                let bossWave = false;
+                let bossSpawned = false;
+                let combo = 0;
+                let lastKillTime = 0;
+                let comboTimeout = null;
+                let animationId = null;
                 
-                // Apply slow effect if powerup is active
-                let currentSpeed = this.speed;
-                if (powerupActive === 'SLOW_ENEMIES' && Date.now() < powerupEndTime) {
-                    currentSpeed *= 0.4;
-                }
+                // Enhanced enemy types with better scaling
+                const ENEMY_TYPES = {
+                    NORMAL: { 
+                        health: 25, 
+                        speed: 1.2, 
+                        color: '#f44336', 
+                        value: 12, 
+                        radius: 12,
+                        name: 'Grunt'
+                    },
+                    FAST: { 
+                        health: 15, 
+                        speed: 2.2, 
+                        color: '#2196F3', 
+                        value: 18, 
+                        radius: 10,
+                        name: 'Scout'
+                    },
+                    TANK: { 
+                        health: 60, 
+                        speed: 0.7, 
+                        color: '#795548', 
+                        value: 35, 
+                        radius: 20,
+                        name: 'Tank'
+                    },
+                    BOSS: { 
+                        health: 200, 
+                        speed: 0.5, 
+                        color: '#9C27B0', 
+                        value: 150, 
+                        radius: 30,
+                        name: 'Warlord'
+                    }
+                };
                 
-                // Move towards stronghold
-                const dx = stronghold.x - this.x;
-                const dy = stronghold.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                // Enhanced upgrades with scaling costs
+                let upgrades = {
+                    damage: { level: 1, cost: 50, effect: 12, maxLevel: 15 },
+                    fireRate: { level: 1, cost: 40, effect: 0.82, maxLevel: 12 },
+                    range: { level: 1, cost: 60, effect: 25, maxLevel: 10 },
+                    health: { level: 1, cost: 80, effect: 25, maxLevel: 8 },
+                    speed: { level: 1, cost: 35, effect: 1.3, maxLevel: 10 },
+                    money: { level: 1, cost: 45, effect: 0.12, maxLevel: 10 }
+                };
                 
-                this.x += (dx / distance) * currentSpeed;
-                this.y += (dy / distance) * currentSpeed;
-                this.rotation = Math.atan2(dy, dx);
+                // Stronghold properties
+                const stronghold = {
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    radius: 40,
+                    color: '#4CAF50'
+                };
                 
-                // Check collision with stronghold
-                if (distance < stronghold.radius + this.radius) {
-                    const damage = this.type === 'BOSS' ? 25 : this.type === 'TANK' ? 15 : 8;
+                // Enhanced power-up types
+                const POWERUPS = {
+                    RAPID_FIRE: { 
+                        name: 'Rapid Fire', 
+                        color: '#FF9800', 
+                        duration: 10000, 
+                        effect: 'fireRate',
+                        icon: '⚡'
+                    },
+                    DOUBLE_DAMAGE: { 
+                        name: 'Double Damage', 
+                        color: '#f44336', 
+                        duration: 8000, 
+                        effect: 'damage',
+                        icon: '⚔️'
+                    },
+                    SLOW_ENEMIES: { 
+                        name: 'Slow Enemies', 
+                        color: '#2196F3', 
+                        duration: 12000, 
+                        effect: 'slow',
+                        icon: '🐌'
+                    },
+                    MONEY_BOOST: { 
+                        name: 'Money Boost', 
+                        color: '#FFD700', 
+                        duration: 15000, 
+                        effect: 'money',
+                        icon: '💰'
+                    },
+                    SHIELD: {
+                        name: 'Energy Shield',
+                        color: '#00BCD4',
+                        duration: 10000,
+                        effect: 'shield',
+                        icon: '🛡️'
+                    }
+                };
+                
+                // Initialize cannons with visual variety
+                function initCannons() {
+                    cannons = [];
+                    const directions = [
+                        { x: 1, y: 0, angle: 0 },
+                        { x: 0.7, y: 0.7, angle: Math.PI / 4 },
+                        { x: 0, y: 1, angle: Math.PI / 2 },
+                        { x: -0.7, y: 0.7, angle: 3 * Math.PI / 4 },
+                        { x: -1, y: 0, angle: Math.PI },
+                        { x: -0.7, y: -0.7, angle: 5 * Math.PI / 4 },
+                        { x: 0, y: -1, angle: 3 * Math.PI / 2 },
+                        { x: 0.7, y: -0.7, angle: 7 * Math.PI / 4 }
+                    ];
                     
-                    // Apply shield protection
-                    if (powerupActive === 'SHIELD' && Date.now() < powerupEndTime) {
-                        addCombatLog(`Shield absorbed ${damage} damage!`, 'powerup');
-                    } else {
-                        strongholdHealth = Math.max(0, strongholdHealth - damage);
-                        healthDisplay.textContent = strongholdHealth;
-                        addCombatLog(`${this.name} hit stronghold for ${damage} damage!`, 'damage');
+                    const cannonDistance = 70;
+                    
+                    directions.forEach((dir, index) => {
+                        cannons.push({
+                            x: stronghold.x + dir.x * cannonDistance,
+                            y: stronghold.y + dir.y * cannonDistance,
+                            angle: dir.angle,
+                            lastShotTime: 0,
+                            type: index % 3,
+                            cooldown: 0
+                        });
+                    });
+                }
+                
+                // Enhanced Enemy class
+                class Enemy {
+                    constructor(type = 'NORMAL') {
+                        const config = ENEMY_TYPES[type];
+                        const side = Math.floor(Math.random() * 4);
+                        let x, y;
                         
-                        if (strongholdHealth / maxHealth < 0.3) {
-                            document.querySelector('.game-board').classList.add('critical-health');
+                        switch(side) {
+                            case 0: x = Math.random() * canvas.width; y = -40; break;
+                            case 1: x = canvas.width + 40; y = Math.random() * canvas.height; break;
+                            case 2: x = Math.random() * canvas.width; y = canvas.height + 40; break;
+                            case 3: x = -40; y = Math.random() * canvas.height; break;
+                        }
+                        
+                        this.x = x;
+                        this.y = y;
+                        this.radius = config.radius;
+                        this.speed = config.speed * getDifficultyMultiplier();
+                        this.health = config.health;
+                        this.maxHealth = config.health;
+                        this.color = config.color;
+                        this.value = Math.floor(config.value * (1 + upgrades.money.level * upgrades.money.effect));
+                        this.type = type;
+                        this.name = config.name;
+                        this.trail = [];
+                        this.trailLength = 20;
+                    }
+                    
+                    update() {
+                        // Add current position to trail
+                        this.trail.push({ x: this.x, y: this.y });
+                        if (this.trail.length > this.trailLength) {
+                            this.trail.shift();
+                        }
+                        
+                        // Apply slow effect if powerup is active
+                        let currentSpeed = this.speed;
+                        if (powerupActive === 'SLOW_ENEMIES' && Date.now() < powerupEndTime) {
+                            currentSpeed *= 0.4;
+                        }
+                        
+                        // Move towards stronghold
+                        const dx = stronghold.x - this.x;
+                        const dy = stronghold.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        this.x += (dx / distance) * currentSpeed;
+                        this.y += (dy / distance) * currentSpeed;
+                        
+                        // Check collision with stronghold
+                        if (distance < stronghold.radius + this.radius) {
+                            const damage = this.type === 'BOSS' ? 25 : this.type === 'TANK' ? 15 : 8;
+                            
+                            // Apply shield protection
+                            if (powerupActive === 'SHIELD' && Date.now() < powerupEndTime) {
+                            } else {
+                                strongholdHealth = Math.max(0, strongholdHealth - damage);
+                                healthDisplay.textContent = strongholdHealth;
+                                
+                                if (strongholdHealth / maxHealth < 0.3) {
+                                    document.querySelector('.game-board').classList.add('critical-health');
+                                }
+                            }
+                            
+                            const index = enemies.indexOf(this);
+                            if (index > -1) enemies.splice(index, 1);
+                            
+                            if (strongholdHealth <= 0) gameOver();
+                            return;
                         }
                     }
                     
-                    const index = enemies.indexOf(this);
-                    if (index > -1) enemies.splice(index, 1);
-                    
-                    if (strongholdHealth <= 0) gameOver();
-                }
-            }
-            
-            draw() {
-                // Draw trail with fade effect
-                ctx.save();
-                this.trail.forEach((pos, i) => {
-                    const alpha = i / this.trailLength;
-                    const radius = this.radius * alpha * 0.5;
-                    ctx.globalAlpha = alpha * 0.5;
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                ctx.restore();
-                
-                // Enemy body with gradient
-                const gradient = ctx.createRadialGradient(
-                    this.x, this.y, 0,
-                    this.x, this.y, this.radius
-                );
-                gradient.addColorStop(0, this.color);
-                gradient.addColorStop(1, this.color.replace(')', ', 0.8)'));
-                
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                
-                // Draw enemy based on type
-                switch(this.type) {
-                    case 'FAST':
-                        // Scout - sleek design
-                        ctx.fillStyle = gradient;
-                        ctx.beginPath();
-                        ctx.moveTo(this.radius, 0);
-                        ctx.lineTo(-this.radius, -this.radius * 0.6);
-                        ctx.lineTo(-this.radius * 0.5, 0);
-                        ctx.lineTo(-this.radius, this.radius * 0.6);
-                        ctx.closePath();
-                        ctx.fill();
-                        
-                        // Wings
-                        ctx.fillStyle = '#1565C0';
-                        ctx.fillRect(-this.radius * 0.8, -this.radius * 0.8, this.radius * 0.5, this.radius * 0.3);
-                        ctx.fillRect(-this.radius * 0.8, this.radius * 0.5, this.radius * 0.5, this.radius * 0.3);
-                        break;
-                        
-                    case 'TANK':
-                        // Tank - armored design
-                        ctx.fillStyle = gradient;
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Armor plates
-                        ctx.strokeStyle = '#000';
-                        ctx.lineWidth = 3;
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.radius - 3, 0, Math.PI * 2);
-                        ctx.stroke();
-                        
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(-this.radius * 0.3, -this.radius * 0.8, this.radius * 0.6, this.radius * 0.4);
-                        break;
-                        
-                    case 'BOSS':
-                        // Boss - intimidating design
-                        ctx.fillStyle = gradient;
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Spikes
-                        ctx.fillStyle = '#7B1FA2';
-                        for (let i = 0; i < 8; i++) {
-                            const angle = (i * Math.PI * 2) / 8;
-                            const spikeX = Math.cos(angle) * (this.radius + 8);
-                            const spikeY = Math.sin(angle) * (this.radius + 8);
+                    draw() {
+                        // Draw trail with fade effect
+                        ctx.save();
+                        this.trail.forEach((pos, i) => {
+                            const alpha = i / this.trailLength;
+                            const radius = this.radius * alpha * 0.5;
+                            ctx.globalAlpha = alpha * 0.5;
+                            ctx.fillStyle = this.color;
                             ctx.beginPath();
-                            ctx.moveTo(0, 0);
-                            ctx.lineTo(spikeX, spikeY);
-                            ctx.lineWidth = 4;
+                            ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        });
+                        ctx.restore();
+                        
+                        // Enemy body with gradient
+                        const gradient = ctx.createRadialGradient(
+                            this.x, this.y, 0,
+                            this.x, this.y, this.radius
+                        );
+                        gradient.addColorStop(0, this.color);
+                        gradient.addColorStop(1, this.color.replace(')', ', 0.8)'));
+                        
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Eyes
+                        ctx.fillStyle = '#FFF';
+                        ctx.beginPath();
+                        ctx.arc(this.x - 6, this.y - 6, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(this.x + 6, this.y - 6, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Health bar
+                        const healthPercentage = this.health / this.maxHealth;
+                        ctx.fillStyle = '#f44336';
+                        ctx.fillRect(this.x - this.radius, this.y - this.radius - 15, this.radius * 2, 6);
+                        ctx.fillStyle = healthPercentage > 0.5 ? '#4CAF50' : healthPercentage > 0.25 ? '#FF9800' : '#f44336';
+                        ctx.fillRect(this.x - this.radius, this.y - this.radius - 15, this.radius * 2 * healthPercentage, 6);
+                        
+                        // Name tag for bosses
+                        if (this.type === 'BOSS') {
+                            ctx.fillStyle = '#FF4081';
+                            ctx.font = 'bold 16px Jura';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('WARLORD', this.x, this.y - this.radius - 25);
+                        }
+                    }
+                    
+                    takeDamage(damage) {
+                        this.health -= damage;
+                        shotsHit++;
+                        
+                        // Show damage number
+                        showDamageNumber(this.x, this.y, damage);
+                        
+                        if (this.health <= 0) {
+                            // Combo system
+                            const now = Date.now();
+                            if (now - lastKillTime < 2000) {
+                                combo++;
+   
+                            } else {
+                                combo = 1;
+                            }
+                            lastKillTime = now;
+                            
+                            // Clear combo timeout
+                            if (comboTimeout) clearTimeout(comboTimeout);
+                            comboTimeout = setTimeout(() => combo = 0, 2000);
+                            
+                            // Drop money with combo bonus
+                            const comboBonus = 1 + (combo * 0.1);
+                            const dropValue = Math.floor(this.value * comboBonus);
+                            
+                            moneyDrops.push({
+                                x: this.x,
+                                y: this.y,
+                                value: dropValue,
+                                collected: false,
+                                combo: combo
+                            });
+                            
+                            enemiesDefeated++;
+                            enemyCounter.textContent = `Enemies: ${enemiesDefeated}`;
+                            
+                            // Chance to drop powerup
+                            let dropChance = 0.05;
+                            if (this.type === 'BOSS') dropChance = 0.8;
+                            else if (this.type === 'TANK') dropChance = 0.2;
+                            
+                            if (Math.random() < dropChance) {
+                                const powerupTypes = Object.keys(POWERUPS);
+                                const randomType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                                powerups.push({
+                                    x: this.x,
+                                    y: this.y,
+                                    type: randomType,
+                                    collected: false,
+                                    radius: 18,
+                                    floatOffset: Math.random() * Math.PI * 2
+                                });
+                            }
+                            
+                            // Skill point chance
+                            if (Math.random() < 0.1) {
+                                skillPoints++;
+                                updateSkillPointsDisplay();
+          
+                            }
+                            
+                            const index = enemies.indexOf(this);
+                            if (index > -1) enemies.splice(index, 1);
+                            
+                            if (enemies.length === 0 && enemiesSpawnedThisWave >= enemiesPerWave) {
+                                waveComplete = true;
+                                setTimeout(() => nextWave(), 2500);
+                            }
+                            
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                
+                // Enhanced Projectile class
+                class Projectile {
+                    constructor(x, y, target, cannonType = 0) {
+                        this.x = x;
+                        this.y = y;
+                        this.target = target;
+                        this.baseSpeed = 6;
+                        this.speed = this.baseSpeed * (1 + (upgrades.speed.level - 1) * 0.3);
+                        this.baseDamage = 12;
+                        this.damage = this.baseDamage * upgrades.damage.level;
+                        this.radius = 6;
+                        this.color = '#e6c300';
+                        this.cannonType = cannonType;
+                        this.trail = [];
+                        shotsFired++;
+                        
+                        // Apply powerup effects
+                        if (powerupActive === 'DOUBLE_DAMAGE' && Date.now() < powerupEndTime) {
+                            this.damage *= 2;
+                            this.color = '#f44336';
+                        }
+                        if (powerupActive === 'RAPID_FIRE' && Date.now() < powerupEndTime) {
+                            this.speed *= 1.8;
+                        }
+                    }
+                    
+                    update() {
+                        // Add to trail
+                        this.trail.push({ x: this.x, y: this.y });
+                        if (this.trail.length > 5) this.trail.shift();
+                        
+                        const dx = this.target.x - this.x;
+                        const dy = this.target.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        this.x += (dx / distance) * this.speed;
+                        this.y += (dy / distance) * this.speed;
+                        
+                        if (distance < this.target.radius + this.radius) {
+                            if (this.target.takeDamage(this.damage)) {
+                                const moneyBonus = this.damage * 0.1 * combo;
+                                const totalValue = this.target.value + moneyBonus;
+                                
+                                money += totalValue;
+                                totalMoneyEarned += totalValue;
+                                moneyDisplay.textContent = money;
+                                updateUpgradeButtons();
+                            }
+                            
+                            const index = projectiles.indexOf(this);
+                            if (index > -1) projectiles.splice(index, 1);
+                            return true;
+                        }
+                        return false;
+                    }
+                    
+                    draw() {
+                        // Draw trail
+                        if (this.trail.length > 1) {
+                            ctx.strokeStyle = this.color;
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                            for (let i = 1; i < this.trail.length; i++) {
+                                ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                            }
                             ctx.stroke();
                         }
                         
-                        // Glowing core
-                        ctx.fillStyle = '#FF4081';
+                        // Glowing effect
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 20;
+                        ctx.fillStyle = this.color;
                         ctx.beginPath();
-                            ctx.arc(0, 0, this.radius * 0.5, 0, Math.PI * 2);
+                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                         ctx.fill();
-                        break;
+                        ctx.shadowBlur = 0;
                         
-                    default:
-                        // Normal - simple design
-                        ctx.fillStyle = gradient;
+                        // Inner core
+                        ctx.fillStyle = '#FFFFFF';
                         ctx.beginPath();
-                        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                        ctx.arc(this.x, this.y, this.radius / 2, 0, Math.PI * 2);
                         ctx.fill();
-                        
-                        // Details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(-this.radius * 0.3, -this.radius * 0.3, this.radius * 0.6, this.radius * 0.6);
-                }
-                
-                ctx.restore();
-                
-                // Eyes
-                ctx.fillStyle = '#FFF';
-                ctx.beginPath();
-                ctx.arc(this.x - 6, this.y - 6, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(this.x + 6, this.y - 6, 4, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Health bar
-                const healthPercentage = this.health / this.maxHealth;
-                ctx.fillStyle = '#f44336';
-                ctx.fillRect(this.x - this.radius, this.y - this.radius - 15, this.radius * 2, 6);
-                ctx.fillStyle = healthPercentage > 0.5 ? '#4CAF50' : healthPercentage > 0.25 ? '#FF9800' : '#f44336';
-                ctx.fillRect(this.x - this.radius, this.y - this.radius - 15, this.radius * 2 * healthPercentage, 6);
-                
-                // Name tag for bosses
-                if (this.type === 'BOSS') {
-                    ctx.fillStyle = '#FF4081';
-                    ctx.font = 'bold 16px Jura';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('WARLORD', this.x, this.y - this.radius - 25);
-                }
-            }
-            
-            takeDamage(damage) {
-                this.health -= damage;
-                shotsHit++;
-                
-                // Show damage number
-                showDamageNumber(this.x, this.y, damage);
-                
-                if (this.health <= 0) {
-                    // Combo system
-                    const now = Date.now();
-                    if (now - lastKillTime < 2000) {
-                        combo++;
-                        addCombatLog(`${combo}x COMBO!`, 'kill');
-                    } else {
-                        combo = 1;
                     }
-                    lastKillTime = now;
+                }
+                
+                // Initialize game
+                function initGame() {
+                    console.log('Starting game...');
                     
-                    // Clear combo timeout
-                    if (comboTimeout) clearTimeout(comboTimeout);
-                    comboTimeout = setTimeout(() => combo = 0, 2000);
+                    // Cancel any existing animation frame
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
+                    }
                     
-                    // Drop money with combo bonus
-                    const comboBonus = 1 + (combo * 0.1);
-                    const dropValue = Math.floor(this.value * comboBonus);
+                    strongholdHealth = 100 + (upgrades.health.level - 1) * upgrades.health.effect;
+                    maxHealth = strongholdHealth;
+                    money = 100;
+                    wave = 1;
+                    enemiesDefeated = 0;
+                    totalMoneyEarned = 100;
+                    enemies = [];
+                    projectiles = [];
+                    moneyDrops = [];
+                    powerups = [];
+                    enemiesSpawnedThisWave = 0;
+                    waveComplete = false;
+                    powerupActive = null;
+                    skillPoints = 0;
+                    shotsFired = 0;
+                    shotsHit = 0;
+                    bossWave = false;
+                    bossSpawned = false;
+                    combo = 0;
                     
-                    moneyDrops.push({
-                        x: this.x,
-                        y: this.y,
-                        value: dropValue,
-                        collected: false,
-                        combo: combo
+                    // Update displays
+                    healthDisplay.textContent = strongholdHealth;
+                    moneyDisplay.textContent = money;
+                    waveDisplay.textContent = wave;
+                    enemyCounter.textContent = `Enemies: ${enemiesDefeated}`;
+                    updateWavePreview();
+                    document.querySelector('.game-board').classList.remove('critical-health');
+                    
+                    // Initialize cannons
+                    initCannons();
+                    
+                    // Update UI
+                    updateUpgradeButtons();
+                    updatePowerupDisplay();
+                    updateSkillPointsDisplay();
+                    
+                    // Hide game over screen
+                    gameOverScreen.style.display = 'none';
+                    
+                    // Start game loop
+                    gameRunning = true;
+                    gamePaused = false;
+                    document.getElementById('pauseBtn').textContent = 'Pause';
+                    animationId = requestAnimationFrame(gameLoop);
+                    
+                    console.log('Game started successfully');
+                }
+                
+                // Enhanced game loop
+                function gameLoop(timestamp) {
+                    if (!gameRunning || gamePaused) return;
+                    
+                    // Clear with fade effect
+                    ctx.fillStyle = 'rgba(10, 10, 18, 0.2)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    drawBackground(timestamp);
+                    drawStronghold();
+                    
+                    // Update powerup timer
+                    if (powerupActive && Date.now() > powerupEndTime) {
+                        powerupActive = null;
+                        updatePowerupDisplay();
+                    }
+                    
+                    // Spawn enemies with wave-based logic
+                    const now = performance.now();
+                    if (now - lastSpawnTime > enemySpawnInterval && enemiesSpawnedThisWave < enemiesPerWave) {
+                        let enemyType = getEnemyTypeForWave();
+                        
+                        if (bossWave && !bossSpawned && enemiesSpawnedThisWave >= enemiesPerWave - 1) {
+                            enemyType = 'BOSS';
+                            bossSpawned = true;
+                            showBossWarning();
+                        }
+                        
+                        enemies.push(new Enemy(enemyType));
+                        lastSpawnTime = now;
+                        enemiesSpawnedThisWave++;
+                    }
+                    
+                    // Update and draw game objects
+                    enemies.forEach(enemy => {
+                        enemy.update();
+                        enemy.draw();
                     });
                     
-                    enemiesDefeated++;
-                    enemyCounter.textContent = `Enemies: ${enemiesDefeated}`;
+                    projectiles.forEach((projectile, index) => {
+                        if (projectile.update()) {
+                            projectiles.splice(index, 1);
+                        } else {
+                            projectile.draw();
+                        }
+                    });
                     
-                    // Chance to drop powerup
-                    let dropChance = 0.05;
-                    if (this.type === 'BOSS') dropChance = 0.8;
-                    else if (this.type === 'TANK') dropChance = 0.2;
+                    moneyDrops.forEach((drop, index) => {
+                        drawMoneyDrop(drop);
+                        if (drop.collected) moneyDrops.splice(index, 1);
+                    });
                     
-                    if (Math.random() < dropChance) {
-                        const powerupTypes = Object.keys(POWERUPS);
-                        const randomType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-                        powerups.push({
-                            x: this.x,
-                            y: this.y,
-                            type: randomType,
-                            collected: false,
-                            radius: 18,
-                            floatOffset: Math.random() * Math.PI * 2
+                    powerups.forEach((powerup, index) => {
+                        drawPowerup(powerup);
+                        if (powerup.collected) powerups.splice(index, 1);
+                    });
+                    
+                    // Enhanced cannon logic
+                    cannons.forEach(cannon => {
+                        // Cannon cooldown
+                        if (cannon.cooldown > 0) {
+                            cannon.cooldown--;
+                        }
+                        
+                        let closestEnemy = null;
+                        let closestDistance = 180 + (upgrades.range.level - 1) * upgrades.range.effect;
+                        
+                        enemies.forEach(enemy => {
+                            const dx = enemy.x - cannon.x;
+                            const dy = enemy.y - cannon.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < closestDistance) {
+                                closestDistance = distance;
+                                closestEnemy = enemy;
+                            }
                         });
+                        
+                        if (closestEnemy && cannon.cooldown <= 0) {
+                            const dx = closestEnemy.x - cannon.x;
+                            const dy = closestEnemy.y - cannon.y;
+                            cannon.angle = Math.atan2(dy, dx);
+                            
+                            let fireRate = 1200 * Math.pow(upgrades.fireRate.effect, upgrades.fireRate.level - 1);
+                            if (powerupActive === 'RAPID_FIRE' && Date.now() < powerupEndTime) {
+                                fireRate /= 3;
+                            }
+                            
+                            if (now - cannon.lastShotTime > fireRate) {
+                                projectiles.push(new Projectile(cannon.x, cannon.y, closestEnemy, cannon.type));
+                                cannon.lastShotTime = now;
+                                cannon.cooldown = cannon.type === 2 ? 10 : 0;
+                            }
+                        }
+                        
+                        drawCannon(cannon);
+                    });
+                    
+                    animationId = requestAnimationFrame(gameLoop);
+                }
+                
+                // Drawing functions
+                function drawBackground(timestamp) {
+                    // Simple background
+                    ctx.fillStyle = '#0a0a12';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Stars
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    for (let i = 0; i < 50; i++) {
+                        const x = (i * 53) % canvas.width;
+                        const y = (i * 37) % canvas.height;
+                        const size = Math.sin(timestamp * 0.001 + i) * 1 + 1;
+                        
+                        ctx.beginPath();
+                        ctx.arc(x, y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                function drawStronghold() {
+                    // Base structure
+                    const gradient = ctx.createRadialGradient(
+                        stronghold.x, stronghold.y, 0,
+                        stronghold.x, stronghold.y, stronghold.radius
+                    );
+                    gradient.addColorStop(0, '#4CAF50');
+                    gradient.addColorStop(1, '#2E7D32');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(stronghold.x, stronghold.y, stronghold.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Outer shield with pulse effect
+                    if (powerupActive === 'SHIELD' && Date.now() < powerupEndTime) {
+                        const pulse = Math.sin(Date.now() * 0.005) * 5;
+                        ctx.strokeStyle = 'rgba(0, 188, 212, 0.3)';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(stronghold.x, stronghold.y, stronghold.radius + 15 + pulse, 0, Math.PI * 2);
+                        ctx.stroke();
                     }
                     
-                    // Skill point chance
-                    if (Math.random() < 0.1) {
+                    // Health bar
+                    const healthPercentage = strongholdHealth / maxHealth;
+                    const barWidth = 120;
+                    const barHeight = 12;
+                    const barX = stronghold.x - barWidth / 2;
+                    const barY = stronghold.y - stronghold.radius - 40;
+                    
+                    // Background
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.fillRect(barX, barY, barWidth, barHeight);
+                    
+                    // Health
+                    const healthGradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+                    healthGradient.addColorStop(0, healthPercentage > 0.5 ? '#4CAF50' : healthPercentage > 0.25 ? '#FF9800' : '#f44336');
+                    healthGradient.addColorStop(1, healthPercentage > 0.5 ? '#2E7D32' : healthPercentage > 0.25 ? '#EF6C00' : '#C62828');
+                    
+                    ctx.fillStyle = healthGradient;
+                    ctx.fillRect(barX, barY, barWidth * healthPercentage, barHeight);
+                    
+                    // Border
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(barX, barY, barWidth, barHeight);
+                }
+                
+                function drawCannon(cannon) {
+                    ctx.save();
+                    ctx.translate(cannon.x, cannon.y);
+                    ctx.rotate(cannon.angle);
+                    
+                    // Base
+                    ctx.fillStyle = '#777';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Barrel
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(0, -10, 40, 20);
+                    
+                    // Barrel tip
+                    ctx.fillStyle = '#222';
+                    ctx.fillRect(35, -12, 10, 24);
+                    
+                    // Cooldown indicator
+                    if (cannon.cooldown > 0) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 15, 0, (cannon.cooldown / 10) * Math.PI * 2);
+                        ctx.lineTo(0, 0);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                }
+                
+                function drawMoneyDrop(drop) {
+                    const pulse = Math.sin(Date.now() / 200) * 4;
+                    const float = Math.sin(Date.now() / 1000 + drop.x) * 3;
+                    
+                    // Outer glow
+                    ctx.shadowColor = '#FFD700';
+                    ctx.shadowBlur = 20;
+                    ctx.fillStyle = drop.collected ? '#4CAF50' : '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(drop.x, drop.y + float, 12 + pulse, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    // Dollar sign
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 18px Jura';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('$', drop.x, drop.y + float);
+                }
+                
+                function drawPowerup(powerup) {
+                    const config = POWERUPS[powerup.type];
+                    const pulse = Math.sin(Date.now() / 300 + powerup.floatOffset) * 5;
+                    const float = Math.sin(Date.now() / 800 + powerup.floatOffset) * 8;
+                    
+                    // Outer glow
+                    ctx.shadowColor = config.color;
+                    ctx.shadowBlur = 25;
+                    ctx.fillStyle = config.color;
+                    ctx.beginPath();
+                    ctx.arc(powerup.x, powerup.y + float, powerup.radius + pulse, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    // Icon
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 20px Jura';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(config.icon, powerup.x, powerup.y + float);
+                }
+                
+                // Utility functions
+                function getDifficultyMultiplier() {
+                    switch(difficulty) {
+                        case 'easy': return 0.8;
+                        case 'hard': return 1.4;
+                        default: return 1.0;
+                    }
+                }
+                
+                function getEnemyTypeForWave() {
+                    if (wave >= 15 && Math.random() < 0.15) return 'BOSS';
+                    if (wave >= 10 && Math.random() < 0.25) return 'TANK';
+                    if (wave >= 5 && Math.random() < 0.4) return 'FAST';
+                    return 'NORMAL';
+                }
+                
+                function updateWavePreview() {
+                    const nextEnemy = getEnemyTypeForWave();
+                    wavePreview.textContent = `Next: ${ENEMY_TYPES[nextEnemy].name}`;
+                }
+                
+                function showDamageNumber(x, y, damage) {
+                    const damageEl = document.createElement('div');
+                    damageEl.textContent = `-${damage}`;
+                    damageEl.style.position = 'absolute';
+                    damageEl.style.left = `${x}px`;
+                    damageEl.style.top = `${y}px`;
+                    damageEl.style.color = '#f44336';
+                    damageEl.style.fontWeight = 'bold';
+                    damageEl.style.fontSize = '16px';
+                    damageEl.style.pointerEvents = 'none';
+                    damageEl.style.zIndex = '100';
+                    damageEl.style.animation = 'fadeUp 1s forwards';
+                    
+                    document.querySelector('.game-board').appendChild(damageEl);
+                    
+                    setTimeout(() => {
+                        if (damageEl.parentNode) {
+                            damageEl.parentNode.removeChild(damageEl);
+                        }
+                    }, 1000);
+                }
+
+                
+                function showBossWarning() {
+                    bossWarning.style.display = 'block';
+                    setTimeout(() => bossWarning.style.display = 'none', 3000);
+                }
+                
+                // Game progression
+                function nextWave() {
+                    wave++;
+                    waveDisplay.textContent = wave;
+                    
+                    // Show wave indicator
+                    waveIndicator.textContent = `WAVE ${wave}`;
+                    waveIndicator.style.display = 'block';
+                    setTimeout(() => waveIndicator.style.display = 'none', 2000);
+                    
+                    // Increase difficulty
+                    enemiesPerWave = Math.floor(8 + wave * 2);
+                    enemySpawnInterval = Math.max(500, 2000 - wave * 100);
+                    
+                    // Check for boss wave
+                    bossWave = wave % 5 === 0;
+                    bossSpawned = false;
+                    
+                    // Reset wave state
+                    enemiesSpawnedThisWave = 0;
+                    waveComplete = false;
+                    
+                    // Bonus money with wave bonus
+                    const waveBonus = 50 + wave * 12;
+                    const comboBonus = combo * 10;
+                    const totalBonus = waveBonus + comboBonus;
+                    
+                    money += totalBonus;
+                    totalMoneyEarned += totalBonus;
+                    moneyDisplay.textContent = money;
+
+                    
+                    // Update preview
+                    updateWavePreview();
+                    
+                    // Unlock achievements
+                    checkAchievements();
+                    updateUpgradeButtons();
+                    
+                    // Grant skill point every 3 waves
+                    if (wave % 3 === 0) {
                         skillPoints++;
                         updateSkillPointsDisplay();
-                        addCombatLog('Gained 1 Skill Point!', 'upgrade');
+
+                    }
+                }
+                
+                function gameOver() {
+                    gameRunning = false;
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
                     }
                     
-                    const index = enemies.indexOf(this);
-                    if (index > -1) enemies.splice(index, 1);
+                    // Calculate accuracy
+                    const accuracy = shotsFired > 0 ? Math.round((shotsHit / shotsFired) * 100) : 0;
                     
-                    if (enemies.length === 0 && enemiesSpawnedThisWave >= enemiesPerWave) {
-                        waveComplete = true;
-                        setTimeout(() => nextWave(), 2500);
+                    // Determine rank
+                    let rank = 'Recruit';
+                    let rankColor = '#ccc';
+                    const score = wave * 100 + enemiesDefeated * 10 + totalMoneyEarned;
+                    
+                    if (score > 5000) { rank = 'General'; rankColor = '#FFD700'; }
+                    else if (score > 3000) { rank = 'Colonel'; rankColor = '#C0C0C0'; }
+                    else if (score > 1500) { rank = 'Captain'; rankColor = '#CD7F32'; }
+                    else if (score > 500) { rank = 'Sergeant'; rankColor = '#4CAF50'; }
+                    
+                    // Update final stats
+                    finalScore.textContent = `You survived ${wave} waves`;
+                    finalEnemies.textContent = `Enemies defeated: ${enemiesDefeated}`;
+                    finalMoney.textContent = `Total resources: $${totalMoneyEarned}`;
+                    finalAccuracy.textContent = `Accuracy: ${accuracy}%`;
+                    finalRank.textContent = `Rank: ${rank}`;
+                    finalRank.style.color = rankColor;
+                    
+                    gameOverScreen.style.display = 'flex';
+                    
+                    // Unlock defeat achievement
+                    if (!achievements.has('first_defeat')) {
+                        achievements.add('first_defeat');
+                        showAchievement('Fallen Stronghold', 'Your first defeat. The battle continues!');
                     }
+                }
+                
+                // UI functions
+                function updateUpgradeButtons() {
+                    Object.keys(upgrades).forEach(key => {
+                        const btn = document.getElementById(key + 'Upgrade');
+                        if (btn) {
+                            btn.querySelector('.upgrade-cost').textContent = `Cost: $${upgrades[key].cost}`;
+                            btn.querySelector('.upgrade-level').textContent = `Level: ${upgrades[key].level}/${upgrades[key].maxLevel}`;
+                            btn.disabled = money < upgrades[key].cost || upgrades[key].level >= upgrades[key].maxLevel;
+                        }
+                    });
+                }
+                
+                function updatePowerupDisplay() {
+                    if (powerupActive && Date.now() < powerupEndTime) {
+                        const config = POWERUPS[powerupActive];
+                        const timeLeft = Math.ceil((powerupEndTime - Date.now()) / 1000);
+                        powerupContainer.style.display = 'flex';
+                        powerupContainer.innerHTML = `${config.icon} ${config.name} (${timeLeft}s)`;
+                        powerupContainer.style.borderColor = config.color;
+                    } else {
+                        powerupContainer.style.display = 'none';
+                        powerupActive = null;
+                    }
+                }
+                
+                function updateSkillPointsDisplay() {
+                    const skillPointsElement = document.getElementById('skillPoints');
+                    if (skillPointsElement) {
+                        skillPointsElement.textContent = `(Skill Points: ${skillPoints})`;
+                    }
+                }
+                
+                function buyUpgrade(upgradeType) {
+                    const upgrade = upgrades[upgradeType];
                     
-                    return true;
-                }
-                return false;
-            }
-        }
-        
-        // Enhanced Projectile class
-        class Projectile {
-            constructor(x, y, target, cannonType = 0) {
-                this.x = x;
-                this.y = y;
-                this.target = target;
-                this.baseSpeed = 6;
-                this.speed = this.baseSpeed * (1 + (upgrades.speed.level - 1) * 0.3);
-                this.baseDamage = 12;
-                this.damage = this.baseDamage * upgrades.damage.level;
-                this.radius = 6;
-                this.color = '#e6c300';
-                this.cannonType = cannonType;
-                this.trail = [];
-                shotsFired++;
-                
-                // Apply powerup effects
-                if (powerupActive === 'DOUBLE_DAMAGE' && Date.now() < powerupEndTime) {
-                    this.damage *= 2;
-                    this.color = '#f44336';
-                }
-                if (powerupActive === 'RAPID_FIRE' && Date.now() < powerupEndTime) {
-                    this.speed *= 1.8;
-                }
-            }
-            
-            update() {
-                // Add to trail
-                this.trail.push({ x: this.x, y: this.y });
-                if (this.trail.length > 5) this.trail.shift();
-                
-                const dx = this.target.x - this.x;
-                const dy = this.target.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                this.x += (dx / distance) * this.speed;
-                this.y += (dy / distance) * this.speed;
-                
-                if (distance < this.target.radius + this.radius) {
-                    if (this.target.takeDamage(this.damage)) {
-                        const moneyBonus = this.damage * 0.1 * combo;
-                        const totalValue = this.target.value + moneyBonus;
-                        
-                        money += totalValue;
-                        totalMoneyEarned += totalValue;
+                    if (money >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
+                        money -= upgrade.cost;
                         moneyDisplay.textContent = money;
-                        updateUpgradeButtons();
+                        upgrade.level++;
+                        upgrade.cost = Math.floor(upgrade.cost * 1.6);
                         
-                        addCombatLog(`Defeated ${this.target.name} (+$${totalValue})`, 'kill');
+                        if (upgradeType === 'health') {
+                            const healthIncrease = upgrade.effect;
+                            strongholdHealth += healthIncrease;
+                            maxHealth += healthIncrease;
+                            healthDisplay.textContent = strongholdHealth;
+                        }
+                        
+                        updateUpgradeButtons();
+
                     }
+                }
+                
+                function activatePowerup(type) {
+                    powerupActive = type;
+                    powerupEndTime = Date.now() + POWERUPS[type].duration;
+                    updatePowerupDisplay();
                     
-                    const index = projectiles.indexOf(this);
-                    if (index > -1) projectiles.splice(index, 1);
-                    return true;
-                }
-                return false;
-            }
-            
-            draw() {
-                // Draw trail
-                ctx.strokeStyle = this.color;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(this.trail[0]?.x || this.x, this.trail[0]?.y || this.y);
-                for (let i = 1; i < this.trail.length; i++) {
-                    ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                }
-                ctx.stroke();
-                
-                // Glowing effect
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 20;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                
-                // Inner core
-                ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius / 2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Cannon type indicator
-                if (this.cannonType === 1) {
-                    ctx.strokeStyle = '#2196F3';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius + 2, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-            }
-        }
-        
-        // Initialize game
-        function initGame() {
-            strongholdHealth = 100 + (upgrades.health.level - 1) * upgrades.health.effect;
-            maxHealth = strongholdHealth;
-            money = 100;
-            wave = 1;
-            enemiesDefeated = 0;
-            totalMoneyEarned = 100;
-            enemies = [];
-            projectiles = [];
-            moneyDrops = [];
-            powerups = [];
-            enemiesSpawnedThisWave = 0;
-            waveComplete = false;
-            powerupActive = null;
-            skillPoints = 0;
-            shotsFired = 0;
-            shotsHit = 0;
-            bossWave = false;
-            bossSpawned = false;
-            combo = 0;
-            
-            // Update displays
-            healthDisplay.textContent = strongholdHealth;
-            moneyDisplay.textContent = money;
-            waveDisplay.textContent = wave;
-            enemyCounter.textContent = `Enemies: ${enemiesDefeated}`;
-            updateWavePreview();
-            document.querySelector('.game-board').classList.remove('critical-health');
-            
-            // Initialize cannons
-            initCannons();
-            
-            // Update UI
-            updateUpgradeButtons();
-            updatePowerupDisplay();
-            updateSkillPointsDisplay();
-            
-            // Hide game over screen
-            gameOverScreen.style.display = 'none';
-            
-            // Start game loop
-            gameRunning = true;
-            gamePaused = false;
-            document.getElementById('pauseBtn').textContent = 'Pause';
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // Enhanced game loop
-        function gameLoop(timestamp) {
-            if (!gameRunning || gamePaused) return;
-            
-            // Clear with fade effect
-            ctx.fillStyle = 'rgba(10, 10, 18, 0.2)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            drawEnhancedBackground(timestamp);
-            drawStronghold();
-            
-            // Update powerup timer
-            if (powerupActive && Date.now() > powerupEndTime) {
-                powerupActive = null;
-                updatePowerupDisplay();
-            }
-            
-            // Spawn enemies with wave-based logic
-            const now = performance.now();
-            if (now - lastSpawnTime > enemySpawnInterval && enemiesSpawnedThisWave < enemiesPerWave) {
-                let enemyType = getEnemyTypeForWave();
-                
-                if (bossWave && !bossSpawned && enemiesSpawnedThisWave >= enemiesPerWave - 1) {
-                    enemyType = 'BOSS';
-                    bossSpawned = true;
-                    showBossWarning();
-                }
-                
-                enemies.push(new Enemy(enemyType));
-                lastSpawnTime = now;
-                enemiesSpawnedThisWave++;
-            }
-            
-            // Update and draw game objects
-            enemies.forEach(enemy => {
-                enemy.update();
-                enemy.draw();
-            });
-            
-            projectiles.forEach((projectile, index) => {
-                if (projectile.update()) {
-                    projectiles.splice(index, 1);
-                } else {
-                    projectile.draw();
-                }
-            });
-            
-            moneyDrops.forEach((drop, index) => {
-                drawMoneyDrop(drop);
-                if (drop.collected) moneyDrops.splice(index, 1);
-            });
-            
-            powerups.forEach((powerup, index) => {
-                drawPowerup(powerup);
-                if (powerup.collected) powerups.splice(index, 1);
-            });
-            
-            // Enhanced cannon logic
-            cannons.forEach(cannon => {
-                // Cannon cooldown
-                if (cannon.cooldown > 0) {
-                    cannon.cooldown--;
-                }
-                
-                let closestEnemy = null;
-                let closestDistance = 180 + (upgrades.range.level - 1) * upgrades.range.effect;
-                
-                enemies.forEach(enemy => {
-                    const dx = enemy.x - cannon.x;
-                    const dy = enemy.y - cannon.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+
                     
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        closestEnemy = enemy;
+                    // Show achievement for first powerup
+                    if (!achievements.has('first_powerup')) {
+                        achievements.add('first_powerup');
+                        showAchievement('Power Surge!', 'Activated your first power-up');
+                    }
+                }
+                
+                function checkAchievements() {
+                    if (wave >= 5 && !achievements.has('wave_5')) {
+                        achievements.add('wave_5');
+                        showAchievement('Bronze Defender', 'Reached wave 5');
+                    }
+                    if (wave >= 10 && !achievements.has('wave_10')) {
+                        achievements.add('wave_10');
+                        showAchievement('Silver Guardian', 'Reached wave 10');
+                    }
+                    if (wave >= 15 && !achievements.has('wave_15')) {
+                        achievements.add('wave_15');
+                        showAchievement('Gold Warlord', 'Reached wave 15');
+                    }
+                    if (enemiesDefeated >= 100 && !achievements.has('100_kills')) {
+                        achievements.add('100_kills');
+                        showAchievement('Century Slayer', 'Defeated 100 enemies');
+                    }
+                    if (money >= 1000 && !achievements.has('wealthy')) {
+                        achievements.add('wealthy');
+                        showAchievement('War Chest', 'Accumulated $1000');
+                    }
+                    if (combo >= 10 && !achievements.has('combo_10')) {
+                        achievements.add('combo_10');
+                        showAchievement('Combo Master', 'Achieved 10x combo');
+                    }
+                }
+                
+                function showAchievement(title, description) {
+                    achievementTitle.textContent = title;
+                    achievementDesc.textContent = description;
+                    achievementPopup.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        achievementPopup.style.display = 'none';
+                    }, 4000);
+                }
+                
+                // Event listeners
+                canvas.addEventListener('click', (e) => {
+                    if (!gameRunning) return;
+                    
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Collect money drops
+                    moneyDrops.forEach(drop => {
+                        const dx = drop.x - x;
+                        const dy = drop.y - y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 25 && !drop.collected) {
+                            drop.collected = true;
+                            money += drop.value;
+                            totalMoneyEarned += drop.value;
+                            moneyDisplay.textContent = money;
+                            updateUpgradeButtons();
+                            
+                        }
+                    });
+                    
+                    // Collect powerups
+                    powerups.forEach(powerup => {
+                        const dx = powerup.x - x;
+                        const dy = powerup.y - y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 30 && !powerup.collected) {
+                            powerup.collected = true;
+                            activatePowerup(powerup.type);
+                        }
+                    });
+                });
+                
+                // Button events
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    if (!gameRunning) initGame();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    if (gameRunning) {
+                        gamePaused = !gamePaused;
+                        document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume' : 'Pause';
+                        if (!gamePaused && !animationId) {
+                            animationId = requestAnimationFrame(gameLoop);
+                        }
                     }
                 });
                 
-                if (closestEnemy && cannon.cooldown <= 0) {
-                    const dx = closestEnemy.x - cannon.x;
-                    const dy = closestEnemy.y - cannon.y;
-                    cannon.angle = Math.atan2(dy, dx);
-                    
-                    let fireRate = 1200 * Math.pow(upgrades.fireRate.effect, upgrades.fireRate.level - 1);
-                    if (powerupActive === 'RAPID_FIRE' && Date.now() < powerupEndTime) {
-                        fireRate /= 3;
+                document.getElementById('restartBtn').addEventListener('click', initGame);
+                document.getElementById('restartBtn2').addEventListener('click', initGame);
+                
+                // Upgrade buttons
+                Object.keys(upgrades).forEach(key => {
+                    const btn = document.getElementById(key + 'Upgrade');
+                    if (btn) {
+                        btn.addEventListener('click', () => buyUpgrade(key));
                     }
+                });
+                
+                // Difficulty buttons
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        difficulty = btn.dataset.difficulty;
+                        
+                        // Show achievement for changing difficulty
+                        if (!achievements.has('difficulty_change')) {
+                            achievements.add('difficulty_change');
+                            showAchievement('Challenge Accepted', `Playing on ${difficulty} difficulty`);
+                        }
+                    });
+                });
+                
+                // Draw initial screen
+                function drawInitialScreen() {
+                    console.log('Drawing initial screen...');
                     
-                    if (now - cannon.lastShotTime > fireRate) {
-                        projectiles.push(new Projectile(cannon.x, cannon.y, closestEnemy, cannon.type));
-                        cannon.lastShotTime = now;
-                        cannon.cooldown = cannon.type === 2 ? 10 : 0; // Heavy cannons have cooldown
-                    }
+                    // Clear canvas
+                    ctx.fillStyle = '#0a0a12';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw stronghold
+                    const gradient = ctx.createRadialGradient(
+                        stronghold.x, stronghold.y, 0,
+                        stronghold.x, stronghold.y, stronghold.radius
+                    );
+                    gradient.addColorStop(0, '#4CAF50');
+                    gradient.addColorStop(1, '#2E7D32');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(stronghold.x, stronghold.y, stronghold.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw cannons
+                    initCannons();
+                    cannons.forEach(cannon => {
+                        ctx.save();
+                        ctx.translate(cannon.x, cannon.y);
+                        ctx.rotate(cannon.angle);
+                        
+                        // Base
+                        ctx.fillStyle = '#777';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 15, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Barrel
+                        ctx.fillStyle = '#666';
+                        ctx.fillRect(0, -10, 40, 20);
+                        
+                        ctx.restore();
+                    });
+                    
+                    // Draw title text
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 28px Jura';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('STRONGHOLD DEFENSE', canvas.width / 2, canvas.height / 2 - 60);
+                    ctx.font = '20px Jura';
+                    ctx.fillText('Select difficulty and click "Start Game"', canvas.width / 2, canvas.height / 2 - 10);
+                    ctx.fillText('Defend the stronghold from all sides!', canvas.width / 2, canvas.height / 2 + 30);
+                    ctx.font = '16px Jura';
+                    ctx.fillText('Upgrade cannons between waves', canvas.width / 2, canvas.height / 2 + 70);
+                    ctx.fillText('Collect power-ups for temporary boosts', canvas.width / 2, canvas.height / 2 + 100);
+                    
+                    // Draw click prompt
+                    ctx.fillStyle = '#e6c300';
+                    ctx.font = '18px Jura';
+                    ctx.fillText('Click "Start Game" to begin!', canvas.width / 2, canvas.height - 50);
+                    
+                    console.log('Initial screen drawn');
                 }
                 
-                drawEnhancedCannon(cannon);
-            });
-            
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // Enhanced drawing functions
-        function drawEnhancedBackground(timestamp) {
-            // Animated nebula background
-            const time = timestamp * 0.001;
-            
-            // Base gradient
-            const gradient = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, 0,
-                canvas.width / 2, canvas.height / 2, canvas.width
-            );
-            gradient.addColorStop(0, 'rgba(10, 10, 25, 0.8)');
-            gradient.addColorStop(1, 'rgba(5, 5, 15, 0.9)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Animated stars
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            for (let i = 0; i < 100; i++) {
-                const x = (i * 53 + time * 20) % canvas.width;
-                const y = (i * 37 + time * 10) % canvas.height;
-                const size = Math.sin(time + i) * 2 + 1;
-                const alpha = Math.sin(time * 0.5 + i) * 0.5 + 0.5;
-                
-                ctx.globalAlpha = alpha;
-                ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
-            
-            // Defense grid with animation
-            ctx.strokeStyle = 'rgba(76, 175, 80, 0.15)';
-            ctx.lineWidth = 1;
-            const gridSize = 60;
-            const offset = time * 10;
-            
-            for (let x = offset % gridSize; x < canvas.width; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            for (let y = offset % gridSize; y < canvas.height; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-            
-            // Range indicator with pulse
-            const range = 180 + (upgrades.range.level - 1) * upgrades.range.effect;
-            const pulse = Math.sin(time * 2) * 5;
-            
-            ctx.strokeStyle = 'rgba(76, 175, 80, 0.2)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([10, 5]);
-            ctx.beginPath();
-            ctx.arc(stronghold.x, stronghold.y, range + pulse, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
-        
-        function drawStronghold() {
-            // Outer shield with pulse effect
-            if (powerupActive === 'SHIELD' && Date.now() < powerupEndTime) {
-                const pulse = Math.sin(Date.now() * 0.005) * 5;
-                ctx.strokeStyle = 'rgba(0, 188, 212, 0.3)';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(stronghold.x, stronghold.y, stronghold.radius + 15 + pulse, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            
-            // Base structure
-            const gradient = ctx.createRadialGradient(
-                stronghold.x, stronghold.y, 0,
-                stronghold.x, stronghold.y, stronghold.radius
-            );
-            gradient.addColorStop(0, '#4CAF50');
-            gradient.addColorStop(1, '#2E7D32');
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(stronghold.x, stronghold.y, stronghold.radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Inner structure with details
-            ctx.fillStyle = '#1B5E20';
-            ctx.beginPath();
-            ctx.arc(stronghold.x, stronghold.y, stronghold.radius - 10, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Glowing windows
-            ctx.shadowColor = '#FFD700';
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = '#FFD700';
-            const windowCount = 8;
-            for (let i = 0; i < windowCount; i++) {
-                const angle = (i * Math.PI * 2) / windowCount;
-                const distance = stronghold.radius - 15;
-                const x = stronghold.x + Math.cos(angle) * distance;
-                const y = stronghold.y + Math.sin(angle) * distance;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, 5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
-            
-            // Health bar with gradient
-            const healthPercentage = strongholdHealth / maxHealth;
-            const barWidth = 120;
-            const barHeight = 12;
-            const barX = stronghold.x - barWidth / 2;
-            const barY = stronghold.y - stronghold.radius - 40;
-            
-            // Background
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(barX, barY, barWidth, barHeight);
-            
-            // Health gradient
-            const healthGradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
-            healthGradient.addColorStop(0, healthPercentage > 0.5 ? '#4CAF50' : healthPercentage > 0.25 ? '#FF9800' : '#f44336');
-            healthGradient.addColorStop(1, healthPercentage > 0.5 ? '#2E7D32' : healthPercentage > 0.25 ? '#EF6C00' : '#C62828');
-            
-            ctx.fillStyle = healthGradient;
-            ctx.fillRect(barX, barY, barWidth * healthPercentage, barHeight);
-            
-            // Border
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(barX, barY, barWidth, barHeight);
-            
-            // Health text
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 14px Jura';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(`${strongholdHealth}/${maxHealth}`, stronghold.x, barY + barHeight / 2);
-        }
-        
-        function drawEnhancedCannon(cannon) {
-            ctx.save();
-            ctx.translate(cannon.x, cannon.y);
-            ctx.rotate(cannon.angle);
-            
-            // Base
-            const baseGradient = ctx.createLinearGradient(0, -15, 0, 15);
-            baseGradient.addColorStop(0, '#777');
-            baseGradient.addColorStop(1, '#555');
-            
-            ctx.fillStyle = baseGradient;
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Barrel with type variation
-            let barrelColor = '#666';
-            if (cannon.type === 1) barrelColor = '#2196F3'; // Fast cannon
-            if (cannon.type === 2) barrelColor = '#FF5722'; // Heavy cannon
-            
-            const barrelGradient = ctx.createLinearGradient(0, -10, 40, -10);
-            barrelGradient.addColorStop(0, barrelColor);
-            barrelGradient.addColorStop(1, '#333');
-            
-            ctx.fillStyle = barrelGradient;
-            ctx.fillRect(0, -10, 40, 20);
-            
-            // Barrel tip
-            ctx.fillStyle = '#222';
-            ctx.fillRect(35, -12, 10, 24);
-            
-            // Cooldown indicator
-            if (cannon.cooldown > 0) {
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                ctx.beginPath();
-                ctx.arc(0, 0, 15, 0, (cannon.cooldown / 10) * Math.PI * 2);
-                ctx.lineTo(0, 0);
-                ctx.fill();
-            }
-            
-            ctx.restore();
-        }
-        
-        function drawMoneyDrop(drop) {
-            const pulse = Math.sin(Date.now() / 200) * 4;
-            const float = Math.sin(Date.now() / 1000 + drop.x) * 3;
-            
-            // Outer glow
-            ctx.shadowColor = '#FFD700';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = drop.collected ? '#4CAF50' : '#FFD700';
-            ctx.beginPath();
-            ctx.arc(drop.x, drop.y + float, 12 + pulse, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            
-            // Combo indicator
-            if (drop.combo > 1) {
-                ctx.fillStyle = '#FF4081';
-                ctx.font = 'bold 16px Jura';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${drop.combo}x`, drop.x, drop.y + float - 25);
-            }
-            
-            // Dollar sign
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 18px Jura';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('$', drop.x, drop.y + float);
-            
-            // Value indicator
-            if (!drop.collected) {
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Jura';
-                ctx.fillText(drop.value, drop.x, drop.y + float + 25);
-            }
-        }
-        
-        function drawPowerup(powerup) {
-            const config = POWERUPS[powerup.type];
-            const pulse = Math.sin(Date.now() / 300 + powerup.floatOffset) * 5;
-            const float = Math.sin(Date.now() / 800 + powerup.floatOffset) * 8;
-            
-            // Outer glow
-            ctx.shadowColor = config.color;
-            ctx.shadowBlur = 25;
-            ctx.fillStyle = config.color;
-            ctx.beginPath();
-            ctx.arc(powerup.x, powerup.y + float, powerup.radius + pulse, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            
-            // Icon
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 20px Jura';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(config.icon, powerup.x, powerup.y + float);
-            
-            // Name
-            ctx.fillStyle = config.color;
-            ctx.font = 'bold 12px Jura';
-            ctx.fillText(config.name, powerup.x, powerup.y + float + powerup.radius + 15);
-        }
-        
-        // Utility functions
-        function getDifficultyMultiplier() {
-            switch(difficulty) {
-                case 'easy': return 0.8;
-                case 'hard': return 1.4;
-                default: return 1.0;
-            }
-        }
-        
-        function getEnemyTypeForWave() {
-            if (wave >= 15 && Math.random() < 0.15) return 'BOSS';
-            if (wave >= 10 && Math.random() < 0.25) return 'TANK';
-            if (wave >= 5 && Math.random() < 0.4) return 'FAST';
-            return 'NORMAL';
-        }
-        
-        function updateWavePreview() {
-            const nextEnemy = getEnemyTypeForWave();
-            wavePreview.textContent = `Next: ${ENEMY_TYPES[nextEnemy].name}`;
-        }
-        
-        function showDamageNumber(x, y, damage) {
-            const damageEl = document.createElement('div');
-            damageEl.textContent = `-${damage}`;
-            damageEl.style.position = 'absolute';
-            damageEl.style.left = `${x}px`;
-            damageEl.style.top = `${y}px`;
-            damageEl.style.color = '#f44336';
-            damageEl.style.fontWeight = 'bold';
-            damageEl.style.fontSize = '16px';
-            damageEl.style.pointerEvents = 'none';
-            damageEl.style.zIndex = '100';
-            damageEl.style.animation = 'fadeUp 1s forwards';
-            
-            document.querySelector('.game-board').appendChild(damageEl);
-            
-            setTimeout(() => damageEl.remove(), 1000);
-        }
-        
-        function addCombatLog(message, type = 'normal') {
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry ${type}`;
-            logEntry.textContent = message;
-            
-            combatLog.appendChild(logEntry);
-            combatLog.scrollTop = combatLog.scrollHeight;
-            
-            // Show log for 3 seconds
-            combatLog.classList.add('show');
-            setTimeout(() => {
-                if (combatLog.children.length > 5) {
-                    combatLog.removeChild(combatLog.firstChild);
-                }
-                if (combatLog.children.length === 0) {
-                    combatLog.classList.remove('show');
-                }
-            }, 3000);
-        }
-        
-        function showBossWarning() {
-            bossWarning.style.display = 'block';
-            setTimeout(() => bossWarning.style.display = 'none', 3000);
-        }
-        
-        // Game progression
-        function nextWave() {
-            wave++;
-            waveDisplay.textContent = wave;
-            
-            // Show wave indicator
-            waveIndicator.textContent = `WAVE ${wave}`;
-            waveIndicator.style.display = 'block';
-            setTimeout(() => waveIndicator.style.display = 'none', 2000);
-            
-            // Increase difficulty
-            enemiesPerWave = Math.floor(8 + wave * 2);
-            enemySpawnInterval = Math.max(500, 2000 - wave * 100);
-            
-            // Check for boss wave
-            bossWave = wave % 5 === 0;
-            bossSpawned = false;
-            
-            // Reset wave state
-            enemiesSpawnedThisWave = 0;
-            waveComplete = false;
-            
-            // Bonus money with wave bonus
-            const waveBonus = 50 + wave * 12;
-            const comboBonus = combo * 10;
-            const totalBonus = waveBonus + comboBonus;
-            
-            money += totalBonus;
-            totalMoneyEarned += totalBonus;
-            moneyDisplay.textContent = money;
-            
-            addCombatLog(`Wave ${wave} complete! +$${totalBonus}`, 'upgrade');
-            
-            // Update preview
-            updateWavePreview();
-            
-            // Unlock achievements
-            checkAchievements();
-            updateUpgradeButtons();
-            
-            // Grant skill point every 3 waves
-            if (wave % 3 === 0) {
-                skillPoints++;
-                updateSkillPointsDisplay();
-                addCombatLog('Gained 1 Skill Point!', 'upgrade');
-            }
-        }
-        
-        function gameOver() {
-            gameRunning = false;
-            
-            // Calculate accuracy
-            const accuracy = shotsFired > 0 ? Math.round((shotsHit / shotsFired) * 100) : 0;
-            
-            // Determine rank
-            let rank = 'Recruit';
-            let rankColor = '#ccc';
-            const score = wave * 100 + enemiesDefeated * 10 + totalMoneyEarned;
-            
-            if (score > 5000) { rank = 'General'; rankColor = '#FFD700'; }
-            else if (score > 3000) { rank = 'Colonel'; rankColor = '#C0C0C0'; }
-            else if (score > 1500) { rank = 'Captain'; rankColor = '#CD7F32'; }
-            else if (score > 500) { rank = 'Sergeant'; rankColor = '#4CAF50'; }
-            
-            // Update final stats
-            finalScore.textContent = `You survived ${wave} waves`;
-            finalEnemies.textContent = `Enemies defeated: ${enemiesDefeated}`;
-            finalMoney.textContent = `Total resources: $${totalMoneyEarned}`;
-            finalAccuracy.textContent = `Accuracy: ${accuracy}%`;
-            
-            const finalRank = document.getElementById('finalRank');
-            finalRank.textContent = `Rank: ${rank}`;
-            finalRank.style.color = rankColor;
-            
-            gameOverScreen.style.display = 'flex';
-            
-            // Unlock defeat achievement
-            if (!achievements.has('first_defeat')) {
-                achievements.add('first_defeat');
-                showAchievement('Fallen Stronghold', 'Your first defeat. The battle continues!');
-            }
-        }
-        
-        // UI functions
-        function updateUpgradeButtons() {
-            Object.keys(upgrades).forEach(key => {
-                const btn = document.getElementById(key + 'Upgrade');
-                if (btn) {
-                    btn.querySelector('.upgrade-cost').textContent = `Cost: $${upgrades[key].cost}`;
-                    btn.querySelector('.upgrade-level').textContent = `Level: ${upgrades[key].level}/${upgrades[key].maxLevel}`;
-                    btn.disabled = money < upgrades[key].cost || upgrades[key].level >= upgrades[key].maxLevel;
-                }
-            });
-        }
-        
-        function updatePowerupDisplay() {
-            if (powerupActive && Date.now() < powerupEndTime) {
-                const config = POWERUPS[powerupActive];
-                const timeLeft = Math.ceil((powerupEndTime - Date.now()) / 1000);
-                powerupContainer.style.display = 'flex';
-                powerupContainer.innerHTML = `${config.icon} ${config.name} (${timeLeft}s)`;
-                powerupContainer.style.borderColor = config.color;
-            } else {
-                powerupContainer.style.display = 'none';
-                powerupActive = null;
-            }
-        }
-        
-        function updateSkillPointsDisplay() {
-            document.getElementById('skillPoints').textContent = `(Skill Points: ${skillPoints})`;
-        }
-        
-        function buyUpgrade(upgradeType) {
-            const upgrade = upgrades[upgradeType];
-            
-            if (money >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
-                money -= upgrade.cost;
-                moneyDisplay.textContent = money;
-                upgrade.level++;
-                upgrade.cost = Math.floor(upgrade.cost * 1.6);
-                
-                if (upgradeType === 'health') {
-                    const healthIncrease = upgrade.effect;
-                    strongholdHealth += healthIncrease;
-                    maxHealth += healthIncrease;
-                    healthDisplay.textContent = strongholdHealth;
-                }
-                
+                // Initialize UI
+                initCannons();
                 updateUpgradeButtons();
-                addCombatLog(`${upgradeType} upgraded to level ${upgrade.level}!`, 'upgrade');
-            }
-        }
-        
-        function activatePowerup(type) {
-            powerupActive = type;
-            powerupEndTime = Date.now() + POWERUPS[type].duration;
-            updatePowerupDisplay();
-            
-            addCombatLog(`${POWERUPS[type].name} activated!`, 'powerup');
-            
-            // Show achievement for first powerup
-            if (!achievements.has('first_powerup')) {
-                achievements.add('first_powerup');
-                showAchievement('Power Surge!', 'Activated your first power-up');
-            }
-        }
-        
-        function checkAchievements() {
-            if (wave >= 5 && !achievements.has('wave_5')) {
-                achievements.add('wave_5');
-                showAchievement('Bronze Defender', 'Reached wave 5');
-            }
-            if (wave >= 10 && !achievements.has('wave_10')) {
-                achievements.add('wave_10');
-                showAchievement('Silver Guardian', 'Reached wave 10');
-            }
-            if (wave >= 15 && !achievements.has('wave_15')) {
-                achievements.add('wave_15');
-                showAchievement('Gold Warlord', 'Reached wave 15');
-            }
-            if (enemiesDefeated >= 100 && !achievements.has('100_kills')) {
-                achievements.add('100_kills');
-                showAchievement('Century Slayer', 'Defeated 100 enemies');
-            }
-            if (money >= 1000 && !achievements.has('wealthy')) {
-                achievements.add('wealthy');
-                showAchievement('War Chest', 'Accumulated $1000');
-            }
-            if (combo >= 10 && !achievements.has('combo_10')) {
-                achievements.add('combo_10');
-                showAchievement('Combo Master', 'Achieved 10x combo');
-            }
-        }
-        
-        function showAchievement(title, description) {
-            achievementTitle.textContent = title;
-            achievementDesc.textContent = description;
-            achievementPopup.style.display = 'block';
-            
-            setTimeout(() => {
-                achievementPopup.style.display = 'none';
-            }, 4000);
-        }
-        
-        // Event listeners
-        canvas.addEventListener('click', (e) => {
-            if (!gameRunning) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // Collect money drops
-            moneyDrops.forEach(drop => {
-                const dx = drop.x - x;
-                const dy = drop.y - y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                updateWavePreview();
+                drawInitialScreen();
                 
-                if (distance < 25 && !drop.collected) {
-                    drop.collected = true;
-                    money += drop.value;
-                    totalMoneyEarned += drop.value;
-                    moneyDisplay.textContent = money;
-                    updateUpgradeButtons();
-                    
-                    addCombatLog(`Collected $${drop.value}`, 'upgrade');
-                }
-            });
-            
-            // Collect powerups
-            powerups.forEach(powerup => {
-                const dx = powerup.x - x;
-                const dy = powerup.y - y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                console.log('Game initialized successfully');
                 
-                if (distance < 30 && !powerup.collected) {
-                    powerup.collected = true;
-                    activatePowerup(powerup.type);
-                }
-            });
-        });
-        
-        // Button events
-        document.getElementById('startBtn').addEventListener('click', () => {
-            if (!gameRunning) initGame();
-        });
-        
-        document.getElementById('pauseBtn').addEventListener('click', () => {
-            if (gameRunning) {
-                gamePaused = !gamePaused;
-                document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume' : 'Pause';
-                if (!gamePaused) requestAnimationFrame(gameLoop);
+            } catch (error) {
+                console.error('Error initializing game:', error);
+                alert('Error initializing game. Check console for details.');
             }
         });
-        
-        document.getElementById('restartBtn').addEventListener('click', initGame);
-        document.getElementById('restartBtn2').addEventListener('click', initGame);
-        
-        // Upgrade buttons
-        Object.keys(upgrades).forEach(key => {
-            document.getElementById(key + 'Upgrade').addEventListener('click', () => buyUpgrade(key));
-        });
-        
-        // Difficulty buttons
-        document.querySelectorAll('.difficulty-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                difficulty = btn.dataset.difficulty;
-                
-                // Show achievement for changing difficulty
-                if (!achievements.has('difficulty_change')) {
-                    achievements.add('difficulty_change');
-                    showAchievement('Challenge Accepted', `Playing on ${difficulty} difficulty`);
-                }
-            });
-        });
-        
-        // Initialize game
-        initCannons();
-        updateUpgradeButtons();
-        updateWavePreview();
-        
-        // Add CSS for damage numbers
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeUp {
-                0% { opacity: 1; transform: translateY(0) scale(1); }
-                100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Draw initial state
-        drawEnhancedBackground(0);
-        drawStronghold();
-        initCannons();
-        cannons.forEach(cannon => drawEnhancedCannon(cannon));
-        
-        // Draw initial instructions
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 28px Jura';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('STRONGHOLD DEFENSE', canvas.width / 2, canvas.height / 2 - 60);
-        ctx.font = '20px Jura';
-        ctx.fillText('Select difficulty and click "Start Game"', canvas.width / 2, canvas.height / 2 - 10);
-        ctx.fillText('Defend the stronghold from all sides!', canvas.width / 2, canvas.height / 2 + 30);
-        ctx.font = '16px Jura';
-        ctx.fillText('Upgrade cannons between waves', canvas.width / 2, canvas.height / 2 + 70);
-        ctx.fillText('Collect power-ups for temporary boosts', canvas.width / 2, canvas.height / 2 + 100);
     </script>
 </body>
 </html>

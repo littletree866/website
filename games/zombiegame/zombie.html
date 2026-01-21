@@ -4,234 +4,882 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zombie Survival</title>
+  <title>ZOMBIE APOCALYPSE</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="../../icon.jpg" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
       box-sizing: border-box;
-      /* keep control of fonts via body below */
+      margin: 0;
+      padding: 0;
     }
 
     body {
       font-family: 'DM Sans', sans-serif;
       margin: 0;
-      background: radial-gradient(circle at top, #1b1b1b, #000);
+      background: radial-gradient(circle at top, #1a0f0f, #000);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      overflow: hidden;
     }
 
     canvas {
-      background: #0d0d0d;
-      border-radius: 16px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, .8);
+      background: linear-gradient(135deg, #1a0f0f 0%, #0a0a0a 100%);
+      border-radius: 12px;
+      box-shadow: 
+        0 0 60px rgba(255, 50, 50, 0.3),
+        0 0 120px rgba(255, 0, 0, 0.1);
+      border: 2px solid #ff4444;
     }
 
-    button {
-      font-family: inherit;
-      font-weight: 700;
+    .container {
+      position: relative;
     }
 
     .hud {
       position: absolute;
-      top: 16px;
-      left: 16px;
-      font-weight: 600;
-      font-size: 16px;
+      top: 20px;
+      left: 20px;
+      font-weight: 700;
+      font-size: 18px;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ff4444;
+      min-width: 220px;
     }
 
     .hud div {
-      margin-bottom: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud span {
+      color: #ffcc00;
+    }
+
+    .powerup-hud {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #00ccff;
+      min-width: 220px;
+    }
+
+    .powerup-hud h3 {
+      color: #00ccff;
+      margin-bottom: 10px;
+      text-shadow: 0 0 8px rgba(0, 204, 255, 0.5);
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #44ff44;
+      font-size: 14px;
+      max-width: 300px;
+    }
+
+    .controls h3 {
+      color: #44ff44;
+      margin-bottom: 8px;
+    }
+
+    .ability {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ff44ff;
+    }
+
+    .ability button {
+      background: linear-gradient(45deg, #ff44ff, #8844ff);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 16px;
+    }
+
+    .ability button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 68, 255, 0.8);
+    }
+
+    .ability button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .cooldown {
+      color: #ffcc00;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .title {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 36px;
+      color: #ff4444;
+      text-shadow: 
+        0 0 10px #ff0000,
+        0 0 20px #ff0000,
+        0 0 30px #ff0000;
+      letter-spacing: 2px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .damage-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .wave-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 30px 50px;
+      border-radius: 15px;
+      border: 3px solid #ffcc00;
+      font-size: 28px;
+      color: #ffcc00;
+      text-align: center;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 0 40px rgba(255, 204, 0, 0.5);
+    }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
     }
   </style>
 </head>
 
 <body>
-  <div class="hud">
-    <div id="health">❤️ Health: 100</div>
-    <div id="score">🧟 Kills: 0</div>
-    <div id="helpers">🧑 Allies: 0</div>
+  <div class="title">ZOMBIE APOCALYPSE</div>
+  
+  <div class="container">
+    <div class="hud">
+      <div><i class="fas fa-heart" style="color: #ff4444;"></i> HEALTH: <span id="health">100</span></div>
+      <div><i class="fas fa-skull-crossbones" style="color: #44ff44;"></i> KILLS: <span id="score">0</span></div>
+      <div><i class="fas fa-users" style="color: #00ccff;"></i> ALLIES: <span id="helpers">0</span></div>
+      <div><i class="fas fa-wave-square" style="color: #ffcc00;"></i> WAVE: <span id="wave">1</span></div>
+      <div><i class="fas fa-bolt" style="color: #ff44ff;"></i> POWER: <span id="power">0</span>%</div>
+    </div>
+
+    <div class="powerup-hud">
+      <h3><i class="fas fa-star"></i> ACTIVE POWER-UPS</h3>
+      <div id="powerups-list">None</div>
+    </div>
+
+    <div class="controls">
+      <h3><i class="fas fa-gamepad"></i> CONTROLS</h3>
+      <div>MOVEMENT: Arrow Keys / WASD</div>
+      <div>SHOOT: Mouse Click</div>
+      <div>ABILITY: SPACEBAR / Button</div>
+      <div>POWER: Collect glowing orbs!</div>
+    </div>
+
+    <div class="ability">
+      <button id="specialAbility" onclick="activateSpecialAbility()">
+        <i class="fas fa-fire"></i> NUCLEAR BLAST
+      </button>
+      <div class="cooldown" id="cooldown">READY!</div>
+    </div>
+
+    <div class="wave-indicator" id="waveIndicator">WAVE 1 INCOMING!</div>
+    
+    <div class="damage-effect" id="damageEffect"></div>
+    <canvas id="game" width="1000" height="650"></canvas>
   </div>
-  <canvas id="game" width="900" height="550"></canvas>
 
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
+    const damageEffect = document.getElementById('damageEffect');
+    const waveIndicator = document.getElementById('waveIndicator');
+
+    // Sound effects
+    const sounds = {
+      shoot: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='),
+      explode: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='),
+      powerup: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='),
+      hit: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==')
+    };
+
+    Object.values(sounds).forEach(s => {
+      s.volume = 0.3;
+      s.preload = 'auto';
+    });
 
     const keys = {};
     window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
+    // Game state
     const player = {
       x: canvas.width / 2,
       y: canvas.height / 2,
-      r: 16,
-      speed: 3.2,
-      health: 100
+      r: 18,
+      speed: 3.5,
+      health: 100,
+      maxHealth: 100,
+      power: 0,
+      powerUps: new Set(),
+      lastShot: 0,
+      shootDelay: 200
     };
 
+    // Game objects
     let bullets = [];
     let zombies = [];
     let humans = [];
+    let powerUps = [];
+    let particles = [];
     let kills = 0;
     let frame = 0;
-    let spawnRate = 90;
+    let spawnRate = 80;
+    let wave = 1;
+    let waveKillsRequired = 15;
+    let specialAbilityCooldown = 0;
+    let isAbilityActive = false;
+    let abilityDuration = 0;
 
-    canvas.addEventListener('click', e => {
+    // Zombie types with more variety
+    const ZOMBIE_TYPES = {
+      normal: { emoji: '🧟', speed: 1.2, health: 1, color: '#44ff44', points: 10 },
+      fast: { emoji: '🧟‍♂️', speed: 2.5, health: 1, color: '#ff8844', points: 15 },
+      tank: { emoji: '🧟‍♀️', speed: 0.8, health: 3, color: '#ff4444', points: 25 },
+      virus: { emoji: '🤢', speed: 1.0, health: 1, color: '#8844ff', points: 20 },
+      cure: { emoji: '💉', speed: 1.5, health: 1, color: '#00ccff', points: 30 }
+    };
+
+    // Power-up types
+    const POWERUP_TYPES = {
+      health: { emoji: '❤️', color: '#ff4444', duration: 0 },
+      speed: { emoji: '⚡', color: '#ffcc00', duration: 600 },
+      shield: { emoji: '🛡️', color: '#00ccff', duration: 450 },
+      rapid: { emoji: '🔫', color: '#ff44ff', duration: 300 },
+      damage: { emoji: '💥', color: '#ff8800', duration: 500 }
+    };
+
+    // Mouse control
+    canvas.addEventListener('mousedown', (e) => {
+      const now = Date.now();
+      if (now - player.lastShot >= player.shootDelay) {
+        shoot(e);
+        player.lastShot = now;
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      // Auto-shoot when mouse button is held
+      if (e.buttons === 1) {
+        const now = Date.now();
+        if (now - player.lastShot >= player.shootDelay) {
+          shoot(e);
+          player.lastShot = now;
+        }
+      }
+    });
+
+    function shoot(e) {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
       const angle = Math.atan2(my - player.y, mx - player.x);
-      bullets.push({
-        x: player.x,
-        y: player.y,
-        vx: Math.cos(angle) * 7,
-        vy: Math.sin(angle) * 7,
-        r: 4
-      });
-    });
+      
+      const bulletCount = player.powerUps.has('rapid') ? 3 : 1;
+      const spread = player.powerUps.has('rapid') ? 0.2 : 0;
+      
+      for (let i = 0; i < bulletCount; i++) {
+        const bulletSpread = angle + (i - (bulletCount - 1) / 2) * spread;
+        bullets.push({
+          x: player.x,
+          y: player.y,
+          vx: Math.cos(bulletSpread) * 8,
+          vy: Math.sin(bulletSpread) * 8,
+          r: player.powerUps.has('damage') ? 8 : 5,
+          damage: player.powerUps.has('damage') ? 2 : 1,
+          color: player.powerUps.has('damage') ? '#ff8800' : '#ffcc00'
+        });
+      }
+      
+      createParticles(player.x, player.y, 5, '#ffcc00');
+      sounds.shoot.currentTime = 0;
+      sounds.shoot.play();
+    }
 
+    // Special ability
+    window.activateSpecialAbility = function() {
+      if (specialAbilityCooldown > 0 || isAbilityActive) return;
+      
+      isAbilityActive = true;
+      abilityDuration = 120;
+      specialAbilityCooldown = 600;
+      
+      // Kill all zombies on screen
+      zombies.forEach(z => {
+        createParticles(z.x, z.y, 20, '#ff44ff');
+        kills++;
+        player.power = Math.min(100, player.power + 5);
+      });
+      zombies = [];
+      
+      createParticles(player.x, player.y, 100, '#ff44ff');
+      sounds.explode.play();
+      
+      document.getElementById('specialAbility').disabled = true;
+      document.getElementById('specialAbility').innerHTML = '<i class="fas fa-bolt"></i> ACTIVATED!';
+    };
+
+    // Spawn functions
     function spawnZombie() {
       const edge = Math.floor(Math.random() * 4);
       let x, y;
-      if (edge === 0) { x = 0; y = Math.random() * canvas.height; }
-      if (edge === 1) { x = canvas.width; y = Math.random() * canvas.height; }
-      if (edge === 2) { x = Math.random() * canvas.width; y = 0; }
-      if (edge === 3) { x = Math.random() * canvas.width; y = canvas.height; }
+      if (edge === 0) { x = -50; y = Math.random() * canvas.height; }
+      else if (edge === 1) { x = canvas.width + 50; y = Math.random() * canvas.height; }
+      else if (edge === 2) { x = Math.random() * canvas.width; y = -50; }
+      else { x = Math.random() * canvas.width; y = canvas.height + 50; }
 
       const roll = Math.random();
-      let type = 'normal';
-      if (roll < 0.2) type = 'virus';
-      else if (roll < 0.35) type = 'fast';
-      else if (roll < 0.45) type = 'cure';
+      let type;
+      if (roll < 0.05) type = 'tank';
+      else if (roll < 0.15) type = 'virus';
+      else if (roll < 0.3) type = 'fast';
+      else if (roll < 0.4) type = 'cure';
+      else type = 'normal';
 
       zombies.push({
         x, y,
-        r: 18,
+        r: type === 'tank' ? 25 : 20,
         type,
-        speed: type === 'fast' ? 2.2 : 1.2,
-        emoji: '🧟'
+        health: ZOMBIE_TYPES[type].health,
+        speed: ZOMBIE_TYPES[type].speed * (0.9 + wave * 0.05),
+        emoji: ZOMBIE_TYPES[type].emoji,
+        color: ZOMBIE_TYPES[type].color,
+        points: ZOMBIE_TYPES[type].points
       });
     }
 
+    function spawnPowerUp(x, y) {
+      const types = Object.keys(POWERUP_TYPES);
+      const type = types[Math.floor(Math.random() * types.length)];
+      
+      powerUps.push({
+        x, y,
+        r: 15,
+        type,
+        emoji: POWERUP_TYPES[type].emoji,
+        color: POWERUP_TYPES[type].color,
+        duration: POWERUP_TYPES[type].duration
+      });
+    }
+
+    function spawnHuman(x, y) {
+      humans.push({
+        x, y,
+        r: 18,
+        emoji: '🧑‍🔬',
+        target: null,
+        lastShot: 0,
+        health: 50
+      });
+    }
+
+    // Particle effects
+    function createParticles(x, y, count, color) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          r: Math.random() * 4 + 2,
+          color,
+          life: 30
+        });
+      }
+    }
+
+    // Update game state
     function update() {
       frame++;
-      if (frame % spawnRate === 0) spawnZombie();
+      
+      // Spawn logic
+      if (frame % Math.max(20, spawnRate - wave * 2) === 0) {
+        spawnZombie();
+      }
+      
+      if (frame % 300 === 0 && Math.random() < 0.3) {
+        spawnPowerUp(Math.random() * canvas.width, Math.random() * canvas.height);
+      }
 
+      // Player movement with speed boost
+      let speedMultiplier = player.powerUps.has('speed') ? 1.5 : 1;
+      if (keys['arrowup'] || keys['w']) player.y -= player.speed * speedMultiplier;
+      if (keys['arrowleft'] || keys['a']) player.x -= player.speed * speedMultiplier;
+      if (keys['arrowdown'] || keys['s']) player.y += player.speed * speedMultiplier;
+      if (keys['arrowright'] || keys['d']) player.x += player.speed * speedMultiplier;
+      
+      // Special ability activation with spacebar
+      if (keys[' '] && specialAbilityCooldown === 0 && !isAbilityActive) {
+        activateSpecialAbility();
+      }
 
-      if (keys['ArrowUp']) player.y -= player.speed;
-      if (keys['ArrowLeft']) player.x -= player.speed;
-      if (keys['ArrowDown']) player.y += player.speed;
-      if (keys['ArrowRight']) player.x += player.speed;
+      // Ability cooldown
+      if (specialAbilityCooldown > 0) {
+        specialAbilityCooldown--;
+        document.getElementById('cooldown').textContent = 
+          `Cooldown: ${Math.ceil(specialAbilityCooldown/60)}s`;
+      } else if (!isAbilityActive) {
+        document.getElementById('cooldown').textContent = 'READY!';
+        document.getElementById('specialAbility').disabled = false;
+        document.getElementById('specialAbility').innerHTML = '<i class="fas fa-fire"></i> NUCLEAR BLAST';
+      }
 
+      // Ability duration
+      if (isAbilityActive) {
+        abilityDuration--;
+        if (abilityDuration <= 0) {
+          isAbilityActive = false;
+        }
+      }
 
+      // Keep player in bounds
       player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
       player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
 
+      // Update bullets
+      bullets.forEach(b => {
+        b.x += b.vx;
+        b.y += b.vy;
+        
+        // Trail particles
+        if (frame % 3 === 0) {
+          createParticles(b.x, b.y, 1, b.color);
+        }
+      });
+      bullets = bullets.filter(b => 
+        b.x > -50 && b.x < canvas.width + 50 && 
+        b.y > -50 && b.y < canvas.height + 50
+      );
 
-      bullets.forEach(b => { b.x += b.vx; b.y += b.vy; });
-      bullets = bullets.filter(b => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height);
-
-
-      zombies.forEach((z, zi) => {
+      // Update zombies
+      zombies.forEach(z => {
         const angle = Math.atan2(player.y - z.y, player.x - z.x);
         z.x += Math.cos(angle) * z.speed;
         z.y += Math.sin(angle) * z.speed;
 
-        if (Math.hypot(player.x - z.x, player.y - z.y) < player.r + z.r) {
-          if (z.type === 'virus') player.health -= 0.35;
-          else player.health -= 0.18;
+        // Zombie collision with player
+        const dist = Math.hypot(player.x - z.x, player.y - z.y);
+        if (dist < player.r + z.r) {
+          if (!player.powerUps.has('shield')) {
+            player.health -= z.type === 'virus' ? 2 : 1;
+            
+            // Damage effect
+            damageEffect.style.opacity = '0.7';
+            damageEffect.style.background = 'radial-gradient(circle at 50% 50%, rgba(255,0,0,0.3) 0%, transparent 70%)';
+            setTimeout(() => {
+              damageEffect.style.opacity = '0';
+            }, 100);
+            
+            sounds.hit.play();
+          }
+          
+          // Knockback
+          const knockback = 10;
+          player.x += Math.cos(angle) * knockback;
+          player.y += Math.sin(angle) * knockback;
         }
       });
 
-
+      // Update humans
       humans.forEach(h => {
-        const target = zombies[0];
-        if (!target) return;
-        const a = Math.atan2(target.y - h.y, target.x - h.x);
-        h.x += Math.cos(a) * 1.4;
-        h.y += Math.sin(a) * 1.4;
+        // Find nearest zombie
+        let nearestDist = Infinity;
+        let nearestZombie = null;
+        
+        zombies.forEach(z => {
+          const dist = Math.hypot(h.x - z.x, h.y - z.y);
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearestZombie = z;
+          }
+        });
 
-        if (Math.hypot(h.x - target.x, h.y - target.y) < h.r + target.r) {
-          zombies.shift();
-          kills++;
+        if (nearestZombie) {
+          const angle = Math.atan2(nearestZombie.y - h.y, nearestZombie.x - h.x);
+          h.x += Math.cos(angle) * 1.8;
+          h.y += Math.sin(angle) * 1.8;
+
+          // Human shoots
+          if (frame % 60 === 0 && nearestDist < 400) {
+            bullets.push({
+              x: h.x,
+              y: h.y,
+              vx: Math.cos(angle) * 7,
+              vy: Math.sin(angle) * 7,
+              r: 4,
+              damage: 1,
+              color: '#00ccff'
+            });
+          }
+        } else {
+          // Follow player if no zombies
+          const angle = Math.atan2(player.y - h.y, player.x - h.x);
+          h.x += Math.cos(angle) * 1.2;
+          h.y += Math.sin(angle) * 1.2;
         }
       });
 
-
+      // Bullet collisions
       bullets.forEach((b, bi) => {
         zombies.forEach((z, zi) => {
           if (Math.hypot(b.x - z.x, b.y - z.y) < b.r + z.r) {
+            // Damage zombie
+            z.health -= b.damage;
+            
+            // Hit effect
+            createParticles(b.x, b.y, 10, '#ffffff');
+            
+            // Remove bullet
             bullets.splice(bi, 1);
 
-            if (z.type === 'cure' && Math.random() < 0.09) {
-              humans.push({ x: z.x, y: z.y, r: 16, emoji: '🧑' });
-            } else {
+            if (z.health <= 0) {
+              // Death effect
+              createParticles(z.x, z.y, 15, z.color);
+              
+              // Check for power-up drop
+              if (z.type === 'cure') {
+                if (Math.random() < 0.3) {
+                  spawnHuman(z.x, z.y);
+                }
+                if (Math.random() < 0.2) {
+                  spawnPowerUp(z.x, z.y);
+                }
+              } else if (Math.random() < 0.1) {
+                spawnPowerUp(z.x, z.y);
+              }
+              
               kills++;
+              player.power = Math.min(100, player.power + (z.points / 10));
+              
+              // Remove zombie
+              zombies.splice(zi, 1);
             }
-            zombies.splice(zi, 1);
           }
         });
       });
 
-      spawnRate = Math.max(25, 90 - Math.floor(kills / 4));
+      // Power-up collisions
+      powerUps.forEach((p, pi) => {
+        if (Math.hypot(player.x - p.x, player.y - p.y) < player.r + p.r) {
+          // Apply power-up
+          switch(p.type) {
+            case 'health':
+              player.health = Math.min(player.maxHealth, player.health + 30);
+              break;
+            case 'speed':
+            case 'shield':
+            case 'rapid':
+            case 'damage':
+              player.powerUps.add(p.type);
+              setTimeout(() => {
+                player.powerUps.delete(p.type);
+              }, p.duration);
+              break;
+          }
+          
+          // Effect
+          createParticles(p.x, p.y, 20, p.color);
+          sounds.powerup.play();
+          
+          // Remove power-up
+          powerUps.splice(pi, 1);
+        }
+      });
+
+      // Update particles
+      particles.forEach((p, pi) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1; // Gravity
+        p.life--;
+        
+        if (p.life <= 0) {
+          particles.splice(pi, 1);
+        }
+      });
+
+      // Wave system
+      if (kills >= waveKillsRequired) {
+        wave++;
+        waveKillsRequired = wave * 15;
+        spawnRate = Math.max(10, 80 - wave * 5);
+        
+        // Show wave indicator
+        waveIndicator.textContent = `WAVE ${wave} INCOMING!`;
+        waveIndicator.style.display = 'block';
+        setTimeout(() => {
+          waveIndicator.style.display = 'none';
+        }, 2000);
+        
+        // Spawn bonus zombies for new wave
+        for (let i = 0; i < wave * 3; i++) {
+          setTimeout(() => spawnZombie(), i * 100);
+        }
+      }
+
+      // Update HUD
+      document.getElementById('health').textContent = Math.max(0, Math.floor(player.health));
+      document.getElementById('score').textContent = kills;
+      document.getElementById('helpers').textContent = humans.length;
+      document.getElementById('wave').textContent = wave;
+      document.getElementById('power').textContent = Math.floor(player.power);
+      
+      // Update power-ups list
+      const powerupsList = document.getElementById('powerups-list');
+      if (player.powerUps.size > 0) {
+        powerupsList.innerHTML = Array.from(player.powerUps)
+          .map(p => `<div style="color: ${POWERUP_TYPES[p].color}">${POWERUP_TYPES[p].emoji} ${p.toUpperCase()}</div>`)
+          .join('');
+      } else {
+        powerupsList.textContent = 'None';
+      }
+      
+      // Regenerate health slowly
+      if (frame % 60 === 0 && player.health < player.maxHealth) {
+        player.health = Math.min(player.maxHealth, player.health + 0.5);
+      }
     }
 
-    function drawEmoji(emoji, x, y, size) {
-      ctx.font = size + 'px DM Sans';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(emoji, x, y);
-    }
-
+    // Draw game
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Background with grid
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Grid
+      ctx.strokeStyle = 'rgba(255, 0, 0, 0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 50) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
 
+      // Draw particles
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 30;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
 
-      drawEmoji('🧑', player.x, player.y, 26);
-
-
-      ctx.fillStyle = '#facc15';
+      // Draw bullets with glow
       bullets.forEach(b => {
+        // Glow effect
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = b.color;
         ctx.beginPath();
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
       });
 
+      // Draw power-ups with animation
+      powerUps.forEach(p => {
+        const pulse = Math.sin(frame * 0.1) * 3;
+        
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r + pulse, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw emoji
+        ctx.font = '24px DM Sans';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(p.emoji, p.x, p.y);
+        ctx.shadowBlur = 0;
+      });
 
-      zombies.forEach(z => drawEmoji(z.emoji, z.x, z.y, 28));
+      // Draw zombies with health bars
+      zombies.forEach(z => {
+        // Health bar
+        if (z.health > 1) {
+          ctx.fillStyle = '#ff0000';
+          ctx.fillRect(z.x - 20, z.y - z.r - 15, 40, 5);
+          ctx.fillStyle = '#00ff00';
+          ctx.fillRect(z.x - 20, z.y - z.r - 15, 40 * (z.health / 3), 5);
+        }
+        
+        // Zombie body with shadow
+        ctx.shadowColor = z.color;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = z.color;
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw emoji
+        ctx.font = '32px DM Sans';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(z.emoji, z.x, z.y);
+        ctx.shadowBlur = 0;
+      });
 
+      // Draw humans
+      humans.forEach(h => {
+        // Shield effect if player has shield
+        if (player.powerUps.has('shield')) {
+          ctx.strokeStyle = '#00ccff';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(h.x, h.y, h.r + 5, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        
+        ctx.fillStyle = '#00ccff';
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.font = '28px DM Sans';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(h.emoji, h.x, h.y);
+      });
 
-      humans.forEach(h => drawEmoji(h.emoji, h.x, h.y, 26));
+      // Draw player with effects
+      const playerEffect = Math.sin(frame * 0.2) * 2;
+      
+      // Shield effect
+      if (player.powerUps.has('shield')) {
+        ctx.strokeStyle = '#00ccff';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.r + 10, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      // Player body
+      ctx.shadowColor = '#ff4444';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = isAbilityActive ? '#ff44ff' : '#ff4444';
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.r + playerEffect, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Player emoji
+      ctx.font = '36px DM Sans';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(isAbilityActive ? '💥' : '🧑‍🚀', player.x, player.y);
+      ctx.shadowBlur = 0;
 
-      document.getElementById('health').textContent = `❤️ Health: ${Math.max(0, player.health.toFixed(0))}`;
-      document.getElementById('score').textContent = `🧟 Kills: ${kills}`;
-      document.getElementById('helpers').textContent = `🧑 Allies: ${humans.length}`;
+      // Power meter
+      if (player.power > 0) {
+        ctx.fillStyle = '#ff44ff';
+        ctx.fillRect(20, canvas.height - 40, (player.power / 100) * 200, 20);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(20, canvas.height - 40, 200, 20);
+        
+        ctx.font = '14px DM Sans';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('POWER METER', 120, canvas.height - 27);
+      }
     }
 
+    // Game loop
     function loop() {
       if (player.health <= 0) {
-        ctx.fillStyle = '#000';
+        // Game over screen
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#fff';
-        ctx.font = '48px DM Sans';
+        
+        ctx.fillStyle = '#ff4444';
+        ctx.font = 'bold 64px DM Sans';
         ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
-        ctx.font = '20px DM Sans';
-        ctx.fillText(`Kills: ${kills}`, canvas.width / 2, canvas.height / 2 + 36);
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '32px DM Sans';
+        ctx.fillText(`Kills: ${kills}`, canvas.width / 2, canvas.height / 2 + 20);
+        ctx.fillText(`Wave: ${wave}`, canvas.width / 2, canvas.height / 2 + 60);
+        ctx.fillText(`Allies Saved: ${humans.length}`, canvas.width / 2, canvas.height / 2 + 100);
+        
+        ctx.font = '24px DM Sans';
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillText('Refresh to play again!', canvas.width / 2, canvas.height / 2 + 160);
         return;
       }
+      
       update();
       draw();
       requestAnimationFrame(loop);
     }
 
-    window.addEventListener('keydown', e => keys[e.key] = true);
-    window.addEventListener('keyup', e => keys[e.key] = false);
-
+    // Start game
+    waveIndicator.style.display = 'block';
+    setTimeout(() => {
+      waveIndicator.style.display = 'none';
+    }, 2000);
+    
     loop();
   </script>
 </body>

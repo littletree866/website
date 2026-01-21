@@ -2,108 +2,945 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The World's Dumbest Game</title>
-<link rel="icon" href="../../icon.jpg" type="image/x-icon">
+<link rel="icon" type="image/png" href="../../icon.jpg">
+
 <style>
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  background:#0d0d0d;
-  color:#e6e6e6;
-  font-family:monospace;
-  overflow:hidden;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-#wrap{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:20px;
+:root {
+  --primary: #7c3aed;
+  --primary-dark: #5b21b6;
+  --secondary: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --bg-dark: #0f172a;
+  --bg-darker: #020617;
+  --surface: #1e293b;
+  --surface-light: #334155;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
 }
 
-#time{
-  font-size:28px;
-  opacity:.8;
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, var(--bg-darker), var(--bg-dark));
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-#btn{
-  padding:20px 50px;
-  font-size:22px;
-  background:#111;
-  border:2px solid #444;
-  color:#eee;
-  cursor:pointer;
+/* Screens */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
 
-#btn:hover{background:#181818}
-
-#count{
-  font-size:22px;
-  opacity:.9;
+.hidden {
+  display: none !important;
+  opacity: 0;
 }
 
-#msg{
-  font-size:16px;
-  opacity:.7;
-  max-width:420px;
-  text-align:center;
+/* Home Screen */
+#home {
+  background: radial-gradient(circle at 50% 20%, rgba(124, 58, 237, 0.1), transparent 50%);
+}
+
+.title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 30px rgba(124, 58, 237, 0.3);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(124, 58, 237, 0.4);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--surface-light);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-light);
+}
+
+.btn-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Game Screen */
+#game {
+  padding-top: 100px;
+  padding-bottom: 150px;
+}
+
+/* HUD */
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--surface);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+}
+
+#stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Main Game Button */
+#btn {
+  font-size: clamp(2rem, 4vw, 3rem);
+  padding: 2rem 4rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4),
+              0 0 60px rgba(124, 58, 237, 0.2);
+  position: relative;
+  overflow: hidden;
+  font-weight: 800;
+}
+
+#btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 50px rgba(124, 58, 237, 0.5),
+              0 0 80px rgba(124, 58, 237, 0.3);
+}
+
+#btn:active {
+  transform: scale(0.95);
+}
+
+#btn:before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#btn:hover:before {
+  opacity: 1;
+}
+
+/* Message Display */
+#message {
+  font-size: 1.2rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.5);
+  max-width: 600px;
+  transition: all 0.3s ease;
+}
+
+#message.critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  animation: pulse 0.5s ease infinite;
+}
+
+#message.level-up {
+  background: rgba(16, 185, 129, 0.2);
+  color: #a7f3d0;
+  animation: bounce 0.5s ease;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Log */
+#log {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: rgba(2, 6, 23, 0.95);
+  border-top: 1px solid var(--surface);
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+
+.log-entry {
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-muted);
+}
+
+.log-entry.critical { color: var(--danger); }
+.log-entry.success { color: var(--secondary); }
+.log-entry.warning { color: var(--warning); }
+
+/* Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(5px);
+  pointer-events: none;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modalBox {
+  background: linear-gradient(135deg, var(--surface), var(--bg-dark));
+  border: 1px solid var(--surface-light);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 95%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.modal.active .modalBox {
+  transform: translateY(0);
+}
+
+.modal h2 {
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.modal-buttons {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.5rem 0;
+}
+
+.modal-btn {
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--surface-light);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary);
+}
+
+.modal-btn .cost {
+  color: var(--secondary);
+  font-weight: 600;
+}
+
+/* Particles */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  z-index: 999;
+}
+
+/* Progress Bars */
+.progress-container {
+  width: 300px;
+  height: 8px;
+  background: var(--surface);
+  border-radius: 4px;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Combo Display */
+#combo-display {
+  position: absolute;
+  top: -50px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--warning);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  #hud {
+    padding: 0.8rem;
+  }
+  
+  #stats {
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  #btn {
+    padding: 1.5rem 3rem;
+    font-size: 1.5rem;
+  }
+}
+
+.small {
+  font-size: 12px;
+  opacity: .6;
+  margin: 1rem 0;
 }
 </style>
 </head>
 <body>
 
-<div id="wrap">
-  <div id="time">00:00</div>
-  <button id="btn">PRESS</button>
-  <div id="count">0 presses</div>
-  <div id="msg">...</div>
+<!-- Home Screen -->
+<div id="home" class="screen">
+  <div>
+    <h1 class="title">The World's Dumbest Game</h1>
+    <p class="subtitle">Please do not play this.</p>
+  </div>
+  <div class="btn-group">
+    <button class="btn" onclick="startGame()">START SIMULATION</button>
+    <button class="btn btn-secondary" onclick="openSettings()">SETTINGS</button>
+  </div>
+</div>
+
+<!-- Game Screen -->
+<div id="game" class="screen hidden">
+  <div id="hud">
+    <div id="stats">
+      <div class="stat-item">
+        <span class="stat-value" id="score">0</span>
+        <span class="stat-label">SCORE</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="level">1</span>
+        <span class="stat-label">LEVEL</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="skillPoints">0</span>
+        <span class="stat-label">SKILL POINTS</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="time">0s</span>
+        <span class="stat-label">TIME WASTED</span>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="openShop()">SHOP</button>
+      <button class="btn btn-secondary" onclick="openSettings()">SETTINGS</button>
+      <button class="btn btn-secondary" onclick="goHome()">HOME</button>
+    </div>
+  </div>
+
+  <div style="position: relative;">
+    <div id="combo-display"></div>
+    <button id="btn">CLICK FOR GLORY</button>
+  </div>
+  
+  <div class="progress-container">
+    <div id="xp-bar" class="progress-bar"></div>
+  </div>
+  
+  <div id="message">Click the button. Feel important.</div>
+  
+  <div id="log"></div>
+</div>
+
+<!-- Shop Modal -->
+<div id="shopModal" class="modal">
+  <div class="modalBox">
+    <h2>Upgrade Shop (May Cause Regret)</h2>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="buy('power')">
+        <span>💪 Stronger Clicks<br><small>More points per click</small></span>
+        <span class="cost">1 SP</span>
+      </button>
+      <button class="modal-btn" onclick="buy('crit')">
+        <span>🎯 Critical Chance<br><small>Higher chance for critical hits</small></span>
+        <span class="cost">1 SP</span>
+      </button>
+      <button class="modal-btn" onclick="buy('auto')">
+        <span>🤖 Auto Clicker<br><small>Automated clicking (passive income)</small></span>
+        <span class="cost">2 SP</span>
+      </button>
+      <button class="modal-btn" onclick="buy('chaos')">
+        <span>🌀 Chaos Engine<br><small>Increases random events</small></span>
+        <span class="cost">1 SP</span>
+      </button>
+      <button class="modal-btn" onclick="buy('multiplier')">
+        <span>✨ Score Multiplier<br><small>Permanent score multiplier</small></span>
+        <span class="cost">3 SP</span>
+      </button>
+    </div>
+    <div class="small">Warning: Upgrades may have unintended consequences.</div>
+    <button class="btn btn-secondary" onclick="closeShop()" style="margin-top: 1rem;">Close</button>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal">
+  <div class="modalBox">
+    <h2>Settings</h2>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="toggleSetting('particles')">
+        <span>✨ Particle Effects<br><small>Make everything sparkly</small></span>
+        <span id="particles-status">ON</span>
+      </button>
+      <button class="modal-btn" onclick="toggleSetting('sound')">
+        <span>🔊 Sound Effects<br><small>Add satisfying clicks</small></span>
+        <span id="sound-status">ON</span>
+      </button>
+      <button class="modal-btn" onclick="toggleSetting('chaosMode')">
+        <span>😈 Chaos Mode<br><small>Everything is unpredictable</small></span>
+        <span id="chaos-status">OFF</span>
+      </button>
+      <button class="modal-btn" onclick="fakeSetting()">
+        <span>🌌 Raytraced Button<br><small>Extremely realistic shadows</small></span>
+      </button>
+      <button class="modal-btn" onclick="fakeSetting()">
+        <span>⚡ Performance Mode<br><small>For weak computers</small></span>
+      </button>
+    </div>
+    <button class="btn btn-secondary" onclick="closeSettings()" style="margin-top: 1rem;">Close</button>
+  </div>
 </div>
 
 <script>
-let start = Date.now();
-let presses = 0;
+// DOM Elements
+const el = id => document.getElementById(id);
 
-const messages = [
-  [10, "Still here."],
-  [25, "Most people leave before this."],
-  [45, "You’re actually paying attention."],
-  [70, "Wow. You actually saw this message."],
-  [110, "You’ve stayed longer than 90% of visitors."],
-  [160, "This page is starting to remember you."],
-  [240, "There is no reason to keep going."],
-  [360, "You’re doing this on purpose now."],
-  [520, "Not many people reach this."],
-  [800, "We consider you a regular."],
-  [1200, "You are part of the system now."]
-];
-
-setInterval(()=>{
-  let t = Math.floor((Date.now()-start)/1000);
-  let m = String(Math.floor(t/60)).padStart(2,"0");
-  let s = String(t%60).padStart(2,"0");
-  document.getElementById("time").textContent = `${m}:${s}`;
-
-  for(let i=messages.length-1;i>=0;i--){
-    if(t>=messages[i][0]){
-      document.getElementById("msg").textContent = messages[i][1];
-      break;
-    }
+// Game State
+const game = {
+  score: 0,
+  level: 1,
+  xp: 0,
+  maxXp: 100,
+  combo: 0,
+  skillPoints: 0,
+  crit: 0.05,
+  power: 1,
+  auto: 0,
+  chaos: 0,
+  multiplier: 1,
+  clickCount: 0,
+  upgrades: {
+    power: 0,
+    crit: 0,
+    auto: 0,
+    chaos: 0,
+    multiplier: 0
   }
-},1000);
+};
 
-document.getElementById("btn").onclick = ()=>{
-  presses++;
-  document.getElementById("count").textContent = presses+" presses";
+// Settings
+const settings = {
+  particles: true,
+  sound: true,
+  chaosMode: false
+};
 
-  if(presses===10) msg.textContent="You’re testing if this reacts.";
-  if(presses===50) msg.textContent="You didn’t need to click this much.";
-  if(presses===150) msg.textContent="You are still clicking.";
-  if(presses===400) msg.textContent="It remembers your hands.";
+let startTime = null;
+let lastClick = 0;
+let comboTimeout = null;
+
+// Initialize
+function init() {
+  updateUI();
+  startAutoClicker();
+  startGameLoop();
+  
+  // Set initial button event
+  el("btn").onclick = handleClick;
 }
+
+// Start Game
+function startGame() {
+  el("home").classList.add("hidden");
+  el("game").classList.remove("hidden");
+  startTime = Date.now();
+  addLog("Game started. The button awaits.", "normal");
+}
+
+function goHome() {
+  closeShop();
+  closeSettings();
+  el("game").classList.add("hidden");
+  el("home").classList.remove("hidden");
+  addLog("Returned to menu. The button misses you.", "normal");
+}
+
+// Game Loop
+function startGameLoop() {
+  setInterval(() => {
+    if (startTime) {
+      const t = Math.floor((Date.now() - startTime) / 1000);
+      el("time").textContent = `${t}s`;
+    }
+    
+    // Random events
+    if (Math.random() < 0.001 + (game.chaos * 0.002)) {
+      triggerRandomEvent();
+    }
+  }, 1000);
+}
+
+// Update UI
+function updateUI() {
+  el("score").textContent = Math.floor(game.score).toLocaleString();
+  el("level").textContent = game.level;
+  el("skillPoints").textContent = game.skillPoints;
+  
+  // XP Bar
+  const xpPercent = (game.xp / game.maxXp) * 100;
+  el("xp-bar").style.width = `${Math.min(xpPercent, 100)}%`;
+}
+
+// Log System
+function addLog(message, type = "normal") {
+  const log = el("log");
+  const entry = document.createElement("div");
+  entry.className = `log-entry ${type}`;
+  entry.textContent = `[${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}] ${message}`;
+  log.prepend(entry);
+  
+  // Keep log at reasonable size
+  if (log.children.length > 50) {
+    log.removeChild(log.lastChild);
+  }
+}
+
+// Main Click Function
+function handleClick() {
+  const now = Date.now();
+  const delta = now - lastClick;
+  
+  // Combo system
+  if (delta < 300) {
+    game.combo = game.combo + 1;
+    showCombo(game.combo);
+    clearTimeout(comboTimeout);
+    comboTimeout = setTimeout(() => {
+      if (game.combo >= 3) {
+        addLog(`Combo of ${game.combo} lost!`, "warning");
+      }
+      game.combo = 0;
+    }, 500);
+  } else {
+    game.combo = 1;
+  }
+  
+  lastClick = now;
+  game.clickCount++;
+  
+  // Calculate gain
+  let gain = (game.combo * game.power * game.level * game.multiplier) / 10;
+  
+  // Critical hit
+  const isCrit = Math.random() < game.crit;
+  if (isCrit) {
+    gain *= 3;
+    showMessage("CRITICAL HIT!", "critical");
+    addLog(`Critical hit! +${Math.floor(gain)} points`, "success");
+  }
+  
+  game.score += gain;
+  game.xp += gain * 0.5;
+  
+  // Level up check
+  if (game.xp >= game.maxXp) {
+    levelUp();
+  }
+  
+  // Visual feedback
+  createParticles(10);
+  animateButton();
+  
+  // Random bad event
+  if (Math.random() < 0.08 + (game.chaos * 0.03)) {
+    triggerBadEvent();
+  }
+  
+  updateUI();
+  playClickSound();
+}
+
+// Auto Clicker
+function startAutoClicker() {
+  setInterval(() => {
+    if (game.auto > 0 && startTime) {
+      const autoGain = (game.auto * game.power * game.multiplier) / 20;
+      game.score += autoGain;
+      game.xp += autoGain * 0.25;
+      
+      if (game.xp >= game.maxXp) {
+        levelUp();
+      }
+      
+      updateUI();
+      
+      // Occasional auto clicker log
+      if (Math.random() < 0.01) {
+        addLog(`Auto-clicker working... +${autoGain.toFixed(1)}`, "normal");
+      }
+    }
+  }, 1000);
+}
+
+// Level Up
+function levelUp() {
+  game.level++;
+  game.skillPoints++;
+  game.xp = 0;
+  game.maxXp = Math.floor(game.maxXp * 1.5);
+  
+  showMessage(`LEVEL UP! You're now level ${game.level}`, "level-up");
+  addLog(`Reached level ${game.level}. Gained 1 skill point.`, "success");
+  
+  createParticles(20);
+  updateUI();
+}
+
+// Shop Functions
+function openShop() {
+  el("shopModal").classList.add("active");
+}
+
+function closeShop() {
+  el("shopModal").classList.remove("active");
+}
+
+function buy(type) {
+  let cost = 1;
+  if (type === 'auto') cost = 2;
+  if (type === 'multiplier') cost = 3;
+  
+  if (game.skillPoints >= cost) {
+    game.skillPoints -= cost;
+    game.upgrades[type]++;
+    
+    switch(type) {
+      case 'power':
+        game.power += 0.5;
+        addLog("Muscles grown. Click power increased.", "success");
+        break;
+      case 'crit':
+        game.crit += 0.04;
+        addLog("Aiming improved. Critical chance increased.", "success");
+        break;
+      case 'auto':
+        game.auto++;
+        addLog("Hired a robot assistant. It seems unhappy.", "normal");
+        break;
+      case 'chaos':
+        game.chaos++;
+        addLog("Chaos level increased. Reality feels less stable.", "warning");
+        break;
+      case 'multiplier':
+        game.multiplier *= 1.2;
+        addLog("Score multiplier activated. Things are getting serious.", "success");
+        break;
+    }
+    
+    updateUI();
+  } else {
+    showMessage("Not enough skill points!", "critical");
+    addLog("Attempted to buy upgrade without enough points. Shame.", "warning");
+  }
+}
+
+// Settings Functions
+function openSettings() {
+  updateSettingsDisplay();
+  el("settingsModal").classList.add("active");
+}
+
+function closeSettings() {
+  el("settingsModal").classList.remove("active");
+}
+
+function toggleSetting(setting) {
+  settings[setting] = !settings[setting];
+  updateSettingsDisplay();
+  addLog(`${setting} ${settings[setting] ? 'enabled' : 'disabled'}`, "normal");
+}
+
+function updateSettingsDisplay() {
+  el("particles-status").textContent = settings.particles ? "ON" : "OFF";
+  el("sound-status").textContent = settings.sound ? "ON" : "OFF";
+  el("chaos-status").textContent = settings.chaosMode ? "ON" : "OFF";
+}
+
+function fakeSetting() {
+  addLog("Feature not implemented. Please purchase DLC.", "warning");
+  showMessage("This does absolutely nothing.", "critical");
+}
+
+// Visual Effects
+function createParticles(count) {
+  if (!settings.particles) return;
+  
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.width = `${Math.random() * 10 + 5}px`;
+    particle.style.height = particle.style.width;
+    particle.style.background = `hsl(${Math.random() * 60 + 200}, 100%, 70%)`;
+    particle.style.left = `${Math.random() * 100}vw`;
+    particle.style.top = `${Math.random() * 100}vh`;
+    
+    document.body.appendChild(particle);
+    
+    // Animate and remove
+    particle.animate([
+      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+      { transform: `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) scale(0)`, opacity: 0 }
+    ], {
+      duration: 1000 + Math.random() * 1000,
+      easing: 'cubic-bezier(0.2, 0, 0.8, 1)'
+    }).onfinish = () => particle.remove();
+  }
+}
+
+function showCombo(combo) {
+  const display = el("combo-display");
+  display.textContent = `${combo}x COMBO!`;
+  display.style.opacity = '1';
+  display.style.color = combo >= 10 ? '#f59e0b' : combo >= 5 ? '#10b981' : '#94a3b8';
+  
+  display.animate([
+    { transform: 'translateY(0) scale(1)', opacity: 1 },
+    { transform: 'translateY(-100px) scale(1.5)', opacity: 0 }
+  ], {
+    duration: 1000,
+    easing: 'cubic-bezier(0.2, 0, 0.8, 1)'
+  });
+}
+
+function showMessage(message, type = "normal") {
+  const msg = el("message");
+  msg.textContent = message;
+  msg.className = type;
+  
+  setTimeout(() => {
+    msg.className = '';
+  }, 2000);
+}
+
+function animateButton() {
+  const btn = el("btn");
+  btn.animate([
+    { transform: 'scale(1)' },
+    { transform: 'scale(0.95)' },
+    { transform: 'scale(1)' }
+  ], {
+    duration: 200,
+    easing: 'cubic-bezier(0.2, 0, 0.8, 1)'
+  });
+}
+
+// Sound Effects
+function playClickSound() {
+  if (!settings.sound) return;
+  
+  // Create click sound
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (e) {
+    // Audio context not supported, silently fail
+  }
+}
+
+// Random Events
+function triggerRandomEvent() {
+  const events = [
+    () => {
+      const bonus = game.level * 100;
+      game.score += bonus;
+      addLog(`Found ${bonus} bonus points in the code!`, "success");
+      showMessage("BONUS POINTS!", "level-up");
+    },
+    () => {
+      game.skillPoints++;
+      addLog("A mysterious benefactor granted you a skill point!", "success");
+      showMessage("FREE SKILL POINT!", "level-up");
+    },
+    () => {
+      const oldPower = game.power;
+      game.power *= 1.1;
+      addLog(`Button feels more powerful! Power: ${oldPower.toFixed(1)} → ${game.power.toFixed(1)}`, "normal");
+    }
+  ];
+  
+  events[Math.floor(Math.random() * events.length)]();
+  updateUI();
+}
+
+function triggerBadEvent() {
+  const events = [
+    () => {
+      const loss = game.score * 0.1;
+      game.score -= loss;
+      addLog(`System glitch! Lost ${Math.floor(loss)} points.`, "warning");
+      showMessage("GLITCH DETECTED!", "critical");
+    },
+    () => {
+      const btn = el("btn");
+      btn.style.filter = 'hue-rotate(180deg)';
+      addLog("Button colors inverted. This is fine.", "warning");
+      setTimeout(() => btn.style.filter = '', 2000);
+    },
+    () => {
+      game.combo = 0;
+      addLog("Combo breaker! Combo reset to zero.", "warning");
+    },
+    () => {
+      if (game.auto > 0) {
+        game.auto--;
+        addLog("Auto-clicker unionized and left. One less auto-clicker.", "warning");
+      }
+    }
+  ];
+  
+  events[Math.floor(Math.random() * events.length)]();
+  updateUI();
+}
+
+// Initialize game
+init();
 </script>
 </body>
 </html>

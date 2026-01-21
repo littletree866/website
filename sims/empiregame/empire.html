@@ -3,402 +3,848 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Empire BETA</title>
+  <title>Empire Conquest</title>
   <link rel="icon" href="../../icon.jpg" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'DM Sans', sans-serif;
-      background: #000;
+      font-family: 'Jura', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2a 100%);
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden;
     }
 
     #container {
       position: relative;
-      width: 800px;
-      height: 600px;
+      width: 900px;
+      height: 650px;
+      box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     canvas {
-      background: linear-gradient(180deg, #222, #111);
-      border: 3px solid #666;
-      box-shadow: 0 0 20px #000;
+      background: linear-gradient(180deg, #111 0%, #000 100%);
+      display: block;
+      border: 2px solid #444;
     }
 
     #fade {
       position: absolute;
       top: 0;
       left: 0;
-      width: 800px;
-      height: 600px;
+      width: 100%;
+      height: 100%;
       background: #000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.6s;
+      transition: opacity 0.4s ease-in-out;
+      z-index: 10;
     }
+
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      font-size: 14px;
+      z-index: 5;
+    }
+
+    .hud-item {
+      margin: 5px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-bar {
+      width: 100px;
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-left: 10px;
+    }
+
+    .stat-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .hp-fill { background: linear-gradient(90deg, #ff0000, #ff5555); }
+    .exp-fill { background: linear-gradient(90deg, #00aaff, #55ccff); }
   </style>
 </head>
 
 <body>
   <div id="container">
-    <canvas id="game" width="800" height="600"></canvas>
+    <canvas id="game" width="900" height="650"></canvas>
+    <div id="hud">
+      <div class="hud-item">Level: <span id="level">1</span></div>
+      <div class="hud-item">HP: <span id="hp">100</span>/<span id="maxHp">100</span>
+        <div class="stat-bar"><div class="stat-fill hp-fill" style="width: 100%"></div></div>
+      </div>
+      <div class="hud-item">EXP: <span id="exp">0</span>/<span id="expNeeded">100</span>
+        <div class="stat-bar"><div class="stat-fill exp-fill" style="width: 0%"></div></div>
+      </div>
+      <div class="hud-item">Gold: <span id="gold">0</span> <span style="color: gold">💰</span></div>
+      <div class="hud-item">ATK: <span id="attack">10</span></div>
+      <div class="hud-item">DEF: <span id="defense">5</span></div>
+    </div>
     <div id="fade"></div>
   </div>
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const fade = document.getElementById("fade");
+    const EMPIRE_SAVE_KEY = 'empire_save_v2';
+
+    // HUD elements
+    const hudLevel = document.getElementById('level');
+    const hudHp = document.getElementById('hp');
+    const hudMaxHp = document.getElementById('maxHp');
+    const hudExp = document.getElementById('exp');
+    const hudExpNeeded = document.getElementById('expNeeded');
+    const hudGold = document.getElementById('gold');
+    const hudAttack = document.getElementById('attack');
+    const hudDefense = document.getElementById('defense');
+    const hpBar = document.querySelector('.hp-fill');
+    const expBar = document.querySelector('.exp-fill');
 
     let scene = "world";
     let transitioning = false;
     let currentRegion = "Siege Lands";
     let hoverArea = null, currentEnemy = null;
-    let flash = 0, shake = 0, goldAnim = [];
-
+    let flash = 0, shake = 0, goldAnim = [], textAnim = [];
+    let playerLevelUp = false;
 
     const player = {
       hp: 100,
       maxHp: 100,
       attack: 10,
       defense: 5,
-      gold: 0,
+      gold: 50,
       level: 1,
       exp: 0,
       expNeeded: 100,
-      equipment: {}
-    };
-    const EMPIRE_SAVE_KEY = 'empire_save_v1';
-
-    try {
-      const s = localStorage.getItem(EMPIRE_SAVE_KEY);
-      if (s) {
-        const p = JSON.parse(s);
-        Object.assign(player, p);
+      equipment: {
+        weapon: null,
+        armor: null
+      },
+      regionsCompleted: {
+        "Siege Lands": 0,
+        "North Island": 0,
+        "Volcanic Valley": 0
       }
-    } catch (e) { console.warn('empire load failed', e); }
+    };
 
+    function saveGame() {
+      try {
+        localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player));
+        showText("Game Saved!", 400, 50, "#0f0");
+      } catch (e) {
+        console.warn('Save failed', e);
+      }
+    }
+
+    function loadGame() {
+      try {
+        const saved = localStorage.getItem(EMPIRE_SAVE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          Object.assign(player, data);
+          updateHUD();
+        }
+      } catch (e) {
+        console.warn('Load failed', e);
+      }
+    }
+
+    function updateHUD() {
+      hudLevel.textContent = player.level;
+      hudHp.textContent = Math.floor(player.hp);
+      hudMaxHp.textContent = player.maxHp;
+      hudExp.textContent = player.exp;
+      hudExpNeeded.textContent = player.expNeeded;
+      hudGold.textContent = player.gold;
+      hudAttack.textContent = getPlayerTotalAttack();
+      hudDefense.textContent = getPlayerTotalDefense();
+      
+      hpBar.style.width = `${(player.hp / player.maxHp) * 100}%`;
+      expBar.style.width = `${(player.exp / player.expNeeded) * 100}%`;
+    }
+
+    function showText(text, x, y, color = "#fff") {
+      textAnim.push({
+        text,
+        x,
+        y,
+        color,
+        alpha: 1,
+        life: 120
+      });
+    }
 
     const regions = {
       "Siege Lands": [
-        { name: "Siege Camp", hp: 60, atk: 5, def: 2, loot: 10, req: {} },
-        { name: "Siege Camp 2", hp: 110, atk: 10, def: 5, loot: 20, req: { atk: 15, def: 8 } },
-        { name: "BOSS", hp: 180, atk: 16, def: 8, loot: 35, req: { atk: 25, def: 15 } },
+        { name: "Siege Camp", hp: 60, atk: 5, def: 2, loot: 20, exp: 30, req: {} },
+        { name: "Goblin Fort", hp: 110, atk: 10, def: 5, loot: 35, exp: 50, req: { atk: 15, def: 8 } },
+        { name: "Dragon Lord", hp: 180, atk: 16, def: 8, loot: 60, exp: 100, req: { atk: 25, def: 15 } },
       ],
       "North Island": [
-        { name: "Ice Kingdom", hp: 220, atk: 18, def: 12, loot: 45, req: { atk: 30, def: 18 } },
-        { name: "BOSS", hp: 300, atk: 22, def: 15, loot: 55, req: { atk: 35, def: 20 } },
+        { name: "Ice Kingdom", hp: 220, atk: 18, def: 12, loot: 80, exp: 150, req: { atk: 30, def: 18 } },
+        { name: "Frost Giant", hp: 300, atk: 22, def: 15, loot: 100, exp: 200, req: { atk: 35, def: 20 } },
       ],
       "Volcanic Valley": [
-        { name: "Ash Camp", hp: 360, atk: 25, def: 20, loot: 70, req: { atk: 45, def: 25 } },
-        { name: "BOSS", hp: 500, atk: 35, def: 20, loot: 90, req: { atk: 50, def: 28 } },
+        { name: "Ash Camp", hp: 360, atk: 25, def: 20, loot: 120, exp: 300, req: { atk: 45, def: 25 } },
+        { name: "Fire Demon", hp: 500, atk: 35, def: 20, loot: 200, exp: 500, req: { atk: 50, def: 28 } },
       ]
     };
-
 
     const regionUnlocks = {
       "North Island": { atk: 25, def: 15 },
       "Volcanic Valley": { atk: 40, def: 22 },
     };
 
-
     const shopItems = {
       weapons: [
-        { name: "+5 Attack", atk: 5, cost: 50 },
-        { name: "+11 Attack", atk: 11, cost: 90 },
-        { name: "+17 Attack", atk: 17, cost: 140 }
+        { name: "Iron Sword", atk: 5, cost: 50 },
+        { name: "Steel Blade", atk: 11, cost: 120 },
+        { name: "Dragon Slayer", atk: 17, cost: 250 },
+        { name: "Excalibur", atk: 25, cost: 500 }
       ],
       armor: [
-        { name: "+3 Defense", def: 3, cost: 50 },
-        { name: "+7 Defense", def: 7, cost: 100 },
-        { name: "+12 Defense", def: 12, cost: 150 }
+        { name: "Leather Armor", def: 3, cost: 50 },
+        { name: "Chainmail", def: 7, cost: 120 },
+        { name: "Plate Armor", def: 12, cost: 250 },
+        { name: "Dragon Scale", def: 20, cost: 500 }
       ],
+      potions: [
+        { name: "Healing Potion", heal: 50, cost: 30 },
+        { name: "Greater Healing", heal: 100, cost: 60 },
+        { name: "Elixir", heal: 200, cost: 120 }
+      ]
     };
 
+    const shopList = [
+      ...shopItems.weapons.map(i => ({ ...i, type: 'weapon' })),
+      ...shopItems.armor.map(i => ({ ...i, type: 'armor' })),
+      ...shopItems.potions.map(i => ({ ...i, type: 'potion' }))
+    ];
 
-    function getPlayerTotalAttack() { return player.attack + (player.equipment.weapon && player.equipment.weapon.atk ? player.equipment.weapon.atk : 0); }
-    function getPlayerTotalDefense() { return player.defense + (player.equipment.armor && player.equipment.armor.def ? player.equipment.armor.def : 0); }
+    function getPlayerTotalAttack() {
+      const base = player.attack;
+      const weaponBonus = player.equipment.weapon ? player.equipment.weapon.atk : 0;
+      return base + weaponBonus;
+    }
+
+    function getPlayerTotalDefense() {
+      const base = player.defense;
+      const armorBonus = player.equipment.armor ? player.equipment.armor.def : 0;
+      return base + armorBonus;
+    }
 
     function checkAreaUnlocked(area) {
       if (!area.req) return true;
       const { atk = 0, def = 0 } = area.req;
       return getPlayerTotalAttack() >= atk && getPlayerTotalDefense() >= def;
     }
+
     function checkRegionUnlocked(name) {
       if (name === "Siege Lands") return true;
       const req = regionUnlocks[name];
       return req && getPlayerTotalAttack() >= req.atk && getPlayerTotalDefense() >= req.def;
     }
 
-
     function drawWorld() {
-      ctx.clearRect(0, 0, 800, 600);
-      const grad = ctx.createLinearGradient(0, 0, 0, 600);
-      grad.addColorStop(0, "#111"); grad.addColorStop(1, "#000");
-      ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 600);
+      // Background
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, "#0a1429");
+      grad.addColorStop(1, "#000814");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Title
       ctx.fillStyle = "#fff";
-      ctx.font = "28px DM Sans";
-      ctx.fillText("World Map", 320, 60);
+      ctx.font = "bold 36px 'Jura'";
+      ctx.textAlign = "center";
+      ctx.fillText("EMPIRE CONQUEST", canvas.width / 2, 70);
 
+      // Draw regions
       const worldRegions = Object.keys(regions);
       worldRegions.forEach((r, i) => {
         const unlocked = checkRegionUnlocked(r);
-        const x = 150 + (i * 250), y = 250;
-        ctx.globalAlpha = unlocked ? 1 : 0.3;
-        ctx.fillStyle = (hoverArea === r) ? "#666" : "#333";
-        ctx.fillRect(x, y, 180, 80);
-        ctx.strokeStyle = unlocked ? "#ff0" : "#666";
-        ctx.strokeRect(x, y, 180, 80);
-        ctx.fillStyle = "#fff";
-        ctx.font = "18px DM Sans";
-        ctx.fillText(r, x + 20, y + 45);
-      });
-      ctx.globalAlpha = 1;
-    }
+        const completed = player.regionsCompleted[r] || 0;
+        const x = 150 + (i * 300);
+        const y = 300;
 
+        // Region card
+        ctx.globalAlpha = unlocked ? 1 : 0.3;
+        
+        // Background
+        const gradient = ctx.createLinearGradient(x, y, x, y + 120);
+        gradient.addColorStop(0, unlocked ? "#2a2a3a" : "#1a1a1a");
+        gradient.addColorStop(1, unlocked ? "#1a1a2a" : "#0a0a0a");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, y, 200, 120);
+        
+        // Border
+        ctx.strokeStyle = unlocked ? (completed === regions[r].length ? "#0f0" : "#ff0") : "#666";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, y, 200, 120);
+
+        // Region name
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 20px 'Jura'";
+        ctx.textAlign = "left";
+        ctx.fillText(r, x + 15, y + 35);
+
+        // Progress
+        ctx.font = "14px 'Jura'";
+        ctx.fillStyle = "#aaa";
+        ctx.fillText(`${completed}/${regions[r].length} completed`, x + 15, y + 60);
+
+        // Requirements if locked
+        if (!unlocked) {
+          ctx.fillStyle = "#f55";
+          ctx.font = "12px 'Jura'";
+          ctx.fillText(`Req: ATK ${regionUnlocks[r].atk}, DEF ${regionUnlocks[r].def}`, x + 15, y + 85);
+        }
+
+        // Hover effect
+        if (hoverArea === r) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.fillRect(x, y, 200, 120);
+        }
+      });
+
+      ctx.globalAlpha = 1;
+      ctx.textAlign = "left";
+    }
 
     function drawRegion() {
-      ctx.clearRect(0, 0, 800, 600);
-      const grd = ctx.createLinearGradient(0, 0, 0, 600);
-      grd.addColorStop(0, "#1a1a1a"); grd.addColorStop(1, "#090909");
-      ctx.fillStyle = grd; ctx.fillRect(0, 0, 800, 600);
-      ctx.fillStyle = "#fff";
-      ctx.font = "22px DM Sans";
-      ctx.fillText(currentRegion, 320, 50);
+      // Background
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "#1a1a2a");
+      gradient.addColorStop(1, "#0a0a1a");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Region title
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 28px 'Jura'";
+      ctx.textAlign = "center";
+      ctx.fillText(currentRegion, canvas.width / 2, 70);
+
+      // Draw areas
       const areas = regions[currentRegion];
-      areas.forEach((a, i) => {
-        const unlocked = checkAreaUnlocked(a);
-        const x = 150 + i * 200, y = 250;
+      areas.forEach((area, i) => {
+        const unlocked = checkAreaUnlocked(area);
+        const x = 100 + (i % 3) * 250;
+        const y = 150 + Math.floor(i / 3) * 180;
+
+        // Area card
         ctx.globalAlpha = unlocked ? 1 : 0.4;
-        const hover = (hoverArea === a);
-        const scale = hover ? 1.1 : 1;
-        const w = 150 * scale, h = 80 * scale;
-        const gx = x - (w - 150) / 2, gy = y - (h - 80) / 2;
-        ctx.fillStyle = (hover) ? "#555" : "#333";
-        ctx.fillRect(gx, gy, w, h);
-        ctx.strokeStyle = hover ? "#ff0" : "#666";
-        ctx.strokeRect(gx, gy, w, h);
-        ctx.fillStyle = "#fff";
-        ctx.font = "16px DM Sans";
-        ctx.fillText(a.name, gx + 10, gy + 45);
+        
+        // Background
+        const areaGradient = ctx.createLinearGradient(x, y, x, y + 100);
+        areaGradient.addColorStop(0, unlocked ? "#333344" : "#222233");
+        areaGradient.addColorStop(1, unlocked ? "#222233" : "#111122");
+        ctx.fillStyle = areaGradient;
+        ctx.fillRect(x, y, 200, 100);
+        
+        // Border
+        ctx.strokeStyle = hoverArea === area ? "#ff0" : (unlocked ? "#666" : "#444");
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, 200, 100);
+
+        // Enemy name
+        ctx.fillStyle = unlocked ? "#fff" : "#888";
+        ctx.font = "bold 18px 'Jura'";
+        ctx.textAlign = "left";
+        ctx.fillText(area.name, x + 10, y + 30);
+
+        // Stats
+        ctx.font = "14px 'Jura'";
+        ctx.fillText(`HP: ${area.hp}`, x + 10, y + 55);
+        ctx.fillText(`ATK: ${area.atk}`, x + 10, y + 75);
+        ctx.fillText(`DEF: ${area.def}`, x + 100, y + 55);
+        ctx.fillText(`Loot: ${area.loot}💰`, x + 100, y + 75);
+
+        // Hover effect
+        if (hoverArea === area && unlocked) {
+          ctx.fillStyle = "rgba(255, 255, 0, 0.1)";
+          ctx.fillRect(x, y, 200, 100);
+        }
       });
+
       ctx.globalAlpha = 1;
 
-
-      drawButton(30, 30, 100, 40, "Back");
-      drawButton(670, 30, 100, 40, "Shop");
+      // Buttons
+      drawButton(30, 30, 100, 40, "World Map", "#444");
+      drawButton(770, 30, 100, 40, "Shop", "#228822");
+      drawButton(770, 80, 100, 40, "Heal", "#882222");
+      drawButton(770, 130, 100, 40, "Save", "#224488");
     }
 
-
     function drawBattle() {
-      ctx.clearRect(0, 0, 800, 600);
-      const bg = ctx.createLinearGradient(0, 0, 0, 600);
-      bg.addColorStop(0, "#3a0000"); bg.addColorStop(1, "#1a0000");
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, 800, 600);
+      // Animated background
+      const time = Date.now() * 0.001;
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, `hsl(${time * 20 % 360}, 70%, 10%)`);
+      gradient.addColorStop(1, `hsl(${(time * 20 + 30) % 360}, 70%, 5%)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Enemy
       ctx.save();
-      if (shake) ctx.translate(Math.random() * shake - shake / 2, Math.random() * shake - shake / 2);
+      if (shake) {
+        ctx.translate(Math.random() * shake - shake / 2, Math.random() * shake - shake / 2);
+      }
+
+      // Enemy stats
       ctx.fillStyle = "#fff";
-      ctx.font = "22px DM Sans";
-      ctx.fillText(currentEnemy.name, 520, 60);
-      ctx.fillStyle = "#900";
-      ctx.fillRect(520, 80, 200 * (currentEnemy.hp / currentEnemy.maxHp), 20);
-      ctx.strokeStyle = "#fff"; ctx.strokeRect(520, 80, 200, 20);
+      ctx.font = "bold 24px 'Jura'";
+      ctx.textAlign = "center";
+      ctx.fillText(currentEnemy.name, canvas.width / 2, 50);
 
-      ctx.fillStyle = "#0f0";
-      ctx.fillRect(80, 80, 200 * (player.hp / player.maxHp), 20);
-      ctx.strokeStyle = "#fff"; ctx.strokeRect(80, 80, 200, 20);
-      ctx.fillStyle = "#fff"; ctx.fillText("You", 150, 60);
-
-
-      ctx.fillStyle = "#55f";
-      ctx.fillRect(80, 110, 200 * (player.exp / player.expNeeded), 10);
-      ctx.strokeStyle = "#88f"; ctx.strokeRect(80, 110, 200, 10);
+      // Enemy HP bar
+      const enemyHpPercent = currentEnemy.hp / currentEnemy.maxHp;
+      ctx.fillStyle = "#333";
+      ctx.fillRect(250, 70, 400, 25);
+      const enemyHpGradient = ctx.createLinearGradient(250, 70, 650, 70);
+      enemyHpGradient.addColorStop(0, enemyHpPercent > 0.5 ? "#f00" : "#f80");
+      enemyHpGradient.addColorStop(1, enemyHpPercent > 0.5 ? "#f44" : "#fa4");
+      ctx.fillStyle = enemyHpGradient;
+      ctx.fillRect(250, 70, 400 * enemyHpPercent, 25);
+      ctx.strokeStyle = "#fff";
+      ctx.strokeRect(250, 70, 400, 25);
       ctx.fillStyle = "#fff";
-      ctx.font = "14px DM Sans";
-      ctx.fillText(`Level ${player.level}`, 80, 140);
+      ctx.font = "16px 'Jura'";
+      ctx.fillText(`${Math.floor(currentEnemy.hp)}/${currentEnemy.maxHp}`, canvas.width / 2, 65);
 
-      drawButton(350, 500, 120, 45, "Attack");
+      // Player stats
+      const playerHpPercent = player.hp / player.maxHp;
+      ctx.fillStyle = "#333";
+      ctx.fillRect(250, 120, 400, 20);
+      const playerHpGradient = ctx.createLinearGradient(250, 120, 650, 120);
+      playerHpGradient.addColorStop(0, playerHpPercent > 0.5 ? "#0f0" : "#fa0");
+      playerHpGradient.addColorStop(1, playerHpPercent > 0.5 ? "#4f4" : "#f84");
+      ctx.fillStyle = playerHpGradient;
+      ctx.fillRect(250, 120, 400 * playerHpPercent, 20);
+      ctx.strokeStyle = "#fff";
+      ctx.strokeRect(250, 120, 400, 20);
+      ctx.fillStyle = "#fff";
+      ctx.font = "16px 'Jura'";
+      ctx.fillText(`HP: ${Math.floor(player.hp)}/${player.maxHp}`, canvas.width / 2, 115);
 
-      if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash / 10})`; ctx.fillRect(0, 0, 800, 600); flash--; }
+      // Battle options
+      drawButton(350, 500, 200, 50, "ATTACK", "#aa3333");
+      drawButton(350, 560, 200, 50, "FLEE", "#333366");
+
+      // Flash effect
+      if (flash > 0) {
+        ctx.fillStyle = `rgba(255,255,255,${flash / 15})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        flash--;
+      }
+
       ctx.restore();
 
+      // Animations
       goldAnim.forEach(g => {
         ctx.globalAlpha = g.alpha;
-        ctx.fillStyle = "gold"; ctx.font = "18px DM Sans";
-        ctx.fillText(`+${g.amount}`, g.x, g.y);
-        g.y -= 1; g.alpha -= 0.02;
+        ctx.fillStyle = "gold";
+        ctx.font = "bold 20px 'Jura'";
+        ctx.textAlign = "center";
+        ctx.fillText(`+${g.amount}💰`, g.x, g.y);
+        g.y -= 2;
+        g.alpha -= 0.015;
       });
+
+      textAnim.forEach(t => {
+        ctx.globalAlpha = t.alpha;
+        ctx.fillStyle = t.color;
+        ctx.font = "bold 20px 'Jura'";
+        ctx.textAlign = "center";
+        ctx.fillText(t.text, t.x, t.y);
+        t.y -= 1;
+        t.alpha -= 0.008;
+        t.life--;
+      });
+
       ctx.globalAlpha = 1;
+      textAnim = textAnim.filter(t => t.life > 0);
       goldAnim = goldAnim.filter(g => g.alpha > 0);
     }
 
-
-    function drawButton(x, y, w, h, label) {
-      ctx.fillStyle = "#333"; ctx.fillRect(x, y, w, h);
-      ctx.strokeStyle = "#777"; ctx.strokeRect(x, y, w, h);
-      ctx.fillStyle = "#fff"; ctx.font = "18px DM Sans";
-      ctx.fillText(label, x + 15, y + 26);
-    }
-
-
-    function fadeTo(target) {
-      transitioning = true; fade.style.opacity = 1;
-      setTimeout(() => { scene = target; fade.style.opacity = 0; transitioning = false; }, 600);
-    }
-
-
-    const shopList = [
-      ...shopItems.weapons.map(i => ({ ...i, type: 'weapon' })),
-      ...shopItems.armor.map(i => ({ ...i, type: 'armor' }))
-    ];
-
-
     function drawShop() {
-      ctx.clearRect(0, 0, 800, 600);
-      const bg = ctx.createLinearGradient(0, 0, 0, 600);
-      bg.addColorStop(0, "#1a1a2a"); bg.addColorStop(1, "#0a0a1a");
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, 800, 600);
+      // Background
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "#1a1a2a");
+      gradient.addColorStop(1, "#0a0a1a");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Title
       ctx.fillStyle = "#fff";
-      ctx.font = "24px DM Sans";
-      ctx.fillText("Shop", 360, 50);
-      ctx.fillText(`${player.gold}`, 650, 50);
+      ctx.font = "bold 32px 'Jura'";
+      ctx.textAlign = "center";
+      ctx.fillText("SHOP", canvas.width / 2, 60);
+      ctx.font = "24px 'Jura'";
+      ctx.fillStyle = "gold";
+      ctx.fillText(`${player.gold}💰`, canvas.width - 100, 60);
 
-
+      // Shop items
       let y = 120;
       shopList.forEach((item, i) => {
-        const x = 150;
-        ctx.fillStyle = player.gold >= item.cost ? "#444" : "#333";
-        ctx.fillRect(x, y, 500, 60);
-        ctx.strokeStyle = "#666";
-        ctx.strokeRect(x, y, 500, 60);
+        const x = 50 + (i % 2) * 400;
+        if (i % 2 === 0 && i > 0) y += 100;
 
-        ctx.fillStyle = "#fff";
-        ctx.font = "18px DM Sans";
-        ctx.fillText(item.name, x + 20, y + 35);
-        ctx.fillText(`Cost: ${item.cost}`, x + 300, y + 35);
-        ctx.fillText(item.atk ? `ATK +${item.atk}` : `DEF +${item.def}`, x + 420, y + 35);
-        y += 70;
+        const canAfford = player.gold >= item.cost;
+        const isEquipped = (item.type === 'weapon' && player.equipment.weapon === item) ||
+                          (item.type === 'armor' && player.equipment.armor === item);
+
+        // Item card
+        ctx.globalAlpha = canAfford ? 1 : 0.4;
+        
+        const itemGradient = ctx.createLinearGradient(x, y, x, y + 80);
+        itemGradient.addColorStop(0, isEquipped ? "#2a4a2a" : (canAfford ? "#2a2a4a" : "#1a1a3a"));
+        itemGradient.addColorStop(1, isEquipped ? "#1a3a1a" : (canAfford ? "#1a1a3a" : "#0a0a2a"));
+        ctx.fillStyle = itemGradient;
+        ctx.fillRect(x, y, 350, 80);
+        
+        ctx.strokeStyle = isEquipped ? "#0f0" : (canAfford ? "#666" : "#444");
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, 350, 80);
+
+        // Item info
+        ctx.fillStyle = isEquipped ? "#0f0" : (canAfford ? "#fff" : "#888");
+        ctx.font = "bold 18px 'Jura'";
+        ctx.textAlign = "left";
+        ctx.fillText(item.name, x + 10, y + 25);
+
+        ctx.font = "16px 'Jura'";
+        if (item.atk) ctx.fillText(`ATK +${item.atk}`, x + 10, y + 50);
+        if (item.def) ctx.fillText(`DEF +${item.def}`, x + 10, y + 50);
+        if (item.heal) ctx.fillText(`Heal ${item.heal} HP`, x + 10, y + 50);
+        
+        ctx.fillStyle = "gold";
+        ctx.fillText(`${item.cost}💰`, x + 250, y + 50);
+
+        // Hover effect
+        if (hoverArea === i && canAfford && !isEquipped) {
+          ctx.fillStyle = "rgba(255, 255, 0, 0.1)";
+          ctx.fillRect(x, y, 350, 80);
+        }
       });
 
-      ctx.fillStyle = "#fff";
-      ctx.font = "18px DM Sans";
-      drawButton(30, 30, 100, 40, "Back");
+      ctx.globalAlpha = 1;
+
+      // Back button
+      drawButton(30, 30, 100, 40, "Back", "#444");
     }
 
+    function drawButton(x, y, w, h, text, bgColor = "#333") {
+      // Button background
+      const gradient = ctx.createLinearGradient(x, y, x, y + h);
+      gradient.addColorStop(0, bgColor);
+      gradient.addColorStop(1, darkenColor(bgColor, 40));
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, y, w, h);
+      
+      // Button border
+      ctx.strokeStyle = "#666";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+      
+      // Button text
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 18px 'Jura'";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x + w / 2, y + h / 2);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+    }
+
+    function darkenColor(color, percent) {
+      const num = parseInt(color.slice(1), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = (num >> 16) - amt;
+      const G = (num >> 8 & 0x00FF) - amt;
+      const B = (num & 0x0000FF) - amt;
+      return "#" + (0x1000000 + (R < 0 ? 0 : R > 255 ? 255 : R) * 0x10000 +
+        (G < 0 ? 0 : G > 255 ? 255 : G) * 0x100 +
+        (B < 0 ? 0 : B > 255 ? 255 : B)).toString(16).slice(1);
+    }
+
+    function fadeTo(target) {
+      transitioning = true;
+      fade.style.opacity = 1;
+      setTimeout(() => {
+        scene = target;
+        fade.style.opacity = 0;
+        transitioning = false;
+      }, 400);
+    }
 
     function gainExp(amount) {
       player.exp += amount;
+      showText(`+${amount} EXP`, 450, 200, "#55f");
+      
       while (player.exp >= player.expNeeded) {
         player.level++;
         player.exp -= player.expNeeded;
         player.expNeeded = Math.floor(player.expNeeded * 1.5);
-        player.maxHp += 20;
+        player.maxHp += 30;
         player.hp = player.maxHp;
-        player.attack += 2;
-        player.defense += 1;
-        alert(`Level Up! Now level ${player.level}`);
+        player.attack += 5;
+        player.defense += 3;
+        playerLevelUp = true;
+        
+        showText(`LEVEL UP!`, 450, 150, "#0f0");
+        showText(`New Level: ${player.level}`, 450, 180, "#ff0");
       }
+      updateHUD();
     }
-
 
     function battleTurn() {
-      const dmgToEnemy = Math.max(1, player.attack + player.equipment.weapon.atk - currentEnemy.def);
+      // Player attacks
+      const playerAttack = getPlayerTotalAttack();
+      const enemyDefense = currentEnemy.def;
+      const dmgToEnemy = Math.max(1, Math.floor(playerAttack * (0.8 + Math.random() * 0.4)) - enemyDefense);
+      
       currentEnemy.hp = Math.max(0, currentEnemy.hp - dmgToEnemy);
-      flash = 5; shake = 4;
-      if (currentEnemy.hp <= 0) {
-        goldAnim.push({ x: 400, y: 300, amount: currentEnemy.loot, alpha: 1 });
-        player.gold += currentEnemy.loot;
+      showText(`You hit for ${dmgToEnemy} damage!`, 450, 300, "#f55");
+      flash = 10;
+      shake = 6;
 
-        try { localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player)); } catch (e) { }
-        gainExp(currentEnemy.loot * 2);
-        player.hp = player.maxHp;
-        setTimeout(() => fadeTo("region"), 700);
+      if (currentEnemy.hp <= 0) {
+        // Victory
+        goldAnim.push({ x: 450, y: 350, amount: currentEnemy.loot, alpha: 1 });
+        player.gold += currentEnemy.loot;
+        
+        // Mark area as completed
+        const areaIndex = regions[currentRegion].findIndex(a => a.name === currentEnemy.name);
+        if (areaIndex >= 0) {
+          player.regionsCompleted[currentRegion] = Math.max(
+            player.regionsCompleted[currentRegion] || 0,
+            areaIndex + 1
+          );
+        }
+        
+        gainExp(currentEnemy.exp);
+        saveGame();
+        
+        setTimeout(() => {
+          if (playerLevelUp) {
+            alert(`Level Up! You are now level ${player.level}!\n\nStats Increased:\nMax HP: +30\nATK: +5\nDEF: +3`);
+            playerLevelUp = false;
+          }
+          fadeTo("region");
+        }, 1500);
         return;
       }
+
+      // Enemy attacks
       setTimeout(() => {
-        const dmgToPlayer = Math.max(1, currentEnemy.atk - player.defense);
+        const enemyAttack = currentEnemy.atk;
+        const playerDefense = getPlayerTotalDefense();
+        const dmgToPlayer = Math.max(1, Math.floor(enemyAttack * (0.8 + Math.random() * 0.4)) - playerDefense);
+        
         player.hp = Math.max(0, player.hp - dmgToPlayer);
-        flash = 5; shake = 4;
+        showText(`${currentEnemy.name} hits for ${dmgToPlayer} damage!`, 450, 320, "#55f");
+        flash = 10;
+        shake = 6;
+        updateHUD();
+
         if (player.hp <= 0) {
-          alert("Defeated! Resting...");
-          player.hp = player.maxHp;
-          fadeTo("region");
+          setTimeout(() => {
+            alert("You have been defeated! You lose 10% of your gold.");
+            player.gold = Math.max(0, Math.floor(player.gold * 0.9));
+            player.hp = player.maxHp;
+            updateHUD();
+            fadeTo("region");
+          }, 800);
         }
-      }, 400);
+      }, 600);
     }
 
+    function healPlayer(amount) {
+      if (player.hp < player.maxHp) {
+        player.hp = Math.min(player.maxHp, player.hp + amount);
+        showText(`+${amount} HP`, 400, 50, "#0f0");
+        updateHUD();
+        return true;
+      }
+      return false;
+    }
 
+    // Event Listeners
     canvas.addEventListener("mousemove", e => {
       if (transitioning) return;
       const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
       hoverArea = null;
 
       if (scene === "world") {
-        for (let r of Object.keys(regions)) {
-          const i = Object.keys(regions).indexOf(r);
-          const x = 150 + (i * 250), y = 250;
-          if (mx > x && mx < x + 180 && my > y && my < y + 80 && checkRegionUnlocked(r)) hoverArea = r;
+        const worldRegions = Object.keys(regions);
+        worldRegions.forEach((r, i) => {
+          const x = 150 + (i * 300);
+          const y = 300;
+          if (mx > x && mx < x + 200 && my > y && my < y + 120 && checkRegionUnlocked(r)) {
+            canvas.style.cursor = "pointer";
+            hoverArea = r;
+          }
+        });
+      } else if (scene === "region") {
+        const areas = regions[currentRegion];
+        areas.forEach((area, i) => {
+          const x = 100 + (i % 3) * 250;
+          const y = 150 + Math.floor(i / 3) * 180;
+          if (mx > x && mx < x + 200 && my > y && my < y + 100) {
+            if (checkAreaUnlocked(area)) {
+              canvas.style.cursor = "pointer";
+              hoverArea = area;
+            }
+          }
+        });
+
+        // Check buttons
+        if ((mx > 30 && mx < 130 && my > 30 && my < 70) ||
+            (mx > 770 && mx < 870 && my > 30 && my < 70) ||
+            (mx > 770 && mx < 870 && my > 80 && my < 120) ||
+            (mx > 770 && mx < 870 && my > 130 && my < 170)) {
+          canvas.style.cursor = "pointer";
+        }
+      } else if (scene === "shop") {
+        shopList.forEach((item, i) => {
+          const x = 50 + (i % 2) * 400;
+          const y = 120 + Math.floor(i / 2) * 100;
+          if (mx > x && mx < x + 350 && my > y && my < y + 80) {
+            canvas.style.cursor = player.gold >= item.cost ? "pointer" : "not-allowed";
+            hoverArea = i;
+          }
+        });
+        if (mx > 30 && mx < 130 && my > 30 && my < 70) {
+          canvas.style.cursor = "pointer";
+        }
+      } else if (scene === "battle") {
+        if ((mx > 350 && mx < 550 && my > 500 && my < 550) ||
+            (mx > 350 && mx < 550 && my > 560 && my < 610)) {
+          canvas.style.cursor = "pointer";
         }
       }
-      else if (scene === "region") {
-        const areas = regions[currentRegion];
-        for (let a of areas) {
-          const i = areas.indexOf(a);
-          const x = 150 + i * 200, y = 250;
-          if (mx > x && mx < x + 150 && my > y && my < y + 80 && checkAreaUnlocked(a)) hoverArea = a;
-        }
+
+      if (!hoverArea && !(scene === "battle" && mx > 350 && mx < 550 && (my > 500 && my < 610))) {
+        canvas.style.cursor = "default";
       }
     });
 
     canvas.addEventListener("click", e => {
       if (transitioning) return;
       const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
 
       if (scene === "world" && hoverArea) {
         currentRegion = hoverArea;
         fadeTo("region");
-      }
-      else if (scene === "region") {
-        const areas = regions[currentRegion];
-        if (mx > 30 && mx < 130 && my > 30 && my < 70) { fadeTo("world"); return; }
-        if (mx > 670 && mx < 770 && my > 30 && my < 70) { fadeTo("shop"); return; }
+      } else if (scene === "region") {
+        // Back to world
+        if (mx > 30 && mx < 130 && my > 30 && my < 70) {
+          fadeTo("world");
+          return;
+        }
+        // Shop
+        if (mx > 770 && mx < 870 && my > 30 && my < 70) {
+          fadeTo("shop");
+          return;
+        }
+        // Heal
+        if (mx > 770 && mx < 870 && my > 80 && my < 120) {
+          if (healPlayer(50)) {
+            showText("Healed!", 400, 100, "#0f0");
+          } else {
+            showText("Already at full health!", 400, 100, "#ff0");
+          }
+          return;
+        }
+        // Save
+        if (mx > 770 && mx < 870 && my > 130 && my < 170) {
+          saveGame();
+          return;
+        }
+        // Enter battle
         if (hoverArea) {
           currentEnemy = { ...hoverArea, maxHp: hoverArea.hp };
           fadeTo("battle");
         }
-      }
-      else if (scene === "battle") {
-        if (mx > 350 && mx < 470 && my > 500 && my < 545) battleTurn();
-      }
-      else if (scene === "shop") {
-        if (mx > 30 && mx < 130 && my > 30 && my < 70) { fadeTo("region"); return; }
-        let y = 120;
-        shopList.forEach((item, i) => {
-          if (mx > 150 && mx < 650 && my > y && my < y + 60) {
-            if (player.gold >= item.cost) {
-              player.gold -= item.cost;
-              if (item.type === 'weapon') player.equipment.weapon = item;
-              else player.equipment.armor = item;
-
-              try { localStorage.setItem(EMPIRE_SAVE_KEY, JSON.stringify(player)); } catch (e) { }
-            }
+      } else if (scene === "battle") {
+        // Attack
+        if (mx > 350 && mx < 550 && my > 500 && my < 550) {
+          battleTurn();
+        }
+        // Flee
+        if (mx > 350 && mx < 550 && my > 560 && my < 610) {
+          if (Math.random() < 0.7) {
+            showText("Escaped safely!", 450, 400, "#0f0");
+            setTimeout(() => fadeTo("region"), 1000);
+          } else {
+            showText("Failed to escape!", 450, 400, "#f00");
+            const dmg = Math.floor(player.maxHp * 0.1);
+            player.hp = Math.max(1, player.hp - dmg);
+            showText(`Took ${dmg} damage!`, 450, 420, "#f55");
+            updateHUD();
           }
-          y += 70;
-        });
+        }
+      } else if (scene === "shop") {
+        // Back to region
+        if (mx > 30 && mx < 130 && my > 30 && my < 70) {
+          fadeTo("region");
+          return;
+        }
+        // Buy items
+        if (hoverArea !== null) {
+          const item = shopList[hoverArea];
+          if (player.gold >= item.cost) {
+            if (item.type === 'potion') {
+              if (healPlayer(item.heal)) {
+                player.gold -= item.cost;
+                showText(`Used ${item.name}!`, 400, 50, "#0f0");
+              } else {
+                showText("Already at full health!", 400, 50, "#ff0");
+              }
+            } else {
+              player.gold -= item.cost;
+              if (item.type === 'weapon') {
+                player.equipment.weapon = item;
+                showText(`Equipped ${item.name}!`, 400, 50, "#0f0");
+              } else if (item.type === 'armor') {
+                player.equipment.armor = item;
+                showText(`Equipped ${item.name}!`, 400, 50, "#0f0");
+              }
+            }
+            updateHUD();
+            saveGame();
+          } else {
+            showText("Not enough gold!", 400, 50, "#f00");
+          }
+        }
       }
     });
 
-
+    // Game loop
     function loop() {
       if (scene === "world") drawWorld();
       else if (scene === "region") drawRegion();
@@ -406,8 +852,11 @@
       else if (scene === "shop") drawShop();
       requestAnimationFrame(loop);
     }
+
+    // Initialize
+    loadGame();
+    updateHUD();
     loop();
   </script>
 </body>
-
 </html>
