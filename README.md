@@ -22,7 +22,6 @@
 
 ## 📅 Updates Log
 
-- **Version 1.18.24** — February 16, 2026 
 - **Version 1.18.22** — February 2, 2026
 - **Version 1.17.20** — January 15, 2026
 - **Version 1.16.19** — January 1, 2026
