@@ -24,22 +24,21 @@
 			--border-radius: 12px;
 			--transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		}
-
-		/* Make the main title more restrained (less shimmer) */
 		.main-title {
 			font-size: clamp(2.2rem, 4.2vw, 3.2rem);
 			font-weight: 500;
 			letter-spacing: 0.06em;
 			text-align: center;
-			background: linear-gradient(120deg, #00f0ff, #7b5cff, #ff3cac);
+			background: linear-gradient(135deg, #0f0f0f, #4a9b6d, #0f0f0fa8);
+
+
 			background-clip: text;
 			-webkit-background-clip: text;
 			color: transparent;
 			text-shadow: none;
 			animation: none;
 		}
-
-		.snow {
+		 .petals {
 			position: fixed;
 			top: 0;
 			left: 0;
@@ -47,60 +46,83 @@
 			height: 100%;
 			pointer-events: none;
 			z-index: 9999;
+
 			background-image:
-				radial-gradient(2px 2px at 20px 30px, white 98%, transparent),
-				radial-gradient(3px 3px at 100px 150px, white 98%, transparent),
-				radial-gradient(2px 2px at 200px 80px, white 98%, transparent),
-				radial-gradient(1.5px 1.5px at 300px 200px, white 98%, transparent),
-				radial-gradient(2.5px 2.5px at 400px 100px, white 98%, transparent),
-				radial-gradient(1.8px 1.8px at 500px 250px, white 98%, transparent);
+				radial-gradient(6px 4px at 20px 30px, #ffc0cb 98%, transparent),
+				radial-gradient(5px 3px at 100px 150px, #ffb7c5 98%, transparent),
+				radial-gradient(6px 4px at 200px 80px, #ffd1dc 98%, transparent),
+				radial-gradient(5px 3px at 300px 200px, #ffe4e9 98%, transparent),
+				radial-gradient(6px 4px at 400px 100px, #ffcad4 98%, transparent),
+				radial-gradient(5px 3px at 500px 250px, #ffc1cc 98%, transparent);
+
+			background-repeat: repeat;
+			background-size: 700px 700px;
+
+			animation: petalsFall 12s linear infinite;
+			opacity: 0.9;
+			filter: drop-shadow(0 0 4px rgba(255,182,193,0.8));
+		}
+		@keyframes petalsFall {
+			0% {
+				background-position: 0 -700px;
+			}
+			50% {
+				background-position: 40px 0;
+			}
+			100% {
+				background-position: 0 700px;
+			}
+		}
+		.petals::after {
+			content: "";
+			position: absolute;
+			width: 100%;
+			height: 100%;
+
+			background-image:
+				radial-gradient(4px 3px at 50px 100px, #ffe4ec 98%, transparent),
+				radial-gradient(3px 2px at 250px 300px, #ffd6e0 98%, transparent),
+				radial-gradient(4px 3px at 450px 200px, #ffc2d1 98%, transparent);
+
 			background-repeat: repeat;
 			background-size: 600px 600px;
-			animation: snowFall 6s linear infinite;
-			opacity: 0.8;
-			filter: drop-shadow(0 0 6px white);
+			animation: petalsFallReverse 18s linear infinite;
+			opacity: 0.6;
 		}
-
-		@keyframes snowFall {
-			from {
+		@keyframes petalsFallReverse {
+			0% {
 				background-position: 0 -600px;
 			}
-
-			to {
-				background-position: 0 600px;
+			100% {
+				background-position: -60px 600px;
 			}
 		}
-
-
 		* {
 			margin: 0;
 			padding: 0;
 			box-sizing: border-box;
 		}
-
 		html,
 		body {
 			height: 100%;
 		}
-
 		body {
-			font-family: 'Jura', sans-serif;
+			font-family: 'DM Sans', sans-serif;
 			line-height: 1.6;
 			color: #000000;
 			background: linear-gradient(-45deg,
-					#f7fcff,
-					#d9f1ff,
-					#b7e3ff,
-					#a3d6ff,
-					#eaf7ff);
+			#e6fff2,
+			#ccf5e1,
+			#b3ecd2,
+			#d7f9ff,
+			#f0ffff);
+
 			background-size: 600% 600%;
 			animation: gradientBG 26s ease infinite;
 			display: flex;
 			flex-direction: column;
 			min-height: 100vh;
 		}
-
-
 		@keyframes gradientBG {
 			0% {
 				background-position: 0% 50%;
@@ -122,29 +144,25 @@
 				background-position: 0% 50%;
 			}
 		}
-
-		/* Slightly wider content area for row layout */
 		.container {
 			max-width: 1100px;
 			width: 100%;
 			margin: 0 auto;
 			padding: 0 20px;
 		}
-
 		header {
-			/* tighten header for a more official feel */
 			padding: 40px 0;
 			margin-bottom: 28px;
 			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 			text-align: center;
 			color: #08324f;
-			background: linear-gradient(135deg, #dff6ff, #a8dcff, #6bbcff);
+			background: linear-gradient(135deg, #dfffe4, #a8ffc1, #6bdc8a);
+
 			box-shadow: 0 12px 40px rgba(160, 220, 255, 0.45);
 			backdrop-filter: blur(6px);
 			border-bottom: 2px solid rgba(255, 255, 255, 0.5);
 			text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
 		}
-
 		.description {
 			color: rgb(3, 0, 0);
 			margin: 30px 0 15px 0;
@@ -152,22 +170,18 @@
 			border-radius: var(--border-radius);
 			background: rgba(255, 255, 255, 0.15);
 			backdrop-filter: blur(10px);
-			font-family: 'Jura', sans-serif;
+			font-family: 'DM Sans', sans-serif;
 			font-size: 0.95rem;
-			font-weight: 800;
+			font-weight: 400;
 			letter-spacing: 0.5px;
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 		}
-
-
 		header h1 {
 			font-size: 2.5rem;
 			font-weight: 700;
 			margin-bottom: 15px;
 			letter-spacing: -0.5px;
 		}
-
-		/* Convert links section to a responsive card grid */
 		.links-section {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -176,18 +190,14 @@
 			opacity: 0;
 			animation: fadeInUp 0.6s forwards;
 		}
-
-		/* Make category headers and description span full width */
 		.links-section .category-header,
 		.links-section .description {
 			grid-column: 1 / -1;
 			margin-top: 6px;
 			margin-bottom: 4px;
 		}
-
-		/* Tidy up category header look */
 		.category-header {
-			font-family: 'Jura', sans-serif;
+			font-family: 'DM Sans', sans-serif;
 			font-size: 1.05rem;
 			font-weight: 800;
 			letter-spacing: 0.08em;
@@ -197,13 +207,12 @@
 			color: var(--dark);
 			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 		}
-
 		.content-link {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
 			flex-direction: row;
-			font-family: "Jura", sans-serif;
+			font-family: "DM Sans", sans-serif;
 			gap: 10px;
 			font-size: 10px;
 			background: linear-gradient(180deg, #ffffff, #fbfdff);
@@ -212,39 +221,33 @@
 			border-radius: 12px;
 			color: var(--dark);
 			text-decoration: none;
-			font-weight: 800;
+			font-weight: 400;
 			box-shadow: 0 6px 18px rgba(13, 38, 63, 0.06);
 			transition: transform 0.18s var(--transition), box-shadow 0.18s var(--transition);
 			overflow: hidden;
 		}
-
 		.content-link .normal-text,
 		.content-link .hover-text {
 			display: inline-block;
 
 		}
-
 		.content-link .hover-text {
 			display: none;
 			opacity: 0.95;
 			color: var(--primary);
 			font-weight: 700;
 		}
-
 		.content-link:hover {
 			transform: translateY(-6px);
 			box-shadow: 0 14px 40px rgba(30, 136, 255, 0.12);
 			background: linear-gradient(180deg, #ffffff, #f5f9ff);
 		}
-
 		.content-link:hover .normal-text {
 			display: none;
 		}
-
 		.content-link:hover .hover-text {
 			display: inline-block;
 		}
-
 		.content-link.disabled {
 			pointer-events: none;
 			opacity: 0.75;
@@ -252,7 +255,6 @@
 			box-shadow: none;
 			background: linear-gradient(180deg, #fbfbfb, #f7f7f7);
 		}
-
 		@keyframes fadeInUp {
 			to {
 				opacity: 1;
@@ -264,7 +266,6 @@
 				transform: translateY(20px);
 			}
 		}
-
 		.category-header {
 			color: rgb(3, 0, 0);
 			margin: 30px 0 15px 0;
@@ -272,13 +273,12 @@
 			border-radius: var(--border-radius);
 			background: rgba(255, 255, 255, 0.15);
 			backdrop-filter: blur(10px);
-			font-family: 'Jura', sans-serif;
+			font-family: 'DM Sans', sans-serif;
 			font-size: 1.4rem;
 			font-weight: lighter;
 			letter-spacing: 0.5px;
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 		}
-
 		footer {
 			background: var(--dark);
 			color: white;
@@ -286,13 +286,11 @@
 			text-align: center;
 			margin-top: 60px;
 		}
-
 		.copyright {
 			margin-top: 15px;
 			opacity: 0.85;
 			font-size: 0.9rem;
 		}
-
 		.coming-soon-badge {
 			display: inline-flex;
 			align-items: center;
@@ -306,7 +304,6 @@
 			background: #ffefef;
 			border: 1px solid #fd9393;
 		}
-
 		.popular-badge {
 			display: inline-flex;
 			align-items: center;
@@ -320,7 +317,6 @@
 			background: #fffaeb;
 			border: 1px solid #fcd34d;
 		}
-
 		.revamped-badge {
 			display: inline-flex;
 			align-items: center;
@@ -334,8 +330,6 @@
 			background: #EFF6FF;
 			border: 1px solid #93C5FD;
 		}
-
-
 		.unavailable-badge {
 			display: inline-flex;
 			align-items: center;
@@ -349,7 +343,6 @@
 			background: #f1b5bd;
 			border: 1px solid #C7D2FE;
 		}
-
 		.beta-badge {
 			display: inline-flex;
 			align-items: center;
@@ -363,7 +356,6 @@
 			background: #EEF2FF;
 			border: 1px solid #C7D2FE;
 		}
-
 		.new-badge {
 			display: inline-flex;
 			align-items: center;
@@ -377,11 +369,6 @@
 			background: #ECFDF5;
 			border: 1px solid #6EE7B7;
 		}
-
-		.small-text {
-			font-size: 2px !important;
-		}
-
 		@media (max-width: 768px) {
 			header h1 {
 				font-size: 1.8rem;
@@ -403,10 +390,11 @@
 </head>
 
 <body>
-	<div class="snow"></div>
+	<div class="petals"></div>
 	<header>
 		<div class="container">
-			<h1 style="font-family: 'Jura', sans-serif;  font-size: 35px; font-weight: 700;" class="main-title">Infinity Nexus</h1>
+			<h1 style="font-family: 'DM Sans', sans-serif;  font-size: 35px; font-weight: 700;" class="main-title">Infinity Nexus</h1>
+			<p>Early Spring Update</p>
 			<p style="font-weight: 400; ">Welcome! This is an open-sourced personal project
 				with any contributions
 				welcome.</p>
@@ -414,10 +402,9 @@
 				Be sure to check back often!</p>
 			<p style="font-weight: 400;">For complete release notes click <a
 					href="info/updateinfo/updateinfo.html" style="font-weight: bold; color:#0a0a0a">here</a>.</p>
-			<p style="font-weight: bold; font-family: 'Jura';">Last Update February 2, 2026 • Version 1.18.22</p>
-			<p style="font-weight: bold; font-family: 'Jura';">Next Update February 16, 2026 • Version 1.18.24</p>
+			<p style="font-weight: bold; font-family: 'DM Sans';">Last Update February 16, 2026 • Version 1.18.24</p>
+			<p style="font-weight: bold; font-family: 'DM Sans';">Next Update February 24, 2026 • Version 1.19.24</p>
 
-			<a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="font-family: 'Jura'; font-weight: bold; color:#000000; text-decoration:solid;">Click here to say something</a>
 		</div>
 	</header>
 
@@ -442,87 +429,6 @@
 					<span class="coming-soon-badge">Coming Soon</span>
 				</a>
 
-				<!-- Work in Progress Section -->
-			<!-- <h2 class="category-header" style="margin-bottom: 0;">🌟 Work in Progress <span class="coming-soon-badge">Coming Soon</span></h2>
- 
-				<p class="description" style="margin-top: 0;">👀 Take a look at what's coming soon</p>
-				<a href=null class="content-link disabled">
-					<span class="normal-text">🪴 Dig Deep</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
-				</a>	
-			<a href=null class="content-link disabled">
-					<span class="normal-text">🛸 Alien Invasion</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
-				</a>
-				<a href=null class="content-link disabled">
-					<span class="normal-text">🦖 Dino Run</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
-				</a>
-				<a href=null class="content-link disabled">
-					<span class="normal-text">🏰 Castle Siege</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
-				</a>-->
-				
-	
-
-				<!--New Games Section-->
-				<h2 class="category-header" style="margin-bottom: 0;">🆕 New Releases 
-					<span class="new-badge">New</span>/ 👍Revamped <span class="revamped-badge">Revamped</span></h2>
-				<p class="description" style="margin-top: 0;">🙂 It's better now </p>
-
-				<a href="games/dumbestgame/dumbestgame.html" class="content-link">
-					<span class="normal-text">🤓 The World's Dumbest Game</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-					<span class="new-badge">New</span>
-				</a>
-				<a href="games/pokemon-wizard/pokemon-wizard.html" class="content-link">
-					<span class="normal-text">⚔️ Pokemon Great Rock (Final)</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-					<span class="new-badge">New</span>
-				</a>
-				<a href="newgames/science/science.html" class="content-link">
-					<span class="normal-text">🧪 The Science Experiement</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-					<span class="new-badge">New</span>
-				</a>
-				<a href="games/clickme/clickme.html" class="content-link">
-					<span class="normal-text">🪤 Click Me</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-					<span class="new-badge">New</span>
-				</a>
-				<a href="games/dontclickme/dontclickme.html" class="content-link">
-					<span class="normal-text">❗ Don't Click Me</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-					<span class="new-badge">New</span>
-				</a>
-
-				<a href="sims/s&d/money.html" class="content-link">
-					<span class="normal-text" >📊 Supply & Demand</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-				<a href="casinogames/roulette/roulette.html" class="content-link ">
-					<span class="normal-text">🎡 Roulette</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-				<a href="games/platformergame/platformergame.html" class="content-link ">
-					<span class="normal-text">😵 The Impossible Game</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-				<a href="sims/pyramid/pyramid.html" class="content-link">
-					<span class="normal-text">🏜️ Pyramid</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-
-
-
 				<!-- Featured Section -->
 				<h2 class="category-header" style="margin-bottom: 0;">👍 Must Plays</h2>
 				<p class="description" style="margin-top: 0;">🔥 My Picks</p>
@@ -530,7 +436,6 @@
 				<a href="games/tower/tower.html" class="content-link">
 					<span class="normal-text">🛡️ Tower Defense+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
 				</a>
 				<a href="games/tower2/tower2.html" class="content-link">
 					<span class="normal-text">🛡️ Tower Defense 2+</span>
@@ -543,6 +448,14 @@
 				</a>
 				<a href="games/spacegame/spacegame.html" class="content-link">
 					<span class="normal-text">🚀 Space Game</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="games/platformergame/platformergame.html" class="content-link ">
+					<span class="normal-text">😵 The Impossible Game</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+				<a href="sims/pyramid/pyramid.html" class="content-link">
+					<span class="normal-text">🏜️ Pyramid</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
 
@@ -570,14 +483,31 @@
 					<span class="normal-text">🧙‍♂️ Wizard Battle</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
-				<a href="games/pokemon/pokemon.html" class="content-link">
-					<span class="normal-text">⚔️ Pokémon Great Rock (BASIC)</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
 
 				<a href="games/zombiegame/zombie.html" class="content-link ">
 					<span class="normal-text">🧟 Zombie Survival</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+
+				<a href="games/dumbestgame/dumbestgame.html" class="content-link">
+					<span class="normal-text">🤓 The World's Dumbest Game</span>
+					<span class="hover-text">⚡Play Now⚡</span>
+				</a>
+				<a href="games/pokemonnova/pokemonnova.html" class="content-link">
+					<span class="normal-text">⚔️ Pokémon Nova</span>
+					<span class="hover-text">⚡Play Now⚡</span>
+				</a>
+				<a href="newgames/science/science.html" class="content-link">
+					<span class="normal-text">🧪 The Science Experiement</span>
+					<span class="hover-text">⚡Play Now⚡</span>
+				</a>
+				<a href="games/clickme/clickme.html" class="content-link">
+					<span class="normal-text">🪤 Click Me</span>
+					<span class="hover-text">⚡Play Now⚡</span>
+				</a>
+				<a href="games/dontclickme/dontclickme.html" class="content-link">
+					<span class="normal-text">❗ Don't Click Me</span>
+					<span class="hover-text">⚡Play Now⚡</span>
 				</a>
 
 
@@ -587,23 +517,23 @@
 				<a href="casinogames/slot/slot.html" class="content-link">
 					<span class="normal-text">🎰 Slot Machine</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
 				</a>
 
 				<a href="casinogames/curseddice/curseddice.html" class="content-link">
 					<span class="normal-text">🎲 Cursed Dice</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
 				</a>
 				<a href="casinogames/blackjack/blackjack.html" class="content-link">
 					<span class="normal-text">🃏 Blackjack+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
 				</a>
 				<a href="casinogames/poker/poker.html" class="content-link">
 					<span class="normal-text">♠️ Poker+</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
+				</a>
+				<a href="casinogames/roulette/roulette.html" class="content-link ">
+					<span class="normal-text">🎡 Roulette</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
 
 				<!-- Simulations Section -->
@@ -612,16 +542,20 @@
 				<a href="sims/lifegame/life.html" class="content-link">
 					<span class="normal-text">💰 Wealth Builder</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
 				</a>
 				<a href="sims/citygame/citygame.html" class="content-link">
 					<span class="normal-text">🏙️ Metropolis Builder</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
 				</a>
 
 				<a href="sims/box/box.html" class="content-link">
 					<span class="normal-text">📦 The Box</span>
+					<span class="hover-text">⚡ Play Now ⚡</span>
+				</a>
+
+				
+				<a href="sims/s&d/money.html" class="content-link">
+					<span class="normal-text" >📊 Supply & Demand</span>
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
 
@@ -634,11 +568,12 @@
 					<span class="hover-text">⚡ Play Now ⚡</span>
 				</a>
 
-				<!-- Information & Guides Section -->
+				<!-- Information & Guides -->
 				<h2 class="category-header">📄 Information & Guides</h2>
 				<a href="info/challengebadge/challenge.html" class="content-link disabled">
 					<span class="normal-text">🏅 Challenges & Badges </span>
 					<span class="hover-text">➡️ View Badges</span>
+					<span class="unavailable-badge">Unavailable</span>
 				</a>
 				<a href="info/docs/documentation.html" class="content-link ">
 					<span class="normal-text">📋 Game Documentation</span>
@@ -647,7 +582,7 @@
 				<!--	<a href="info/snapshots/snapshots.html" class="content-link ">
 					<span class="normal-text">🖼️ Snapshots</span>
 					<span class="hover-text">➡️ View Gallery</span>
-				</a>-->
+				</a>-->     
 			
 				<a href="info/updateinfo/updateinfo.html" class="content-link">
 					<span class="normal-text">📝 Update Info</span>
@@ -667,7 +602,7 @@
 
 	<footer>
 		<div class="container">
-			<a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a>
+			<a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a> | <a href="info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
 			<p class="copyright">© <span id="copyright-year"></span> Infinity Nexus</p>
 			<p class="author">Created by Littletree866</p>
 		</div>

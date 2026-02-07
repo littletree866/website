@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roulette</title>
+    <title>Cosmic Roulette</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="../../icon.jpg">
@@ -18,7 +19,7 @@
             --warning-yellow: #ffcc00;
             --chip-1: linear-gradient(135deg, #ff3333, #cc0000);
             --chip-5: linear-gradient(135deg, #33cc33, #009900);
-            --chip-10: linear-gradient(135deg, #3366ff, #0033cc);
+            --chip-10: linear-gradient(135deg, #3366ff, #0033cc); 
             --chip-25: linear-gradient(135deg, #ffcc00, #cc9900);
             --chip-50: linear-gradient(135deg, #cc33ff, #9900cc);
             --text-light: #ffffff;
@@ -115,12 +116,12 @@
             height: 100%;
             border-radius: 50%;
             border: 10px solid #2a2a5a;
-            box-shadow: 
+            box-shadow:
                 0 0 40px rgba(123, 104, 238, 0.6),
                 inset 0 0 30px rgba(0, 0, 0, 0.8);
             transition: transform 5s cubic-bezier(0.2, 0.8, 0.3, 1);
             background: radial-gradient(circle at center, #111133 0%, #000022 100%);
-            overflow: visible; /* Changed from hidden to visible */
+            overflow: visible;
         }
 
         /* FIXED: Better wheel pointer */
@@ -301,11 +302,25 @@
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
 
-        .chip-1 { background: var(--chip-1); }
-        .chip-5 { background: var(--chip-5); }
-        .chip-10 { background: var(--chip-10); }
-        .chip-25 { background: var(--chip-25); }
-        .chip-50 { background: var(--chip-50); }
+        .chip-1 {
+            background: var(--chip-1);
+        }
+
+        .chip-5 {
+            background: var(--chip-5);
+        }
+
+        .chip-10 {
+            background: var(--chip-10);
+        }
+
+        .chip-25 {
+            background: var(--chip-25);
+        }
+
+        .chip-50 {
+            background: var(--chip-50);
+        }
 
         .bet-grid {
             display: grid;
@@ -567,14 +582,17 @@
 
         /* Animations */
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
+            0% {
+                transform: scale(1);
+            }
 
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .pulse {
@@ -601,15 +619,19 @@
             .info-grid {
                 grid-template-columns: 1fr;
             }
+
             .bet-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
+
             .bet-types {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .player-stats {
                 grid-template-columns: 1fr;
             }
+
             .header h1 {
                 font-size: 2.2rem;
             }
@@ -633,7 +655,6 @@
             line-height: 1.5;
         }
 
-        /* Hotkeys */
         .hotkeys {
             display: flex;
             flex-wrap: wrap;
@@ -659,7 +680,6 @@
             font-weight: 600;
         }
 
-        /* Footer */
         footer {
             text-align: center;
             margin-top: 40px;
@@ -670,6 +690,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -685,12 +706,12 @@
                         <div id="wheel"></div>
                         <div class="wheel-pointer"></div>
                     </div>
-                    
+
                     <div class="spin-controls">
                         <button id="spin-btn">
                             <i class="fas fa-play"></i> SPIN WHEEL
                         </button>
-                        
+
                         <div class="spin-info">
                             <div class="speed-control">
                                 <span>Speed:</span>
@@ -698,7 +719,7 @@
                                 <span id="speed-value">5</span>
                             </div>
                             <div class="spins-count">
-                                <i class="fas fa-redo"></i> 
+                                <i class="fas fa-redo"></i>
                                 <span>Spins: <span id="spin-count">0</span></span>
                             </div>
                         </div>
@@ -735,7 +756,7 @@
                     <div class="bet-grid" id="number-grid">
                         <!-- Numbers will be generated here -->
                     </div>
-                    
+
                     <h3><i class="fas fa-layer-group"></i> BET TYPES</h3>
                     <div class="bet-types">
                         <div class="bet-type-btn active" data-type="single">Single Number</div>
@@ -745,7 +766,7 @@
                         <div class="bet-type-btn" data-type="black">Black</div>
                         <div class="bet-type-btn" data-type="1-18">1-18</div>
                     </div>
-                    
+
                     <div class="bet-actions">
                         <button class="action-btn" id="place-bet">
                             <i class="fas fa-plus-circle"></i> PLACE BET
@@ -775,7 +796,7 @@
                 <p>Welcome to Cosmic Roulette!</p>
                 <p style="font-size: 1rem; margin-top: 10px;">Select numbers, place your bet, and spin the wheel!</p>
             </div>
-            
+
             <div class="history-section">
                 <h3><i class="fas fa-history"></i> RECENT SPINS</h3>
                 <div class="history-list" id="history-list">
@@ -791,15 +812,15 @@
                 <div class="info-item">
                     <h4>Payouts</h4>
                     <p>• Single Number: 35:1<br>
-                       • Even/Odd/Red/Black: 1:1<br>
-                       • 1-18/19-36: 1:1</p>
+                        • Even/Odd/Red/Black: 1:1<br>
+                        • 1-18/19-36: 1:1</p>
                 </div>
                 <div class="info-item">
                     <h4>How to Play</h4>
                     <p>1. Select chip value<br>
-                       2. Choose numbers or bet type<br>
-                       3. Place bet<br>
-                       4. Spin the wheel</p>
+                        2. Choose numbers or bet type<br>
+                        3. Place bet<br>
+                        4. Spin the wheel</p>
                 </div>
                 <div class="info-item">
                     <h4>Hotkeys</h4>
@@ -864,7 +885,7 @@
             createNumberButtons();
             setupEventListeners();
             updateUI();
-            
+
             // Load saved game if exists
             loadGame();
         }
@@ -873,12 +894,12 @@
         function createWheel() {
             wheel.innerHTML = '';
             const angleStep = 360 / CONFIG.numbers;
-            
+
             for (let i = 0; i < CONFIG.numbers; i++) {
                 // Create wheel slice
                 const slice = document.createElement('div');
                 slice.className = 'wheel-slice';
-                
+
                 // Determine color
                 let color;
                 if (i === 0) {
@@ -888,39 +909,39 @@
                 } else {
                     color = '#111111'; // Black
                 }
-                
+
                 slice.style.background = color;
                 slice.style.transform = `rotate(${i * angleStep}deg)`;
                 slice.style.borderTop = '1px solid rgba(255,255,255,0.1)';
-                
+
                 // Create number label - FIXED POSITIONING
                 const number = document.createElement('div');
                 number.className = 'slice-number';
                 number.textContent = i;
                 number.style.color = i === 0 || CONFIG.redNumbers.includes(i) ? 'white' : '#ddd';
-                
+
                 // Position number correctly - FIXED CALCULATION
                 const angle = i * angleStep;
                 const radius = 38; // Distance from center (percentage)
-                const angleRad = (angle + angleStep/2) * Math.PI / 180;
-                
+                const angleRad = (angle + angleStep / 2) * Math.PI / 180;
+
                 // Calculate position
                 const x = 50 + radius * Math.cos(angleRad);
                 const y = 50 + radius * Math.sin(angleRad);
-                
+
                 number.style.left = `${x}%`;
                 number.style.top = `${y}%`;
-                number.style.transform = `translate(-50%, -50%) rotate(${angle + angleStep/2}deg)`;
-                
+                number.style.transform = `translate(-50%, -50%) rotate(${angle + angleStep / 2}deg)`;
+
                 // Adjust font size for double-digit numbers
                 if (i >= 10) {
                     number.style.fontSize = '14px';
                 }
-                
+
                 wheel.appendChild(slice);
                 wheel.appendChild(number);
             }
-            
+
             // Add center circle
             const centerCircle = document.createElement('div');
             centerCircle.style.position = 'absolute';
@@ -939,7 +960,7 @@
         // Create Number Buttons
         function createNumberButtons() {
             numberGrid.innerHTML = '';
-            
+
             // Create 0 button
             const zeroBtn = document.createElement('button');
             zeroBtn.className = 'number-btn number-green';
@@ -947,7 +968,7 @@
             zeroBtn.dataset.number = '0';
             zeroBtn.addEventListener('click', () => toggleNumber(0));
             numberGrid.appendChild(zeroBtn);
-            
+
             // Create 1-36 buttons
             for (let i = 1; i < CONFIG.numbers; i++) {
                 const numBtn = document.createElement('button');
@@ -962,34 +983,30 @@
         // Toggle Number Selection
         function toggleNumber(number) {
             const index = gameState.selectedNumbers.indexOf(number);
-            
+
             if (gameState.betType === 'single') {
-                // For single bets, replace selection
                 if (index === -1) {
                     gameState.selectedNumbers = [number];
                 } else {
                     gameState.selectedNumbers = [];
                 }
             } else {
-                // For other bet types, allow multiple selection
                 if (index === -1) {
                     gameState.selectedNumbers.push(number);
                 } else {
                     gameState.selectedNumbers.splice(index, 1);
                 }
             }
-            
+
             updateNumberSelection();
         }
 
         // Update Number Selection UI
         function updateNumberSelection() {
-            // Clear all selections first
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            
-            // Mark selected numbers
+
             gameState.selectedNumbers.forEach(num => {
                 const btn = document.querySelector(`.number-btn[data-number="${num}"]`);
                 if (btn) btn.classList.add('selected');
@@ -1002,20 +1019,19 @@
                 showMessage('Please select at least one number!', 'error');
                 return;
             }
-            
+
             if (gameState.chipValue > gameState.balance) {
                 showMessage('Insufficient balance!', 'error');
                 return;
             }
-            
+
             const totalBetAmount = gameState.chipValue * gameState.selectedNumbers.length;
-            
+
             if (gameState.balance < totalBetAmount) {
                 showMessage(`You need ${totalBetAmount} chips for this bet!`, 'error');
                 return;
             }
-            
-            // Add bets to game state
+
             gameState.selectedNumbers.forEach(number => {
                 const bet = {
                     number: number,
@@ -1023,18 +1039,16 @@
                     type: gameState.betType,
                     color: getNumberColor(number)
                 };
-                
+
                 gameState.bets.push(bet);
             });
-            
-            // Update balance and current bet
+
             gameState.balance -= totalBetAmount;
             gameState.currentBet += totalBetAmount;
-            
-            // Clear selection
+
             gameState.selectedNumbers = [];
             updateNumberSelection();
-            
+
             updateUI();
             showMessage(`Bet placed: ${totalBetAmount} chips`, 'success');
             saveGame();
@@ -1042,12 +1056,11 @@
 
         // Clear All Bets
         function clearBets() {
-            // Return chips to balance
             gameState.balance += gameState.currentBet;
             gameState.bets = [];
             gameState.currentBet = 0;
             gameState.selectedNumbers = [];
-            
+
             updateNumberSelection();
             updateUI();
             showMessage('All bets cleared', 'info');
@@ -1057,40 +1070,35 @@
         // Spin the Wheel
         function spinWheel() {
             if (gameState.isSpinning) return;
-            
+
             if (gameState.bets.length === 0) {
                 showMessage('Place a bet before spinning!', 'error');
                 return;
             }
-            
+
             if (gameState.balance <= 0) {
                 showMessage('You need chips to spin!', 'error');
                 return;
             }
-            
+
             gameState.isSpinning = true;
             spinBtn.disabled = true;
-            
-            // Generate winning number
+
             const winningNumber = Math.floor(Math.random() * CONFIG.numbers);
             const winningColor = getNumberColor(winningNumber);
-            
-            // Calculate wheel rotation
+
             const anglePerNumber = 360 / CONFIG.numbers;
             const targetAngle = 360 * 5 + (360 - (winningNumber * anglePerNumber + anglePerNumber / 2));
-            
-            // Apply rotation
+
             gameState.wheelRotation += targetAngle;
             const speed = (11 - gameState.spinSpeed) * 3;
-            
+
             wheel.style.transition = `transform ${speed}s cubic-bezier(0.2, 0.8, 0.3, 1)`;
             wheel.style.transform = `rotate(${gameState.wheelRotation}deg)`;
-            
-            // Show spinning message
+
             resultDisplay.textContent = 'Spinning...';
             resultDisplay.className = 'result-neutral pulse';
-            
-            // Process result after spin completes
+
             setTimeout(() => {
                 processSpinResult(winningNumber, winningColor);
             }, speed * 1000);
@@ -1100,25 +1108,21 @@
         function processSpinResult(winningNumber, winningColor) {
             let winnings = 0;
             let winCount = 0;
-            
-            // Check each bet
+
             gameState.bets.forEach(bet => {
                 const isWin = checkBetWin(bet, winningNumber, winningColor);
-                
+
                 if (isWin) {
-                    // Calculate payout
                     const payoutMultiplier = getPayoutMultiplier(bet.type);
                     winnings += bet.amount * payoutMultiplier;
                     winCount++;
                 }
             });
-            
-            // Update game state
+
             gameState.balance += winnings;
             gameState.spinCount++;
             spinCountEl.textContent = gameState.spinCount;
-            
-            // Add to history
+
             const historyItem = {
                 number: winningNumber,
                 color: winningColor,
@@ -1126,34 +1130,29 @@
             };
             gameState.history.unshift(historyItem);
             if (gameState.history.length > 12) gameState.history.pop();
-            
-            // Clear current bets
+
             gameState.bets = [];
             gameState.currentBet = 0;
-            
-            // Show result
+
             const isWin = winnings > 0;
-            const resultText = isWin 
-                ? `🎉 WINNER! Number ${winningNumber} (${winningColor}) - Won ${winnings} chips!` 
+            const resultText = isWin
+                ? `🎉 WINNER! Number ${winningNumber} (${winningColor}) - Won ${winnings} chips!`
                 : `💔 LOSS! Number ${winningNumber} (${winningColor}) - Better luck next time!`;
-            
+
             resultDisplay.textContent = resultText;
             resultDisplay.className = isWin ? 'result-win' : 'result-lose';
-            
+
             if (isWin) {
                 createConfetti();
                 showMessage(`Congratulations! You won ${winnings} chips!`, 'success');
             }
-            
-            // Update UI
+
             updateHistory();
             updateUI();
-            
-            // Reset spinning state
+
             gameState.isSpinning = false;
             spinBtn.disabled = false;
-            
-            // Check for game over
+
             if (gameState.balance <= 0) {
                 setTimeout(() => {
                     if (confirm("Game over! You've run out of chips. Start a new game?")) {
@@ -1161,13 +1160,13 @@
                     }
                 }, 1500);
             }
-            
+
             saveGame();
         }
 
         // Check if Bet Wins
         function checkBetWin(bet, winningNumber, winningColor) {
-            switch(bet.type) {
+            switch (bet.type) {
                 case 'single':
                     return bet.number === winningNumber;
                 case 'even':
@@ -1187,11 +1186,11 @@
 
         // Get Payout Multiplier
         function getPayoutMultiplier(betType) {
-            switch(betType) {
+            switch (betType) {
                 case 'single':
-                    return 35; // 35:1
+                    return 35;
                 default:
-                    return 1; // 1:1 for even/odd/red/black
+                    return 1;
             }
         }
 
@@ -1203,21 +1202,17 @@
 
         // Update UI
         function updateUI() {
-            // Update balance and current bet
             balanceEl.textContent = gameState.balance;
             currentBetEl.textContent = gameState.currentBet;
-            
-            // Update chip selection
+
             document.querySelectorAll('.chip').forEach(chip => {
                 chip.classList.toggle('active', parseInt(chip.dataset.value) === gameState.chipValue);
             });
-            
-            // Update bet type selection
+
             document.querySelectorAll('.bet-type-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.type === gameState.betType);
             });
-            
-            // Update bet list
+
             updateBetList();
         }
 
@@ -1233,8 +1228,7 @@
                 `;
                 return;
             }
-            
-            // Group bets by number
+
             const betsByNumber = {};
             gameState.bets.forEach(bet => {
                 if (!betsByNumber[bet.number]) {
@@ -1247,13 +1241,12 @@
                 }
                 betsByNumber[bet.number].amount += bet.amount;
             });
-            
-            // Display grouped bets
+
             betList.innerHTML = '';
             Object.values(betsByNumber).forEach(bet => {
                 const betItem = document.createElement('div');
                 betItem.className = 'bet-item';
-                
+
                 betItem.innerHTML = `
                     <div class="bet-number" style="color: ${bet.color === 'red' ? '#ff6666' : bet.color === 'green' ? '#00cc88' : '#ddd'}">
                         <i class="fas fa-dot-circle"></i> Number ${bet.number} (${bet.color})
@@ -1262,7 +1255,7 @@
                         ${bet.amount} chips
                     </div>
                 `;
-                
+
                 betList.appendChild(betItem);
             });
         }
@@ -1270,7 +1263,7 @@
         // Update History
         function updateHistory() {
             historyList.innerHTML = '';
-            
+
             gameState.history.forEach(item => {
                 const historyItem = document.createElement('div');
                 historyItem.className = `history-item ${item.win ? 'history-win' : 'history-lose'}`;
@@ -1284,11 +1277,11 @@
         function showMessage(text, type = 'info') {
             const originalText = resultDisplay.textContent;
             const originalClass = resultDisplay.className;
-            
+
             resultDisplay.textContent = text;
-            resultDisplay.className = type === 'error' ? 'result-lose' : 
-                                     type === 'success' ? 'result-win' : 'result-neutral';
-            
+            resultDisplay.className = type === 'error' ? 'result-lose' :
+                type === 'success' ? 'result-win' : 'result-neutral';
+
             if (type === 'info' || type === 'error') {
                 setTimeout(() => {
                     resultDisplay.textContent = originalText;
@@ -1300,7 +1293,7 @@
         // Create Confetti Effect
         function createConfetti() {
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            
+
             for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
                 confetti.style.position = 'fixed';
@@ -1313,10 +1306,9 @@
                 confetti.style.zIndex = '9999';
                 confetti.style.pointerEvents = 'none';
                 confetti.style.opacity = '0.8';
-                
+
                 document.body.appendChild(confetti);
-                
-                // Animation
+
                 confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
                     { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
@@ -1324,8 +1316,7 @@
                     duration: 2000 + Math.random() * 2000,
                     easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
                 });
-                
-                // Remove after animation
+
                 setTimeout(() => confetti.remove(), 4000);
             }
         }
@@ -1338,15 +1329,15 @@
             gameState.selectedNumbers = [];
             gameState.spinCount = 0;
             gameState.history = [];
-            
+
             updateNumberSelection();
             updateUI();
             updateHistory();
             spinCountEl.textContent = '0';
-            
+
             resultDisplay.textContent = 'New game started with 1000 chips!';
             resultDisplay.className = 'result-neutral';
-            
+
             saveGame();
         }
 
@@ -1380,18 +1371,15 @@
 
         // Setup Event Listeners
         function setupEventListeners() {
-            // Spin button
             spinBtn.addEventListener('click', spinWheel);
-            
-            // Chip selection
+
             document.querySelectorAll('.chip').forEach(chip => {
                 chip.addEventListener('click', () => {
                     gameState.chipValue = parseInt(chip.dataset.value);
                     updateUI();
                 });
             });
-            
-            // Bet type selection
+
             document.querySelectorAll('.bet-type-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     gameState.betType = btn.dataset.type;
@@ -1400,28 +1388,21 @@
                     updateUI();
                 });
             });
-            
-            // Place bet button
+
             placeBetBtn.addEventListener('click', placeBet);
-            
-            // Clear bets button
             clearBetsBtn.addEventListener('click', clearBets);
-            
-            // Speed control
+
             speedSlider.addEventListener('input', (e) => {
                 gameState.spinSpeed = parseInt(e.target.value);
                 speedValue.textContent = gameState.spinSpeed;
             });
-            
-            // Keyboard shortcuts
+
             document.addEventListener('keydown', (e) => {
-                // Space to spin
                 if (e.code === 'Space' && !gameState.isSpinning) {
                     e.preventDefault();
                     spinWheel();
                 }
-                
-                // Number keys 1-5 for chip values
+
                 if (e.code >= 'Digit1' && e.code <= 'Digit5') {
                     const index = parseInt(e.code.replace('Digit', '')) - 1;
                     if (index < CONFIG.chipValues.length) {
@@ -1429,13 +1410,11 @@
                         updateUI();
                     }
                 }
-                
-                // Escape to clear bets
+
                 if (e.code === 'Escape') {
                     clearBets();
                 }
-                
-                // R to reset game
+
                 if (e.code === 'KeyR' && e.ctrlKey) {
                     e.preventDefault();
                     if (confirm('Reset game and start over?')) {
@@ -1449,4 +1428,5 @@
         window.addEventListener('DOMContentLoaded', initGame);
     </script>
 </body>
+
 </html>

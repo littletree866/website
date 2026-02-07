@@ -1050,7 +1050,7 @@
             const stats = { ...baseStats[type] };
             const wave = game.wave;
             
-            // Scale stats with wave
+            // Scale stats with wave 
             if (type === 'normal') {
                 stats.hp += Math.floor(wave * 1.5);
                 stats.gold += Math.floor(wave / 3);

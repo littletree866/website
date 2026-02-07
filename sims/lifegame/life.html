@@ -1360,7 +1360,7 @@
     function assetGrowthLoop() {
       state.assets.forEach(asset => {
         if (asset.owned > 0) {
-          const growth = asset.owned * asset.cost * (asset.growthPerMin / 60);
+          const growth = asset.owned * asset.cost  * (asset.growthPerMin / 60);
           state.money += growth;
         }
       });

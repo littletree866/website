@@ -25,4 +25,4 @@ Thanks for your interest in helping improve the site! Your contributions, either
 By contributing, you agree your contributions are licensed under the MIT-License
 
 ###
-And finally, thank you!
+And finally, thank you! 
