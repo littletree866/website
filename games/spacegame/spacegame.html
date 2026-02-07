@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Game</title>
     <link rel="icon" href="../../icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=DM Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Jura', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #000;
@@ -142,15 +142,6 @@
             width: 100%;
             transition: width 0.3s;
         }
-        
-        /* Health pickup animation */
-        .health-pickup {
-            position: absolute;
-            font-size: 24px;
-            z-index: 5;
-            transition: all 1s ease-in-out;
-            pointer-events: none;
-        }
     </style>
 </head>
 
@@ -159,8 +150,8 @@
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 
         <div id="hud">
-            <div>SCORE: <span id="scoreDisplay">0</span></div>
-            <div>WAVE: <span id="levelDisplay">1</span></div>
+            <div>Score: <span id="scoreDisplay">0</span></div>
+            <div>Level: <span id="levelDisplay">1</span></div>
             <div><span id="livesDisplay">5</span></div>
         </div>
 
@@ -183,7 +174,7 @@
                 Resume to continue.</div>
             <div>
                 <button id="resumeButton">Resume</button>
-            </div>      
+            </div>
         </div>
 
         <div id="gameOver">
@@ -205,14 +196,32 @@
         const POWERUP_TYPES = [
             { type: 'shield', icon: '🛡️', duration: 5000, color: '#00ff00' },
             { type: 'rapid', icon: '⚡', duration: 5000, color: '#ffff00' },
+            { type: 'spread', icon: '➗', duration: 5000, color: '#ff00ff' },
             { type: 'freeze', icon: '❄️', duration: 5000, color: '#00ffff' },
             { type: 'bomb', icon: '💣', duration: 0, color: '#ff0000' }
         ];
 
+        const BOSS_TYPES = [
+            {
+                name: "Ghost",
+                health: 450,
+                sprite: '👻',
+                patterns: ['circle', 'spread', 'laser'],
+                spawnScore: 2000
+            },
+            {
+                name: "Boss",
+                health: 400,
+                sprite: '👹',
+                patterns: ['wave', 'burst', 'chase'],
+                spawnScore: 2500
+            }
+        ];
+
         const ACHIEVEMENTS = [
             { id: 'combo10', name: 'Combo Master', desc: '10x hit combo', score: 500 },
-            { id: 'perfectRound', name: 'Perfect Round', desc: 'Clear wave without damage', score: 750 },
-            { id: 'healthCollector', name: 'Health Collector', desc: 'Collect 5 health pickups', score: 500 }
+            { id: 'boss1', name: 'Boss Slayer', desc: 'Defeat first boss', score: 1000 },
+            { id: 'perfectRound', name: 'Perfect Round', desc: 'Clear wave without damage', score: 750 }
         ];
 
 
@@ -237,13 +246,8 @@
 
         let gameState = initGameState();
         let explosions = [];
-        let enemySpawnRate = 1200; // Increased base spawn rate for shorter waves
+        let enemySpawnRate = 1500;
         let enemySpeedMultiplier = 1;
-        let healthPickups = []; // Array for health pickups
-        let enemiesPerWave = 8; // Base enemies per wave
-        let currentWave = 0;
-        let enemiesInCurrentWave = 0;
-        let enemiesDestroyedInWave = 0;
 
 
         const enemies = [];
@@ -368,7 +372,9 @@
                 score: 0,
                 level: 1,
                 lives: 5,
-                maxLives: 5,
+                bossBattleActive: false,
+                bossHealth: 0,
+                maxBossHealth: 100,
                 achievements: [],
                 combo: 0,
                 maxCombo: 0,
@@ -376,8 +382,7 @@
                 activeEffects: [],
                 running: false,
                 lastTime: 0,
-                currentState: GAME_STATES.MENU,
-                healthPickupsCollected: 0
+                currentState: GAME_STATES.MENU
             };
         }
 
@@ -406,7 +411,6 @@
             updateBullets(deltaTime);
             updatePowerups(deltaTime);
             updateExplosions(deltaTime);
-            updateHealthPickups(deltaTime);
             checkCollisions();
             checkLevelProgression();
             updateHUD();
@@ -433,9 +437,6 @@
 
 
             drawExplosions();
-
-
-            drawHealthPickups();
 
 
             player.draw();
@@ -499,7 +500,6 @@
 
                 if (enemy.y > canvas.height + enemy.height) {
                     enemies.splice(i, 1);
-                    enemiesDestroyedInWave++;
                 }
 
 
@@ -649,7 +649,7 @@
 
             // Display hearts for lives
             let hearts = '';
-            for (let i = 0; i < gameState.maxLives; i++) {
+            for (let i = 0; i < 5; i++) {
                 hearts += i < gameState.lives ? '❤️' : '🩶';
             }
             livesDisplay.textContent = hearts;
@@ -666,7 +666,6 @@
                     updateHUD();
                     createExplosion(enemy.x, enemy.y, enemy.width, 1);
                     enemies.splice(i, 1);
-                    enemiesDestroyedInWave++;
 
                     if (gameState.lives <= 0) {
                         gameOver();
@@ -698,7 +697,6 @@
 
                     if (enemy.health <= 0) {
                         enemies.splice(i, 1);
-                        enemiesDestroyedInWave++;
                         gameState.score += enemy.points;
                         updateHUD();
                         createExplosion(enemy.x, enemy.y, enemy.width, 1);
@@ -714,13 +712,8 @@
                         }
 
 
-                        if (Math.random() < 0.75) { // Slightly increased chance for powerups
-                            if (Math.random() < 0.3 && gameState.lives < gameState.maxLives) {
-                                // Spawn health pickup when player is not at full health
-                                spawnHealthPickup(enemy.x, enemy.y);
-                            } else {
-                                spawnPowerup(enemy.x, enemy.y);
-                            }
+                        if (Math.random() < 0.1) {
+                            spawnPowerup(enemy.x, enemy.y);
                         }
                     }
                     return;
@@ -742,27 +735,6 @@
 
         function checkLevelProgression() {
 
-            // Check if wave is complete
-            if (enemies.length === 0 && enemiesDestroyedInWave >= enemiesInCurrentWave) {
-                currentWave++;
-                enemiesDestroyedInWave = 0;
-                enemiesInCurrentWave = enemiesPerWave + Math.floor(currentWave / 2); // Increase enemies per wave
-                
-                // Spawn new wave
-                setTimeout(() => {
-                    for (let i = 0; i < enemiesInCurrentWave; i++) {
-                        setTimeout(() => spawnEnemy(), i * (enemySpawnRate / enemiesInCurrentWave));
-                    }
-                }, 1000);
-                
-                // Award points for clearing wave
-                if (gameState.lives === gameState.maxLives) {
-                    gameState.score += 200;
-                    unlockAchievement('perfectRound');
-                    showMessage("Perfect Wave! +200 points");
-                }
-            }
-
             const newLevel = Math.floor(gameState.score / 1000) + 1;
             if (newLevel > gameState.level) {
                 gameState.level = newLevel;
@@ -780,9 +752,42 @@
                 }
 
 
-                enemySpawnRate = Math.max(250, 1200 - (gameState.level * 100));
-                enemySpeedMultiplier = 1 + (gameState.level * 0.01);
+                enemySpawnRate = Math.max(300, 1500 - (gameState.level * 100));
+                enemySpeedMultiplier = 1 + (gameState.level * 0.1);
             }
+
+
+            if (!gameState.bossBattleActive && gameState.score >= 1000) {
+                spawnBoss();
+            }
+        }
+
+        function spawnBoss() {
+            if (gameState.bossBattleActive) return;
+
+            const bossType = BOSS_TYPES[0];
+            if (!bossType) return;
+
+            gameState.bossBattleActive = true;
+            gameState.bossHealth = bossType.health;
+            gameState.maxBossHealth = bossType.health;
+
+            const boss = {
+                x: canvas.width / 2,
+                y: -50,
+                width: 80,
+                height: 80,
+                health: bossType.health,
+                type: bossType,
+                pattern: 0,
+                patternStep: 0,
+                points: 500,
+                speed: 1,
+                color: '#f00'
+            };
+
+            enemies.push(boss);
+            showMessage(`WARNING: ${bossType.name} APPROACHING!`, true, 3000);
         }
 
         function spawnEnemy() {
@@ -817,6 +822,8 @@
                 shootDelay: Math.max(500, 1500 + Math.random() * 1000),
                 points: Math.max(1, enemyType.points)
             });
+
+            setTimeout(spawnEnemy, Math.max(300, Math.random() * enemySpawnRate + 300));
         }
 
         function spawnBonusShip() {
@@ -870,102 +877,6 @@
             });
         }
 
-        function spawnHealthPickup(x, y) {
-            healthPickups.push({
-                x: x,
-                y: y,
-                width: 30,
-                height: 30,
-                speed: 1,
-                type: 'health',
-                icon: '💚',
-                color: '#00ff00',
-                collected: false,
-                animationStage: 'falling', // falling, movingToBar, turningRed, complete
-                targetX: 30, // Health bar position
-                targetY: 60
-            });
-        }
-
-        function updateHealthPickups(deltaTime) {
-            for (let i = healthPickups.length - 1; i >= 0; i--) {
-                const pickup = healthPickups[i];
-                
-                if (pickup.collected) {
-                    healthPickups.splice(i, 1);
-                    continue;
-                }
-                
-                switch (pickup.animationStage) {
-                    case 'falling':
-                        pickup.y += pickup.speed * (deltaTime / 16);
-                        
-                        // Check collision with player
-                        if (checkCollision(player, pickup)) {
-                            pickup.animationStage = 'movingToBar';
-                        }
-                        
-                        if (pickup.y > canvas.height + pickup.height) {
-                            healthPickups.splice(i, 1);
-                        }
-                        break;
-                        
-                    case 'movingToBar':
-                        // Move toward health bar position
-                        const dx = pickup.targetX - pickup.x;
-                        const dy = pickup.targetY - pickup.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (distance < 5) {
-                            pickup.animationStage = 'turningRed';
-                            pickup.animationStart = Date.now();
-                        } else {
-                            pickup.x += (dx / distance) * 5;
-                            pickup.y += (dy / distance) * 5;
-                        }
-                        break;
-                        
-                    case 'turningRed':
-                        if (Date.now() - pickup.animationStart > 500) {
-                            pickup.collected = true;
-                            gameState.lives = Math.min(gameState.maxLives, gameState.lives + 1);
-                            gameState.healthPickupsCollected++;
-                            updateHUD();
-                            showMessage("+1 ❤️");
-                            
-                            if (gameState.healthPickupsCollected >= 5) {
-                                unlockAchievement('healthCollector');
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-
-        function drawHealthPickups() {
-            healthPickups.forEach(pickup => {
-                if (pickup.animationStage === 'turningRed') {
-                    // Animate color change from green to red
-                    const progress = Math.min(1, (Date.now() - pickup.animationStart) / 500);
-                    const red = Math.floor(255 * progress);
-                    const green = Math.floor(255 * (1 - progress));
-                    ctx.fillStyle = `rgb(${red}, ${green}, 0)`;
-                } else {
-                    ctx.fillStyle = pickup.color;
-                }
-                
-                ctx.beginPath();
-                ctx.arc(pickup.x, pickup.y, pickup.width / 2, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#fff';
-                ctx.font = '20px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(pickup.icon, pickup.x, pickup.y);
-            });
-        }
-
         function applyPowerup(powerup) {
             const powerupType = POWERUP_TYPES.find(p => p.type === powerup.type);
             if (!powerupType) return;
@@ -980,6 +891,9 @@
                 case 'rapid':
                     player.shootDelay = 150;
                     setTimeout(() => player.shootDelay = 300, powerupType.duration);
+                    break;
+                case 'spread':
+
                     break;
                 case 'freeze':
                     enemies.forEach(enemy => enemy.speed *= 0.5);
@@ -1034,7 +948,6 @@
                     const enemyIndex = enemies.indexOf(enemy);
                     if (enemyIndex > -1) {
                         enemies.splice(enemyIndex, 1);
-                        enemiesDestroyedInWave++;
                     }
 
 
@@ -1101,7 +1014,6 @@
             player.bullets.length = 0;
             gameState.powerups.length = 0;
             explosions.length = 0;
-            healthPickups.length = 0;
 
 
             player.x = canvas.width / 2;
@@ -1116,15 +1028,7 @@
             updateHUD();
 
 
-            // Start first wave
-            currentWave = 1;
-            enemiesInCurrentWave = enemiesPerWave;
-            enemiesDestroyedInWave = 0;
-            
-            for (let i = 0; i < enemiesInCurrentWave; i++) {
-                setTimeout(() => spawnEnemy(), i * (enemySpawnRate / enemiesInCurrentWave));
-            }
-            
+            spawnEnemy();
             spawnBonusShip();
             spawnPlanet();
 
@@ -1164,4 +1068,3 @@
         window.addEventListener('load', init);
     </script>
 </body>
-</html>
