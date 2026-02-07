@@ -1,11 +1,11 @@
-# Infinity Nexus (v1.18.22 — Released Feb 2, 2026)
+# Infinity Nexus (v1.18.24 — Released Feb 16, 2026)
 
 
 ## General Info
 
-1. Starting Februrary 2, 2026 my main focus will be improving all the games on my site. There will still be a monthly challenge, but new games will come less frequently. 
+1. Starting February 2, 2026 my main focus will be improving all the games on my site. There will still be a monthly challenge, but new games will come less frequently. 
 2. All of this code is licensed under the MIT license, please give me credit for any code you use in this repo, and please do not make money off the code you used.
-3. Updates may come every 1-3 weeks, unless otherwise specified .
+3. Updates may come every 1-3 weeks, unless otherwise specified.
 4. Please report broken code through the form at the bottom of the main page of the site.
 
 
@@ -22,6 +22,7 @@
 
 ## 📅 Updates Log
 
+- **Version 1.18.24** — February 16, 2026
 - **Version 1.18.22** — February 2, 2026
 - **Version 1.17.20** — January 15, 2026
 - **Version 1.16.19** — January 1, 2026
