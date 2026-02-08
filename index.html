@@ -10,7 +10,8 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
+		rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
 
 
@@ -24,6 +25,7 @@
 			--border-radius: 12px;
 			--transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		}
+
 		.main-title {
 			font-size: clamp(2.2rem, 4.2vw, 3.2rem);
 			font-weight: 500;
@@ -38,7 +40,8 @@
 			text-shadow: none;
 			animation: none;
 		}
-		 .petals {
+
+		.petals {
 			position: fixed;
 			top: 0;
 			left: 0;
@@ -60,19 +63,23 @@
 
 			animation: petalsFall 12s linear infinite;
 			opacity: 0.9;
-			filter: drop-shadow(0 0 4px rgba(255,182,193,0.8));
+			filter: drop-shadow(0 0 4px rgba(255, 182, 193, 0.8));
 		}
+
 		@keyframes petalsFall {
 			0% {
 				background-position: 0 -700px;
 			}
+
 			50% {
 				background-position: 40px 0;
 			}
+
 			100% {
 				background-position: 0 700px;
 			}
 		}
+
 		.petals::after {
 			content: "";
 			position: absolute;
@@ -89,33 +96,38 @@
 			animation: petalsFallReverse 18s linear infinite;
 			opacity: 0.6;
 		}
+
 		@keyframes petalsFallReverse {
 			0% {
 				background-position: 0 -600px;
 			}
+
 			100% {
 				background-position: -60px 600px;
 			}
 		}
+
 		* {
 			margin: 0;
 			padding: 0;
 			box-sizing: border-box;
 		}
+
 		html,
 		body {
 			height: 100%;
 		}
+
 		body {
 			font-family: 'DM Sans', sans-serif;
 			line-height: 1.6;
 			color: #000000;
 			background: linear-gradient(-45deg,
-			#e6fff2,
-			#ccf5e1,
-			#b3ecd2,
-			#d7f9ff,
-			#f0ffff);
+					#e6fff2,
+					#ccf5e1,
+					#b3ecd2,
+					#d7f9ff,
+					#f0ffff);
 
 			background-size: 600% 600%;
 			animation: gradientBG 26s ease infinite;
@@ -123,6 +135,7 @@
 			flex-direction: column;
 			min-height: 100vh;
 		}
+
 		@keyframes gradientBG {
 			0% {
 				background-position: 0% 50%;
@@ -144,12 +157,14 @@
 				background-position: 0% 50%;
 			}
 		}
+
 		.container {
 			max-width: 1100px;
 			width: 100%;
 			margin: 0 auto;
 			padding: 0 20px;
 		}
+
 		header {
 			padding: 40px 0;
 			margin-bottom: 28px;
@@ -163,6 +178,7 @@
 			border-bottom: 2px solid rgba(255, 255, 255, 0.5);
 			text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
 		}
+
 		.description {
 			color: rgb(3, 0, 0);
 			margin: 30px 0 15px 0;
@@ -176,96 +192,18 @@
 			letter-spacing: 0.5px;
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 		}
+
 		header h1 {
 			font-size: 2.5rem;
 			font-weight: 700;
 			margin-bottom: 15px;
 			letter-spacing: -0.5px;
 		}
+
 		.links-section {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-			gap: 16px;
-			align-items: start;
-			opacity: 0;
-			animation: fadeInUp 0.6s forwards;
+			display: block;
 		}
-		.links-section .category-header,
-		.links-section .description {
-			grid-column: 1 / -1;
-			margin-top: 6px;
-			margin-bottom: 4px;
-		}
-		.category-header {
-			font-family: 'DM Sans', sans-serif;
-			font-size: 1.05rem;
-			font-weight: 800;
-			letter-spacing: 0.08em;
-			background: rgba(255, 255, 255, 0.06);
-			padding: 10px 14px;
-			border-radius: 10px;
-			color: var(--dark);
-			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-		}
-		.content-link {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			flex-direction: row;
-			font-family: "DM Sans", sans-serif;
-			gap: 10px;
-			font-size: 10px;
-			background: linear-gradient(180deg, #ffffff, #fbfdff);
-			padding: 16px 18px;
-			min-height: 72px;
-			border-radius: 12px;
-			color: var(--dark);
-			text-decoration: none;
-			font-weight: 400;
-			box-shadow: 0 6px 18px rgba(13, 38, 63, 0.06);
-			transition: transform 0.18s var(--transition), box-shadow 0.18s var(--transition);
-			overflow: hidden;
-		}
-		.content-link .normal-text,
-		.content-link .hover-text {
-			display: inline-block;
 
-		}
-		.content-link .hover-text {
-			display: none;
-			opacity: 0.95;
-			color: var(--primary);
-			font-weight: 700;
-		}
-		.content-link:hover {
-			transform: translateY(-6px);
-			box-shadow: 0 14px 40px rgba(30, 136, 255, 0.12);
-			background: linear-gradient(180deg, #ffffff, #f5f9ff);
-		}
-		.content-link:hover .normal-text {
-			display: none;
-		}
-		.content-link:hover .hover-text {
-			display: inline-block;
-		}
-		.content-link.disabled {
-			pointer-events: none;
-			opacity: 0.75;
-			transform: none;
-			box-shadow: none;
-			background: linear-gradient(180deg, #fbfbfb, #f7f7f7);
-		}
-		@keyframes fadeInUp {
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
-
-			from {
-				opacity: 0;
-				transform: translateY(20px);
-			}
-		}
 		.category-header {
 			color: rgb(3, 0, 0);
 			margin: 30px 0 15px 0;
@@ -279,6 +217,152 @@
 			letter-spacing: 0.5px;
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 		}
+
+		/* Section header */
+		.section-header {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: var(--dark);
+			margin: 40px 0 24px 0;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		/* Grid */
+		.archive-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 24px;
+			margin-bottom: 32px;
+		}
+
+		/* Card */
+		.archive-card {
+			background: white;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+			transition: all 0.3s ease;
+			animation: cardFadeUp 0.5s ease forwards;
+		}
+
+		@keyframes cardFadeUp {
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+		}
+
+		.archive-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
+		}
+
+		.card-header {
+			height: 160px;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			display: flex;
+			align-items: flex-end;
+			padding: 16px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.archive-tag {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
+			margin-bottom: 12px;
+		}
+
+		.archive-title {
+			font-size: 1.25rem;
+			font-weight: 700;
+			color: var(--dark);
+			margin-bottom: 12px;
+			padding: 16px 16px 0 16px;
+		}
+
+		.archive-meta {
+			display: flex;
+			gap: 12px;
+			font-size: 0.875rem;
+			color: var(--muted);
+			padding: 0 16px;
+			margin-bottom: 12px;
+		}
+
+		.content-link {
+			font-size: 0.95rem;
+			line-height: 1.5;
+			color: #555;
+			padding: 0 16px 16px 16px;
+		}
+
+		/* Status pill */
+		.status-pill {
+			display: inline-flex;
+			align-items: center;
+			padding: 6px 12px;
+			border-radius: 20px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.4px;
+			text-decoration: none;
+			color: white;
+		}
+
+		.status-available {
+			background: #D1FAE5;
+			color: #065F46;
+		}
+
+		.status-popular {
+			background: #FEF3C7;
+			color: #B45309;
+		}
+
+		.status-revamped {
+			background: #EFF6FF;
+			color: #1E40AF;
+		}
+
+		.status-update {
+			background: #EFF6FF;
+			color: #1E40AF;
+		}
+
+		.status-unavailable {
+			background: #F3F4F6;
+			color: #6B7280;
+		}
+
+		@keyframes fadeInUp {
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+		}
+
 		footer {
 			background: var(--dark);
 			color: white;
@@ -286,11 +370,13 @@
 			text-align: center;
 			margin-top: 60px;
 		}
+
 		.copyright {
 			margin-top: 15px;
 			opacity: 0.85;
 			font-size: 0.9rem;
 		}
+
 		.coming-soon-badge {
 			display: inline-flex;
 			align-items: center;
@@ -303,7 +389,9 @@
 			color: #af1e1e;
 			background: #ffefef;
 			border: 1px solid #fd9393;
+			margin-left: 8px;
 		}
+
 		.popular-badge {
 			display: inline-flex;
 			align-items: center;
@@ -317,6 +405,7 @@
 			background: #fffaeb;
 			border: 1px solid #fcd34d;
 		}
+
 		.revamped-badge {
 			display: inline-flex;
 			align-items: center;
@@ -330,6 +419,7 @@
 			background: #EFF6FF;
 			border: 1px solid #93C5FD;
 		}
+
 		.unavailable-badge {
 			display: inline-flex;
 			align-items: center;
@@ -343,6 +433,7 @@
 			background: #f1b5bd;
 			border: 1px solid #C7D2FE;
 		}
+
 		.beta-badge {
 			display: inline-flex;
 			align-items: center;
@@ -356,6 +447,7 @@
 			background: #EEF2FF;
 			border: 1px solid #C7D2FE;
 		}
+
 		.new-badge {
 			display: inline-flex;
 			align-items: center;
@@ -369,6 +461,7 @@
 			background: #ECFDF5;
 			border: 1px solid #6EE7B7;
 		}
+
 		@media (max-width: 768px) {
 			header h1 {
 				font-size: 1.8rem;
@@ -393,217 +486,207 @@
 	<div class="petals"></div>
 	<header>
 		<div class="container">
-			<h1 style="font-family: 'DM Sans', sans-serif;  font-size: 35px; font-weight: 700;" class="main-title">Infinity Nexus</h1>
+			<h1 style="font-family: 'DM Sans', sans-serif;  font-size: 35px; font-weight: 700;" class="main-title">
+				Infinity Nexus</h1>
 			<p>Early Spring Update</p>
 			<p style="font-weight: 400; ">Welcome! This is an open-sourced personal project
 				with any contributions
 				welcome.</p>
 			<p style="font-weight: 400;">This site is regularly updated with new games, features, and improvements.
 				Be sure to check back often!</p>
-			<p style="font-weight: 400;">For complete release notes click <a
-					href="info/updateinfo/updateinfo.html" style="font-weight: bold; color:#0a0a0a">here</a>.</p>
+			<p style="font-weight: 400;">For complete release notes click <a href="info/updateinfo/updateinfo.html"
+					style="font-weight: bold; color:#0a0a0a">here</a>.</p>
 			<p style="font-weight: bold; font-family: 'DM Sans';">Last Update February 16, 2026 • Version 1.18.24</p>
 			<p style="font-weight: bold; font-family: 'DM Sans';">Next Update February 24, 2026 • Version 1.19.24</p>
 
 		</div>
 	</header>
 
-	<main class="main-content">
-		<div class="container" id="main">
+	<div class="container" id="main">
 
-			<div class="links-section">
-				<h2 class="category-header" style="margin-bottom: 0;">🏆 The Monthly Challenge</h2>
-				<p class="description" style="margin-top: 0;">🏅See if you can beat the challenge</p>
+		<div class="links-section">
+		
 
-				<a href="monthlychallenges/jan2026/Jan2026Challenge.html" class="content-link">
-					<span class="normal-text" >🏆 January Challenge</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="monthlychallenges/feb2026/Feb2026Challenge.html" class="content-link">
-					<span class="normal-text">🏆 February Challenge</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="monthlychallenges/mar2026/Mar2026Challenge.html" class="content-link disabled">
-					<span class="normal-text">🏆 March Challenge</span>
-					<span class="hover-text">🔧 Coming Soon 🔧</span>
-					<span class="coming-soon-badge">Coming Soon</span>
-				</a>
+			<div class="archive-grid">
+				<!-- January Challenge -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Challenge</div>
+					</div>
+					<h3 class="archive-title">January Challenge</h3>
+					<div class="archive-meta">
+						<span>📅 January 2026</span>
+					</div>
+					<p class="content-link">Test your skills against this month's special challenge!</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="monthlychallenges/jan2026/Jan2026Challenge.html"
+							class="status-pill status-available">Play Now →</a>
+					</div>
+				</div>
 
-				<!-- Featured Section -->
-				<h2 class="category-header" style="margin-bottom: 0;">👍 Must Plays</h2>
-				<p class="description" style="margin-top: 0;">🔥 My Picks</p>
+				<!-- February Challenge -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Challenge</div>
+					</div>
+					<h3 class="archive-title">February Challenge</h3>
+					<div class="archive-meta">
+						<span>📅 February 2026</span>
+					</div>
+					<p class="content-link">The current month's challenge is live! Can you beat it?</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="monthlychallenges/feb2026/Feb2026Challenge.html"
+							class="status-pill status-available">Play Now →</a>
+					</div>
+				</div>
 
-				<a href="games/tower/tower.html" class="content-link">
-					<span class="normal-text">🛡️ Tower Defense+</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="games/tower2/tower2.html" class="content-link">
-					<span class="normal-text">🛡️ Tower Defense 2+</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="popular-badge">Popular</span>
-				</a>
-				<a href="games/clickergame/clickergame.html" class="content-link">
-					<span class="normal-text">👆 Clicker Quest+</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="popular-badge">Popular</span>
-				</a>
-				<a href="games/spacegame/spacegame.html" class="content-link">
-					<span class="normal-text">🚀 Space Game</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-				<a href="games/platformergame/platformergame.html" class="content-link ">
-					<span class="normal-text">😵 The Impossible Game</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-				<a href="sims/pyramid/pyramid.html" class="content-link">
-					<span class="normal-text">🏜️ Pyramid</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<!-- Games Section -->
-				<h2 class="category-header" style="margin-bottom: 0;">🎮 Game Corner</h2>
-				<p class="description" style="margin-top: 0;">💖 Play to your heart's content</p>
-
-				<a href="games/georunner/runner.html" class="content-link">
-					<span class="normal-text">🏃 Geometry Runner</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="popular-badge">Popular</span>
-				</a>
-
-				<a href="games/puzzle/puzzle.html" class="content-link">
-					<span class="normal-text">🧩 Puzzle Master</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-					<span class="revamped-badge">Revamped</span>
-				</a>
-
-				<a href="games/thegame/thegame.html" class="content-link">
-					<span class="normal-text">🔘 DO NOT PRESS</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<a href="games/wizardgame/wizardgame.html" class="content-link">
-					<span class="normal-text">🧙‍♂️ Wizard Battle</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<a href="games/zombiegame/zombie.html" class="content-link ">
-					<span class="normal-text">🧟 Zombie Survival</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<a href="games/dumbestgame/dumbestgame.html" class="content-link">
-					<span class="normal-text">🤓 The World's Dumbest Game</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-				</a>
-				<a href="games/pokemonnova/pokemonnova.html" class="content-link">
-					<span class="normal-text">⚔️ Pokémon Nova</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-				</a>
-
-				<a href="games/clickme/clickme.html" class="content-link">
-					<span class="normal-text">🪤 Click Me</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-				</a>
-				<a href="games/dontclickme/dontclickme.html" class="content-link">
-					<span class="normal-text">❗ Don't Click Me</span>
-					<span class="hover-text">⚡Play Now⚡</span>
-				</a>
-
-
-				<!-- Casino Games Section -->
-				<h2 class="category-header" style="margin-bottom: 0;">🎲 Chance Games</h2>
-				<p class="description" style="margin-top: 0;">🍀 Test your luck</p>
-				<a href="casinogames/slot/slot.html" class="content-link">
-					<span class="normal-text">🎰 Slot Machine</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<a href="casinogames/curseddice/curseddice.html" class="content-link">
-					<span class="normal-text">🎲 Cursed Dice</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="casinogames/blackjack/blackjack.html" class="content-link">
-					<span class="normal-text">🃏 Blackjack+</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="casinogames/poker/poker.html" class="content-link">
-					<span class="normal-text">♠️ Poker+</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="casinogames/roulette/roulette.html" class="content-link ">
-					<span class="normal-text">🎡 Roulette</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<!-- Simulations Section -->
-				<h2 class="category-header" style="margin-bottom: 0;">💡 Simulations</h2>
-				<p class="description" style="margin-top: 0;">💭 Think & Strategize</p>
-				<a href="sims/lifegame/life.html" class="content-link">
-					<span class="normal-text">💰 Wealth Builder</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="sims/citygame/citygame.html" class="content-link">
-					<span class="normal-text">🏙️ Metropolis Builder</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<a href="sims/box/box.html" class="content-link">
-					<span class="normal-text">📦 The Box</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				
-				<a href="sims/s&d/money.html" class="content-link">
-					<span class="normal-text" >📊 Supply & Demand</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<a href="sims/empiregame/empire.html" class="content-link">
-					<span class="normal-text">👑 Empire Game</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-				<a href="sims/miniempire/mini.html" class="content-link">
-					<span class="normal-text">🏰 Mini Empire</span>
-					<span class="hover-text">⚡ Play Now ⚡</span>
-				</a>
-
-				<!-- Information & Guides -->
-				<h2 class="category-header">📄 Information & Guides</h2>
-				<a href="info/challengebadge/challenge.html" class="content-link disabled">
-					<span class="normal-text">🏅 Challenges & Badges </span>
-					<span class="hover-text">➡️ View Badges</span>
-					<span class="unavailable-badge">Unavailable</span>
-				</a>
-<!--Needs to updated-->				<a href="info/docs/documentation.html" class="content-link disabled">
-					<span class="normal-text">📋 Game Documentation</span>
-					<span class="hover-text">➡️ Read Guides</span>
-				</a>
-				<!--	<a href="info/snapshots/snapshots.html" class="content-link ">
-					<span class="normal-text">🖼️ Snapshots</span>
-					<span class="hover-text">➡️ View Gallery</span>
-				</a>-->     
+				<!-- March Challenge -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Challenge</div>
+					</div>
+					<h3 class="archive-title">March Challenge</h3>
+					<div class="archive-meta">
+						<span>📅 March 2026</span>
+					</div>
+					<p class="content-link">Coming soon! Stay tuned for the next challenge.</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<span class="coming-soon-badge">Coming Soon</span>
+					</div>
+				</div>
 			
-				<a href="info/updateinfo/updateinfo.html" class="content-link">
-					<span class="normal-text">📝 Update Info</span>
-					<span class="hover-text">➡️ See Changes</span>
-				</a>
-				<a href="info/archives/archives.html" class="content-link">
-					<span class="normal-text">🗝️ Archives</span>
-					<span class="hover-text">➡️ See Archives</span>
-				</a>
-				<a href="https://github.com/littletree866/infinity-nexus" class="content-link" target="_blank">
-					<span class="normal-text">💻 Source Code</span>
-					<span class="hover-text">➡️ GitHub</span>
-				</a>
-			</div>
+
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Featured</div>
+					</div>
+					<h3 class="archive-title">Must Play Games</h3>
+					<div class="archive-meta">
+						<span>⭐ 6 Games</span>
+					</div>
+					<p class="content-link">Curated selection of my favorite games you won't want to miss!</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="mainpages/mainpage2.html" class="status-pill status-available">Explore →</a>
+					</div>
+				</div>
+
+
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Collection</div>
+					</div>
+					<h3 class="archive-title">Game Corner</h3>
+					<div class="archive-meta">
+						<span>🕹️ 9 Games</span>
+					</div>
+					<p class="content-link">A diverse collection of casual, action, and puzzle games for everyone!</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="mainpages/mainpage3.html" class="status-pill status-available">Explore →</a>
+					</div>
+				</div>
+			
+
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Casino</div>
+					</div>
+					<h3 class="archive-title">Casino Games</h3>
+					<div class="archive-meta">
+						<span>🎰 5 Games</span>
+					</div>
+					<p class="content-link">Test your luck with classic casino games like Slots, Blackjack, Poker, and
+						more!</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="mainpages/mainpage1.html" class="status-pill status-available">Play Now →</a>
+					</div>
+				</div>
+</div>
+
+			<div class="archive-grid">
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Simulation</div>
+					</div>
+					<h3 class="archive-title">Simulation Games</h3>
+					<div class="archive-meta">
+						<span>🌍 6 Games</span>
+					</div>
+					<p class="content-link">Build empires, manage cities, and learn economics through interactive
+						simulations!</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="mainpages/mainpage4.html" class="status-pill status-available">Explore →</a>
+					</div>
+				</div>
+
+
+				<!-- Game Documentation -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Guide</div>
+					</div>
+					<h3 class="archive-title">Game Documentation</h3>
+					<div class="archive-meta">
+						<span>📖 Guides</span>
+					</div>
+					<p class="content-link">Read detailed guides, tips, and documentation for all games</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="info/docs/documentation.html" class="status-pill status-available">Read →</a>
+					</div>
+				</div>
+
+				<!-- Update Info -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">News</div>
+					</div>
+					<h3 class="archive-title">Update Info</h3>
+					<div class="archive-meta">
+						<span>📝 Changelog</span>
+					</div>
+					<p class="content-link">Check out the latest updates, new features, and improvements</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="info/updateinfo/updateinfo.html" class="status-pill status-available">View →</a>
+					</div>
+				</div>
+
+				<!-- Archives -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Archive</div>
+					</div>
+					<h3 class="archive-title">Archives</h3>
+					<div class="archive-meta">
+						<span>🗝️ History</span>
+					</div>
+					<p class="content-link">Explore removed games and historical versions of released titles</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="info/archives/archives.html" class="status-pill status-available">Browse →</a>
+					</div>
+				</div>
+
+				<!-- Source Code -->
+				<div class="archive-card">
+					<div class="card-header">
+						<div class="archive-tag">Open Source</div>
+					</div>
+					<h3 class="archive-title">Source Code</h3>
+					<div class="archive-meta">
+						<span>💻 GitHub</span>
+					</div>
+					<p class="content-link">View the open-source code on GitHub and contribute to the project!</p>
+					<div style="padding: 0 16px 16px 16px;">
+						<a href="https://github.com/littletree866/infinity-nexus" class="status-pill status-available"
+							target="_blank">GitHub →</a>
+					</div>
+				</div>
+				</div>
 		</div>
-	</main>
+	</div>
 
 	<footer>
 		<div class="container">
-			<a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a> | <a href="info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
+			<a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a>
+			| <a href="info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
 			<p class="copyright">© <span id="copyright-year"></span> Infinity Nexus</p>
 			<p class="author">Created by Littletree866</p>
 		</div>

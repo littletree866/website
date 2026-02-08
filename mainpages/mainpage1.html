@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Infinity Nexus</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="icon" href="../icon.jpg" type="image/x-icon">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
+		rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+
+	<style>
+		:root {
+			--primary: #6e8efb;
+			--secondary: #a777e3;
+			--dark: #2c3e50;
+			--light: #f8f9fa;
+			--text: #333;
+			--border-radius: 12px;
+			--muted: #6f7b8a;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'DM Sans', sans-serif;
+			line-height: 1.6;
+			color: var(--text);
+			background: linear-gradient(135deg, #f5f7fa 0%, #eaf0ff 100%);
+			min-height: 100vh;
+			padding: 28px;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: auto;
+		}
+
+		/* Header */
+		header {
+			text-align: center;
+			padding: 50px 20px;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			color: white;
+			border-radius: var(--border-radius);
+			margin-bottom: 32px;
+			box-shadow: 0 12px 40px rgba(110, 142, 251, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+
+		header::before {
+			content: "";
+			position: absolute;
+			top: -50%;
+			right: -50%;
+			width: 200%;
+			height: 200%;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+			background-size: 50px 50px;
+			animation: shimmer 3s ease-in-out infinite;
+		}
+
+		@keyframes shimmer {
+
+			0%,
+			100% {
+				transform: translate(0, 0);
+			}
+
+			50% {
+				transform: translate(-20px, -20px);
+			}
+		}
+
+		header h1 {
+			font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+			font-weight: 700;
+			margin-bottom: 10px;
+			position: relative;
+			z-index: 1;
+			letter-spacing: -0.5px;
+		}
+
+		header p {
+			font-size: 1.05rem;
+			opacity: 0.95;
+			position: relative;
+			z-index: 1;
+			font-weight: 400;
+		}
+
+		/* Controls */
+		.controls {
+			display: flex;
+			gap: 16px;
+			margin-bottom: 32px;
+			flex-wrap: wrap;
+			align-items: center;
+		}
+
+		@media (max-width: 640px) {
+			.controls {
+				flex-direction: column;
+			}
+		}
+
+		.input-search {
+			flex: 1;
+			min-width: 240px;
+			display: flex;
+			align-items: center;
+			background: white;
+			border-radius: 8px;
+			padding: 12px 16px;
+			box-shadow: 0 4px 12px rgba(110, 142, 251, 0.1);
+			border: 1px solid rgba(110, 142, 251, 0.2);
+		}
+
+		.input-search:focus-within {
+			border-color: var(--primary);
+			box-shadow: 0 6px 24px rgba(110, 142, 251, 0.15);
+		}
+
+		.input-search input {
+			border: none;
+			outline: none;
+			flex: 1;
+			font-family: inherit;
+			font-size: 1rem;
+		}
+
+		.input-search svg {
+			width: 20px;
+			height: 20px;
+			color: var(--muted);
+		}
+
+		#clearSearch {
+			background: none;
+			border: none;
+			color: var(--muted);
+			cursor: pointer;
+			padding: 4px;
+			border-radius: 4px;
+			transition: all 0.2s;
+		}
+
+		#clearSearch:hover {
+			background: rgba(0, 0, 0, 0.05);
+			color: var(--text);
+		}
+
+		.select {
+			padding: 12px 16px;
+			border-radius: 8px;
+			border: 1px solid rgba(110, 142, 251, 0.2);
+			background: white;
+			font-family: inherit;
+			font-size: 1rem;
+			cursor: pointer;
+			box-shadow: 0 4px 12px rgba(110, 142, 251, 0.1);
+		}
+
+		.select:hover {
+			border-color: var(--primary);
+		}
+
+		.select:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 6px 24px rgba(110, 142, 251, 0.15);
+		}
+
+		/* Section header */
+		.section-header {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: var(--dark);
+			margin: 40px 0 24px 0;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.count-badge {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 28px;
+			height: 28px;
+			border-radius: 50%;
+			background: var(--primary);
+			color: white;
+			font-size: 0.875rem;
+			font-weight: 700;
+		}
+
+		/* Grid */
+		.archive-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 24px;
+			margin-bottom: 60px;
+		}
+
+		/* Card */
+		.archive-card {
+			background: white;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+			transition: all 0.3s ease;
+			animation: cardFadeUp 0.5s ease forwards;
+			opacity: 0;
+		}
+
+		@keyframes cardFadeUp {
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+		}
+
+		.archive-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
+		}
+
+		.card-header {
+			height: 160px;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			display: flex;
+			align-items: flex-end;
+			padding: 16px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.archive-tag {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
+			margin-bottom: 12px;
+		}
+
+		.archive-title {
+			font-size: 1.25rem;
+			font-weight: 700;
+			color: var(--dark);
+			margin-bottom: 12px;
+			padding: 16px 16px 0 16px;
+		}
+
+		.archive-meta {
+			display: flex;
+			gap: 12px;
+			font-size: 0.875rem;
+			color: var(--muted);
+			padding: 0 16px;
+			margin-bottom: 12px;
+		}
+
+		.description {
+			font-size: 0.95rem;
+			line-height: 1.5;
+			color: #555;
+			padding: 0 16px 16px 16px;
+		}
+
+		/* Status pill */
+		.status-pill {
+			display: inline-flex;
+			align-items: center;
+			padding: 6px 12px;
+			border-radius: 20px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.4px;
+		}
+
+		.status-archived {
+			background: #FEE2E2;
+			color: #991B1B;
+		}
+
+		.status-available {
+			background: #D1FAE5;
+			color: #065F46;
+		}
+
+		.status-update {
+			background: #EFF6FF;
+			color: #1E40AF;
+		}
+
+		.status-avaliable {
+			background: #D1FAE5;
+			color: #065F46;
+		}
+
+		.status-inprogress {
+			background: #FEF3C7;
+			color: #B45309;
+		}
+
+		.status-unavailable {
+			background: #F3F4F6;
+			color: #6B7280;
+		}
+
+		/* Empty state */
+		.empty {
+			text-align: center;
+			padding: 60px 20px;
+			color: var(--muted);
+		}
+
+		.empty svg {
+			width: 80px;
+			height: 80px;
+			margin-bottom: 20px;
+			opacity: 0.5;
+		}
+
+		/* hide helper */
+		.archive-card.hide {
+			display: none;
+		}
+
+		footer {
+			background: var(--dark);
+			color: white;
+			padding: 40px 20px;
+			text-align: center;
+			border-radius: var(--border-radius);
+			margin-top: 60px;
+		}
+
+		footer p {
+			margin-bottom: 8px;
+			opacity: 0.9;
+		}
+
+		.back-link {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			color: var(--primary);
+			text-decoration: none;
+			font-weight: 600;
+			margin-bottom: 32px;
+			transition: all 0.2s;
+		}
+
+		.back-link:hover {
+			color: var(--secondary);
+			transform: translateX(-4px);
+		}
+
+		@media (max-width: 768px) {
+			body {
+				padding: 16px;
+			}
+
+			header {
+				padding: 40px 16px;
+			}
+
+			header h1 {
+				font-size: 2rem;
+			}
+
+			.section-header {
+				font-size: 1.25rem;
+			}
+
+			.archive-grid {
+				grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+				gap: 16px;
+			}
+
+			.controls {
+				flex-direction: column;
+			}
+
+			.input-search {
+				min-width: 100%;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<a href="../index.html" class="back-link">← Back to Home</a>
+
+		<header>
+			<h1>🎰 Infinity Nexus Casino</h1>
+			<p>99% of gamblers quit before they win big!</p>
+		</header>
+
+
+
+		<div class="archive-grid" id="archiveGrid">
+			<!-- Slot Machine -->
+			<div class="archive-card">
+				<div class="card-header">
+					<img src="slot.png" alt="Slot Machine" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.3;">
+
+				</div>
+				<h3 class="archive-title">Slot Machine</h3>
+				<div class="archive-meta">
+					<span>🎰 Slots</span>
+				</div>
+
+				<p></p>
+				<div style="padding: 0 16px 16px 16px;">
+					<a href="../casinogames/slot/slot.html" class="status-pill status-available"
+						style="text-decoration: none; display: inline-block;">Play Now →</a>
+				</div>
+			</div>
+
+			<!-- Blackjack -->
+			<div class="archive-card">
+				<div class="card-header">
+					<img src="blackjack.png" alt="Blackjack" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.3;">
+
+				</div>
+				<h3 class="archive-title">Blackjack</h3>
+				<div class="archive-meta">
+					<span>♠️ Card Game</span>
+				</div>
+
+				
+				<div style="padding: 0 16px 16px 16px;">
+					<a href="../casinogames/blackjack/blackjack.html" class="status-pill status-available"
+						style="text-decoration: none; display: inline-block;">Play Now →</a>
+				</div>
+			</div>
+
+			<!-- Poker -->
+			<div class="archive-card">
+				<div class="card-header">
+					<img src="poker.png" alt="Poker" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.3;">
+
+				</div>
+				<h3 class="archive-title">Poker</h3>
+				<div class="archive-meta">
+					<span>♥️ Card Game</span>
+				</div>
+
+
+				<div style="padding: 0 16px 16px 16px;">
+					<a href="../casinogames/poker/poker.html" class="status-pill status-available"
+						style="text-decoration: none; display: inline-block;">Play Now →</a>
+				</div>
+			</div>
+
+			<!-- Cursed Dice -->
+			<div class="archive-card">
+				<div class="card-header">
+					<img src="curseddice.png" alt="Cursed Dice" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.3;">
+
+				</div>
+				<h3 class="archive-title">Cursed Dice</h3>
+				<div class="archive-meta">
+					<span>🎲 Dice Game</span>
+				</div>
+
+				<div style="padding: 0 16px 16px 16px;">
+					<a href="../casinogames/curseddice/curseddice.html" class="status-pill status-available"
+						style="text-decoration: none; display: inline-block;">Play Now →</a>
+				</div>
+			</div>
+
+			<!-- Roulette -->
+			<div class="archive-card">
+				<div class="card-header">
+					<img src="roulette.png" alt="Roulette" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.3;">
+
+				</div>
+				<h3 class="archive-title">Roulette</h3>
+				<div class="archive-meta">
+					<span>🎡 Spinning Game</span>
+				</div>
+
+				<div style="padding: 0 16px 16px 16px;">
+					<a href="../casinogames/roulette/roulette.html" class="status-pill status-available"
+						style="text-decoration: none; display: inline-block;">Play Now →</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		<p>Infinity Nexus Casino &copy; <span id="footer-year">2026</span></p>
+		<p>All rights reserved</p>
+	</footer>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			document.getElementById('footer-year').textContent = new Date().getFullYear();
+		});
+	</script>
+</body>
+
+</html>
