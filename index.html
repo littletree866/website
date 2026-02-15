@@ -2,701 +2,871 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Infinity Nexus</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	<link rel="icon" href="icon.jpg" type="image/x-icon">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
-		rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
-
-
-	<style>
-		:root {
-			--primary: #6e8efb;
-			--secondary: #a777e3;
-			--dark: #2c3e50;
-			--light: #f8f9fa;
-			--text: #000000;
-			--border-radius: 12px;
-			--transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-		}
-
-		.main-title {
-			font-size: clamp(2.2rem, 4.2vw, 3.2rem);
-			font-weight: 500;
-			letter-spacing: 0.06em;
-			text-align: center;
-			background: linear-gradient(135deg, #0f0f0f, #4a9b6d, #0f0f0fa8);
-
-
-			background-clip: text;
-			-webkit-background-clip: text;
-			color: transparent;
-			text-shadow: none;
-			animation: none;
-		}
-
-		.petals {
-			position: fixed;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			pointer-events: none;
-			z-index: 9999;
-
-			background-image:
-				radial-gradient(6px 4px at 20px 30px, #ffc0cb 98%, transparent),
-				radial-gradient(5px 3px at 100px 150px, #ffb7c5 98%, transparent),
-				radial-gradient(6px 4px at 200px 80px, #ffd1dc 98%, transparent),
-				radial-gradient(5px 3px at 300px 200px, #ffe4e9 98%, transparent),
-				radial-gradient(6px 4px at 400px 100px, #ffcad4 98%, transparent),
-				radial-gradient(5px 3px at 500px 250px, #ffc1cc 98%, transparent);
-
-			background-repeat: repeat;
-			background-size: 700px 700px;
-
-			animation: petalsFall 12s linear infinite;
-			opacity: 0.9;
-			filter: drop-shadow(0 0 4px rgba(255, 182, 193, 0.8));
-		}
-
-		@keyframes petalsFall {
-			0% {
-				background-position: 0 -700px;
-			}
-
-			50% {
-				background-position: 40px 0;
-			}
-
-			100% {
-				background-position: 0 700px;
-			}
-		}
-
-		.petals::after {
-			content: "";
-			position: absolute;
-			width: 100%;
-			height: 100%;
-
-			background-image:
-				radial-gradient(4px 3px at 50px 100px, #ffe4ec 98%, transparent),
-				radial-gradient(3px 2px at 250px 300px, #ffd6e0 98%, transparent),
-				radial-gradient(4px 3px at 450px 200px, #ffc2d1 98%, transparent);
-
-			background-repeat: repeat;
-			background-size: 600px 600px;
-			animation: petalsFallReverse 18s linear infinite;
-			opacity: 0.6;
-		}
-
-		@keyframes petalsFallReverse {
-			0% {
-				background-position: 0 -600px;
-			}
-
-			100% {
-				background-position: -60px 600px;
-			}
-		}
-
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-
-		html,
-		body {
-			height: 100%;
-		}
-
-		body {
-			font-family: 'DM Sans', sans-serif;
-			line-height: 1.6;
-			color: #000000;
-			background: linear-gradient(-45deg,
-					#e6fff2,
-					#ccf5e1,
-					#b3ecd2,
-					#d7f9ff,
-					#f0ffff);
-
-			background-size: 600% 600%;
-			animation: gradientBG 26s ease infinite;
-			display: flex;
-			flex-direction: column;
-			min-height: 100vh;
-		}
-
-		@keyframes gradientBG {
-			0% {
-				background-position: 0% 50%;
-			}
-
-			25% {
-				background-position: 100% 50%;
-			}
-
-			50% {
-				background-position: 100% 100%;
-			}
-
-			75% {
-				background-position: 0% 100%;
-			}
-
-			100% {
-				background-position: 0% 50%;
-			}
-		}
-
-		.container {
-			max-width: 1100px;
-			width: 100%;
-			margin: 0 auto;
-			padding: 0 20px;
-		}
-
-		header {
-			padding: 40px 0;
-			margin-bottom: 28px;
-			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-			text-align: center;
-			color: #08324f;
-			background: linear-gradient(135deg, #dfffe4, #a8ffc1, #6bdc8a);
-
-			box-shadow: 0 12px 40px rgba(160, 220, 255, 0.45);
-			backdrop-filter: blur(6px);
-			border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-			text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
-		}
-
-		.description {
-			color: rgb(3, 0, 0);
-			margin: 30px 0 15px 0;
-			padding: 12px 16px;
-			border-radius: var(--border-radius);
-			background: rgba(255, 255, 255, 0.15);
-			backdrop-filter: blur(10px);
-			font-family: 'DM Sans', sans-serif;
-			font-size: 0.95rem;
-			font-weight: 400;
-			letter-spacing: 0.5px;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-		}
-
-		header h1 {
-			font-size: 2.5rem;
-			font-weight: 700;
-			margin-bottom: 15px;
-			letter-spacing: -0.5px;
-		}
-
-		.links-section {
-			display: block;
-		}
-
-		.category-header {
-			color: rgb(3, 0, 0);
-			margin: 30px 0 15px 0;
-			padding: 12px 16px;
-			border-radius: var(--border-radius);
-			background: rgba(255, 255, 255, 0.15);
-			backdrop-filter: blur(10px);
-			font-family: 'DM Sans', sans-serif;
-			font-size: 1.4rem;
-			font-weight: lighter;
-			letter-spacing: 0.5px;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-		}
-
-		/* Section header */
-		.section-header {
-			font-size: 1.5rem;
-			font-weight: 700;
-			color: var(--dark);
-			margin: 40px 0 24px 0;
-			display: flex;
-			align-items: center;
-			gap: 12px;
-		}
-
-		/* Grid */
-		.archive-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-			gap: 24px;
-			margin-bottom: 32px;
-		}
-
-		/* Card */
-		.archive-card {
-			background: white;
-			border-radius: 12px;
-			overflow: hidden;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-			transition: all 0.3s ease;
-			animation: cardFadeUp 0.5s ease forwards;
-		}
-
-		@keyframes cardFadeUp {
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
-
-			from {
-				opacity: 0;
-				transform: translateY(20px);
-			}
-		}
-
-		.archive-card:hover {
-			transform: translateY(-8px);
-			box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
-		}
-
-		.card-header {
-			height: 160px;
-			background: linear-gradient(135deg, var(--primary), var(--secondary));
-			display: flex;
-			align-items: flex-end;
-			padding: 16px;
-			position: relative;
-			overflow: hidden;
-		}
-
-		.archive-tag {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 12px;
-			border-radius: 20px;
-			font-size: 0.75rem;
-			font-weight: 700;
-			text-transform: uppercase;
-			letter-spacing: 0.5px;
-			background: rgba(255, 255, 255, 0.2);
-			color: white;
-			margin-bottom: 12px;
-		}
-
-		.archive-title {
-			font-size: 1.25rem;
-			font-weight: 700;
-			color: var(--dark);
-			margin-bottom: 12px;
-			padding: 16px 16px 0 16px;
-		}
-
-		.archive-meta {
-			display: flex;
-			gap: 12px;
-			font-size: 0.875rem;
-			color: var(--muted);
-			padding: 0 16px;
-			margin-bottom: 12px;
-		}
-
-		.content-link {
-			font-size: 0.95rem;
-			line-height: 1.5;
-			color: #555;
-			padding: 0 16px 16px 16px;
-		}
-
-		/* Status pill */
-		.status-pill {
-			display: inline-flex;
-			align-items: center;
-			padding: 6px 12px;
-			border-radius: 20px;
-			font-size: 0.75rem;
-			font-weight: 700;
-			text-transform: uppercase;
-			letter-spacing: 0.4px;
-			text-decoration: none;
-			color: white;
-		}
-
-		.status-available {
-			background: #D1FAE5;
-			color: #065F46;
-		}
-
-		.status-popular {
-			background: #FEF3C7;
-			color: #B45309;
-		}
-
-		.status-revamped {
-			background: #EFF6FF;
-			color: #1E40AF;
-		}
-
-		.status-update {
-			background: #EFF6FF;
-			color: #1E40AF;
-		}
-
-		.status-unavailable {
-			background: #F3F4F6;
-			color: #6B7280;
-		}
-
-		@keyframes fadeInUp {
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
-
-			from {
-				opacity: 0;
-				transform: translateY(20px);
-			}
-		}
-
-		footer {
-			background: var(--dark);
-			color: white;
-			padding: 40px 0;
-			text-align: center;
-			margin-top: 60px;
-		}
-
-		.copyright {
-			margin-top: 15px;
-			opacity: 0.85;
-			font-size: 0.9rem;
-		}
-
-		.coming-soon-badge {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 10px;
-			border-radius: 999px;
-			font-size: 9px;
-			font-weight: 800;
-			letter-spacing: .5px;
-			text-transform: uppercase;
-			color: #af1e1e;
-			background: #ffefef;
-			border: 1px solid #fd9393;
-			margin-left: 8px;
-		}
-
-		.popular-badge {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 10px;
-			border-radius: 999px;
-			font-size: 9px;
-			font-weight: 800;
-			letter-spacing: .5px;
-			text-transform: uppercase;
-			color: #b45309;
-			background: #fffaeb;
-			border: 1px solid #fcd34d;
-		}
-
-		.revamped-badge {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 10px;
-			border-radius: 999px;
-			font-size: 9px;
-			font-weight: 800;
-			letter-spacing: .5px;
-			text-transform: uppercase;
-			color: #1E40AF;
-			background: #EFF6FF;
-			border: 1px solid #93C5FD;
-		}
-
-		.unavailable-badge {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 10px;
-			border-radius: 999px;
-			font-size: 9px;
-			font-weight: 700;
-			letter-spacing: .4px;
-			text-transform: uppercase;
-			color: #55555a;
-			background: #f1b5bd;
-			border: 1px solid #C7D2FE;
-		}
-
-		.beta-badge {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 10px;
-			border-radius: 999px;
-			font-size: 9px;
-			font-weight: 700;
-			letter-spacing: .4px;
-			text-transform: uppercase;
-			color: #312E81;
-			background: #EEF2FF;
-			border: 1px solid #C7D2FE;
-		}
-
-		.new-badge {
-			display: inline-flex;
-			align-items: center;
-			padding: 4px 10px;
-			border-radius: 999px;
-			font-size: 9px;
-			font-weight: 800;
-			letter-spacing: .5px;
-			text-transform: uppercase;
-			color: #065F46;
-			background: #ECFDF5;
-			border: 1px solid #6EE7B7;
-		}
-
-		@media (max-width: 768px) {
-			header h1 {
-				font-size: 1.8rem;
-			}
-
-			.category-header {
-				font-size: 1.1rem;
-			}
-
-			.container {
-				padding: 0 15px;
-			}
-
-			header {
-				padding: 40px 0;
-			}
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --text: #333;
+            --border-radius: 12px;
+
+        }
+
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: linear-gradient(135deg, #f5f7fa 0%, #eaf0ff 100%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body> :not(footer) {
+            padding: 28px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Main Layout Wrapper */
+        .main-wrapper {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 5px 0px;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            flex-shrink: 0;
+            width: 300px;
+            max-height: fit-content;
+            position: sticky;
+            top: 28px;
+            margin-left: -28px;
+        }
+
+        .sidebar-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .sidebar-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-content p {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar-announcement {
+            background: linear-gradient(135deg, rgba(110, 142, 251, 0.1), rgba(167, 119, 227, 0.1));
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .sidebar-announcement p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        /* Main Content Area */
+        .content-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--dark);
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 6.0vw, 4.0rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            text-align: center;
+            color: white;
+
+            margin: 0;
+            /* remove weird tiny top margin */
+            z-index: 1;
+
+            display: flex;
+            justify-content: center;
+            /* horizontal centering, already handled by text-align too */
+            align-items: center;
+            /* vertical centering */
+            height: 100%;
+            /* make it fill the header's height */
+        }
+
+        /* Header */
+        header {
+            padding: 50px 20px;
+            margin: 32px auto;
+            max-width: 800px;
+            text-align: center;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--border-radius);
+            box-shadow: 0 12px 40px rgba(110, 142, 251, 0.2);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+
+            display: flex;
+            /* allows vertical centering */
+            justify-content: center;
+            align-items: center;
+        }
+
+
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: shimmer 3s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-20px, -20px);
+            }
+        }
+
+        header h1 {
+            font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header p {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+        }
+
+        header a {
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        header a:hover {
+            border-bottom-color: rgba(255, 255, 255, 0.8);
+            opacity: 0.85;
+        }
+
+        .description {
+            margin-top: 20px;
+            /* space below main title */
+            max-width: 700px;
+            /* limit width, so it doesn’t stretch too far */
+            text-align: center;
+            /* center text */
+            color: white;
+            /* default text color */
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            background: none;
+            /* remove purple block */
+            border-radius: 12px;
+            /* optional: make it feel like a floating block */
+            padding: 0;
+            /* remove extra padding */
+        }
+
+        .description p {
+            margin: 4px 0;
+            /* spacing between paragraphs */
+        }
+
+        .description p.warning {
+            color: red;
+            font-weight: bold;
+        }
+
+
+
+
+        .category-header {
+            margin: 32px 0 20px 0;
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: 0 4px 12px rgba(110, 142, 251, 0.08);
+            border: 1px solid rgba(110, 142, 251, 0.1);
+            transition: all 0.2s ease;
+        }
+
+
+        .category-header:hover {
+            box-shadow: 0 6px 20px rgba(110, 142, 251, 0.12);
+            border-color: rgba(110, 142, 251, 0.2);
+        }
+
+
+
+        .category-header {
+            color: var(--dark);
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        /* Section Header */
+        .section-header {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 48px 0 24px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Grid Layout */
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 28px;
+            margin-bottom: 48px;
+        }
+
+        /* Cards */
+        .archive-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            animation: cardFadeUp 0.5s ease forwards;
+            opacity: 0;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        @keyframes cardFadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        .archive-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
+            border-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .archive-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .archive-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .archive-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .archive-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .archive-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .archive-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .card-header {
+            height: 160px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: shimmer 4s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .archive-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(6px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .archive-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 12px;
+            padding: 16px 16px 0 16px;
+        }
+
+        .archive-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.875rem;
+            color: var(--muted);
+            padding: 0 16px;
+            margin-bottom: 12px;
+        }
+
+        .content-link {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #555;
+            padding: 0 16px 16px 16px;
+        }
+
+        /* Badges - Professional & Refined */
+        .badge-base {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            border: none;
+            line-height: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .badge-base:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-available,
+        .status-pill.status-available {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .new-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-popular,
+        .popular-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .status-revamped,
+        .revamped-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .status-unavailable,
+        .unavailable-badge {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+        }
+
+        .beta-badge {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .coming-soon-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--dark), #1a2332);
+            color: white;
+            padding: 48px 0;
+            text-align: center;
+            margin-top: 80px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer a {
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            margin-top: 20px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            color: var(--light-gray);
+        }
+
+        /* Utility Classes */
+        .header-pattern {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-alt {
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.9) 0%,
+                    rgba(248, 250, 252, 0.95) 100%);
+            border-bottom: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .main-wrapper {
+                flex-direction: column;
+                padding: 0 20px;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: none;
+                position: static;
+            }
+
+            .archive-grid {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 48px 20px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .category-header {
+                font-size: 1.25rem;
+                padding: 14px 20px;
+            }
+
+            .archive-grid {
+                gap: 20px;
+            }
+
+            .section-header {
+                font-size: 1.5rem;
+                margin: 32px 0 20px 0;
+            }
+
+            .archive-card {
+                animation: cardFadeUp 0.5s ease forwards;
+            }
+
+            .card-header {
+                height: 140px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            header {
+                padding: 40px 16px;
+            }
+
+            .main-wrapper {
+                padding: 0 16px;
+            }
+
+            body> :not(footer) {
+                padding: 0;
+            }
+
+            .archive-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .badge-base,
+            .coming-soon-badge,
+            .popular-badge,
+            .revamped-badge,
+            .unavailable-badge,
+            .beta-badge,
+            .new-badge,
+            .status-available {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .petals {
+                display: none;
+            }
+
+            body {
+                background: white;
+            }
+        }
+    </style>
+
 </head>
 
 <body>
-	<div class="petals"></div>
-	<header>
-		<div class="container">
-			<h1 style="font-family: 'DM Sans', sans-serif;  font-size: 35px; font-weight: 700;" class="main-title">
-				Infinity Nexus</h1>
-			<p>Early Spring Update</p>
-			<p style="font-weight: 400; ">Welcome! This is an open-sourced personal project
-				with any contributions
-				welcome.</p>
-			<p style="font-weight: 400;">This site is regularly updated with new games, features, and improvements.
-				Be sure to check back often!</p>
-			<p style="font-weight: 400;">For complete release notes click <a href="info/updateinfo/updateinfo.html"
-					style="font-weight: bold; color:#0a0a0a">here</a>.</p>
-			<p style="font-weight: bold; font-family: 'DM Sans';">Last Update February 16, 2026 • Version 1.18.24</p>
-			<p style="font-weight: bold; font-family: 'DM Sans';">Next Update February 24, 2026 • Version 1.19.24</p>
 
-		</div>
-	</header>
-
-	<div class="container" id="main">
-
-		<div class="links-section">
-		
-
-			<div class="archive-grid">
-				<!-- January Challenge -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Challenge</div>
-					</div>
-					<h3 class="archive-title">January Challenge</h3>
-					<div class="archive-meta">
-						<span>📅 January 2026</span>
-					</div>
-					<p class="content-link">Test your skills against this month's special challenge!</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="monthlychallenges/jan2026/Jan2026Challenge.html"
-							class="status-pill status-available">Play Now →</a>
-					</div>
-				</div>
-
-				<!-- February Challenge -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Challenge</div>
-					</div>
-					<h3 class="archive-title">February Challenge</h3>
-					<div class="archive-meta">
-						<span>📅 February 2026</span>
-					</div>
-					<p class="content-link">The current month's challenge is live! Can you beat it?</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="monthlychallenges/feb2026/Feb2026Challenge.html"
-							class="status-pill status-available">Play Now →</a>
-					</div>
-				</div>
-
-				<!-- March Challenge -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Challenge</div>
-					</div>
-					<h3 class="archive-title">March Challenge</h3>
-					<div class="archive-meta">
-						<span>📅 March 2026</span>
-					</div>
-					<p class="content-link">Coming soon! Stay tuned for the next challenge.</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<span class="coming-soon-badge">Coming Soon</span>
-					</div>
-				</div>
-			
-
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Featured</div>
-					</div>
-					<h3 class="archive-title">Must Play Games</h3>
-					<div class="archive-meta">
-						<span>⭐ 6 Games</span>
-					</div>
-					<p class="content-link">Curated selection of my favorite games you won't want to miss!</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="mainpages/mainpage2.html" class="status-pill status-available">Explore →</a>
-					</div>
-				</div>
+    <header>
+        <div class="container">
+            <h1 style="font-family: 'DM Sans', sans-serif; font-weight: 700;" class="main-title"> Infinity Nexus</h1>
 
 
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Collection</div>
-					</div>
-					<h3 class="archive-title">Game Corner</h3>
-					<div class="archive-meta">
-						<span>🕹️ 9 Games</span>
-					</div>
-					<p class="content-link">A diverse collection of casual, action, and puzzle games for everyone!</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="mainpages/mainpage3.html" class="status-pill status-available">Explore →</a>
-					</div>
-				</div>
-			
+        </div>
 
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Casino</div>
-					</div>
-					<h3 class="archive-title">Casino Games</h3>
-					<div class="archive-meta">
-						<span>🎰 5 Games</span>
-					</div>
-					<p class="content-link">Test your luck with classic casino games like Slots, Blackjack, Poker, and
-						more!</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="mainpages/mainpage1.html" class="status-pill status-available">Play Now →</a>
-					</div>
-				</div>
-</div>
+        </div>
 
-			<div class="archive-grid">
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Simulation</div>
-					</div>
-					<h3 class="archive-title">Simulation Games</h3>
-					<div class="archive-meta">
-						<span>🌍 6 Games</span>
-					</div>
-					<p class="content-link">Build empires, manage cities, and learn economics through interactive
-						simulations!</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="mainpages/mainpage4.html" class="status-pill status-available">Explore →</a>
-					</div>
-				</div>
+    </header>
+
+    <div class="main-wrapper">
+        <!-- Left Sidebar -->
+        <aside class="sidebar sidebar-left">
+            <div class="sidebar-content">
+                <h3>📢 Announcements</h3>
+                <div class="sidebar-announcement">
+                    <p><strong>Coming Soon!</strong> New features and updates are on the way.</p>
+
+                    <p>Check back regularly for exciting news and updates about new games and features!</p>
+                    <p style="font-weight: 400; ">Welcome! This is an open-sourced personal project
+                        with any contributions
+                        welcome.</p>
+                    <p style="font-weight: 400;">This site is regularly updated with new games, features, and
+                        improvements.
+                        Be sure to check back often!</p>
+                    <p style="color:red; font-weight: bold;">! A new Pokemon rom hack is coming soon!</p>
+                    <p style="font-weight: 400;">For complete release notes click <a
+                            href="info/updateinfo/updateinfo.html" style="font-weight: bold; color:#0a0a0a">here</a>.
+                    </p>
+                    <p style="font-weight: bold; font-family: 'DM Sans';">Last Update February 24, 2026 • Version
+                        1.19.24</p>
+                    <p style="font-weight: bold; font-family: 'DM Sans';">Next Update March 6, 2026 • Version 1.20.24
+                    </p>
+
+        </aside>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <div class="container" id="main">
+
+                <div class="links-section">
 
 
-				<!-- Game Documentation -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Guide</div>
-					</div>
-					<h3 class="archive-title">Game Documentation</h3>
-					<div class="archive-meta">
-						<span>📖 Guides</span>
-					</div>
-					<p class="content-link">Read detailed guides, tips, and documentation for all games</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="info/docs/documentation.html" class="status-pill status-available">Read →</a>
-					</div>
-				</div>
+                    <div class="archive-grid">
+                        <!-- Monthly Challenges -->
+                        <div class="archive-card">
+                            <div class="card-header">
 
-				<!-- Update Info -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">News</div>
-					</div>
-					<h3 class="archive-title">Update Info</h3>
-					<div class="archive-meta">
-						<span>📝 Changelog</span>
-					</div>
-					<p class="content-link">Check out the latest updates, new features, and improvements</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="info/updateinfo/updateinfo.html" class="status-pill status-available">View →</a>
-					</div>
-				</div>
+                            </div>
+                            <h3 class="archive-title">Monthly Challenges</h3>
+                            <div class="archive-meta">
+                                <span>🏆 3 Challenges</span>
+                            </div>
+                            <p class="content-link">Test your skills against special monthly challenges with exclusive
+                                rewards!
+                            </p>
+                            <div style="padding: 0 16px 16px 16px;">
+                                <a href="mainpages/mainpage6.html" class="status-pill status-available">Explore →</a>
+                            </div>
+                        </div>
 
-				<!-- Archives -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Archive</div>
-					</div>
-					<h3 class="archive-title">Archives</h3>
-					<div class="archive-meta">
-						<span>🗝️ History</span>
-					</div>
-					<p class="content-link">Explore removed games and historical versions of released titles</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="info/archives/archives.html" class="status-pill status-available">Browse →</a>
-					</div>
-				</div>
 
-				<!-- Source Code -->
-				<div class="archive-card">
-					<div class="card-header">
-						<div class="archive-tag">Open Source</div>
-					</div>
-					<h3 class="archive-title">Source Code</h3>
-					<div class="archive-meta">
-						<span>💻 GitHub</span>
-					</div>
-					<p class="content-link">View the open-source code on GitHub and contribute to the project!</p>
-					<div style="padding: 0 16px 16px 16px;">
-						<a href="https://github.com/littletree866/infinity-nexus" class="status-pill status-available"
-							target="_blank">GitHub →</a>
-					</div>
-				</div>
-				</div>
-		</div>
-	</div>
+                        <div class="archive-card">
+                            <div class="card-header">
 
-	<footer>
-		<div class="container">
-			<a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a>
-			| <a href="info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
-			<p class="copyright">© <span id="copyright-year"></span> Infinity Nexus</p>
-			<p class="author">Created by Littletree866</p>
-		</div>
-	</footer>
+                            </div>
+                            <h3 class="archive-title">Must Play Games</h3>
+                            <div class="archive-meta">
+                                <span>⭐ 6 Games</span>
+                            </div>
+                            <p class="content-link">Curated selection of my favorite games you won't want to miss!</p>
+                            <div style="padding: 0 16px 16px 16px;">
+                                <a href="mainpages/mainpage2.html" class="status-pill status-available">Explore →</a>
+                            </div>
+                        </div>
 
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			document.getElementById('copyright-year').textContent = new Date().getFullYear();
-		});
-	</script>
+
+                        <div class="archive-card">
+
+                            <div class="card-header">
+
+
+
+                            </div>
+                            <h3 class="archive-title">Game Corner</h3>
+                            <div class="archive-meta">
+
+                                <span>🕹️ 9 Games</span>
+                            </div>
+                            <p class="content-link">A diverse collection of casual, action, and puzzle games for
+                                everyone!</p>
+                            <div style="padding: 0 16px 16px 16px;">
+                                <a href="mainpages/mainpage3.html" class="status-pill status-available">Explore →</a>
+                            </div>
+                        </div>
+
+
+                        <div class="archive-card">
+                            <div class="card-header">
+
+                            </div>
+                            <h3 class="archive-title">Casino Games</h3>
+                            <div class="archive-meta">
+                                <span>🎰 5 Games</span>
+                            </div>
+                            <p class="content-link">Test your luck with classic casino games like Slots, Blackjack,
+                                Poker, and
+                                more!</p>
+                            <div style="padding: 0 16px 16px 16px;">
+                                <a href="mainpages/mainpage1.html" class="status-pill status-available">Play Now →</a>
+                            </div>
+                        </div>
+
+
+
+                        <div class="archive-card">
+                            <div class="card-header">
+
+                            </div>
+                            <h3 class="archive-title">Simulation Games</h3>
+                            <div class="archive-meta">
+                                <span>🌍 6 Games</span>
+                            </div>
+                            <p class="content-link">Build empires, manage cities, and learn economics through
+                                interactive
+                                simulations!</p>
+                            <div style="padding: 0 16px 16px 16px;">
+                                <a href="mainpages/mainpage4.html" class="status-pill status-available">Explore →</a>
+                            </div>
+                        </div>
+
+                        <!-- Information & Guides -->
+                        <div class="archive-card">
+                            <div class="card-header">
+
+                            </div>
+                            <h3 class="archive-title">Information & Guides</h3>
+                            <div class="archive-meta">
+                                <span>📚 4 Resources</span>
+                            </div>
+                            <p class="content-link">Access comprehensive guides, documentation, updates, and archives
+                                for all
+                                games.</p>
+                            <div style="padding: 0 16px 16px 16px;">
+                                <a href="mainpages/mainpage5.html" class="status-pill status-available">Explore →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="container">
+            <a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a>
+            | <a href="info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
+            <p class="copyright">© <span id="copyright-year"></span> Infinity Nexus</p>
+            <p class="author">Created by Littletree866</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+        });
+    </script>
 </body>
 
 </html>

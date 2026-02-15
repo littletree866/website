@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information & Guides - Infinity Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="../icon.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --text: #000000;
+            --border-radius: 12px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            color: #000000;
+            background: linear-gradient(-45deg,
+                    #e6fff2,
+                    #ccf5e1,
+                    #b3ecd2,
+                    #d7f9ff,
+                    #f0ffff);
+            background-size: 600% 600%;
+            animation: gradientBG 26s ease infinite;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            25% {
+                background-position: 100% 50%;
+            }
+
+            50% {
+                background-position: 100% 100%;
+            }
+
+            75% {
+                background-position: 0% 100%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            gap: 12px;
+        }
+
+        header {
+            padding: 40px 0;
+            margin-bottom: 32px;
+            text-align: center;
+            color: #08324f;
+            background: linear-gradient(135deg, #dfffe4, #a8ffc1, #6bdc8a);
+            box-shadow: 0 12px 40px rgba(160, 220, 255, 0.45);
+            backdrop-filter: blur(6px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-weight: 400;
+            font-size: 1.1rem;
+            color: rgba(8, 50, 79, 0.9);
+        }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .archive-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            animation: cardFadeUp 0.5s ease forwards;
+        }
+
+        @keyframes cardFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .archive-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
+        }
+
+        .card-header {
+            height: 160px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: flex-end;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .archive-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .archive-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 12px;
+            padding: 16px 16px 0 16px;
+        }
+
+        .archive-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.875rem;
+            color: #666;
+            padding: 0 16px;
+            margin-bottom: 12px;
+        }
+
+        .content-link {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #555;
+            padding: 0 16px 16px 16px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .status-available {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .copyright {
+            margin-top: 15px;
+            opacity: 0.85;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            header p {
+                font-size: 0.95rem;
+            }
+
+            .archive-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 16px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>📚 Information & Guides</h1>
+            <p>Explore comprehensive guides, documentation, and resources</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+
+        <div class="archive-grid">
+            <!-- Game Documentation -->
+            <div class="archive-card">
+                <div class="card-header">
+                    <div class="archive-tag">Guide</div>
+                </div>
+                <h3 class="archive-title">Game Documentation</h3>
+                <div class="archive-meta">
+                    <span>📖 Complete Guides</span>
+                </div>
+                <p class="content-link">Read detailed guides, tips, strategies, and comprehensive documentation for all
+                    games on the platform.</p>
+                <div style="padding: 0 16px 16px 16px;">
+                    <a href="../info/docs/documentation.html" class="status-pill status-available">Read →</a>
+                </div>
+            </div>
+
+            <!-- Update Info -->
+            <div class="archive-card">
+                <div class="card-header">
+                    <div class="archive-tag">News</div>
+                </div>
+                <h3 class="archive-title">Update Info</h3>
+                <div class="archive-meta">
+                    <span>📝 Changelog</span>
+                </div>
+                <p class="content-link">Check out the latest updates, new features, bug fixes, and improvements to the
+                    platform.</p>
+                <div style="padding: 0 16px 16px 16px;">
+                    <a href="../info/updateinfo/updateinfo.html" class="status-pill status-available">View →</a>
+                </div>
+            </div>
+
+            <!-- Archives -->
+            <div class="archive-card">
+                <div class="card-header">
+                    <div class="archive-tag">Archive</div>
+                </div>
+                <h3 class="archive-title">Archives</h3>
+                <div class="archive-meta">
+                    <span>🗝️ Historical</span>
+                </div>
+                <p class="content-link">Explore removed games and historical versions of released titles from previous
+                    updates.</p>
+                <div style="padding: 0 16px 16px 16px;">
+                    <a href="../info/archives/archives.html" class="status-pill status-available">Browse →</a>
+                </div>
+            </div>
+
+            <!-- Source Code -->
+            <div class="archive-card">
+                <div class="card-header">
+                    <div class="archive-tag">Open Source</div>
+                </div>
+                <h3 class="archive-title">Source Code</h3>
+                <div class="archive-meta">
+                    <span>💻 GitHub</span>
+                </div>
+                <p class="content-link">View the open-source code on GitHub and contribute to the project or report
+                    issues!</p>
+                <div style="padding: 0 16px 16px 16px;">
+                    <a href="https://github.com/littletree866/infinity-nexus" class="status-pill status-available"
+                        target="_blank">GitHub →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a>
+            | <a href="../info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
+            <p class="copyright">© <span id="copyright-year"></span> Infinity Nexus</p>
+            <p class="author">Created by Littletree866</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+
+</html>

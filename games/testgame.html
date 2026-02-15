@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Empire</title>
+  <link rel="icon" href="../icon.jpg" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "POWER CLEAR", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(107, 140, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 200;
+      margin-bottom: 20px;
+      font-size: 48px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+ 
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      flex: 1;
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 200;
+      margin-top: 8px;
+    }
+
+    div{
+      font-weight: 200;
+    }
+
+    #cashDisplay {
+      font-size: 32px;
+      font-weight: 200;
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .section:hover::before {
+      left: 100%;
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .section h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      font-weight: 200;
+    }
+
+    .stat-row {
+      margin: 12px 0;
+      font-size: 16px;
+    }
+
+    .stat-row strong {
+      font-weight: 700;
+    }
+
+    .progress-container {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      width: 100%;
+      height: 25px;
+      margin: 12px 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.3s;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 8px 0;
+      font-weight: 200;
+      font-size: 14px;
+      font-family: "POWER CLEAR", sans-serif;
+      width: 100%;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background: rgba(0, 0, 0, 0.2);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .achievement-bar {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .achievement-bar h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .achievements {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .achievement {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: help;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .achievement:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .achievement.locked {
+      opacity: 0.3;
+    }
+
+    .floating-text {
+      position: fixed;
+      pointer-events: none;
+      font-weight: 200;
+      font-size: 24px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes float-up {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(0.8);
+      }
+    }
+
+    .income-text {
+      animation: float-up 2s ease-out forwards;
+    }
+  </style>
+</head>
+
+<body>
+
+  <body>
+
+    <div class="container">
+      <h1>🚀 Startup Empire</h1>
+
+      <div class="header-stats">
+        <div class="stat-box">
+          <div class="stat-label">💵 Cash on Hand</div>
+          <div class="stat-value" id="cashDisplay">$<span id="cash">100</span></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">📈 Income/Second</div>
+          <div class="stat-value" id="incomePerSec">$0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">💰 Total Earned</div>
+          <div class="stat-value" id="totalEarned">$100</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">🏆 Total Upgrades</div>
+          <div class="stat-value" id="totalUpgrades">0</div>
+        </div>
+      </div>
+
+      <div class="dashboard">
+        <div class="section">
+          <div class="icon">👩‍💼</div>
+          <h2>Staff</h2>
+          <div class="stat-row">Level: <strong id="staffSkill">1</strong></div>
+          <div class="progress-container">
+            <div class="progress-bar" id="staffBar"></div>
+          </div>
+          <button onclick="upgradeStaff()">
+            Train Staff
+            <br><small>($<span id="staffCost">50</span>)</small>
+          </button>
+          <div class="achievement-bar">
+            <h3>Milestones</h3>
+            <div class="achievements" id="staffAchievements"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="icon">🏢</div>
+          <h2>Office</h2>
+          <div class="stat-row">Level: <strong id="officeLevel">1</strong></div>
+          <div class="progress-container">
+            <div class="progress-bar" id="officeBar"></div>
+          </div>
+          <button onclick="upgradeOffice()">
+            Upgrade Office
+            <br><small>($<span id="officeCost">75</span>)</small>
+          </button>
+          <div class="achievement-bar">
+            <h3>Milestones</h3>
+            <div class="achievements" id="officeAchievements"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="icon">📦</div>
+          <h2>Product</h2>
+          <div class="stat-row">Quality: <strong id="productQuality">1</strong></div>
+          <div class="progress-container">
+            <div class="progress-bar" id="productBar"></div>
+          </div>
+          <button onclick="upgradeProduct()">
+            Improve Product
+            <br><small>($<span id="productCost">60</span>)</small>
+          </button>
+          <div class="achievement-bar">
+            <h3>Milestones</h3>
+            <div class="achievements" id="productAchievements"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="icon">📣</div>
+          <h2>Marketing</h2>
+          <div class="stat-row">Power: <strong id="marketingPower">1</strong></div>
+          <div class="progress-container">
+            <div class="progress-bar" id="marketingBar"></div>
+          </div>
+          <button onclick="upgradeMarketing()">
+            Boost Marketing
+            <br><small>($<span id="marketingCost">40</span>)</small>
+          </button>
+          <div class="achievement-bar">
+            <h3>Milestones</h3>
+            <div class="achievements" id="marketingAchievements"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let cash = 100;
+      let totalEarned = 100;
+      let totalUpgrades = 0;
+      let staffSkill = 1, officeLevel = 1, productQuality = 1, marketingPower = 1;
+      let staffCost = 50, officeCost = 75, productCost = 60, marketingCost = 40;
+
+      const milestones = {
+        staff: [5, 10, 25, 50, 100],
+        office: [5, 10, 25, 50, 100],
+        product: [5, 10, 25, 50, 100],
+        marketing: [5, 10, 25, 50, 100]
+      };
+
+      const milestoneIcons = ['🥉', '🥈', '🥇', '💎', '👑'];
+
+      function updateDisplay() {
+        document.getElementById('cash').innerText = cash;
+        document.getElementById('staffSkill').innerText = staffSkill;
+        document.getElementById('officeLevel').innerText = officeLevel;
+        document.getElementById('productQuality').innerText = productQuality;
+        document.getElementById('marketingPower').innerText = marketingPower;
+        document.getElementById('totalUpgrades').innerText = totalUpgrades;
+        document.getElementById('totalEarned').innerText = '$' + formatNumber(totalEarned);
+
+        document.getElementById('staffCost').innerText = staffCost;
+        document.getElementById('officeCost').innerText = officeCost;
+        document.getElementById('productCost').innerText = productCost;
+        document.getElementById('marketingCost').innerText = marketingCost;
+
+        document.getElementById('staffBar').style.width = Math.min(staffSkill * 10, 100) + '%';
+        document.getElementById('officeBar').style.width = Math.min(officeLevel * 10, 100) + '%';
+        document.getElementById('productBar').style.width = Math.min(productQuality * 10, 100) + '%';
+        document.getElementById('marketingBar').style.width = Math.min(marketingPower * 10, 100) + '%';
+
+        updateAchievements();
+        updateIncomeDisplay();
+      }
+
+      function updateIncomeDisplay() {
+        const incomePerSecond = (staffSkill * 2 + officeLevel * 3 + productQuality * 2 + marketingPower * 1) * 0.5;
+        document.getElementById('incomePerSec').innerText = '$' + formatNumber(incomePerSecond);
+      }
+
+      function formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(2) + 'K';
+        return Math.floor(num);
+      }
+
+      function updateAchievements() {
+        updateAchievementBar('staff', staffSkill, 'staffAchievements');
+        updateAchievementBar('office', officeLevel, 'officeAchievements');
+        updateAchievementBar('product', productQuality, 'productAchievements');
+        updateAchievementBar('marketing', marketingPower, 'marketingAchievements');
+      }
+
+      function updateAchievementBar(type, level, elementId) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = '';
+        milestones[type].forEach((milestone, idx) => {
+          const achieved = level >= milestone;
+          const badge = document.createElement('div');
+          badge.className = 'achievement' + (achieved ? '' : ' locked');
+          badge.innerHTML = milestoneIcons[idx];
+          badge.title = 'Reach level ' + milestone;
+          element.appendChild(badge);
+        });
+      }
+
+      function upgradeStaff() {
+        if (cash >= staffCost) {
+          cash -= staffCost;
+          staffSkill++;
+          totalUpgrades++;
+          staffCost = Math.floor(staffCost * 1.5);
+          updateDisplay();
+          playButtonAnimation(event);
+        }
+      }
+
+      function upgradeOffice() {
+        if (cash >= officeCost) {
+          cash -= officeCost;
+          officeLevel++;
+          totalUpgrades++;
+          officeCost = Math.floor(officeCost * 1.5);
+          updateDisplay();
+          playButtonAnimation(event);
+        }
+      }
+
+      function upgradeProduct() {
+        if (cash >= productCost) {
+          cash -= productCost;
+          productQuality++;
+          totalUpgrades++;
+          productCost = Math.floor(productCost * 1.5);
+          updateDisplay();
+          playButtonAnimation(event);
+        }
+      }
+
+      function upgradeMarketing() {
+        if (cash >= marketingCost) {
+          cash -= marketingCost;
+          marketingPower++;
+          totalUpgrades++;
+          marketingCost = Math.floor(marketingCost * 1.5);
+          updateDisplay();
+          playButtonAnimation(event);
+        }
+      }
+
+      function playButtonAnimation(e) {
+        if (!e || !e.target) return;
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => btn.style.transform = '', 100);
+      }
+
+      function createFloatingText(x, y, text, color = '#4facfe') {
+        const floatingText = document.createElement('div');
+        floatingText.className = 'floating-text income-text';
+        floatingText.innerText = text;
+        floatingText.style.left = x + 'px';
+        floatingText.style.top = y + 'px';
+        floatingText.style.color = color;
+        document.body.appendChild(floatingText);
+
+        setTimeout(() => floatingText.remove(), 2000);
+      }
+
+      // Passive income with visual feedback
+      setInterval(() => {
+        const incomeAmount = staffSkill * 2 + officeLevel * 3 + productQuality * 2 + marketingPower * 1;
+        cash += incomeAmount;
+        totalEarned += incomeAmount;
+        updateDisplay();
+
+        // Create floating text at random positions
+        const randomX = 480;
+        const randomY = 200;
+        createFloatingText(randomX, randomY, '+$' + incomeAmount, '#00f2fe');
+      }, 2000);
+
+      updateDisplay();
+    </script>
+
+  </body>
+
+</html>
