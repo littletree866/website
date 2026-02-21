@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Challenges - Infinity Nexus</title>
+    <title>Infinity Nexus - Monthly Challenges</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="../icon.jpg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,15 +14,16 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
 
+
     <style>
         :root {
             --primary: #6e8efb;
             --secondary: #a777e3;
             --dark: #2c3e50;
             --light: #f8f9fa;
-            --text: #000000;
+            --text: #333;
             --border-radius: 12px;
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --muted: #6f7b8a;
         }
 
         * {
@@ -31,128 +32,124 @@
             box-sizing: border-box;
         }
 
-        html,
-        body {
-            height: 100%;
-        }
-
         body {
             font-family: 'DM Sans', sans-serif;
             line-height: 1.6;
-            color: #000000;
-            background: linear-gradient(-45deg,
-                    #e6fff2,
-                    #ccf5e1,
-                    #b3ecd2,
-                    #d7f9ff,
-                    #f0ffff);
-            background-size: 600% 600%;
-            animation: gradientBG 26s ease infinite;
-            display: flex;
-            flex-direction: column;
+            color: var(--text);
+            background: linear-gradient(135deg, #f5f7fa 0%, #eaf0ff 100%);
             min-height: 100vh;
-        }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            25% {
-                background-position: 100% 50%;
-            }
-
-            50% {
-                background-position: 100% 100%;
-            }
-
-            75% {
-                background-position: 0% 100%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+            padding: 28px;
         }
 
         .container {
-            max-width: 1100px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: auto;
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 24px;
-            transition: var(--transition);
-        }
-
-        .back-link:hover {
-            gap: 12px;
-        }
-
+        /* Header */
         header {
-            padding: 40px 0;
-            margin-bottom: 32px;
             text-align: center;
-            color: #08324f;
-            background: linear-gradient(135deg, #dfffe4, #a8ffc1, #6bdc8a);
-            box-shadow: 0 12px 40px rgba(160, 220, 255, 0.45);
-            backdrop-filter: blur(6px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
+            padding: 50px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 32px;
+            box-shadow: 0 12px 40px rgba(110, 142, 251, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-20px, -20px);
+            }
         }
 
         header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 12px;
+            font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+            font-weight: 900;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
             letter-spacing: -0.5px;
         }
 
         header p {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
             font-weight: 400;
-            font-size: 1.1rem;
-            color: rgba(8, 50, 79, 0.9);
         }
 
+        /* Section header */
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 40px 0 24px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(110, 142, 251, 0.15);
+        }
+
+        /* Grid */
         .archive-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 24px;
-            margin-bottom: 32px;
+            margin-bottom: 60px;
         }
 
+        /* Card */
         .archive-card {
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
             animation: cardFadeUp 0.5s ease forwards;
+            opacity: 0;
+            border: 1px solid rgba(110, 142, 251, 0.1);
         }
 
         @keyframes cardFadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
+
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
         }
 
         .archive-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
+            transform: translateY(-12px);
+            box-shadow: 0 20px 48px rgba(110, 142, 251, 0.25);
+            border-color: rgba(110, 142, 251, 0.3);
         }
 
         .card-header {
@@ -163,6 +160,44 @@
             padding: 16px;
             position: relative;
             overflow: hidden;
+            justify-content: center;
+            box-shadow: inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+            z-index: 0;
+        }
+
+        .card-image-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            font-size: 100px;
+            opacity: 0.8;
+            z-index: 2;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+            animation: floatEmoji 3s ease-in-out infinite;
+        }
+
+        @keyframes floatEmoji {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -55%) scale(1.05);
+            }
         }
 
         .archive-tag {
@@ -171,7 +206,7 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             background: rgba(255, 255, 255, 0.2);
@@ -181,171 +216,172 @@
 
         .archive-title {
             font-size: 1.25rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--dark);
             margin-bottom: 12px;
             padding: 16px 16px 0 16px;
+            letter-spacing: -0.3px;
         }
 
         .archive-meta {
             display: flex;
             gap: 12px;
             font-size: 0.875rem;
-            color: #666;
+            color: var(--muted);
             padding: 0 16px;
             margin-bottom: 12px;
+            font-weight: 600;
         }
 
-        .content-link {
+        .description {
             font-size: 0.95rem;
-            line-height: 1.5;
-            color: #555;
+            line-height: 1.7;
+            color: #666;
             padding: 0 16px 16px 16px;
         }
 
+        /* Status pill */
         .status-pill {
             display: inline-flex;
             align-items: center;
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.4px;
-            text-decoration: none;
-            color: white;
         }
 
         .status-available {
             background: #D1FAE5;
             color: #065F46;
+            transition: all 0.2s ease;
+            border: none;
         }
 
-        .coming-soon-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 9px;
-            font-weight: 800;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            color: #af1e1e;
-            background: #ffefef;
-            border: 1px solid #fd9393;
+        .status-available:hover {
+            background: #A7F3D0;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
         }
 
         footer {
-            background: var(--dark);
+            background: linear-gradient(135deg, var(--dark), #1a2332);
             color: white;
-            padding: 40px 0;
+            padding: 40px 20px;
             text-align: center;
+            border-radius: var(--border-radius);
             margin-top: 60px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
-        .copyright {
-            margin-top: 15px;
-            opacity: 0.85;
-            font-size: 0.9rem;
+        footer p {
+            margin-bottom: 8px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            margin-bottom: 32px;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--secondary);
+            transform: translateX(-4px);
         }
 
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8rem;
+            body {
+                padding: 16px;
             }
 
-            header p {
-                font-size: 0.95rem;
+            header {
+                padding: 40px 16px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .section-header {
+                font-size: 1.25rem;
             }
 
             .archive-grid {
                 grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
                 gap: 16px;
             }
-
-            .container {
-                padding: 0 15px;
-            }
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <h1>🏆 Monthly Challenges</h1>
-            <p>Test your skills against special monthly challenges</p>
-        </div>
-    </header>
-
     <div class="container">
         <a href="../index.html" class="back-link">← Back to Home</a>
 
-        <div class="archive-grid">
-            <!-- January Challenge -->
-            <div class="archive-card">
-                <div class="card-header">
-                    <div class="archive-tag">Challenge</div>
-                </div>
-                <h3 class="archive-title">January Challenge</h3>
-                <div class="archive-meta">
-                    <span>📅 January 2026</span>
-                </div>
-                <p class="content-link">Test your skills against this month's special challenge! Can you complete all
-                    objectives and claim victory?</p>
-                <div style="padding: 0 16px 16px 16px;">
-                    <a href="../monthlychallenges/jan2026/Jan2026Challenge.html"
-                        class="status-pill status-available">Play Now →</a>
-                </div>
-            </div>
+        <header>
+            <h1>🎯 Monthly Challenges</h1>
+            <p>Think, strategize, and build your empire!</p>
+        </header>
 
-            <!-- February Challenge -->
-            <div class="archive-card">
-                <div class="card-header">
-                    <div class="archive-tag">Challenge</div>
-                </div>
-                <h3 class="archive-title">February Challenge</h3>
-                <div class="archive-meta">
-                    <span>📅 February 2026</span>
-                </div>
-                <p class="content-link">The current month's challenge is live! Can you beat it and earn your badge of
-                    achievement?</p>
-                <div style="padding: 0 16px 16px 16px;">
-                    <a href="../monthlychallenges/feb2026/Feb2026Challenge.html"
-                        class="status-pill status-available">Play Now →</a>
-                </div>
-            </div>
+        <h2 class="section-header">🎯 Monthly Challenges</h2>
 
-            <!-- March Challenge -->
+        <div class="archive-grid" id="archiveGrid">
+            <!-- Jan -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">🎯</div>
                     <div class="archive-tag">Challenge</div>
                 </div>
-                <h3 class="archive-title">March Challenge</h3>
+                <h3 class="archive-title">January 2026</h3>
                 <div class="archive-meta">
-                    <span>📅 March 2026</span>
+                    <span>🏃 Platformer</span>
                 </div>
-                <p class="content-link">Coming soon! Stay tuned for the next challenge. Check back regularly for
-                    updates!</p>
+                <p class="description">See if you can beat the January challenge, some exciting platformer levels to
+                    complete!</p>
                 <div style="padding: 0 16px 16px 16px;">
-                    <span class="coming-soon-badge">Coming Soon</span>
+                    <a href="../monthlychallenges/jan2026/Jan2026Challenge.html" class="status-pill status-available"
+                        style="text-decoration: none; display: inline-block;">Play Now →</a>
                 </div>
             </div>
+            <!-- Feb -->
+            <div class="archive-card">
+                <div class="card-header">
+                    <div class="card-image-placeholder">🎯</div>
+                    <div class="archive-tag">Challenge</div>
+                </div>
+                <h3 class="archive-title">February 2026</h3>
+                <div class="archive-meta">
+                    <span>🛡️ Strategy</span>
+                </div>
+                <p class="description">Waves of enemies to defeat in the February challenge!</p>
+                <div style="padding: 0 16px 16px 16px;">
+                    <a href="../monthlychallenges/feb2026/Feb2026Challenge.html" class="status-pill status-available"
+                        style="text-decoration: none; display: inline-block;">Play Now →</a>
+                </div>
+            </div>
+            <!-- Mar (unavaliable for now)-->
+
+
+
         </div>
     </div>
 
     <footer>
-        <div class="container">
-            <a href="https://forms.gle/X8p7jkC74MFG9Evj7" style="color:white; text-decoration: none;">Report Issues</a>
-            | <a href="../info/privacypolicy.html" style="color:white; text-decoration: none;">Privacy Policy</a>
-            <p class="copyright">© <span id="copyright-year"></span> Infinity Nexus</p>
-            <p class="author">Created by Littletree866</p>
-        </div>
+        <p>Infinity Nexus &copy; <span id="footer-year">2026</span></p>
+        <p>All rights reserved</p>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
         });
     </script>
 </body>

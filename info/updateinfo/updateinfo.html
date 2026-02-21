@@ -20,7 +20,7 @@
 		}
 
 		body {
-			font-family: "DM Sans", sans-serif;
+			font-family: "Tahoma", sans-serif;
 			line-height: 1.6;
 			color: #0b0b0b;
 			background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
@@ -235,27 +235,40 @@
 				time. Check
 				regularly for updates. Stay tuned!</p>
 
-			<div style="margin-top:12px;" class="countdown" aria-live="polite">
-				<i class="fas fa-calendar-alt" aria-hidden="true" style="color: #faf2f2;"></i>
-				<div style="color: #f1f0f0; font-weight: bold;">Next release target: <strong style="color: #ece8e8;"
-						id="next-release-date">March 4, 2026</strong></div>
-			</div>
 		</header>
 
 		<section class="releases" aria-labelledby="releases-heading">
 			<h2 id="releases-heading" class="small" style="margin-top:12px">Release Timeline</h2>
 
+
+
+			<div class="card">
+				<div class="split">
+					<div>
+						<h3>v1.20.24</h3>
+						<div class="small">Planned March 6, 2026</strong></div>
+						<div class="small"><strong id="countdown-text">Loading…</strong></div>
+					</div>
+					<div class="badge" aria-hidden="true">Coming soon!</div>
+				</div>
+				<ul class="changelog" aria-hidden="false">
+					<li>???</li>
+				</ul>
+			</div>
+
 			<div class="card">
 				<div class="split">
 					<div>
 						<h3>v1.19.24</h3>
-						<div class="small">Planned February 24, 2026</strong></div>
-						<div class="small"><strong id="countdown-text">Loading…</strong></div>
+						<div class="small">Released February 24, 2026</strong></div>
+		
 					</div>
-					<div class="badge" aria-hidden="true">Coming Soon!</div>
+					<div class="badge" aria-hidden="true">Latest!</div>
 				</div>
 				<ul class="changelog" aria-hidden="false">
-					<li>What could it be?</li>
+					<li>Remade entire homepage</li>
+					<li>Added six new main pages, organized everything into categories</li>
+					<li>Updated all the documentation and game information</li>
 				</ul>
 			</div>
 
@@ -266,7 +279,7 @@
 						<h4 style="font-weight: bold;">This update was released in two parts, once on February 7th, 2026 and again on February 16th, 2026</h4>
 						<div class="small">Released on: <strong id="release-date">February 7, 2026 and February 16, 2026</strong></div>
 					</div>
-					<div class="badge" aria-hidden="true">Latest!</div>
+
 				</div>
 				<ul class="changelog" aria-hidden="false">
 					<p style="font-weight: bold;">Part 1 (February 7, 2026)</p>
@@ -395,7 +408,7 @@
 	<script>
 
 		(function () {
-			const targetDate = new Date(2026, 1, 24); // Feb 24, 2026
+			const targetDate = new Date(2026, 2, 6); // Mar 6, 2026
 			const cdText = document.getElementById('countdown-text'); 
 			const footerYear = document.getElementById('footer-year');
 

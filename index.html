@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;900&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;500;700;900&display=swap" rel="stylesheet">
 
@@ -382,6 +382,18 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
+            justify-content: center;
+        }
+
+        .card-image-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            opacity: 0.7;
+            z-index: 1;
+            line-height: 1;
         }
 
         .card-header::before {
@@ -702,7 +714,7 @@
 
     <header>
         <div class="container">
-            <h1 style="font-family: 'DM Sans', sans-serif; font-weight: 700;" class="main-title"> Infinity Nexus</h1>
+            <h1 style="font-family: 'DM Sans', sans-serif; font-weight: 700;" class="main-title"> Infinity Nexus v1.19.24</h1>
 
 
         </div>
@@ -710,9 +722,8 @@
         </div>
 
     </header>
-
+<!--
     <div class="main-wrapper">
-        <!-- Left Sidebar -->
         <aside class="sidebar sidebar-left">
             <div class="sidebar-content">
                 <h3>📢 Announcements</h3>
@@ -726,7 +737,6 @@
                     <p style="font-weight: 400;">This site is regularly updated with new games, features, and
                         improvements.
                         Be sure to check back often!</p>
-                    <p style="color:red; font-weight: bold;">! A new Pokemon rom hack is coming soon!</p>
                     <p style="font-weight: 400;">For complete release notes click <a
                             href="info/updateinfo/updateinfo.html" style="font-weight: bold; color:#0a0a0a">here</a>.
                     </p>
@@ -736,7 +746,7 @@
                     </p>
 
         </aside>
-
+-->
         <!-- Main Content -->
         <div class="content-wrapper">
             <div class="container" id="main">
@@ -748,7 +758,7 @@
                         <!-- Monthly Challenges -->
                         <div class="archive-card">
                             <div class="card-header">
-
+                                <div class="card-image-placeholder">🏆</div>
                             </div>
                             <h3 class="archive-title">Monthly Challenges</h3>
                             <div class="archive-meta">
@@ -765,13 +775,13 @@
 
                         <div class="archive-card">
                             <div class="card-header">
-
+                                <div class="card-image-placeholder">👍</div>
                             </div>
                             <h3 class="archive-title">Must Play Games</h3>
                             <div class="archive-meta">
                                 <span>⭐ 6 Games</span>
                             </div>
-                            <p class="content-link">Curated selection of my favorite games you won't want to miss!</p>
+                            <p class="content-link">Some of my favorite games that are definintly worth playing! Includes classics like Tower Defense, but also some other games.</p>
                             <div style="padding: 0 16px 16px 16px;">
                                 <a href="mainpages/mainpage2.html" class="status-pill status-available">Explore →</a>
                             </div>
@@ -781,15 +791,15 @@
                         <div class="archive-card">
 
                             <div class="card-header">
-
-
-
+                                <div class="card-image-placeholder">🎮</div>
                             </div>
                             <h3 class="archive-title">Game Corner</h3>
+
                             <div class="archive-meta">
 
                                 <span>🕹️ 9 Games</span>
                             </div>
+
                             <p class="content-link">A diverse collection of casual, action, and puzzle games for
                                 everyone!</p>
                             <div style="padding: 0 16px 16px 16px;">
@@ -800,7 +810,7 @@
 
                         <div class="archive-card">
                             <div class="card-header">
-
+                                <div class="card-image-placeholder">🎰</div>
                             </div>
                             <h3 class="archive-title">Casino Games</h3>
                             <div class="archive-meta">
@@ -818,7 +828,7 @@
 
                         <div class="archive-card">
                             <div class="card-header">
-
+                                <div class="card-image-placeholder">💡</div>
                             </div>
                             <h3 class="archive-title">Simulation Games</h3>
                             <div class="archive-meta">
@@ -835,7 +845,7 @@
                         <!-- Information & Guides -->
                         <div class="archive-card">
                             <div class="card-header">
-
+                                <div class="card-image-placeholder">📚</div>
                             </div>
                             <h3 class="archive-title">Information & Guides</h3>
                             <div class="archive-meta">

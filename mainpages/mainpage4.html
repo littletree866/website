@@ -57,6 +57,7 @@
             box-shadow: 0 12px 40px rgba(110, 142, 251, 0.2);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         header::before {
@@ -85,7 +86,7 @@
 
         header h1 {
             font-size: clamp(2.2rem, 4.2vw, 3.2rem);
-            font-weight: 700;
+            font-weight: 900;
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
@@ -103,12 +104,14 @@
         /* Section header */
         .section-header {
             font-size: 1.5rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--dark);
             margin: 40px 0 24px 0;
             display: flex;
             align-items: center;
             gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(110, 142, 251, 0.15);
         }
 
         /* Grid */
@@ -124,10 +127,11 @@
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
             animation: cardFadeUp 0.5s ease forwards;
             opacity: 0;
+            border: 1px solid rgba(110, 142, 251, 0.1);
         }
 
         @keyframes cardFadeUp {
@@ -143,8 +147,9 @@
         }
 
         .archive-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(110, 142, 251, 0.15);
+            transform: translateY(-12px);
+            box-shadow: 0 20px 48px rgba(110, 142, 251, 0.25);
+            border-color: rgba(110, 142, 251, 0.3);
         }
 
         .card-header {
@@ -155,6 +160,44 @@
             padding: 16px;
             position: relative;
             overflow: hidden;
+            justify-content: center;
+            box-shadow: inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+            z-index: 0;
+        }
+
+        .card-image-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            font-size: 100px;
+            opacity: 0.8;
+            z-index: 2;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+            animation: floatEmoji 3s ease-in-out infinite;
+        }
+
+        @keyframes floatEmoji {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -55%) scale(1.05);
+            }
         }
 
         .archive-tag {
@@ -163,7 +206,7 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             background: rgba(255, 255, 255, 0.2);
@@ -173,10 +216,11 @@
 
         .archive-title {
             font-size: 1.25rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--dark);
             margin-bottom: 12px;
             padding: 16px 16px 0 16px;
+            letter-spacing: -0.3px;
         }
 
         .archive-meta {
@@ -186,12 +230,13 @@
             color: var(--muted);
             padding: 0 16px;
             margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .description {
             font-size: 0.95rem;
-            line-height: 1.5;
-            color: #555;
+            line-height: 1.7;
+            color: #666;
             padding: 0 16px 16px 16px;
         }
 
@@ -202,7 +247,7 @@
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.4px;
         }
@@ -210,20 +255,30 @@
         .status-available {
             background: #D1FAE5;
             color: #065F46;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .status-available:hover {
+            background: #A7F3D0;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
         }
 
         footer {
-            background: var(--dark);
+            background: linear-gradient(135deg, var(--dark), #1a2332);
             color: white;
             padding: 40px 20px;
             text-align: center;
             border-radius: var(--border-radius);
             margin-top: 60px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
         footer p {
             margin-bottom: 8px;
             opacity: 0.9;
+            font-weight: 500;
         }
 
         .back-link {
@@ -232,7 +287,7 @@
             gap: 8px;
             color: var(--primary);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 32px;
             transition: all 0.2s;
         }
@@ -282,6 +337,7 @@
             <!-- Wealth Builder -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">💰</div>
                     <div class="archive-tag">Simulation</div>
                 </div>
                 <h3 class="archive-title">Wealth Builder</h3>
@@ -298,6 +354,7 @@
             <!-- Metropolis Builder -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">🏙️</div>
                     <div class="archive-tag">Simulation</div>
                 </div>
                 <h3 class="archive-title">Metropolis Builder</h3>
@@ -314,6 +371,7 @@
             <!-- The Box -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">📦</div>
                     <div class="archive-tag">Puzzle</div>
                 </div>
                 <h3 class="archive-title">The Box</h3>
@@ -330,6 +388,7 @@
             <!-- Supply & Demand -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">📊</div>
                     <div class="archive-tag">Simulation</div>
                 </div>
                 <h3 class="archive-title">Supply & Demand</h3>
@@ -346,6 +405,7 @@
             <!-- Empire Game -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">👑</div>
                     <div class="archive-tag">Strategy</div>
                 </div>
                 <h3 class="archive-title">Empire Game</h3>
@@ -362,6 +422,7 @@
             <!-- Mini Empire -->
             <div class="archive-card">
                 <div class="card-header">
+                    <div class="card-image-placeholder">🏰</div>
                     <div class="archive-tag">Strategy</div>
                 </div>
                 <h3 class="archive-title">Mini Empire</h3>
