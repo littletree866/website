@@ -9,5 +9,10 @@ Lastest versions are supported across all devices. Earlier versions may have bug
 
 Please use this form: https://forms.gle/8c9Tbep4Z3ZrvxNU9
 
+## Other Info
+
+Everything is under the MIT-License so please give credit if you use any code
+
+
 ##
 Thank you! 
