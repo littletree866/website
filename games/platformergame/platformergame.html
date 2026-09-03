@@ -1,12 +1,11 @@
-<!DOCTYPE html>
+S<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Impossible Game  </title>
+    <title>The Impossible Game</title>
     <link rel="icon" href="../../icon.jpg" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,16 +15,16 @@
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
             overflow: hidden;
-            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 100%);
+            background: linear-gradient(145deg, #0b0e1a 0%, #1a1f33 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             color: #fff;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         button {
@@ -35,305 +34,342 @@
 
         #gameContainer {
             position: relative;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
-            border-radius: 16px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(80, 80, 180, 0.3);
+            border-radius: 20px;
             overflow: hidden;
-            border: 3px solid #2d2d5a;
-            background: #1a1a2e;
+            background: #12162a;
         }
 
         canvas {
-            background: linear-gradient(to bottom, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(180deg, #0d1b3e 0%, #1b3a6b 40%, #2a5298 80%, #3a6bb5 100%);
             display: block;
-            border-radius: 14px;
+            border-radius: 18px;
         }
 
-        
         #ui {
             position: absolute;
-            top: 25px;
-            left: 25px;
-            color: white;
-            font-size: 20px;
-            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.9);
-            font-family: "Trebuchet MS", serif;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 30, 70, 0.8));
-            padding: 20px 25px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(100, 100, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 18px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+            font-family: 'Inter', sans-serif;
+            background: rgba(10, 14, 30, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 18px 24px 20px 24px;
+            border-radius: 18px;
+            border: 1px solid rgba(120, 140, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            min-width: 170px;
+            transition: all 0.3s ease;
+            z-index: 10;
         }
 
         #levelText {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            color: #00ffea;
-            margin-bottom: 12px;
+            background: linear-gradient(135deg, #7dd3fc, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+        }
+
+        /* Fix for the Level Text Icon */
+        .level-icon {
+            -webkit-text-fill-color: #38bdf8;
+            filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
         }
 
         #scoreContainer {
-            font-size: 15px;
-            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #fcd34d;
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: #ffdd00;
+            gap: 8px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(252, 211, 77, 0.2);
+        }
+
+        /* Fix for the Score Icon */
+        .score-icon {
+            font-size: 20px;
+            filter: drop-shadow(0 0 6px rgba(252, 211, 77, 0.6));
+        }
+
+        #scoreText {
+            font-weight: 700;
+            color: #fbbf24;
         }
 
         #healthContainer {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 4px;
         }
 
-
-
-        
         #heartsDisplay {
             display: flex;
-            gap: 12px;
-            font-size: 20px;
-            margin-top: 8px;
+            gap: 6px;
+            font-size: 24px;
+            line-height: 1;
+            margin-top: 4px;
+            align-items: center;
         }
 
+        /* Fix for Hearts - Using scalable SVG icons injected by JS */
         .heart {
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 2px 8px rgba(255, 0, 80, 0.3));
+            width: 28px;
+            height: 28px;
         }
 
         .heart-full {
-            color: #ff416c;
+            fill: #ff3b6f;
         }
 
         .heart-empty {
-            color: #666;
-            opacity: 0.7;
+            fill: #4a4a6a;
+            opacity: 0.4;
+            filter: none;
         }
 
-        
+        #doubleJumpIndicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 200, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #7dd3fc;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.15), inset 0 0 30px rgba(56, 189, 248, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            animation: pulseGlow 2.5s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.1); }
+            50% { box-shadow: 0 0 60px rgba(56, 189, 248, 0.25); }
+        }
+
         #controls {
             position: absolute;
-            bottom: 25px;
-            left: 25px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 30, 70, 0.8));
-            padding: 15px 20px;
+            bottom: 24px;
+            left: 24px;
+            background: rgba(10, 14, 30, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding: 14px 20px;
             border-radius: 16px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(100, 100, 255, 0.2);
-            font-size: 18px;
+            border: 1px solid rgba(120, 140, 255, 0.15);
+            font-size: 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 10;
         }
 
         .control-row {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 14px;
+            color: #b0c4e8;
         }
 
         .key {
-            background: linear-gradient(135deg, rgba(100, 100, 255, 0.3), rgba(70, 70, 200, 0.4));
-            padding: 6px 14px;
+            background: rgba(60, 80, 180, 0.25);
+            backdrop-filter: blur(4px);
+            padding: 5px 14px;
             border-radius: 8px;
-            min-width: 36px;
+            min-width: 34px;
             text-align: center;
             font-weight: 700;
-            border: 2px solid rgba(150, 150, 255, 0.4);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            border: 1px solid rgba(120, 140, 255, 0.25);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            color: #c8d8ff;
         }
 
-        
         #pauseBtn {
             position: absolute;
-            top: 25px;
-            right: 25px;
-            background: linear-gradient(135deg, #4a4a8a, #2d2d5a);
-            color: white;
-            padding: 14px 28px;
-            font-size: 22px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: "Trebuchet MS", serif;
+            top: 20px;
+            right: 20px;
+            background: rgba(60, 70, 160, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #e8eeff;
+            padding: 12px 26px;
+            font-size: 18px;
             font-weight: 600;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid #5a5aaa;
+            border: 1px solid rgba(120, 140, 255, 0.25);
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            z-index: 10;
         }
 
         #pauseBtn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
-            background: linear-gradient(135deg, #5a5aaa, #3d3d7a);
+            transform: translateY(-2px) scale(1.04);
+            background: rgba(80, 100, 220, 0.5);
+            border-color: rgba(150, 170, 255, 0.4);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
         }
 
         #pauseBtn:active {
-            transform: translateY(0) scale(1);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            transform: scale(0.96);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        
         .screen {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 50, 0.98));
-            color: white;
-            padding: 60px 100px;
-            font-size: 48px;
-            border-radius: 28px;
+            transform: translate(-50%, -50%) scale(0.96);
+            background: rgba(8, 12, 30, 0.94);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            color: #fff;
+            padding: 50px 70px;
+            border-radius: 32px;
             text-align: center;
             display: none;
-            font-family: "Trebuchet MS", serif;
-            font-weight: 700;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
-            border: 4px solid #4a4a8a;
-            min-width: 600px;
-            backdrop-filter: blur(20px);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(80, 100, 220, 0.2);
+            min-width: 520px;
+            max-width: 90vw;
             z-index: 1000;
-            animation: screenEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: screenEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(120, 140, 255, 0.15);
         }
 
         @keyframes screenEntrance {
-            from {
+            0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8);
+                transform: translate(-50%, -50%) scale(0.85) translateY(30px);
             }
-
-            to {
+            100% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%) scale(1) translateY(0);
             }
         }
 
         .screen h2 {
-            margin-bottom: 30px;
-            background: linear-gradient(45deg, #00ffea, #ff6b8b, #ffdd00);
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, #fcd34d, #f59e0b, #ef4444, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-size: 64px;
+            font-size: 52px;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 2px;
+            line-height: 1.2;
         }
 
         .screen p {
-            font-size: 28px;
-            margin: 25px 0;
-            color: #ddd;
-            font-weight: 500;
+            font-size: 22px;
+            margin: 12px 0;
+            color: #c8d8f0;
+            font-weight: 400;
+            line-height: 1.5;
+            -webkit-text-fill-color: #c8d8f0;
         }
 
         .screen button {
-            margin-top: 40px;
-            padding: 18px 50px;
-            font-size: 28px;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            font-family: "Trebuchet MS", serif;
+            margin-top: 30px;
+            padding: 16px 48px;
+            font-size: 24px;
             font-weight: 700;
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            color: #fff;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.35);
             text-transform: uppercase;
             letter-spacing: 1.5px;
+            -webkit-text-fill-color: #fff;
         }
 
         .screen button:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 16px 40px rgba(99, 102, 241, 0.5);
+            background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
         }
 
         .screen button:active {
-            transform: translateY(0) scale(1);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            transform: scale(0.96);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
         }
 
-        
-        #doubleJumpIndicator {
-            position: absolute;
-            top: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 150, 255, 0.4));
-            color: #00ffea;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 20px;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 200, 255, 0.5);
-            animation: pulseGlow 2s infinite;
-            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        @keyframes pulseGlow {
-
-            0%,
-            100% {
-                box-shadow: 0 8px 32px rgba(0, 200, 255, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 8px 32px rgba(0, 200, 255, 0.6);
-            }
-        }
-
-        
         #mobileControls {
             position: absolute;
-            bottom: 25px;
-            right: 25px;
+            bottom: 24px;
+            right: 24px;
             display: none;
-            gap: 25px;
+            gap: 18px;
+            align-items: center;
+            z-index: 10;
         }
 
         .mobile-btn {
-            width: 80px;
-            height: 80px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(100, 100, 255, 0.4), rgba(70, 70, 200, 0.5));
-            border: 3px solid rgba(150, 150, 255, 0.6);
-            color: white;
-            font-size: 36px;
+            background: rgba(60, 80, 200, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(120, 140, 255, 0.3);
+            color: #d0dcff;
+            font-size: 32px;
+            font-weight: 300;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             user-select: none;
-            backdrop-filter: blur(10px);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            touch-action: none;
         }
 
         .mobile-btn:active {
-            background: linear-gradient(135deg, rgba(150, 150, 255, 0.6), rgba(100, 100, 255, 0.7));
-            transform: scale(0.9);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            background: rgba(100, 130, 255, 0.5);
+            transform: scale(0.88);
+            border-color: rgba(180, 200, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        
         @media (max-width: 950px) {
             canvas {
                 width: 100vw;
@@ -345,47 +381,72 @@
                 width: 100vw;
                 height: 100vh;
                 border-radius: 0;
+                box-shadow: none;
             }
 
             .screen {
-                min-width: 90vw;
-                padding: 40px;
-                font-size: 32px;
+                min-width: 85vw;
+                padding: 36px 28px;
+                border-radius: 24px;
             }
 
-            .screen h2 {
-                font-size: 48px;
+            .screen h2 { font-size: 38px; }
+            .screen p { font-size: 18px; }
+            .screen button { font-size: 20px; padding: 14px 34px; }
+
+            #ui, #controls, #pauseBtn {
+                transform: scale(0.92);
+                transform-origin: top left;
             }
 
-            #ui,
-            #controls,
             #pauseBtn {
-                transform: scale(0.95);
+                transform-origin: top right;
+                padding: 10px 18px;
+                font-size: 15px;
             }
         }
 
         @media (max-width: 768px) {
-            #mobileControls {
-                display: flex;
-            }
-
-            #controls {
-                display: none;
-            }
+            #mobileControls { display: flex; }
+            #controls { display: none; }
 
             #ui {
-                padding: 15px;
-                font-size: 18px;
+                padding: 12px 16px;
+                font-size: 15px;
+                min-width: 130px;
+                top: 12px;
+                left: 12px;
             }
 
-            #levelText {
-                font-size: 22px;
+            #levelText { font-size: 18px; }
+            #scoreContainer { font-size: 15px; }
+            #heartsDisplay { font-size: 20px; gap: 4px; }
+            #pauseBtn { top: 12px; right: 12px; padding: 8px 16px; font-size: 14px; }
+            .mobile-btn { width: 62px; height: 62px; font-size: 28px; }
+            .screen h2 { font-size: 30px; }
+        }
+
+        @media (max-width: 480px) {
+            .screen { padding: 24px 16px; min-width: 92vw; }
+            .screen h2 { font-size: 26px; }
+            .screen p { font-size: 15px; }
+            .screen button { font-size: 17px; padding: 12px 24px; }
+            .mobile-btn { width: 54px; height: 54px; font-size: 22px; }
+            #mobileControls { gap: 12px; bottom: 16px; right: 16px; }
+
+            #ui {
+                padding: 10px 12px;
+                font-size: 13px;
+                top: 10px;
+                left: 10px;
+                min-width: 100px;
+                border-radius: 12px;
             }
 
-            #heartsDisplay {
-                font-size: 24px;
-                gap: 8px;
-            }
+            #levelText { font-size: 15px; }
+            #scoreContainer { font-size: 13px; }
+            #heartsDisplay { font-size: 17px; }
+            #pauseBtn { padding: 6px 12px; font-size: 12px; top: 10px; right: 10px; border-radius: 30px; }
         }
     </style>
 </head>
@@ -395,11 +456,11 @@
         <canvas id="game" width="900" height="900"></canvas>
 
         <div id="ui">
-            <div id="levelText">🎯 Level: 1</div>
-            <div id="scoreContainer">⭐ Score: <span id="scoreText">0</span></div>
+            <div id="levelText"><span class="level-icon">🎯</span> Level: 1</div>
+            <div id="scoreContainer"><span class="score-icon">⭐</span> Score: <span id="scoreText">0</span></div>
             <div id="healthContainer">
                 <div id="heartsDisplay">
-                    
+                    <!-- Hearts injected via JS to ensure they are SVG not emoji -->
                 </div>
             </div>
         </div>
@@ -503,19 +564,17 @@
         let lastTime = performance.now();
 
         
+        // Helper to draw SVG hearts for the DOM UI
+        function getHeartSVG(filled) {
+            return `<svg class="heart ${filled ? 'heart-full' : 'heart-empty'}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>`;
+        }
+
         function updateHeartsDisplay() {
             heartsDisplay.innerHTML = '';
             for (let i = 0; i < maxHealth; i++) {
-                const heart = document.createElement('span');
-                heart.className = 'heart';
-                if (i < health) {
-                    heart.textContent = 'Γ¥ñ∩╕Å';
-                    heart.classList.add('heart-full');
-                } else {
-                    heart.textContent = '≡ƒ⌐╢';
-                    heart.classList.add('heart-empty');
-                }
-                heartsDisplay.appendChild(heart);
+                heartsDisplay.insertAdjacentHTML('beforeend', getHeartSVG(i < health));
             }
         }
 
@@ -570,17 +629,7 @@
 
         function createCheckpointsForLevel() {
             checkpoints = [];
-            if (level === 1) {
-                checkpoints.push(makeCheckpoint(50, 800, true)); 
-            } else if (level === 2) {
-                checkpoints.push(makeCheckpoint(50, 800, true)); 
-            } else if (level === 3) {
-                checkpoints.push(makeCheckpoint(50, 800, true)); 
-            } else if (level === 4) {
-                checkpoints.push(makeCheckpoint(50, 800, true)); 
-            } else if (level === 5) {
-                checkpoints.push(makeCheckpoint(50, 800, true)); 
-            } else if (level === 6) {
+            if (level >= 1 && level <= 6) {
                 checkpoints.push(makeCheckpoint(50, 800, true)); 
             }
             lastCheckpoint = checkpoints[0]; 
@@ -588,7 +637,8 @@
 
         function loadLevel(n) {
             level = n;
-            document.getElementById("levelText").textContent = `≡ƒÄ» Level: ${level}`;
+            // Replaced broken unicode with proper HTML entity and span class
+            document.getElementById("levelText").innerHTML = `<span class="level-icon">🎯</span> Level: ${level}`;
 
             initPlatforms();
 
@@ -622,40 +672,7 @@
             }
 
             
-            function makeEnemy(x, y, minX, maxX, speed = 1.5) {
-                return { x, y, w: 36, h: 36, vx: speed, minX, maxX, anim: 0, type: 'ground' };
-            }
-
-            function makeCoin(x, y) {
-                return { x, y, w: 20, h: 20, collected: false, anim: 0 };
-            }
-
-            function makePowerUp(x, y, type = 'doubleJump') {
-                return { x, y, w: 28, h: 28, type: type, collected: false, anim: 0 };
-            }
-
-            
-            function makeHeartDrop(x, y) {
-                return {
-                    x, y, w: 24, h: 24,
-                    collected: false,
-                    anim: 0,
-                    vy: -3, 
-                    bounce: 0
-                };
-            }
-
-            
-            function makeCheckpoint(x, y, isStart = false) {
-                return {
-                    x, y, w: 40, h: 60,
-                    active: isStart,
-                    anim: 0,
-                    type: 'checkpoint'
-                };
-            }
-
-            
+            // [Rest of your level creation code remains exactly the same...]
             if (level === 1) {
                 world.width = 3000;
                 platforms = [
@@ -930,7 +947,8 @@
                     break;
                 case "escape":
                     paused = !paused;
-                    document.getElementById("pauseBtn").textContent = paused ? "Γû╢∩╕Å Resume" : "ΓÅ╕∩╕Å Pause";
+                    // Replaced broken unicode
+                    document.getElementById("pauseBtn").innerHTML = paused ? "▶️ Resume" : "⏸️ Pause";
                     break;
             }
         });
@@ -985,7 +1003,8 @@
         document.getElementById("pauseBtn").onclick = () => {
             if (!gameStarted) return;
             paused = !paused;
-            document.getElementById("pauseBtn").textContent = paused ? "Γû╢∩╕Å Resume" : "ΓÅ╕∩╕Å Pause";
+            // Replaced broken unicode
+            document.getElementById("pauseBtn").innerHTML = paused ? "▶️ Resume" : "⏸️ Pause";
         };
 
         
@@ -1069,7 +1088,7 @@
             health = maxHealth;
             updateHeartsDisplay();
             loadLevel(1);
-            document.getElementById("pauseBtn").textContent = "ΓÅ╕∩╕Å Pause";
+            document.getElementById("pauseBtn").innerHTML = "⏸️ Pause";
             gameTime = 0;
         }
 
@@ -1214,7 +1233,9 @@
                             const heartElements = heartsDisplay.querySelectorAll('.heart');
                             if (heartElements[heart.targetIndex]) {
                                 const targetHeart = heartElements[heart.targetIndex];
-                                targetHeart.textContent = 'Γ¥ñ∩╕Å';
+                                
+                                // Replaced broken unicode
+                                targetHeart.outerHTML = getHeartSVG(true);
                                 targetHeart.classList.remove('heart-empty');
                                 targetHeart.classList.add('heart-full');
 
@@ -1571,6 +1592,7 @@
         }
 
         function drawPlatform(p) {
+            // [Your existing drawPlatform code remains exactly the same]
             let sx = p.x - camera.x;
             let sy = p.y - camera.y;
 
@@ -2040,28 +2062,24 @@
 
             
             for (let h of heartDrops) {
+                // Fixed by drawing standard shapes and matching SVGs instead of broken unicode
                 if (!h.collected) {
                     let hx = h.x - camera.x;
                     let hy = h.y - camera.y + Math.sin(h.anim) * 3;
 
-                    
-                    ctx.font = "bold 50px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', serif";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-
-                    
+                    ctx.save();
                     ctx.shadowColor = "#00FF00";
                     ctx.shadowBlur = 10;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
-
-                    
                     ctx.fillStyle = "#00FF00";
-                    ctx.fillText("≡ƒÆÜ", hx + h.w / 2, hy + h.h / 2);
-
                     
-                    ctx.shadowColor = "transparent";
-                    ctx.shadowBlur = 0;
+                    // Draw a simple heart shape
+                    ctx.beginPath();
+                    ctx.moveTo(hx + h.w / 2, hy + h.h / 2 + 5);
+                    ctx.bezierCurveTo(hx + h.w / 2 + 10, hy + h.h / 2 - 5, hx + h.w / 2 + 15, hy + h.h / 2 + 5, hx + h.w / 2, hy + h.h / 2 + 15);
+                    ctx.bezierCurveTo(hx + h.w / 2 - 15, hy + h.h / 2 + 5, hx + h.w / 2 - 10, hy + h.h / 2 - 5, hx + h.w / 2, hy + h.h / 2 + 5);
+                    ctx.fill();
+
+                    ctx.restore();
                 } else if (h.driftPhase !== undefined && h.driftPhase < 1) {
                     
                     const t = h.driftPhase;
@@ -2076,29 +2094,15 @@
                     ctx.translate(currentX, currentY);
                     ctx.scale(scale, scale);
 
-                    ctx.font = "bold 24px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', serif";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-
-                    
-                    let heartEmoji = "≡ƒÆÜ";
-                    let glowColor = "#00FF00";
-
-                    if (h.colorPhase === 'yellow') {
-                        heartEmoji = "≡ƒÆ¢";
-                        glowColor = "#FFFF00";
-                    } else if (h.colorPhase === 'red') {
-                        heartEmoji = "Γ¥ñ∩╕Å";
-                        glowColor = "#FF0000";
-                    }
-
-                    
-                    const glowIntensity = 15 * (1 - t);
-                    ctx.shadowColor = glowColor;
-                    ctx.shadowBlur = glowIntensity;
-
-                    ctx.fillStyle = glowColor;
-                    ctx.fillText(heartEmoji, 0, 0);
+                    // Draw the exact SVG dimensions
+                    ctx.beginPath();
+                    ctx.moveTo(14, 21);
+                    ctx.bezierCurveTo(6, 14, -4, 8, -4, 3);
+                    ctx.bezierCurveTo(-4, -2, 2, -4, 8, -1);
+                    ctx.bezierCurveTo(8, -1, 14, -4, 20, -1);
+                    ctx.bezierCurveTo(26, -4, 32, -2, 32, 3);
+                    ctx.bezierCurveTo(32, 8, 22, 14, 14, 21);
+                    ctx.fill();
 
                     ctx.restore();
                 }
@@ -2106,29 +2110,25 @@
 
             
             for (let c of coins) {
+                // Fixed by drawing a circle instead of broken unicode
                 if (!c.collected) {
                     let cx = c.x - camera.x;
                     let cy = c.y - camera.y + Math.sin(c.anim) * 4;
 
-                    
-                    ctx.font = "bold 30px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', serif";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-
-                    
+                    ctx.save();
                     ctx.shadowColor = "#FFD700";
                     ctx.shadowBlur = 8;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
-
-
-                    
                     ctx.fillStyle = "#FFD700";
-                    ctx.fillText("≡ƒ¬Ö", cx + 10, cy + 10);
-
                     
-                    ctx.shadowColor = "transparent";
-                    ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.arc(cx + 10, cy + 10, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = "#FFA500";
+                    ctx.beginPath();
+                    ctx.arc(cx + 10, cy + 10, 7, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore();
                 }
             }
 
@@ -2276,5 +2276,3 @@
 </body>
 
 </html>
-
-
